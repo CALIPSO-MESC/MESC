@@ -9,6 +9,7 @@ The two folders, cable and ORCHIDEE, correspond to the data processing for each 
 
 
 ## Code Structure 
+```
 pre-processing/
     |——convert_scale.bash                                       #Resampling and format conversion (tif to netcdf) of HWSD soil property data
     |——available_USDASoilClass_mask.py                          #Generate filter masks for cable and ORCHIDEE
