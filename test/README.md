@@ -6,5 +6,5 @@ copied into this directory.
 You can run it directly here:
 
 ```bash
-./rum_main.sh
+./run_main.sh
 ```
