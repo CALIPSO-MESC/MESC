@@ -441,8 +441,10 @@ contains
   !         endif
 
            do ns=1,ms
-              micparam%tvmicR(np,ns)   = micpxdef%xtvmic(nopt) * micpdef%tvmicR * tvref(np) * exp(0.3 * micparam%fmetave(np,ns)) * delt
-              micparam%tvmicK(np,ns)   = micpxdef%xtvmic(nopt) * micpdef%tvmicK * tvref(np) * exp(0.1 * micparam%fmetave(np,ns)) * delt
+              micparam%tvmicR(np,ns)   = micpxdef%xtvmic(nopt) * micpdef%tvmicR * tvref(np) &
+                                       * exp(0.3 * micparam%fmetave(np,ns)) * delt
+              micparam%tvmicK(np,ns)   = micpxdef%xtvmic(nopt) * micpdef%tvmicK * tvref(np) &
+                                       * exp(0.1 * micparam%fmetave(np,ns)) * delt
               micparam%betamicR(np,ns) = micpdef%betamic * micpxdef%xbeta(nopt)
               micparam%betamicK(np,ns) = micpdef%betamic * micpxdef%xbeta(nopt)
            enddo
@@ -578,7 +580,8 @@ contains
                                +drootx(np,ns)*(1.0-fmetroot(np))/micparam%xcnroot(np)  &
                                +dwoodx(np,ns)*(1.0-fmetwood(np))/micparam%xcnwood(np))
 
-                micparam%fmetave(np,ns) = (dleafx(np,ns)*fmetleaf(np) + drootx(np,ns)*fmetroot(np) + dwoodx(np,ns) * fmetwood(np))  &
+                micparam%fmetave(np,ns) = (dleafx(np,ns)*fmetleaf(np) + drootx(np,ns)*fmetroot(np) &
+                                        + dwoodx(np,ns) * fmetwood(np)) &
                                         /(dleafx(np,ns) + drootx(np,ns) + dwoodx(np,ns) + 1.0e-10)
 
             !  else

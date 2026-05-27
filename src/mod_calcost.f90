@@ -88,10 +88,12 @@ module calcost_module
         !     xcost(np) = xcost(np) + ((xmodp(np) - xobsp(np))/xobsp(np))**2 +((xmodm(np) - xobsm(np))/xobsm(np))**2
               xcost(np) = xcost(np) + (xfracpmod(np)-xfracpobs(np))** 2 + (xfracmmod(np) - xfracmobs(np))**2
              endif
-             write(91,901) micparam%siteid(np),micparam%pft(np),micparam%top(np),micparam%bot(np),xobs(np),xmod(np),xobsp(np),xmodp(np),xobsm(np),xmodm(np)
+             write(91,901) micparam%siteid(np),micparam%pft(np),micparam%top(np),micparam%bot(np), &
+                           xobs(np),xmod(np),xobsp(np),xmodp(np),xobsm(np),xmodm(np)
                   
              do ns = 1,ms
-                write(92,*) micparam%siteid(np),micparam%pft(np), ns, (1000.0*miccpool%cpooleq(np,ns,ip)/micinput%bulkd(np,ns),ip=1,mcpool)
+                write(92,*) micparam%siteid(np),micparam%pft(np), ns, &
+                            (1000.0*miccpool%cpooleq(np,ns,ip)/micinput%bulkd(np,ns),ip=1,mcpool)
              enddo
 
            else 
@@ -104,7 +106,8 @@ module calcost_module
                            micparam%c14soilobsm(np),xmodm(np)/miccpool%c12pooleqm(np)
 
              do ns = 1,ms
-                write(94,*) micparam%siteid(np),micparam%pft(np), ns, (1000.0*miccpool%cpooleq(np,ns,ip)/micinput%bulkd(np,ns),ip=1,mcpool)
+                write(94,*) micparam%siteid(np),micparam%pft(np), ns, &
+                            (1000.0*miccpool%cpooleq(np,ns,ip)/micinput%bulkd(np,ns),ip=1,mcpool)
              enddo
            endif 
                         
@@ -284,8 +287,8 @@ module calcost_module
 
          do ns = 1,msobs
             if(ns==1) then
-              xobs7(np,ns) = (micparam%csoilobs(np,2) * zse(2)+ micparam%csoilobs(np,3) * zse(3) + micparam%csoilobs(np,4) * zse(4)) &
-                            /(zse(2)+zse(3)+zse(4)) 
+              xobs7(np,ns) = (micparam%csoilobs(np,2) * zse(2)+ micparam%csoilobs(np,3) * zse(3) &
+                            + micparam%csoilobs(np,4) * zse(4)) /(zse(2)+zse(3)+zse(4))
               xmod7(np,ns) = (xmod(np,2) * zse(2) +xmod(np,3) * zse(3) + xmod(np,4) * zse(4)) &
                              /(zse(2)+zse(3)+zse(4)) 
             else

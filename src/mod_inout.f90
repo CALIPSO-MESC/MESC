@@ -886,9 +886,12 @@ contains
             msite=msite + 1
          endif        
          if(jglobal==1) then
-            write(100,901) micparam%siteid(np),micparam%dataid(np),micparam%pft(np),micparam%bgctype(nP),micparam%top(np),micparam%bot(np) , &
-                         fnpp(np),fanpp(np),fbnpp(np),fcna(np),fcnb(np),flignin(np),ftemp(np),fmoist(np),fclay(np),fsilt(np),fph(np), &
-                         fporosity(np),fmatpot(np),fbulkd(np),fald(np),falo(np),ffed(np),ffeo(np),fsoc(np),fpoc(np),fmaoc(np)
+            write(100,901) micparam%siteid(np),micparam%dataid(np),micparam%pft(np), &
+                         micparam%bgctype(nP),micparam%top(np),micparam%bot(np), &
+                         fnpp(np),fanpp(np),fbnpp(np),fcna(np),fcnb(np),flignin(np), &
+                         ftemp(np),fmoist(np),fclay(np),fsilt(np),fph(np), &
+                         fporosity(np),fmatpot(np),fbulkd(np),fald(np),falo(np), &
+                         ffed(np),ffeo(np),fsoc(np),fpoc(np),fmaoc(np)
          endif        
 
       enddo    ! "np=1,mp"

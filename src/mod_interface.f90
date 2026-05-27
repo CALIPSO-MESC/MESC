@@ -2,7 +2,8 @@ module mesc_interface_module
   use mic_constant
   use mic_variable
   use mesc_inout_module, only: vmic_restart_read, vmic_restart_write, vmic_output_write
-  use mesc_model_module, only: rk4modelx, tridag, bioturb, bgc_fractions, mget, turnovert, desorpt, vmaxt, kmt, bgc_fractions_single, mget_single, turnovert_single, desorpt_single, vmaxt_single, kmt_single
+  use mesc_model_module, only: rk4modelx, tridag, bioturb, bgc_fractions, mget, turnovert, desorpt, vmaxt, kmt, &
+                               bgc_fractions_single, mget_single, turnovert_single, desorpt_single, vmaxt_single, kmt_single
   implicit none
 
 contains
@@ -533,7 +534,8 @@ end subroutine variable_time_single
                enddo ! "ip=1,mcpool"
    
                ! computing daily leaching loss from bottom-layer LWMC 
-               cleachloss = micparam%tvac(np,ms) * sqrt(micinput%wavg(np,ms)/micinput%porosity(np,ms)) *  miccpool%cpool(np,ms,7)  * 24.0
+               cleachloss = micparam%tvac(np,ms) * sqrt(micinput%wavg(np,ms)/micinput%porosity(np,ms)) &
+                          *  miccpool%cpool(np,ms,7)  * 24.0
                cleachloss = max(0.0,min(cleachloss,miccpool%cpool(np,ms,7)))
                micoutput%fluxcleach(np) = micoutput%fluxcleach(np) + cleachloss
                miccpool%cpool(np,ms,7)  = miccpool%cpool(np,ms,7)  - cleachloss               
@@ -1089,7 +1091,8 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                enddo ! "ip=1,mcpool"
    
                ! computing daily leaching loss from bottom-layer LWMC 
-               cleachloss = micparam%tvac(np,ms) * sqrt(micinput%wavg(np,ms)/micinput%porosity(np,ms)) *  miccpool%cpool(np,ms,7)  * 24.0
+               cleachloss = micparam%tvac(np,ms) * sqrt(micinput%wavg(np,ms)/micinput%porosity(np,ms)) &
+                          *  miccpool%cpool(np,ms,7)  * 24.0
                cleachloss = max(0.0,min(cleachloss,miccpool%cpool(np,ms,7)))
                micoutput%fluxcleach(np) = micoutput%fluxcleach(np) + cleachloss
                miccpool%cpool(np,ms,7)  = miccpool%cpool(np,ms,7)  - cleachloss               
