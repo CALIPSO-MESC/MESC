@@ -34,6 +34,7 @@ add_executable(main
   src/mod_interface.f90
   src/mod_calcost.f90
   src/mod_functions.f90
+  src/functn_wrapper.f90
   src/main.f90
 )
 
