@@ -20,19 +20,37 @@ SEC/
 │   ├── mod_calcost.f90    # compute cost for 14C, POC/MAOC fractions, HWSD SOC profile ...
 │   ├── mod_constants.f90  # all constants
 │   ├── mod_functions.f90  # different functions for 14C, POC/MAOC fractions, HWSD SOC profile ...
+│   ├── functn_wrapper.f90 # 
 │   ├── mod_inout.f90      # input or output (netcdf files)
 │   ├── mod_interface.f90  # 
 │   ├── mod_model_core.f90 # the core routines for the mesc model
 │   └── mod_variables.f90  # all variables
 │
+├── auxil/                 # 
+│   └── to do              #
+│
 ├── cmake/                 # CMake helper modules
 │   └── FindNetCDFFortran.cmake
 │
 ├── test/                  # Test and example runs
+│   ├── benchmark          # 
 │   ├── input              # input data
 │   ├── output             # ouput
 │   ├── run_main.sh        # One-command run test script
 │   └── readme      
+│
+├── pre-processing/        # 
+│   ├── cable              # output data of CABLE
+│   ├── ORCHIDEE           # output data of ORCHIDEE
+│   ├── available_USDA_SoilSuborder_mask.py # 
+│   ├── convert_scale.bash                  # 
+│   ├── resample_USDA_SoilSuborder.py       # 
+│   └── readme.md      
+│
+├── pre-processing/        # 
+│   ├── ...                # 
+│   ├── processing.py      # 
+│   └── readme.md      
 │
 ├── CMakeLists.txt         # Build configuration
 ├── build.sh               # One-command build script

@@ -1,0 +1,16 @@
+      program testvmic
+      implicit real*8 (a-h,o-z)
+c  ARRAYS FROM THE INPUT DATA
+      real*8 xparam(16),xcost
+      integer nx
+
+      nx=3  
+      open(20,file='params_val.txt')
+      read(20,*) xcost,xparam(1:nx)
+      close(20)
+
+!      xparam(:) = 1.0
+      fa = functn(nx,xparam)
+c  END OF THE MAIN PROGRAM
+      stop
+      end

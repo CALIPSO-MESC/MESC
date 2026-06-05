@@ -14,3 +14,4 @@ Makefile
 test/output/*.txt
 test/main
 test/*.txt
+test/input/data_extraction_cable_model_calibration_cluster_new.nc

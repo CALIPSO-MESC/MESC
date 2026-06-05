@@ -83,7 +83,7 @@ contains
     implicit None
     TYPE(mic_cpool),              INTENT(INOUT)   :: miccpool
     TYPE(mic_npool),              INTENT(INOUT)   :: micnpool
-	! local variables for writing netcdf file
+! local variables for writing netcdf file
     INTEGER*4                :: STATUS
     INTEGER*4                :: FILE_ID, mp_ID, miccarb_ID, soil_ID   
     CHARACTER                :: CDATE*10,frestart_out*99
@@ -359,10 +359,11 @@ contains
   end subroutine getpatch_global   
 
 !> get global CABLE forcing for running mes-c
-!! input: hartd-wired parameter filename "fglobal_cable"  
+!! input: hard-wired parameter filename "fglobal_cable"  
+!! input: hwsd 0-60cm soil properties and new soil cluster
 !! output: write the parameter values to "micglobal% and micparam%"
 !!  
-  subroutine getdata_global_cable(fglobal,jglobal,jmodel,micglobal,micparam,zse)
+  subroutine getdata_global4_cable(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal,micparam,zse)
   ! read in global forcing from CABLE/ORCHIDEE from time-invarying and time-varying data files
   ! averaging the input files for each land cell using PFTfrac 
   ! read in the following data
@@ -376,7 +377,7 @@ contains
   TYPE(mic_parameter),    INTENT(INOUT)  :: micparam
   real(r_2)  zse(ms)
   character*140 fglobal(10)
-  integer       jglobal,jmodel
+  integer       jglobal,bgcopt,jopt,jmodel
   ! local variables
   real(r_2), dimension(nlon)            :: lon
   real(r_2), dimension(nlat)            :: lat
@@ -386,26 +387,26 @@ contains
   !
   integer i,j,k,npx,isoilx,sorderx
   integer, dimension(:),        allocatable  :: ilon,jlat, fcluster
+  integer, dimension(:,:),      allocatable  :: varx2_int
+  real*8, dimension(:),         allocatable  :: varmp1_db  
   real*4, dimension(:,:),       allocatable  :: varx2_flt
-  real*8, dimension(:),         allocatable  :: varmp1_db
   real*8, dimension(:,:),       allocatable  :: varx2_db,varmp2_db
+  real*8, dimension(:,:,:),     allocatable  :: varx3time_db,varx3ms_db,varx3ms5_db
   real*8, dimension(:,:,:),     allocatable  :: varx3_db,varmp3_db,varsoc3_db,varbulk_db,varaoc_db
-  real*8, dimension(:,:,:,:),   allocatable  :: varx4_db,watpot
-  real*8, dimension(:,:,:,:,:), allocatable  :: varx5_db  
+  real*8, dimension(:,:,:,:),   allocatable  :: varx4_db
   real(r_2), dimension(:),      allocatable  :: falo,fald,ffeo,ffed
-  integer   maxpft,pft
+  integer   maxpft,pft, msite,sitemax,intval,isite
   real*8    bulkd2
   
   
     allocate(ilon(mp),jlat(mp),fcluster(mp))
-    allocate(varx2_flt(nlon,nlat))
-    allocate(varx2_db(nlon,nlat))
-    allocate(varx3_db(nlon,nlat,mpft),varsoc3_db(nlon,nlat,ms),varbulk_db(nlon,nlat,ms),varaoc_db(nlon,nlat,ms))
-    allocate(varx4_db(nlon,nlat,mpft,ntime),watpot(nlon,nlat,ms,ntime))
-    allocate(varx5_db(nlon,nlat,mpft,ms,ntime))
+    allocate(varx2_int(nlon,nlat),varx2_flt(nlon,nlat))
     allocate(varmp1_db(mp))
-    allocate(varmp2_db(mp,ntime))
-    allocate(varmp3_db(mp,ms,ntime))
+    allocate(varx2_db(nlon,nlat),varmp2_db(mp,ntime))
+    allocate(varx3time_db(nlon,nlat,ntime),varx3ms_db(nlon,nlat,ms),varx3ms5_db(nlon,nlat,5))
+    allocate(varx3_db(nlon,nlat,mpft),varmp3_db(mp,ms,ntime))
+    allocate(varsoc3_db(nlon,nlat,ms),varbulk_db(nlon,nlat,ms),varaoc_db(nlon,nlat,ms))
+    allocate(varx4_db(nlon,nlat,ms,ntime))
     allocate(falo(mp),fald(mp),ffeo(mp),ffed(mp))
 
 
@@ -450,12 +451,11 @@ contains
              np=np+1
              ilon(np) = i
              jlat(np) = j
-             micglobal%lon(np)         = real(lon(i),kind=r_2)
-             micglobal%lat(np)         = real(lat(j),kind=r_2)
+             micglobal%lon(np)         = lon(i)
+             micglobal%lat(np)         = lat(j)
              micparam%csoilobs(np,:)   = real(varsoc3_db(i,j,:),kind=r_2)              
-             bulkd2                    = ( varbulk_db(i,j,1)*zse(1)+varbulk_db(i,j,2)*zse(2)+varbulk_db(i,j,3)*zse(3) &
-                                         + varbulk_db(i,j,4)*zse(4)+varbulk_db(i,j,5)*zse(5)                          &
-                                         + varbulk_db(i,j,6)*zse(6)+varbulk_db(i,j,7)*zse(7) )/sum(zse(1:7))   
+             bulkd2                    = ( varbulk_db(i,j,1)*dble(zse(1))+varbulk_db(i,j,2)*dble(zse(2))+varbulk_db(i,j,3)*dble(zse(3)) )&
+                                         /sum(dble(zse(1:3)))   
              micglobal%bulkd(np)       = max(500.0_r_2,min(1800.0_r_2,real(bulkd2,kind=r_2)))
              micglobal%patchfrac(np,:) = patchfrac(i,j,:)             
              micglobal%pft(np)         = maxpft
@@ -487,56 +487,6 @@ contains
     call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
     micglobal%isoil(:) = int(varmp1_db(:)) 
 
-    ok = NF90_INQ_VARID(ncid3,'Ald',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx2_flt)
-    varx2_db = real(varx2_flt,kind=8)
-    call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
-    fald(:) = real(varmp1_db(:),r_2)
-    print *, 'ald', maxval(fald), minval(fald),sum(fald)/real(mp)
-
-    ok = NF90_INQ_VARID(ncid3,'Alo',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx2_flt)
-    varx2_db = real(varx2_flt,kind=8)
-    call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
-    falo(:) = real(varmp1_db(:),kind=r_2)
-    print *, 'alo', maxval(falo), minval(falo),sum(falo)/real(mp)
-    
-    ok = NF90_INQ_VARID(ncid3,'Fed',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx2_flt)
-    varx2_db = real(varx2_flt,kind=8)
-    call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
-    ffed(:) = real(varmp1_db(:),kind=r_2)
-    print *, 'ffed', maxval(ffed), minval(ffed),sum(ffed)/real(mp)
-    
-    ok = NF90_INQ_VARID(ncid3,'Feo',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx2_flt)
-    varx2_db = real(varx2_flt,kind=8)
-    call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
-    ffeo(:) = real(varmp1_db(:),kind=r_2)
-    print *, 'ffeo', maxval(ffeo), minval(ffeo),sum(ffeo)/real(mp)
-    
-    ok = NF90_INQ_VARID(ncid3,'clay',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx2_flt)
-    varx2_db = real(varx2_flt,kind=8)
-    call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
-    micglobal%clay(:) = real(varmp1_db(:),kind=r_2)
-    print *, 'clay', maxval(micglobal%clay), minval(micglobal%clay),sum(micglobal%clay)/real(mp)
-    
-    ok = NF90_INQ_VARID(ncid3,'silt',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx2_flt)
-    varx2_db = real(varx2_flt,kind=8)
-    call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
-    micglobal%silt = real(varmp1_db,kind=r_2)
-    print *, 'silt', maxval(micglobal%silt), minval(micglobal%silt),sum(micglobal%silt)/real(mp)
-    
-    ok = NF90_INQ_VARID(ncid3,'pH',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx2_flt)
-    varx2_db = real(varx2_flt,kind=8)
-    call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
-    micglobal%ph = real(varmp1_db,kind=r_2)
-    micglobal%ph =min(9.0,max(4.0,micglobal%ph))
-    print *, 'ph', maxval(micglobal%ph), minval(micglobal%ph),sum(micglobal%ph)/real(mp)
-    
     ok = NF90_INQ_VARID(ncid3,'npp',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3_db)
     varx3_db = max(0.0,varx3_db)
@@ -544,14 +494,6 @@ contains
     micglobal%npp = real(varmp1_db,kind=r_2)
     micglobal%npp = max(100.0,micglobal%npp)
     print *, 'npp', maxval(micglobal%npp), minval(micglobal%npp),sum(micglobal%npp)/real(mp)
-    
-    ! using hwsd_bulk density
-    !ok = NF90_INQ_VARID(ncid3,'rhosoil',varid)
-    !ok = NF90_GET_VAR(ncid3,varid,varx2_flt)
-    !varx2_db = real(varx2_flt,kind=8)    
-    !call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
-    !micglobal%bulkd = real(varmp1_db,kind=r_2)
-    !print *, 'bulkd', maxval(micglobal%bulkd), minval(micglobal%bulkd),sum(micglobal%bulkd)/real(mp)
     
     ok = NF90_INQ_VARID(ncid3,'lignin_CWD',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3_db)
@@ -591,6 +533,66 @@ contains
     
     ok = NF90_close(ncid3) 
 
+    ! read in the HWSD soil properties and soil cluster
+    ok = NF90_OPEN(fglobal(3),0,ncid3)
+    IF (ok /= NF90_NOERR) CALL nc_abort(ok,'Error opening file'//fglobal(3))
+    print *, 'global input1 = ', fglobal(3)
+
+    ok = NF90_INQ_VARID(ncid3,'Bulk_density',varid)
+    ok = NF90_GET_VAR(ncid3,varid,varbulk_db)   
+    
+    ok = NF90_INQ_VARID(ncid3,'Clay_fraction',varid)
+    ok = NF90_GET_VAR(ncid3,varid,varx3ms_db) 
+    call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms_db(:,:,1:3), varmp1_db)  
+    micglobal%clay(:) = real(varmp1_db(:)*0.01,kind=r_2)
+    print *, 'clay', maxval(micglobal%clay), minval(micglobal%clay),sum(micglobal%clay)/real(mp)
+    
+    ok = NF90_INQ_VARID(ncid3,'Silt_fraction',varid)
+    ok = NF90_GET_VAR(ncid3,varid,varx3ms_db)
+    call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms_db(:,:,1:3), varmp1_db)  
+    micglobal%silt(:) = real(varmp1_db(:)*0.01,kind=r_2)
+    print *, 'silt', maxval(micglobal%silt), minval(micglobal%silt),sum(micglobal%silt)/real(mp)
+    
+    ok = NF90_INQ_VARID(ncid3,'ph',varid)
+    ok = NF90_GET_VAR(ncid3,varid,varx3ms_db)
+    call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms_db(:,:,1:3), varmp1_db)  
+    micglobal%ph = real(varmp1_db,kind=r_2)
+    micglobal%ph =min(9.5,max(3.5,micglobal%ph))
+    print *, 'ph', maxval(micglobal%ph), minval(micglobal%ph),sum(micglobal%ph)/real(mp)
+    
+    ok = NF90_INQ_VARID(ncid3,'Ald',varid)
+    ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
+    call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)  
+    fald = real(varmp1_db,kind=r_2)
+    print *, 'Ald', maxval(fald), minval(fald),sum(fald)/real(mp)
+    
+    ok = NF90_INQ_VARID(ncid3,'Alo',varid)
+    ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
+    call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)  
+    falo = real(varmp1_db,kind=r_2)
+    print *, 'Alo', maxval(falo), minval(falo),sum(falo)/real(mp)
+    
+    ok = NF90_INQ_VARID(ncid3,'Fed',varid)
+    ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
+    call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)  
+    ffed = real(varmp1_db,kind=r_2)
+    print *, 'fed', maxval(ffed), minval(ffed),sum(ffed)/real(mp)
+    
+    ok = NF90_INQ_VARID(ncid3,'Feo',varid)
+    ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
+    call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)  
+    ffeo = real(varmp1_db,kind=r_2)
+    print *, 'feo', maxval(ffeo), minval(ffeo),sum(ffeo)/real(mp)
+    
+    ok = NF90_INQ_VARID(ncid3,'Cluster',varid)
+    ok = NF90_GET_VAR(ncid3,varid,varx2_int)
+    call lonlat2mpx2int(ilon, jlat, varx2_int, fcluster)
+    print *, 'Cluster', maxval(fcluster), minval(fcluster)    
+    
+    micparam%bgctype =fcluster  
+    micglobal%bgctype=fcluster    
+    ok = NF90_close(ncid3)
+    
     ! check the time-invariant data and replace bad values withy default values
     do np=1,mp
        pft = micglobal%pft(np)
@@ -608,21 +610,24 @@ contains
           micglobal%cnroot(np,:) = cnroot1(pft)          
        endif
        ! replacing negative values of metal oxide with their global means in kg/m2
-       if(fald(np)<0.0) fald(np) =0.46_r_2
-       if(falo(np)<0.0) falo(np) =0.39_r_2
-       if(ffed(np)<0.0) ffed(np) =2.74_r_2
-       if(ffeo(np)<0.0) ffeo(np) =3.53_r_2
+     !  if(fald(np)<0.0) fald(np) =0.46_r_2
+     !  if(falo(np)<0.0) falo(np) =0.39_r_2
+     !  if(ffed(np)<0.0) ffed(np) =2.74_r_2
+     !  if(ffeo(np)<0.0) ffeo(np) =3.53_r_2
        micparam%siteid(np)       = np 
        micglobal%poros(:)  = 1.0 - micglobal%bulkd(:)/2650.0
-
+       ! replace "NaN" with -1 for soil pH and clay and silt fractions
+       if(micglobal%ph(np) /= micglobal%ph(np)) micglobal%ph(np)=-1 
+       if(micglobal%silt(np) /= micglobal%silt(np)) micglobal%silt(np)=-1.0
+       if(micglobal%clay(np) /= micglobal%clay(np)) micglobal%clay(np)=-1.0
     enddo
-
-   ! use the lat and lon to estimate bgctype
-    call cluster_centre(fglobal(3),micglobal%clay,micglobal%silt,micglobal%ph,fald,falo,ffed,ffeo,fcluster)
+    ! call "cluster_hwsd" to use ORCHIDEE centroid
+    micglobal%bgctype = -1
+    micparam%bgctype  = -1
+    call cluster_hwsd(2,micglobal%bgctype,micparam%csoilobs,micglobal%clay,micglobal%silt,micglobal%ph,fald,falo,ffed,ffeo,fcluster)    
     micparam%bgctype =fcluster  
-    micglobal%bgctype=fcluster
-    
-    
+    micglobal%bgctype=fcluster       
+
     ! reading time-varying data
     ! temporary solution
     do n=1,ntime
@@ -636,55 +641,76 @@ contains
     IF (ok /= NF90_NOERR) CALL nc_abort(ok,'Error opening file'//fglobal(2))
     
     ok = NF90_INQ_VARID(ncid3,'Leaf_fall',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx4_db)
-    varx4_db = max(0.0, varx4_db)
-    call lonlat2mpx4(ilon,jlat,patchfrac,varx4_db,varmp2_db)
+    ok = NF90_GET_VAR(ncid3,varid,varx3time_db)
+    varx3time_db = max(0.0, varx3time_db)
+    call lonlat2mpx3time(ilon,jlat,varx3time_db,varmp2_db)
     micglobal%dleaf = real(varmp2_db,kind=r_2)
     print *, 'dleaf', minval(micglobal%dleaf),maxval(micglobal%dleaf), &
                       sum(micglobal%dleaf)/real(size(micglobal%dleaf))
     
     ok = NF90_INQ_VARID(ncid3,'non_leaf_aboveground_litterfall',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx4_db)
-    varx4_db = max(0.0, varx4_db)
-    call lonlat2mpx4(ilon,jlat,patchfrac,varx4_db,varmp2_db)
+    ok = NF90_GET_VAR(ncid3,varid,varx3time_db)
+    varx3time_db = max(0.0, varx3time_db)
+    call lonlat2mpx3time(ilon,jlat,varx3time_db,varmp2_db)
     micglobal%dwood = real(varmp2_db,kind=r_2)
     print *, 'dwood', minval(micglobal%dwood),maxval(micglobal%dwood), &
                       sum(micglobal%dwood)/real(size(micglobal%dwood))
     
     ok = NF90_INQ_VARID(ncid3,'Belowground_litter_fall',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx4_db)
-    varx4_db = max(0.0, varx4_db)
-    call lonlat2mpx4(ilon,jlat,patchfrac,varx4_db,varmp2_db)
+    ok = NF90_GET_VAR(ncid3,varid,varx3time_db)
+    varx3time_db = max(0.0, varx3time_db)
+    call lonlat2mpx3time(ilon,jlat,varx3time_db,varmp2_db)
     micglobal%droot = real(varmp2_db,kind=r_2)
     print *, 'droot', minval(micglobal%droot),maxval(micglobal%droot), &
                       sum(micglobal%droot)/real(size(micglobal%droot))
     
     ok = NF90_INQ_VARID(ncid3,'SoilTemp',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx5_db)
-    call lonlat2mpx5(ilon,jlat,patchfrac,-100.0d0,50.0d0,0.0d0,'tsoil',varx5_db,varmp3_db)
+    ok = NF90_GET_VAR(ncid3,varid,varx4_db)
+    call lonlat2mpx4b(ilon,jlat,-100.0d0,50.0d0,0.0d0,varx4_db,varmp3_db)
     micglobal%tsoil = real(varmp3_db,kind=r_2)
     print *, 'tsoil', minval(micglobal%tsoil),maxval(micglobal%tsoil), &
                       sum(micglobal%tsoil)/real(size(micglobal%tsoil))
     
     ok = NF90_INQ_VARID(ncid3,'SoilMoist',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx5_db)
-    call lonlat2mpx5(ilon,jlat,patchfrac,0.0d0,1.0d0,0.15d0,'moist',varx5_db,varmp3_db)
+    ok = NF90_GET_VAR(ncid3,varid,varx4_db)
+    call lonlat2mpx4b(ilon,jlat,0.0d0,0.8d0,0.15d0,varx4_db,varmp3_db)    
     micglobal%moist = real(varmp3_db,kind=r_2)
     print *, 'moist', minval(micglobal%moist),maxval(micglobal%moist), &
                       sum(micglobal%moist)/real(size(micglobal%moist))
     
     ok = NF90_INQ_VARID(ncid3,'water_potential',varid)
-    ok = NF90_GET_VAR(ncid3,varid,watpot)
-    call lonlat2mpx4b(ilon,jlat,patchfrac,-1000.0d0,0.0d0,-100.0d0,'watpt',watpot,varmp3_db)
+    ok = NF90_GET_VAR(ncid3,varid,varx4_db)
+    call lonlat2mpx4b(ilon,jlat,-1000.0d0,0.0d0,-100.0d0,varx4_db,varmp3_db)     
     micglobal%matpot = real(varmp3_db,kind=r_2)    
     print *, 'matpot', minval(micglobal%matpot),maxval(micglobal%matpot), &
                        sum(micglobal%matpot)/real(size(micglobal%matpot))
     
     ok = NF90_close(ncid3) 
 
+
+    ! filter out land cells with "bgctype<0"
+  !  print *, 'calculations are not done for the following cells' 
+    
+    msite = 0
+    do np=1,mp
+       if(micparam%bgctype(np) <1 .or. micparam%bgctype(np) >mbgc &
+         .or. minval(micparam%csoilobs(np,:)) < 0.0               &
+         .or. maxval(micparam%csoilobs(np,:)) > 120.0) then    
+  !        print *, np, micparam%bgctype(np),micglobal%area(np),micglobal%isoil(np), &
+  !                 micglobal%sorder(np),micglobal%bgctype(np), micglobal%npp(np)
+          micparam%bgctype(np)= mbgc
+          micglobal%area(np)  = -1.0
+       endif
+       ! replacing NPP in the time-invariant input file using the mean of time-varying input
+       micglobal%npp(np) = 365.0 * sum(micglobal%dleaf(np,:) + micglobal%dwood(np,:) + micglobal%droot(np,:)) &
+                         /real(size(micglobal%dleaf(np,:)))
+       if(micglobal%isoil(np) <0  .or. micglobal%isoil(np) >12)   micglobal%isoil(np)=12                 
+       if(micglobal%sorder(np) <0 .or. micglobal%sorder(np) >12)  micglobal%sorder(np)=12   
+       if(micglobal%bgctype(np) ==bgcopt .and. micglobal%area(np) >0) msite = msite + 1        
+    enddo   
+    
     ! assign time-invariance properties from "micglobal" to "micparam"
     micparam%pft        = micglobal%pft
-    micparam%bgctype    = micglobal%bgctype
     micparam%isoil      = micglobal%isoil
     micparam%sorder     = micglobal%sorder 
     micparam%fligleaf   = micglobal%ligleaf
@@ -694,62 +720,74 @@ contains
     micparam%xcnroot(:) = micglobal%cnroot(:,1)
     micparam%xcnwood(:) = micglobal%cnwood(:,1)
 
-    ! filter out land cells with "bgctype<0"
-    print *, 'calculations are not done for the following cells' 
-    do np=1,mp
-       if(micparam%bgctype(np) <1 .or. micparam%bgctype(np) >mbgc &
-         .or. minval(micparam%csoilobs(np,:)) < 0.0               &
-         .or. maxval(micparam%csoilobs(np,:)) > 120.0) then 
-          print *, np, micparam%bgctype(np),micglobal%area(np),micglobal%isoil(np), &
-                   micglobal%sorder(np),micglobal%bgctype(np), micglobal%npp(np)
-          micparam%bgctype(np)= mbgc
-          micglobal%area(np)  = -1.0
-       endif
-       ! replacing NPP in the time-invariant input file using the mean of time-varying input
-       micglobal%npp(np) = 365.0 * sum(micglobal%dleaf(np,:) + micglobal%dwood(np,:) + micglobal%droot(np,:)) &
-                         /real(size(micglobal%dleaf(np,:)))
-    enddo
+    sitemax=1000
+    if(msite>2*sitemax) then
+
+       intval = msite/sitemax; isite=0
+       do np=1,mp
+          if(micglobal%bgctype(np) == bgcopt .and.micglobal%area(np) > 0.0) then
+             isite = isite +1
+             if(int(isite/intval)*intval /= isite.or. isite>sitemax*intval) micglobal%area(np) = -1.0
+          endif
+ !         if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
+ !            write(*,103) isite,np, micglobal%bgctype(np), micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
+ !         endif
+       enddo
+    else 
+
+      isite=0
+      do np=1,mp
+         if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
+            isite=isite+1     
+ !           write(*,103) isite,np,micglobal%bgctype(np),micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
+         endif     
+      enddo
+      if(isite<10) print *, 'too few sites ', isite
+
+    endif   
+
+    micglobal%avgts(:) = sum(sum(micglobal%tsoil(:,:,:),dim=3),dim=2)/real(ms*ntime)
+    micglobal%avgms(:) = sum(sum(micglobal%moist(:,:,:),dim=3),dim=2)/real(ms*ntime)
 
 ! write out time-invariant input data
     if(jglobal==1) then
        open(31,file=fglobal(5))
        do np=1,mp
-          write(31,101) micparam%siteid(np),micglobal%area(np),micparam%pft(np), &
-          micparam%isoil(np),micparam%sorder(np),micparam%bgctype(np),   &
-          micglobal%npp(np), &
+          write(31,101) micglobal%lon(np),micglobal%lat(np),ilon(np),jlat(np),                 & 
+          micparam%siteid(np),micglobal%area(np),micparam%pft(np),                             &
+          micparam%isoil(np),micparam%sorder(np),micparam%bgctype(np),fcluster(np), micglobal%npp(np),       &
           minval(micglobal%dleaf(np,:) + micglobal%dwood(np,:) + micglobal%droot(np,:))*365.0, &
           maxval(micglobal%dleaf(np,:) + micglobal%dwood(np,:) + micglobal%droot(np,:))*365.0, &
-          micglobal%ph(np),micglobal%clay(np)+micglobal%silt(np),micglobal%bulkd(np), &
-          sum(micglobal%tsoil(np,:,:))/real(size(micglobal%tsoil(np,:,:))),           &
-          sum(micglobal%moist(np,:,:))/real(size(micglobal%moist(np,:,:))),           &
-          max(-1.0,micparam%csoilobs(np,:)),                                                    &
+          micglobal%ph(np),micglobal%clay(np)*100.0,micglobal%silt(np)*100.0,                  &
+          fald(np),falo(np),ffed(np),ffeo(np), micglobal%bulkd(np),                            &
+          micglobal%avgts(np),micglobal%avgms(np), max(-1.0,micparam%csoilobs(np,:)),          &  
           micparam%fracaoc(np,1),micparam%fracaoc(np,3), micparam%fracaoc(np,ms)   
 
        enddo
        close(31) 
     endif    
-101 format(i5,1x,f8.4,1x,4(i3,1x),100(f10.4,1x))
-
+101 format(2(f8.3,1x),2(i6,1x),i10,1x,es16.8,1x,5(i5,1x),*(es16.8,1x))
+103 format(3(i5,1x),3(f10.4,1x))
     
     deallocate(ilon,jlat,fcluster)
-    deallocate(varx2_flt)
-    deallocate(varx2_db)
-    deallocate(varx3_db,varsoc3_db,varbulk_db,varaoc_db)
-    deallocate(varx4_db,watpot)
-    deallocate(varx5_db)
-    deallocate(varmp1_db)    
-    deallocate(varmp2_db)
-    deallocate(varmp3_db)
+    deallocate(varx2_int,varx2_flt)
+    deallocate(varmp1_db)
+    deallocate(varx3time_db,varx3ms_db,varx3ms5_db)    
+    deallocate(varx2_db,varmp2_db)
+    deallocate(varx3_db,varmp3_db)
+    deallocate(varsoc3_db,varbulk_db,varaoc_db)
+    deallocate(varx4_db)
     deallocate(falo,fald,ffeo,ffed)
 
-   
-  end subroutine getdata_global_cable
+    
+  end subroutine getdata_global4_cable  
 
 !> get global ORCHIDEE forcing for running mes-c
-!! input: hartd-wired parameter filename "fglobal_cable"  
+!! input: hard-wired parameter filename "fglobal_cable"  
+!! input: harmonsied HWSD soil properties (0-60cm)
 !! output: write the parameter values to "micglobal% and micparam%"
-!! 
-subroutine getdata_global_orchidee(fglobal,jglobal,jmodel,micglobal,micparam,zse)
+!!
+subroutine getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal,micparam,zse)
   ! read in global forcing from ORCHIDEE from time-invarying and time-varying data files
   ! averaging the input files for each land cell using PFTfrac 
   ! read in the following data
@@ -765,7 +803,7 @@ subroutine getdata_global_orchidee(fglobal,jglobal,jmodel,micglobal,micparam,zse
   TYPE(mic_parameter),    INTENT(INOUT)  :: micparam
   real(r_2) zse(ms)
   character*140 fglobal(10)
-  integer       jglobal,jmodel
+  integer       jglobal,bgcopt,jopt,jmodel
   ! local variables
   real(r_2), dimension(nlon)            :: lon
   real(r_2), dimension(nlat)            :: lat
@@ -777,17 +815,18 @@ subroutine getdata_global_orchidee(fglobal,jglobal,jmodel,micglobal,micparam,zse
   !
   integer i,j,k,npx,isoilx,sorderx,ilonx,jlatx
   integer, dimension(:),        allocatable  :: ilon,jlat, fcluster
+  integer, dimension(:,:),      allocatable  :: varx2_int
   real*4, dimension(:,:),       allocatable  :: varx2_flt
   real*4, dimension(:,:,:,:),   allocatable  :: varx4_flt
   real*8, dimension(:),         allocatable  :: varmp1_db
   real*8, dimension(:,:),       allocatable  :: varx2_db,varmp2_db
+  real*8, dimension(:,:,:),     allocatable  :: varx3time_db,varx3ms_db,varx3ms5_db  
   real*8, dimension(:,:,:),     allocatable  :: varx3_db,varmp3_db,varsoc3_db,varbulk_db,varaoc_db
-  real*8, dimension(:,:,:,:),   allocatable  :: varx4_db,tsoil4_db,watpot4_db
-  real*8, dimension(:,:,:,:,:), allocatable  :: moist5_db  
+  real*8, dimension(:,:,:,:),   allocatable  :: varx4_db
   real(r_2), dimension(:),      allocatable  :: falo,fald,ffeo,ffed
   double precision, dimension(:,:),       allocatable  :: modisnpp
   double precision, dimension(:),         allocatable  :: modisnpp_mp
-  integer   maxpft,pft
+  integer   maxpft,pft, msite,sitemax,intval,isite
   real*8    bulkd2
   ! data
   real*4, dimension(12)    :: sandx,clayx,siltx,porex,bulkdx,fcpx,wiltx
@@ -800,16 +839,17 @@ subroutine getdata_global_orchidee(fglobal,jglobal,jmodel,micglobal,micparam,zse
   data wiltx/0.0450,0.0570,0.0657,0.1039,0.0901,0.0884,0.1112,0.1967,0.1496,0.1704,0.2665,0.2707/
 
     allocate(ilon(mp),jlat(mp),fcluster(mp))
-    allocate(varx2_flt(nlon,nlat))
+    allocate(varx2_int(nlon,nlat),varx2_flt(nlon,nlat))
     allocate(varx4_flt(nlon,nlat,mpft,1))
     allocate(varx2_db(nlon,nlat))
+    allocate(varx3time_db(nlon,nlat,ntime),varx3ms_db(nlon,nlat,ms),varx3ms5_db(nlon,nlat,5))
     allocate(varx3_db(nlon,nlat,mpft),varsoc3_db(nlon,nlat,ms),varbulk_db(nlon,nlat,ms),varaoc_db(nlon,nlat,ms))
-    allocate(varx4_db(nlon,nlat,mpft,ntime))
-    allocate(tsoil4_db(nlon,nlat,ms,ntime),watpot4_db(nlon,nlat,ms,ntime))
-    allocate(moist5_db(nlon,nlat,ms,mpft,ntime))
+    allocate(varx4_db(nlon,nlat,ms,ntime))
+
     allocate(varmp1_db(mp))
     allocate(varmp2_db(mp,ntime))
     allocate(varmp3_db(mp,ms,ntime))
+
     allocate(falo(mp),fald(mp),ffeo(mp),ffed(mp))
     allocate(modisnpp(nlon,nlat),modisnpp_mp(mp))
 
@@ -855,12 +895,11 @@ subroutine getdata_global_orchidee(fglobal,jglobal,jmodel,micglobal,micparam,zse
              np=np+1
              ilon(np) = i
              jlat(np) = j
-             micglobal%lon(np)         = real(lon(i),kind=r_2)
-             micglobal%lat(np)         = real(lat(j),kind=r_2)
+             micglobal%lon(np)         = lon(i)
+             micglobal%lat(np)         = lat(j)
              micparam%csoilobs(np,:)   = real(varsoc3_db(i,j,:),kind=r_2) 
-             bulkd2                    = ( varbulk_db(i,j,1)*zse(1)+varbulk_db(i,j,2)*zse(2)+varbulk_db(i,j,3)*zse(3) &
-                                         + varbulk_db(i,j,4)*zse(4)+varbulk_db(i,j,5)*zse(5)                          &
-                                         + varbulk_db(i,j,6)*zse(6)+varbulk_db(i,j,7)*zse(7) )/sum(zse(1:7))   
+             bulkd2                    = ( varbulk_db(i,j,1)*dble(zse(1))+varbulk_db(i,j,2)*dble(zse(2))+varbulk_db(i,j,3)*dble(zse(3)) )&
+                                         /sum(dble(zse(1:3)))   
              micglobal%bulkd(np)       = max(500.0_r_2,min(1800.0_r_2,real(bulkd2,kind=r_2)))
              micglobal%patchfrac(np,:) = patchfrac(i,j,:)             
              micglobal%pft(np)         = maxpft
@@ -892,58 +931,6 @@ subroutine getdata_global_orchidee(fglobal,jglobal,jmodel,micglobal,micparam,zse
     call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
     micglobal%sorder(:) = int(varmp1_db(:)) 
 
-    ok = NF90_INQ_VARID(ncid3,'Ald',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx2_flt)
-    varx2_db = real(varx2_flt,kind=8)
-    call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
-    fald(:) = real(varmp1_db(:),r_2)
-    print *, 'ald', maxval(fald), minval(fald),sum(fald)/real(mp)
-
-    ok = NF90_INQ_VARID(ncid3,'Alo',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx2_flt)
-    varx2_db = real(varx2_flt,kind=8)
-    call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
-    falo(:) = real(varmp1_db(:),kind=r_2)
-    print *, 'alo', maxval(falo), minval(falo),sum(falo)/real(mp)
-    
-    ok = NF90_INQ_VARID(ncid3,'Fed',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx2_flt)
-    varx2_db = real(varx2_flt,kind=8)
-    call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
-    ffed(:) = real(varmp1_db(:),kind=r_2)
-    print *, 'ffed', maxval(ffed), minval(ffed),sum(ffed)/real(mp)
-    
-    ok = NF90_INQ_VARID(ncid3,'Feo',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx2_flt)
-    varx2_db = real(varx2_flt,kind=8)
-    call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
-    ffeo(:) = real(varmp1_db(:),kind=r_2)
-    print *, 'ffeo', maxval(ffeo), minval(ffeo),sum(ffeo)/real(mp)
-    
-    ok = NF90_INQ_VARID(ncid3,'pH',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx2_flt)
-    varx2_db = real(varx2_flt,kind=8)
-    call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
-    micglobal%ph = real(varmp1_db,kind=r_2)
-    micglobal%ph =min(9.0,max(4.0,micglobal%ph))
-    print *, 'ph', maxval(micglobal%ph), minval(micglobal%ph),sum(micglobal%ph)/real(mp)
-    
-    ok = NF90_INQ_VARID(ncid3,'clay_soilgrid',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx2_flt)
-    varx2_db = real(varx2_flt,kind=8)
-    call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
-    micglobal%clay = real(varmp1_db,kind=r_2)
-    micglobal%clay =min(1.0,max(0.0,micglobal%clay))
-    print *, 'clay', maxval(micglobal%clay), minval(micglobal%clay),sum(micglobal%clay)/real(mp)    
-
-    ok = NF90_INQ_VARID(ncid3,'silt_soilgrid',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx2_flt)
-    varx2_db = real(varx2_flt,kind=8)
-    call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
-    micglobal%silt = real(varmp1_db,kind=r_2)
-    micglobal%silt =min(1.0,max(0.0,micglobal%silt))
-    print *, 'silt', maxval(micglobal%silt), minval(micglobal%silt),sum(micglobal%silt)/real(mp) 
-    
     ok = NF90_INQ_VARID(ncid3,'npp',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx2_db)
     call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)  
@@ -953,7 +940,71 @@ subroutine getdata_global_orchidee(fglobal,jglobal,jmodel,micglobal,micparam,zse
 
    
     ok = NF90_close(ncid3) 
+
+
+
+    ! read in the HWSD soil properties and soil cluster
+    ok = NF90_OPEN(fglobal(3),0,ncid3)
+    IF (ok /= NF90_NOERR) CALL nc_abort(ok,'Error opening file'//fglobal(3))
+    print *, 'global input1 = ', fglobal(3)
+
+    ok = NF90_INQ_VARID(ncid3,'Bulk_density',varid)
+    ok = NF90_GET_VAR(ncid3,varid,varbulk_db)   
+   
+    ok = NF90_INQ_VARID(ncid3,'Clay_fraction',varid)
+    ok = NF90_GET_VAR(ncid3,varid,varx3ms_db) 
+    call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms_db(:,:,1:3), varmp1_db)  
+    micglobal%clay(:) = real(varmp1_db(:)*0.01,kind=r_2)
+    print *, 'clay', maxval(micglobal%clay), minval(micglobal%clay),sum(micglobal%clay)/real(mp)
     
+    ok = NF90_INQ_VARID(ncid3,'Silt_fraction',varid)
+    ok = NF90_GET_VAR(ncid3,varid,varx3ms_db)
+    call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms_db(:,:,1:3), varmp1_db)  
+    micglobal%silt(:) = real(varmp1_db(:)*0.01,kind=r_2)
+    print *, 'silt', maxval(micglobal%silt), minval(micglobal%silt),sum(micglobal%silt)/real(mp)
+    
+    ok = NF90_INQ_VARID(ncid3,'ph',varid)
+    ok = NF90_GET_VAR(ncid3,varid,varx3ms_db)
+    call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms_db(:,:,1:3), varmp1_db)  
+    micglobal%ph = real(varmp1_db,kind=r_2)
+    micglobal%ph =min(9.5,max(3.5,micglobal%ph))
+    print *, 'ph', maxval(micglobal%ph), minval(micglobal%ph),sum(micglobal%ph)/real(mp)
+    
+    ok = NF90_INQ_VARID(ncid3,'Ald',varid)
+    ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
+    call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)  
+    fald = real(varmp1_db,kind=r_2)
+    print *, 'Ald', maxval(fald), minval(fald),sum(fald)/real(mp)
+    
+    ok = NF90_INQ_VARID(ncid3,'Alo',varid)
+    ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
+    call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)  
+    falo = real(varmp1_db,kind=r_2)
+    print *, 'Alo', maxval(falo), minval(falo),sum(falo)/real(mp)
+    
+    ok = NF90_INQ_VARID(ncid3,'Fed',varid)
+    ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
+    call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)  
+    ffed = real(varmp1_db,kind=r_2)
+    print *, 'fed', maxval(ffed), minval(ffed),sum(ffed)/real(mp)
+    
+    ok = NF90_INQ_VARID(ncid3,'Feo',varid)
+    ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
+    call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)  
+    ffeo = real(varmp1_db,kind=r_2)
+    print *, 'feo', maxval(ffeo), minval(ffeo),sum(ffeo)/real(mp)
+
+    
+    ok = NF90_INQ_VARID(ncid3,'Cluster',varid)
+    ok = NF90_GET_VAR(ncid3,varid,varx2_int)
+    call lonlat2mpx2int(ilon, jlat, varx2_int, fcluster)
+    print *, 'Cluster', maxval(fcluster), minval(fcluster)    
+    
+    micparam%bgctype =fcluster  
+    micglobal%bgctype=fcluster    
+    ok = NF90_close(ncid3)
+
+   
     ! check the time-invariant data and replace bad values withy default values
     do np=1,mp
        pft = micglobal%pft(np)
@@ -963,12 +1014,6 @@ subroutine getdata_global_orchidee(fglobal,jglobal,jmodel,micglobal,micparam,zse
           micglobal%area(np) = -1.0
           pft= 1; ns =1
        endif
-   
-      ! here used default look table values asin global ORCHIDEE 
-      ! micglobal%clay(np) = real(clayx(ns),kind=r_2)
-      ! micglobal%silt(np) = real(siltx(ns),kind=r_2)
-      ! micglobal%bulkd(np)= real(bulkdx(ns),kind=r_2)
-      ! micglobal%poros(np)= real(porex(ns),kind=r_2)  
 
        micglobal%ligleaf(np)  = ligleaf2(pft)
        micglobal%ligwood(np)  = ligwood2(pft)
@@ -976,20 +1021,25 @@ subroutine getdata_global_orchidee(fglobal,jglobal,jmodel,micglobal,micparam,zse
        micglobal%cnleaf(np,:) = cnleaf2(pft)
        micglobal%cnwood(np,:) = cnwood2(pft)
        micglobal%cnroot(np,:) = cnroot2(pft)   
-       micparam%siteid(np)    = np
-       micglobal%poros(:)  = 1.0 - micglobal%bulkd(:)/2650.0
+
        ! replacing negative values of metal oxide with their global means in kg/m2
-       if(fald(np)<0.0) fald(np) =0.46_r_2
-       if(falo(np)<0.0) falo(np) =0.39_r_2
-       if(ffed(np)<0.0) ffed(np) =2.74_r_2
-       if(ffeo(np)<0.0) ffeo(np) =3.53_r_2
-       
+       !if(fald(np)<0.0) fald(np) =0.46_r_2
+       !if(falo(np)<0.0) falo(np) =0.39_r_2
+       !if(ffed(np)<0.0) ffed(np) =2.74_r_2
+       !if(ffeo(np)<0.0) ffeo(np) =3.53_r_2
+       micparam%siteid(np)    = np
+       micglobal%poros(:)  = 1.0 - micglobal%bulkd(:)/2650.0   
+       ! replace "NaN" with -1 for soil pH and clay and silt fractions
+       if(micglobal%ph(np) /= micglobal%ph(np)) micglobal%ph(np)=-1 
+       if(micglobal%silt(np) /= micglobal%silt(np)) micglobal%silt(np)=-1.0
+       if(micglobal%clay(np) /= micglobal%clay(np)) micglobal%clay(np)=-1.0
     enddo
 
    ! use the cluster centres to estimate bgctype
-    call cluster_centre(fglobal(3),micglobal%clay,micglobal%silt,micglobal%ph,fald,falo,ffed,ffeo,fcluster)
-    micparam%bgctype =fcluster  
-    micglobal%bgctype=fcluster
+   ! micglobal%bgctype=-1       
+   ! call cluster_hwsd(jmodel,micglobal%bgctype,micparam%csoilobs,micglobal%clay,micglobal%silt,micglobal%ph,fald,falo,ffed,ffeo,fcluster)    
+   ! micparam%bgctype =fcluster  
+   ! micglobal%bgctype=fcluster
 
     ! reading time-varying data
     ! temporary solution
@@ -1002,48 +1052,48 @@ subroutine getdata_global_orchidee(fglobal,jglobal,jmodel,micglobal,micparam,zse
   ! file 2: daily aboveground leaf fall (g C/m2/day)     ! Open netcdf file
     ok = NF90_OPEN(fglobal(2),0,ncid3)
     IF (ok /= NF90_NOERR) CALL nc_abort(ok,'Error opening file'//fglobal(2))
-    
+
     ok = NF90_INQ_VARID(ncid3,'Leaf_fall',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx4_db)
-    varx4_db = max(0.0, varx4_db)
-    call lonlat2mpx4(ilon,jlat,patchfrac,varx4_db,varmp2_db)
+    ok = NF90_GET_VAR(ncid3,varid,varx3time_db)
+    varx3time_db = max(0.0, varx3time_db)
+    call lonlat2mpx3time(ilon,jlat,varx3time_db,varmp2_db)
     micglobal%dleaf = real(varmp2_db,kind=r_2)
     print *, 'dleaf', minval(micglobal%dleaf),maxval(micglobal%dleaf), &
                       sum(micglobal%dleaf)/real(size(micglobal%dleaf))
     
     ok = NF90_INQ_VARID(ncid3,'non_leaf_aboveground_litterfall',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx4_db)
-    varx4_db = max(0.0, varx4_db)
-    call lonlat2mpx4(ilon,jlat,patchfrac,varx4_db,varmp2_db)
+    ok = NF90_GET_VAR(ncid3,varid,varx3time_db)
+    varx3time_db = max(0.0, varx3time_db)
+    call lonlat2mpx3time(ilon,jlat,varx3time_db,varmp2_db)
     micglobal%dwood = real(varmp2_db,kind=r_2)
     print *, 'dwood', minval(micglobal%dwood),maxval(micglobal%dwood), &
                       sum(micglobal%dwood)/real(size(micglobal%dwood))
     
     ok = NF90_INQ_VARID(ncid3,'Belowground_litter_fall',varid)
-    ok = NF90_GET_VAR(ncid3,varid,varx4_db)
-    varx4_db = max(0.0, varx4_db)
-    call lonlat2mpx4(ilon,jlat,patchfrac,varx4_db,varmp2_db)
+    ok = NF90_GET_VAR(ncid3,varid,varx3time_db)
+    varx3time_db = max(0.0, varx3time_db)
+    call lonlat2mpx3time(ilon,jlat,varx3time_db,varmp2_db)
     micglobal%droot = real(varmp2_db,kind=r_2)
     print *, 'droot', minval(micglobal%droot),maxval(micglobal%droot), &
                       sum(micglobal%droot)/real(size(micglobal%droot))
     
     ok = NF90_INQ_VARID(ncid3,'SoilTemp',varid)
-    ok = NF90_GET_VAR(ncid3,varid,tsoil4_db)
-    call lonlat2mpx4b(ilon,jlat,patchfrac,-100.0d0,50.0d0,0.0d0,'tsoil',tsoil4_db,varmp3_db)
+    ok = NF90_GET_VAR(ncid3,varid,varx4_db)
+    call lonlat2mpx4b(ilon,jlat,-100.0d0,50.0d0,0.0d0,varx4_db,varmp3_db)
     micglobal%tsoil = real(varmp3_db,kind=r_2)
     print *, 'tsoil', minval(micglobal%tsoil),maxval(micglobal%tsoil), &
                       sum(micglobal%tsoil)/real(size(micglobal%tsoil))
     
     ok = NF90_INQ_VARID(ncid3,'SoilMoist',varid)
-    ok = NF90_GET_VAR(ncid3,varid,moist5_db)
-    call lonlat2mpx5a(ilon,jlat,patchfrac,0.0d0,1.0d0,0.15d0,'moist',moist5_db,varmp3_db)
+    ok = NF90_GET_VAR(ncid3,varid,varx4_db)
+    call lonlat2mpx4b(ilon,jlat,0.0d0,0.8d0,0.15d0,varx4_db,varmp3_db)    
     micglobal%moist = real(varmp3_db,kind=r_2)
     print *, 'moist', minval(micglobal%moist),maxval(micglobal%moist), &
                       sum(micglobal%moist)/real(size(micglobal%moist))
     
     ok = NF90_INQ_VARID(ncid3,'water_potential',varid)
-    ok = NF90_GET_VAR(ncid3,varid,watpot4_db)
-    call lonlat2mpx4b(ilon,jlat,patchfrac,-1000.0d0,0.0d0,-100.0d0,'watpt',watpot4_db,varmp3_db)
+    ok = NF90_GET_VAR(ncid3,varid,varx4_db)
+    call lonlat2mpx4b(ilon,jlat,-1000.0d0,0.0d0,-100.0d0,varx4_db,varmp3_db)     
     micglobal%matpot = real(varmp3_db,kind=r_2)    
     print *, 'matpot', minval(micglobal%matpot),maxval(micglobal%matpot), &
                        sum(micglobal%matpot)/real(size(micglobal%matpot))
@@ -1077,10 +1127,29 @@ subroutine getdata_global_orchidee(fglobal,jglobal,jmodel,micglobal,micparam,zse
        enddo
     endif
     
-   
+    ! filter out land cells with "bgctype<0"
+  !  print *, 'calculations are not done for the following cells' 
+    msite=0
+    do np=1,mp
+       if(micparam%bgctype(np) <1 .or. micparam%bgctype(np) >mbgc &
+         .or. minval(micparam%csoilobs(np,:)) < 0.0               &
+         .or. maxval(micparam%csoilobs(np,:)) > 120.0) then    
+    !      print *, np, micparam%bgctype(np),micglobal%area(np),micglobal%isoil(np), &
+    !               micglobal%sorder(np),micglobal%bgctype(np), micglobal%npp(np)
+          micparam%bgctype(np)= mbgc
+          micglobal%area(np)  = -1.0
+       endif
+       ! replacing NPP in the time-invariant input file using the mean of time-varying input
+       micglobal%npp(np) = 365.0 * sum(micglobal%dleaf(np,:) + micglobal%dwood(np,:) + micglobal%droot(np,:)) &
+                         /real(size(micglobal%dleaf(np,:)))
+       if(micglobal%isoil(np) <0  .or. micglobal%isoil(np) >12)   micglobal%isoil(np)=12                 
+       if(micglobal%sorder(np) <0 .or. micglobal%sorder(np) >12)  micglobal%sorder(np)=12      
+       if(micglobal%bgctype(np) ==bgcopt .and. micglobal%area(np) >0) msite = msite + 1                   
+    enddo   
+
     ! assign time-invariance properties from "micglobal" to "micparam"
     micparam%pft        = micglobal%pft
-    micparam%bgctype    = micglobal%bgctype
+  !  micparam%bgctype    = micglobal%bgctype
     micparam%isoil      = micglobal%isoil
     micparam%sorder     = micglobal%sorder 
     micparam%fligleaf   = micglobal%ligleaf
@@ -1090,102 +1159,158 @@ subroutine getdata_global_orchidee(fglobal,jglobal,jmodel,micglobal,micparam,zse
     micparam%xcnroot(:) = micglobal%cnroot(:,1)
     micparam%xcnwood(:) = micglobal%cnwood(:,1)
 
-    ! filter out land cells with "bgctype<0"
-    print *, 'calculations are not done for the following cells' 
-    do np=1,mp
-       if(micparam%bgctype(np) <1 .or. micparam%bgctype(np) >mbgc &
-         .or. minval(micparam%csoilobs(np,:)) < 0.0               &
-         .or. maxval(micparam%csoilobs(np,:)) > 120.0) then    
-          print *, np, micparam%bgctype(np),micglobal%area(np),micglobal%isoil(np), &
-                   micglobal%sorder(np),micglobal%bgctype(np), micglobal%npp(np)
-          micparam%bgctype(np)= mbgc
-          micglobal%area(np)  = -1.0
-       endif
-       ! replacing NPP in the time-invariant input file using the mean of time-varying input
-       micglobal%npp(np) = 365.0 * sum(micglobal%dleaf(np,:) + micglobal%dwood(np,:) + micglobal%droot(np,:)) &
-                         /real(size(micglobal%dleaf(np,:)))
-    enddo
+
+    sitemax=2000
+    if(msite>2*sitemax) then
+
+       intval = msite/sitemax; isite=0
+       do np=1,mp
+          if(micglobal%bgctype(np) == bgcopt .and.micglobal%area(np) > 0.0) then
+             isite = isite +1
+             if(int(isite/intval)*intval /= isite.or. isite>sitemax*intval) micglobal%area(np) = -1.0
+          endif
+   !       if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
+   !          write(*,103) isite,np, micglobal%bgctype(np), micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
+   !       endif
+       enddo
+    else 
+
+      isite=0
+      do np=1,mp
+         if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
+            isite=isite+1     
+   !         write(*,103) isite,np,micglobal%bgctype(np),micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
+         endif     
+      enddo
+      if(isite<10) print *, 'too few sites ', isite
+
+    endif   
+
+    micglobal%avgts(:) = sum(sum(micglobal%tsoil(:,:,:),dim=3),dim=2)/real(ms*ntime)
+    micglobal%avgms(:) = sum(sum(micglobal%moist(:,:,:),dim=3),dim=2)/real(ms*ntime)
 
 ! write out time-invariant input data
     if(jglobal==1) then
        open(31,file=fglobal(5))
        do np=1,mp
-          write(31,101) micparam%siteid(np),micglobal%area(np),micparam%pft(np), &
-          micparam%isoil(np),micparam%sorder(np),micparam%bgctype(np),   &
-          micglobal%npp(np), &
+          write(31,101) micglobal%lon(np),micglobal%lat(np),ilon(np),jlat(np),                 & 
+          micparam%siteid(np),micglobal%area(np),micparam%pft(np),                             &
+          micparam%isoil(np),micparam%sorder(np),micparam%bgctype(np),fcluster(np), micglobal%npp(np),       &
           minval(micglobal%dleaf(np,:) + micglobal%dwood(np,:) + micglobal%droot(np,:))*365.0, &
           maxval(micglobal%dleaf(np,:) + micglobal%dwood(np,:) + micglobal%droot(np,:))*365.0, &
-          micglobal%ph(np),micglobal%clay(np)+micglobal%silt(np),micglobal%bulkd(np), &
-          sum(micglobal%tsoil(np,:,:))/real(size(micglobal%tsoil(np,:,:))),           &
-          sum(micglobal%moist(np,:,:))/real(size(micglobal%moist(np,:,:))),           &
-          max(-1.0,micparam%csoilobs(np,:)),                                                    &
+          micglobal%ph(np),micglobal%clay(np)*100.0,micglobal%silt(np)*100.0,                  &
+          fald(np),falo(np),ffed(np),ffeo(np), micglobal%bulkd(np),                            &
+          micglobal%avgts(np),micglobal%avgms(np), max(-1.0,micparam%csoilobs(np,:)),          &  
           micparam%fracaoc(np,1),micparam%fracaoc(np,3), micparam%fracaoc(np,ms)   
+
        enddo
        close(31) 
     endif    
-101 format(i5,1x,f8.4,1x,4(i3,1x),100(f10.4,1x))
-
-
+101 format(2(f8.3,1x),2(i6,1x),i10,1x,es16.8,1x,5(i5,1x),*(es16.8,1x))
+103 format(3(i5,1x),3(f10.4,1x))
     
     deallocate(ilon,jlat,fcluster)
-    deallocate(varx2_flt)
+    deallocate(varx2_int,varx2_flt)
     deallocate(varx4_flt)
     deallocate(varx2_db)
+    deallocate(varx3time_db,varx3ms_db,varx3ms5_db)
     deallocate(varx3_db,varsoc3_db,varbulk_db,varaoc_db)
     deallocate(varx4_db)
-    deallocate(tsoil4_db,watpot4_db)
-    deallocate(moist5_db)
+
     deallocate(varmp1_db)
     deallocate(varmp2_db)
     deallocate(varmp3_db)
+
     deallocate(falo,fald,ffeo,ffed)
     deallocate(modisnpp,modisnpp_mp)
     
-end subroutine getdata_global_orchidee
+end subroutine getdata_global4_orchidee
 
-!> compute cluster based on the z-transformed value of soil properties
+
+!> compute cluster based on the z-transformed value of HWSD top 60cm soil properties
 !! input: clay, silt, ph, ald, alo, fed and feo  
 !! output: cluster (integer)
 !!   
-subroutine cluster_centre(filecluster,fclay,fsilt,fph,fald,falo,ffed,ffeo,fcluster)
+subroutine cluster_hwsd(jmodel,bgctype,socobs,fclay,fsilt,fph,fald,falo,ffed,ffeo,fcluster)
   use mic_constant
   implicit none
-  character*140 filecluster
-  integer, dimension(mp)   :: fcluster
-  real(r_2), dimension(mp) :: fclay,fsilt,fph,fald,falo,ffed,ffeo
-  real, dimension(10)      :: claymid,siltmid,phmid,aldmid,alomid,fedmid,feomid  
-  real*8  clayavg,siltavg,phavg,aldavg,aloavg,fedavg,feoavg
-  real*8  claysd,siltsd,phsd,aldsd,alosd,fedsd,feosd
-  real(r_2), dimension(10)  :: xdist
-  integer n,m
-  
-    open(81,file=filecluster)
-    read(81,*)
-    read(81,*) claymid(1:10), clayavg,claysd
-    read(81,*) siltmid(1:10), siltavg,siltsd
-    read(81,*) phmid(1:10),   phavg,  phsd
-    read(81,*) aldmid(1:10),  aldavg,aldsd
-    read(81,*) alomid(1:10),  aloavg,alosd
-    read(81,*) fedmid(1:10),  fedavg,fedsd
-    read(81,*) feomid(1:10),  feoavg,feosd
-    close(81)
-    
-    fcluster(:)=-1
-    do n=1,mp
-       xdist(:) = 1.0e6
-       do m=1,10
-          xdist(m) = ((fclay(n) - clayavg)/claysd - claymid(m))** 2 &
-                   + ((fsilt(n) - siltavg)/siltsd - siltmid(m))** 2 & 
-                   + ((fph(n)   - phavg)/phsd     - phmid(m))** 2   & 
-                   + ((fald(n)  - aldavg)/aldsd   - aldmid(m))** 2  & 
-                   + ((falo(n)  - aloavg)/alosd   - alomid(m))** 2  & 
-                   + ((ffed(n)  - fedavg)/fedsd   - fedmid(m))** 2  & 
-                   + ((ffeo(n)  - feoavg)/feosd   - feomid(m))** 2  
-       enddo
-       fcluster(n) = MINLOC(xdist,dim=1)
+  integer jmodel
+  integer,   dimension(mp)     :: bgctype,fcluster
+  real(r_2), dimension(mp,ms)  :: socobs
+  real(r_2), dimension(mp)     :: fclay,fsilt,fph,fald,falo,ffed,ffeo
+  real(r_2), dimension(10,2)   :: claymid,siltmid,phmid,aldmid,alomid,fedmid,feomid  
+  real(r_2), dimension(2)      :: clayavg,siltavg,phavg,aldavg,aloavg,fedavg,feoavg
+  real(r_2), dimension(2)      :: claysd,siltsd,phsd,aldsd,alosd,fedsd,feosd
+  real(r_2), dimension(7)      :: z
+  real(r_2), dimension(10,7)   :: xdist
+  integer np,m,j
+  ! results from K means cluster analysis  done 20260508 by Lingfei Wang
+  data claymid/-0.9525_r_2,-0.8011_r_2,1.1920_r_2,-0.5146_r_2,0.1999_r_2,-0.2399_r_2,-0.7019_r_2,1.4337_r_2,0.8914_r_2,-1.0750_r_2,  &
+                1.4969_r_2,-1.0316_r_2,-0.8065_r_2,-0.1341_r_2,1.1403_r_2,1.5560_r_2,-1.082_r_2,0.6068_r_2,-0.3449_r_2,0.1033_r_2/
+ 
+  data siltmid/0.3693_r_2,-0.9586_r_2,-0.5314_r_2,1.3111_r_2,0.2016_r_2,1.2570_r_2,0.3701_r_2,-0.7761_r_2,-0.2799_r_2,-0.4098_r_2,   &
+               -0.0865_r_2,0.2881_r_2,-1.0136_r_2,1.1445_r_2,-0.5746_r_2,-0.8688_r_2,-0.1002_r_2,-0.4546_r_2,1.3359_r_2,0.1012_r_2/
 
+  data phmid/-0.8845_r_2,0.5324_r_2,-0.6359_r_2,-0.3306_r_2,1.5959_r_2,-0.0262_r_2,-1.1008_r_2,-0.5988_r_2,-0.0312_r_2,-1.2470_r_2,  &
+              0.7591_r_2,-1.0547_r_2,0.3730_r_2,0.0215_r_2,-0.7063_r_2,-0.6784_r_2,-1.1424_r_2,-0.5016_r_2,-0.2510_r_2,1.5791_r_2/
+
+  data aldmid/0.5629_r_2,-0.8189_r_2,2.1928_r_2,-0.2735_r_2,-0.8350_r_2,-0.3037_r_2,1.8790_r_2,1.3780_r_2,0.1905_r_2,-0.4836_r_2,   &
+              -0.2553_r_2,1.1344_r_2,-0.7533_r_2,-0.3713_r_2,2.4355_r_2,1.6124_r_2,-0.2846_r_2,0.5503_r_2,-0.1318_r_2,-0.8379_r_2/
+
+  data alomid/1.7405_r_2,-0.7472_r_2,1.7091_r_2,-0.0801_r_2,-0.6616_r_2,-0.2281_r_2,3.9982_r_2,0.2820_r_2,-0.0875_r_2,-0.3417_r_2,  &
+              -0.1036_r_2,3.0859_r_2,-0.7085_r_2,-0.3075_r_2,2.0749_r_2,0.4096_r_2,-0.0546_r_2,0.0595_r_2,0.0642_r_2,-0.6969_r_2/
+
+  data fedmid/-0.2133_r_2,-0.8057_r_2,1.4228_r_2,-0.1518_r_2,-0.7321_r_2,-0.3320_r_2,0.6954_r_2,1.9225_r_2,0.5566_r_2,-0.6816_r_2,  &
+               0.3769_r_2,0.0985_r_2,-0.7497_r_2,-0.4041_r_2,1.5073_r_2,2.1344_r_2,-0.5428_r_2,0.7526_r_2,-0.0019_r_2,-0.8012_r_2/
+
+  data feomid/1.0284_r_2,-0.7249_r_2,0.6078_r_2,1.8211_r_2,-0.9538_r_2,0.3540_r_2,2.3080_r_2,-0.3343_r_2,-0.4294_r_2,0.0334_r_2,   &
+             -0.4503_r_2,1.6601_r_2,-0.6227_r_2,0.1070_r_2,0.6945_r_2,-0.3107_r_2,0.2227_r_2,-0.3815_r_2,1.7193_r_2,-0.9859_r_2/
+
+  data clayavg/20.3759_r_2,20.5158_r_2/
+  data siltavg/27.8392_r_2,28.6576_r_2/
+  data phavg/5.7890_r_2,5.8697_r_2/
+  data aldavg/0.4653_r_2,0.4491_r_2/
+  data aloavg/0.4091_r_2,0.3955_r_2/
+  data fedavg/2.7099_r_2,2.6748_r_2/
+  data feoavg/0.6246_r_2,0.6269_r_2/
+
+  data claysd/8.6170_r_2,8.9668_r_2/
+  data siltsd/9.0690_r_2,9.7478_r_2/
+  data phsd/0.9142_r_2,0.9715_r_2/
+  data aldsd/0.3838_r_2,0.3856_r_2/
+  data alosd/0.2970_r_2,0.2898_r_2/
+  data fedsd/1.4412_r_2,1.4988_r_2/
+  data feosd/0.4149_r_2,0.4343_r_2/
+  
+    fcluster(:)=bgctype(:)
+    j=jmodel
+    do np=1,mp
+       if(bgctype(np)>1 .and. bgctype(np) < 10) then
+          fcluster(np) = bgctype(np)
+       else 
+         if(min(fclay(np),fsilt(np),fph(np),fald(np),falo(np),ffed(np),ffeo(np)) >0.0 .and. minval(socobs(np,:)) > 0.0) then       
+            xdist(:,:) = 1.0e6
+            z(1) = (fclay(np)*100.0 - clayavg(j))/claysd(j)
+            z(2) = (fsilt(np)*100.0 - siltavg(j))/siltsd(j)
+            z(3) = (fph(np)   - phavg(j))/phsd(j)
+            z(4) = (fald(np)  - aldavg(j))/aldsd(j) 
+            z(5) = (falo(np)  - aloavg(j))/alosd(j)
+            z(6) = (ffed(np)  - fedavg(j))/fedsd(j)
+            z(7) = (ffeo(np)  - feoavg(j))/feosd(j)
+            do m=1,10
+               xdist(m,1) = (z(1) - claymid(m,j))**2
+               xdist(m,2) = (z(2) - siltmid(m,j))**2 
+               xdist(m,3) = (z(3) - phmid(m,j))**2
+               xdist(m,4) = (z(4) - aldmid(m,j))**2
+               xdist(m,5) = (z(5) - alomid(m,j))**2 
+               xdist(m,6) = (z(6) - fedmid(m,j))**2
+               xdist(m,7) = (z(7) - feomid(m,j))**2
+            enddo
+            fcluster(np) = MINLOC(sum(xdist,dim=2),dim=1)
+         endif
+       endif         
     enddo       
-end subroutine cluster_centre
+end subroutine cluster_hwsd
 
 !> map 2d variable into 1d
 !! input: varx2_db(nlon,nlat) 
@@ -1210,6 +1335,31 @@ subroutine lonlat2mpx2(ilon, jlat, varx2_db, varmp1_db)
     end do
 
 end subroutine lonlat2mpx2
+
+
+!> map 2d variable into 1d
+!! input: varx2_db(nlon,nlat) 
+!! output: varmp1_db(mp)
+!!      
+subroutine lonlat2mpx2int(ilon, jlat, varx2_int, varmp1_int)
+    ! map varx2_int(nlon,nlat) to varmp1_int(mp) 
+    use mic_constant
+    implicit none
+
+    integer,   dimension(mp)              :: ilon,jlat
+    integer,   dimension(nlon,nlat)       :: varx2_int
+    integer,   dimension(mp)              :: varmp1_int
+    integer :: np
+
+    ! Initialize output (optional)
+    varmp1_int = 0
+
+    do np = 1, mp
+        ! Assign value
+        varmp1_int(np) = varx2_int(ilon(np), jlat(np))
+    end do
+
+end subroutine lonlat2mpx2int
 
 !> mapping 3d double real variables to 1d (mp)
 !! input: varx3_db 
@@ -1241,161 +1391,112 @@ subroutine lonlat2mpx3(ilon, jlat, patchfrac, varx3_db, varmp1_db)
 
 end subroutine lonlat2mpx3
 
-!> mapping 4d double real variables to 2d (mp)
-!! input: varx4_db 
-!! output: varmp2_db
+
+!> mapping 3d double real variables to 1d (mp)
+!! input: varx3_db 
+!! output: varmp1_db
 !!   
-subroutine lonlat2mpx4(ilon, jlat, patchfrac, varx4_db, varmp2_db)
-! map varx3_db(nlon,nlat,mpft,ntime) to varmp2_db(mp,ntime) 
+subroutine lonlat2mpx3a(ilon, jlat, ms3, zse3, bulkd3, varx3_db, varmp1_db)
+! map varx3_db(nlon,nlat,1:3) to varmp1_db(mp) 
     use mic_constant
     implicit none
-    integer, dimension(mp)  :: ilon,jlat
-    integer np, day, mpft_size
-    real(r_2), dimension(nlon,nlat,mpft)        :: patchfrac
-    real*8,    dimension(nlon,nlat,mpft,ntime)  :: varx4_db
-    real*8,    dimension(mp,ntime)              :: varmp2_db
-    real*8,    dimension(mpft)                  :: varx_slice, weights
-    real*8     areatot
+    integer ms3
+    integer,   dimension(mp)              :: ilon,jlat
+    real*8,    dimension(nlon,nlat,ms3)   :: bulkd3
+    real*8,    dimension(ms3)             :: zse3    
+    real*8,    dimension(nlon,nlat,ms3)   :: varx3_db
+    real*8,    dimension(mp)              :: varmp1_db
+    integer :: np,ns
+    real*8, dimension(ms3)                :: varx_slice, weights
+
+    ! Initialize output
+    varmp1_db = 0.0d0
+
+    do np = 1, mp
+       varx_slice= 0.0; weights=0.0
+        do ns=1,ms3
+           varx_slice(ns) =  varx3_db(ilon(np), jlat(np), ns) * bulkd3(ilon(np), jlat(np), ns) * zse3(ns)
+           weights(ns)    =  bulkd3(ilon(np), jlat(np), ns) * zse3(ns)
+        enddo 
+        varmp1_db(np) = sum(varx_slice ) / sum(weights)
+    end do
+
+end subroutine lonlat2mpx3a
+
+!> mapping 3d double real variables to 2d (mp)
+!! input: varx3_db 
+!! output: varmp2_db
+!!   
+subroutine lonlat2mpx3time(ilon, jlat, varx3time_db, varmp2_db)
+! map varx3time_db(nlon,nlat,time) to varmp2_db(mp,time) 
+    use mic_constant
+    implicit none
+
+    integer,   dimension(mp)              :: ilon,jlat
+    real*8,    dimension(nlon,nlat,ntime) :: varx3time_db
+    real*8,    dimension(mp,ntime)        :: varmp2_db
+    integer :: np
 
     ! Initialize output
     varmp2_db = 0.0d0
 
     do np = 1, mp
-       weights(:)    = patchfrac(ilon(np), jlat(np),:)
-       areatot       = sum(weights)
-       do day = 1, ntime
-          ! Extract all PFT values for this np, day
-          varx_slice(:) = varx4_db(ilon(np), jlat(np), :, day)
-          varmp2_db(np, day) = sum(varx_slice(:) * weights(:)) / areatot
-        end do
-    end do
+    
+       if (ilon(np) < 1 .or. ilon(np) > nlon .or. &
+           jlat(np) < 1 .or. jlat(np) > nlat) then
+           write(*,*) 'ERROR in lonlat2mpx3a'
+           write(*,*) 'np=', np
+           write(*,*) 'ilon=', ilon(np), ' valid range 1:', nlon
+           write(*,*) 'jlat=', jlat(np), ' valid range 1:', nlat
+           stop
+       endif
 
-end subroutine lonlat2mpx4
+       varmp2_db(np,:) = varx3time_db(ilon(np), jlat(np), :)
+    enddo    
 
-!> mapping 3d double real variables to 2d (mp)
-!! input: varx3_db(nlon,nlat,ms,ntime)
-!! output: varmp2_db(mp,ms,ntime) 
+end subroutine lonlat2mpx3time
+
+!> mapping 4d double real variables to 3d (mp)
+!! input: varx4_db(nlon,nlat,ms,ntime)
+!! output: varmp3_db(mp,ms,ntime) 
 !!   
-subroutine lonlat2mpx4b(ilon,jlat,patchfrac,xmin,xmax,xdef,varname,watpot,varmp3_db)
-! map varx3_db(nlon,nlat,ms,ntime) to varmp2_db(mp,ms,ntime) 
+subroutine lonlat2mpx4b(ilon,jlat,xmin,xmax,xdef,varx4_db,varmp3_db)
+! map varx4_db(nlon,nlat,ms,ntime) to varmp3_db(mp,ms,ntime) 
     use mic_constant
     implicit none
 
     integer, dimension(mp)                      :: ilon, jlat
-    real(r_2), dimension(nlon,nlat,mpft)        :: patchfrac
-    real*8, dimension(nlon,nlat,ms,ntime)       :: watpot
+    real*8, dimension(nlon,nlat,ms,ntime)       :: varx4_db
     real*8, dimension(mp,ms,ntime)              :: varmp3_db
     real*8  :: xmin, xmax,xdef
-    integer np
-    character*5 varname
+    integer np,ns,nt
 
     ! Initialize output
-    varmp3_db = 0.0d0
+    varmp3_db = xdef
 
     do np = 1, mp
-
-       varmp3_db(np,:,:) = watpot(ilon(np),jlat(np),:,:)
-       
-       ! check the range and print out if outside the range
-       if(minval(varmp3_db(np,:,:)) <xmin .or. maxval(varmp3_db(np,:,:)) >xmax) then
-        !  print *, 'values outside the range :', np,ilon(np),jlat(np)
-        !  print *, 'range =', varname, xmin, xmax
-        !  print *, 'values= ',varmp3_db(np,:,1)
-          varmp3_db(np,:,:)=xdef
+       if (ilon(np) < 1 .or. ilon(np) > nlon .or. &
+           jlat(np) < 1 .or. jlat(np) > nlat) then
+           write(*,*) 'ERROR in lonlat2mpx4: invalid grid index'
+           write(*,*) 'np=', np
+           write(*,*) 'ilon=', ilon(np), ' valid 1:', nlon
+           write(*,*) 'jlat=', jlat(np), ' valid 1:', nlat
+           stop
        endif
+       varmp3_db(np,:,:) = varx4_db(ilon(np),jlat(np),:,:)
+
+       do ns=1,ms
+       do nt =1,ntime       
+          if(varmp3_db(np,ns,nt) <xmin .or. varmp3_db(np,ns,nt) >xmax) then
+             varmp3_db(np,:,:)=xdef
+          endif
+       enddo
+       enddo       
     end do
-    
     
 end subroutine lonlat2mpx4b    
 
 
-!> mapping 5d double real variables to 3d (mp)
-!! input: varx5_db(nlon,nlat,mpft,ms,ntime)
-!! output: varmp3_db(mp,ms,ntime)
-!!    
-subroutine lonlat2mpx5(ilon, jlat, patchfrac,xmin,xmax,xdef,varname,varx5_db, varmp3_db)
-! map varx5_db(nlon,nlat,mpft,ms,ntime) to varmp3_db(mp,ms,ntime) 
-    use mic_constant
-    implicit none
-
-    integer, dimension(mp)                      :: ilon, jlat
-    real(r_2), dimension(nlon,nlat,mpft)        :: patchfrac
-    real*8, dimension(nlon,nlat,mpft,ms,ntime)  :: varx5_db
-    real*8, dimension(mp,ms,ntime)              :: varmp3_db
-    real*8, dimension(mpft)                     :: wts
-    integer :: np, pft
-    real*8  :: xmin, xmax,xdef,total_weight
-    character*5 varname
-
-    ! Initialize output
-    varmp3_db = 0.0d0
-
-    do np = 1, mp
-       ! Extract weights once for this np
-       wts = patchfrac(ilon(np), jlat(np), :)
-       total_weight = sum(wts)
-       do pft=1,mpft
-          varmp3_db(np,:,:) =  varmp3_db(np,:,:) + varx5_db(ilon(np),jlat(np),pft,:,:) * wts(pft)
-       enddo
-       varmp3_db(np,:,:) = varmp3_db(np,:,:)/total_weight
-       
-       ! check the range and print out if outside the range
-       if(minval(varmp3_db(np,:,:)) <xmin .or. maxval(varmp3_db(np,:,:)) >xmax) then
-        !  print *, 'values outside the range :', np, wts(:)
-        !  print *, 'range =', varname, xmin, xmax
-        !  print *, 'values= ',varmp3_db(np,:,1)
-          varmp3_db(np,:,:) = xdef
-       endif
-    end do
-
-end subroutine lonlat2mpx5
-
-
-!> mapping 5d double real variables to 3d (mp)
-!! input: varx5_db(nlon,nlat,ms,mpft,ntime)
-!! output: varmp2_db(mp,ms,ntime)
-!!   
-subroutine lonlat2mpx5a(ilon, jlat, patchfrac,xmin,xmax,xdef,varname,varx5_db, varmp3_db)
-! map varx5_db(nlon,nlat,ms,mpft,ntime) to varmp2_db(mp,ms,ntime) 
-    use mic_constant
-    implicit none
-
-    integer, dimension(mp)                      :: ilon, jlat
-    real(r_2), dimension(nlon,nlat,mpft)        :: patchfrac
-    real*8, dimension(nlon,nlat,ms,mpft,ntime)  :: varx5_db
-    real*8, dimension(mp,ms,ntime)              :: varmp3_db
-    real*8, dimension(mpft)                     :: wts
-    integer :: np, pft,ns
-    real*8  :: xmin, xmax,xdef,total_weight
-    character*5 varname
-
-    ! Initialize output
-    varmp3_db = 0.0d0
-
-    do np = 1, mp
-       ! Extract weights once for this np
-       wts = patchfrac(ilon(np), jlat(np), :)
-       total_weight = sum(wts)
-       do ns=1,ms
-       do pft=1,mpft
-          varmp3_db(np,ns,:) =  varmp3_db(np,ns,:) + varx5_db(ilon(np),jlat(np),ns,pft,:) * wts(pft)
-       enddo
-       varmp3_db(np,ns,:) = varmp3_db(np,ns,:)/total_weight
-       enddo
-       
-       ! check the range and print out if outside the range
-       if(minval(varmp3_db(np,:,:)) <xmin .or. maxval(varmp3_db(np,:,:)) >xmax) then
-        !  print *, 'values outside the range :', np, wts(:)
-        !  print *, 'range =', varname, xmin, xmax
-        !  print *, 'values= ',varmp3_db(np,:,1)
-          varmp3_db(np,:,:) = xdef
-       endif
-    end do
-
-end subroutine lonlat2mpx5a
-
-
- 
 !> read in global atmospheric C14 data and input data for model run with 14C
 !! input 1: file 1 "frac14c" with all observed C14, carbon input, soil properties and other site-sepefici
 !!        parameter for model run
@@ -1720,7 +1821,7 @@ end subroutine lonlat2mpx5a
 
 !> read in data for model run to calculate POC and MAOC fractions
 !! 
-   subroutine getdata_frc(cfraction,filecluster,jglobal,bgcopt,micinput,micparam,micnpool,zse)
+   subroutine getdata_frc(cfraction,jglobal,bgcopt,micinput,micparam,micnpool,micglobal,zse)
     use netcdf
     use mic_constant
     use mic_variable
@@ -1728,12 +1829,13 @@ end subroutine lonlat2mpx5a
     TYPE(mic_parameter), INTENT(INout)   :: micparam
     TYPE(mic_input),     INTENT(INout)   :: micinput
     TYPE(mic_npool),     INTENT(INOUT)   :: micnpool
+    TYPE(mic_global_input),       INTENT(INout) :: micglobal
     real(r_2)   zse(ms)
     integer jglobal,bgcopt 
     integer:: ncid,varid,status
     integer:: np,ns,i,j
     integer:: nz
-    character*140 Cfraction,filecluster
+    character*140 Cfraction
 
     character(len = nf90_max_name):: name
     real(r_2),dimension(:),         allocatable:: fclay,fsilt,fph,ftemp,fmoist,fporosity,fmatpot
@@ -1913,11 +2015,6 @@ end subroutine lonlat2mpx5a
     status = nf90_get_var(ncid,varid,falo)
     if(status /= nf90_noerr) print*,'Error reading Alo'
 
-    status = nf90_inq_varid(ncid,'Alo',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring Alo'
-    status = nf90_get_var(ncid,varid,falo)
-    if(status /= nf90_noerr) print*,'Error reading Alo'
-
     status = nf90_inq_varid(ncid,'Ald',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring Ald'
     status = nf90_get_var(ncid,varid,fald)
@@ -1947,10 +2044,26 @@ end subroutine lonlat2mpx5a
     status = NF90_CLOSE(ncid)    
     
     if(jglobal==1) open(100,file='inputdata_frc.txt')
+    
+    ! converting metal oxide from cmol/kg to kg/m2
+    ! metal-oxide(cmol/kg) = metal-oxide(kg/m2) *100/(h*bd*MW)
+    ! h: soil thickness in m; bdL bulk density in kg/m3
+    ! MW=0.02698 for Al =0.05585 for Fe
+    do np=1,mp
+       fald(np) = fald(np) * (fbot(np)-ftop(np))*0.01 * fbulkd(np) * 0.0298 /100.0
+       falo(np) = falo(np) * (fbot(np)-ftop(np))*0.01 * fbulkd(np) * 0.0298 /100.0
+       ffed(np) = ffed(np) * (fbot(np)-ftop(np))*0.01 * fbulkd(np) * 0.05585 /100.0
+       ffeo(np) = ffeo(np) * (fbot(np)-ftop(np))*0.01 * fbulkd(np) * 0.05585 /100.0
+       do ns=1,ms
+           micparam%csoilobs(np,ns)    = fsoc(np) 
+       enddo
+    enddo       
 
-    call cluster(filecluster,lat,lon,fcluster)
+    micparam%bgctype = 0
+    call cluster_hwsd(2,micparam%bgctype,micparam%csoilobs,fclay,fsilt,fph,fald,falo,ffed,ffeo,fcluster)    
+
       micparam%bgctype=fcluster              
-      micparam%csoilobs(:,:) = -999.0
+    !  micparam%csoilobs(:,:) = -999.0
       msite=0
       do np=1, mp
    
@@ -1963,7 +2076,7 @@ end subroutine lonlat2mpx5a
 
          ! make sure "*delt" is not repeated in the model called by rk4
           micinput%fcnpp(np)      = fnpp(np)
-          micinput%Dleaf(np)      = fanpp(np)/(24.0*365.0)*delt    !gc/m2/delt
+          micinput%Dleaf(np)      = fanpp(np)/(24.0*365.0)*delt     !gc/m2/delt
           micinput%Droot(np)      = fbnpp(np)/(24.0*365.0)*delt     !gc/m2/delt
           !micinput%Dwood(np)      = forcdata(np,17)/(24.0*365.0)*delt     !gc/m2/delt
 
@@ -1974,6 +2087,13 @@ end subroutine lonlat2mpx5a
           micparam%fligroot(np)   = flignin(np)
           !micparam%fligwood(np)   = forcdata(np,23)
 
+          ! for merging
+          micglobal%npp(np)     = fnpp(np)
+          micglobal%dleaf(np,:) = fanpp(np)/(365.0*delt)
+          micglobal%droot(np,:) = fbnpp(np)/(365.0*delt)
+          micglobal%dwood(np,:) = 0.0
+          micglobal%area(np)    = 1.0
+          
          do ns=1,ms
             micinput%tavg(np,ns)     = ftemp(np)  ! average temperature in deg C
             micinput%wavg(np,ns)     = fmoist(np)  ! average soil water content mm3/mm3
@@ -1983,19 +2103,36 @@ end subroutine lonlat2mpx5a
             micinput%porosity(np,ns) = fporosity(np) !porosity mm3/mm3
             micinput%matpot(np,ns)   = fmatpot(np)  ! soil matric potential -kPa
 
-            micparam%csoilobs(np,ns)    = fsoc(np) 
+        !    micparam%csoilobs(np,ns)    = fsoc(np) 
             micinput%bulkd(np,ns)       = fbulkd(np)
 
             micparam%csoilobsp(np,ns)   = fpoc(np)
             micparam%csoilobsm(np,ns)   = fmaoc(np)
             
             !micnpool%mineralN(np,ns) = forcdata(np,7)*0.001 ! mineral N: "0.001" mg N /kg soil --> g N /kg soil
+            ! for merging
+            micglobal%tsoil(np,ns,:) = ftemp(np)    ! average temperature in deg C
+            micglobal%moist(np,ns,:) = fmoist(np)   ! average soil water content mm3/mm3
+            micglobal%matpot(np,ns,:)= fmatpot(np)  ! soil matric potential -kPa
          enddo !"ns"
+         ! for merging
+         micglobal%clay(np)       = fclay(np)       ! clay content (fraction)
+         micglobal%silt(np)       = fsilt(np)       ! silt content (fraction)
+         micglobal%ph(np)         = fph(np)
+         micglobal%poros(np)      = fporosity(np)   ! porosity mm3/mm3
+         micglobal%bulkd(np)      = fbulkd(np)      
+      enddo  ! np=1,mp
+      
+      micglobal%avgts(:) = sum(sum(micglobal%tsoil(:,:,:),dim=3),dim=2)/real(ms*ntime)
+      micglobal%avgms(:) = sum(sum(micglobal%moist(:,:,:),dim=3),dim=2)/real(ms*ntime)      
+
+      do np=1,mp
+
          if(micparam%bgctype(np) ==bgcopt) then
             msite=msite + 1
          endif        
          if(jglobal==1) then
-            write(100,901) micparam%siteid(np),micparam%dataid(np),micparam%pft(np),micparam%bgctype(nP),micparam%top(np),micparam%bot(np) , &
+            write(100,901) micparam%siteid(np),micparam%dataid(np),micparam%pft(np),micparam%bgctype(np),micparam%top(np),micparam%bot(np) , &
                          fnpp(np),fanpp(np),fbnpp(np),fcna(np),fcnb(np),flignin(np),ftemp(np),fmoist(np),fclay(np),fsilt(np),fph(np), &
                          fporosity(np),fmatpot(np),fbulkd(np),fald(np),falo(np),ffed(np),ffeo(np),fsoc(np),fpoc(np),fmaoc(np)
          endif        
@@ -2106,14 +2243,14 @@ end subroutine lonlat2mpx5a
     status = NF90_CLOSE(ncid)   
    end subroutine  getdata_hwsd_dim   
 
-   subroutine getdata_hwsd(fhwsdsoc,filecluster,fmodis,fanoc,jglobal,bgcopt,jopt,jmodel,micparam,micglobal,zse)
+   subroutine getdata_hwsd(fhwsdsoc,fmodis,fanoc,jglobal,bgcopt,jopt,jmodel,micparam,micglobal,zse)
     !use micglobal%area (area fraction) as a switch to run for selected sites during parameter optimization (jopt==0)  
     !model only runs for those sites with micglobal%area(np) > 0.0    
     use netcdf
     use mic_constant
     use mic_variable
     implicit none
-    character*140 fhwsdsoc,filecluster,fmodis,fanoc
+    character*140 fhwsdsoc,fmodis,fanoc
     integer jglobal,bgcopt,jopt,jmodel
     TYPE(mic_parameter),          INTENT(INout) :: micparam    
     TYPE(mic_global_input),       INTENT(INout) :: micglobal
@@ -2301,10 +2438,20 @@ end subroutine lonlat2mpx5a
     ! Close netcdf file
     status = NF90_CLOSE(ncid)    
 
-   ! check if calculated bgctype is same as the bgctype in the input data
-    call cluster(filecluster,micglobal%lat,micglobal%lon,fcluster)
-  !  micparam%bgctype=fcluster  
-  !  micglobal%bgctype=fcluster
+   ! now calculate soil cluster using parameters for ORCHIDEE (jmodel=2)
+    do np=1,mp
+       do ns=1,ms
+          micparam%csoilobs(np,ns) = real(fsoc7(np,ns),kind=r_2) 
+       enddo
+    enddo
+
+    micglobal%bgctype = 0
+    micparam%bgctype  = 0   
+    call cluster_hwsd(2,micglobal%bgctype,micparam%csoilobs,micglobal%clay,micglobal%silt,micglobal%ph,  &
+                      real(fald,kind=r_2),real(falo,kind=r_2),real(ffed,kind=r_2),real(ffeo,kind=r_2),fcluster)   
+
+    micparam%bgctype  = fcluster  
+    micglobal%bgctype = fcluster
 
    ! get the ancient soc fraction for mp
      status = nf90_open(fanoc,nf90_nowrite,ncid)
@@ -2348,11 +2495,10 @@ end subroutine lonlat2mpx5a
        ! calculate mean bulk density
        micglobal%bulkd(np) = (bulkd(np,1)*zse(1)+bulkd(np,2)*zse(2)+bulkd(np,3)*zse(3)+bulkd(np,4)*zse(4)+bulkd(np,5)*zse(5) &
                              +bulkd(np,6)*zse(6)+bulkd(np,7)*zse(7))/sum(zse(1:7))
-!       micglobal%bgctype(np) = micglobal%sorder(np) 
+
        micglobal%poros(np)   = 1.0 - micglobal%bulkd(np)/2650.0
        micparam%siteid(np)   = micglobal%siteid(np)       
        micparam%pft(np)      = micglobal%pft(np) 
-!       micparam%bgctype(np)  = micglobal%bgctype(np)       
        micparam%isoil(np)    = micglobal%isoil(np)
        micparam%sorder(np)   = micglobal%sorder(np)       
        if(jmodel==1) then      !CABLE 
@@ -2469,84 +2615,6 @@ end subroutine lonlat2mpx5a
 !    print *, 'exit getdata_hwsd'
 
 end subroutine getdata_hwsd
-
-
-subroutine cluster(filecluster,lat,lon,fcluster)
-    ! use the nearest point to estimate the cluster 
-    ! output
-    ! micparam%bgctype: [1,10]
-    use netcdf
-    use mic_constant
-    use mic_variable
-    use, intrinsic :: ieee_arithmetic
-    implicit none
-    double precision, dimension(mp)             :: lat,lon
-    integer, dimension(mp)                      :: fcluster
-    double precision lathd(360), lonhd(720)
-    real*4           varx_flt(720,360)
-    integer          clusterhd(720,360)
-    character*140    filecluster
-    integer ncid,varid,status,i,j,ilon,jlat,np,icluster,freq(10)   
-    
-    ! read the hd by hd cluster map
-    
-    status = nf90_open(filecluster,nf90_nowrite,ncid)
-    if(status /= nf90_noerr) print*, 'Error opening fcluster'
-    
-    ! get variables
-    status = nf90_inq_varid(ncid,'lat',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring data lat'
-    status = nf90_get_var(ncid,varid,lathd)
-    
-    if(status /= nf90_noerr) print*,'Error reading data lat'
-    status = nf90_inq_varid(ncid,'lon',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring data lon'
-    status = nf90_get_var(ncid,varid,lonhd)
-
-    if(status /= nf90_noerr) print*,'Error reading data lon'
-    status = nf90_inq_varid(ncid,'Band1',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring data Band1'
-    status = nf90_get_var(ncid,varid,varx_flt)
-    if(status /= nf90_noerr) print*,'Error reading data Band1'
-    ! close the file
-    status = NF90_close(ncid)
-    if(status /= nf90_noerr) call nc_abort(status, 'Error in clsoing fcluster')    
-
-    clusterhd = -999
-    do i = 1, 720
-      do j = 1, 360
-        if (.not. ieee_is_finite(varx_flt(i,j))) then
-          clusterhd(i,j) = -999
-        else if (varx_flt(i,j) < 0.5 .or. varx_flt(i,j) > 10.5) then
-          clusterhd(i,j) = -999
-        else
-          clusterhd(i,j) = nint(varx_flt(i,j))
-        end if
-      end do
-    end do
-
-    fcluster = -1
-    do np=1,mp
-       ilon = max(1, min(720, int((lon(np) + 179.75)/0.5 +1)))
-       jlat = max(1, min(360, int((lat(np) + 89.75)/0.5  +1)))
-
-       if(clusterhd(ilon,jlat) < 0 .or. clusterhd(ilon,jlat) >10) then
-          freq(1:10) = 0
-          do i=max(1,ilon-5),min(720,ilon+5)
-             do j=max(1,jlat-5),min(360,jlat+5)
-                icluster= clusterhd(i,j)
-                if(icluster>0 .and. icluster<11) then
-                   freq(icluster) = freq(icluster) +1
-                endif
-             enddo
-          enddo
-          fcluster(np) = maxloc(freq,dim=1)
-       else
-          fcluster(np) = clusterhd(ilon,jlat)
-       endif
-    enddo
-101 format('freq ',i6,1x,i2,1x,2(f7.3,1x),15(i3,1x))    
-end subroutine cluster
 
 
 subroutine screenout(runmodel,jmodel,bgcopt,xopt,cost)

@@ -5,7 +5,7 @@ real*8 function functn(nx,xparam16)
   real*8, intent(in)  :: xparam16(16)
 
   write(*,*) 'Entered wrapper functn, nx=', nx
-  write(*,*) 'xparam16(1:min(nx,5))=', xparam16(1:min(nx,5))
+  write(*,*) 'xparam16(1:min(nx,6))=', xparam16(1:min(nx,6))
 
   functn = functn_mod(nx,xparam16)
 
