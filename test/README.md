@@ -10,5 +10,5 @@ Put the downloaded NC file into the `/test/input` directory.
 ### Step 2: Execute the Program
 Once the input file is properly placed, run the startup script directly via the command below:
 ```bash
-./rum_main.sh
+./run_main.sh
 ```
