@@ -120,7 +120,7 @@ cmake --build . -j
 Input files (e.g., parameter files or netCDF datasets) should be placed in the same directory to ensure consistent input–output management.
 
 ```bash
-cd /MESC/test
+cd MESC/test
 chmod +x run_main.sh
 ./run_main.sh
 ```
