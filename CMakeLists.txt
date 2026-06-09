@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.18)
-project(SEC_MESC LANGUAGES Fortran)
+project(MESC LANGUAGES Fortran)
 
 # ------------------------------------------------------------
 # 0) Fortran standard
