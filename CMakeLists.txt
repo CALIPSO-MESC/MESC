@@ -68,11 +68,11 @@ if(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
 endif()
 
 # ------------------------------------------------------------
-# 6) POST-BUILD: copy main executable to SEC/test
+# 6) POST-BUILD: copy main executable to MESC/test
 # ------------------------------------------------------------
 add_custom_command(TARGET main POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
           $<TARGET_FILE:main>
           ${CMAKE_SOURCE_DIR}/test/main
-  COMMENT "Copying main to SEC/test/"
+  COMMENT "Copying main to MESC/test/"
 )

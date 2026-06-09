@@ -7,6 +7,9 @@ set -e
 module purge
 module load oneapi23u1   # load intel compiler
 module load netcdf_intel # load netcdf library
+# module load intel-fc/2020.4.304
+# module unload netcdf
+# module load netcdf/4.8.1-intel20
 
 # --------------------------------------------------
 # Build directory
@@ -26,4 +29,4 @@ cmake .. -DCMAKE_Fortran_COMPILER=ifort
 cmake --build . -j
 
 echo "Build finished."
-echo "Executable is available in: SEC/test/main or SEC/build"
+echo "Executable is available in: MESC/test/main or MESC/build"
