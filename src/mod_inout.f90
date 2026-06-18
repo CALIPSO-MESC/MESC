@@ -19,10 +19,10 @@ contains
     implicit none
     TYPE(mic_cpool),              INTENT(INOUT)   :: miccpool
     TYPE(mic_npool),              INTENT(INOUT)   :: micnpool
-    character*140 frestart_in                        ! restart filename
+    character*140 :: frestart_in                        ! restart filename
     ! local variables
-    integer mpx,msx,mcpoolx                          ! array dimensions
-    integer status,ncid,varid                        ! local variables
+    integer :: mpx,msx,mcpoolx                          ! array dimensions
+    integer :: status,ncid,varid                        ! local variables
     real(r_2), dimension(mp,ms,mcpool)  :: fcpool    ! carbon pools
     real(r_2), dimension(mp,ms)         :: fnpool    ! nitrogen pools
 
@@ -89,7 +89,7 @@ contains
     CHARACTER                :: CDATE*10,frestart_out*99
     INTEGER*4                :: cmic_ID, nmic_ID
     integer :: values(10)
-    real(r_2)  missreal
+    real(r_2)  :: missreal
 
     missreal=-1.0e10
     call date_and_time(values=values)
@@ -173,7 +173,7 @@ contains
     implicit None
     TYPE(mic_input),         INTENT(INout)   :: micinput
     TYPE(mic_output),        INTENT(INout)   :: micoutput
-    real(r_2)     missreal
+    real(r_2)     :: missreal
     INTEGER*4                :: STATUS
     INTEGER*4                :: FILE_ID, mp_ID
     CHARACTER                :: CDATE*10,foutput*99
@@ -253,9 +253,9 @@ contains
     use mic_variable
     implicit none
     TYPE(mic_param_xscale)    :: micpxdef
-    character*140  fglobalparam
-    integer jmodel
-    integer ibgc,ipft,n
+    character*140  :: fglobalparam
+    integer :: jmodel
+    integer :: ibgc,ipft,n
     real(r_2), dimension(14)    :: x
 
     open(100,file=fglobalparam)
@@ -302,11 +302,11 @@ contains
   ! read in global patch area fraction and calculate the number of land cell using sum(PFTfrac(lon,lat,pft))
   use netcdf
   use mic_constant
-  character*140 fpatch
-  integer jmodel,mpx
+  character*140 :: fpatch
+  integer :: jmodel,mpx
   real*8, dimension(:,:,:),   allocatable :: xfield3
   real*4, dimension(:,:,:,:), allocatable :: xfield4
-  integer i,j,np,ncid1,ok,varid,maxpft
+  integer :: i,j,np,ncid1,ok,varid,maxpft
 
     print *, 'patch filename', fpatch
     select case (jmodel)
@@ -375,17 +375,17 @@ contains
   implicit none
   TYPE(mic_global_input), INTENT(INOUT)  :: micglobal
   TYPE(mic_parameter),    INTENT(INOUT)  :: micparam
-  real(r_2)  zse(ms)
-  character*140 fglobal(10)
-  integer       jglobal,bgcopt,jopt,jmodel
+  real(r_2)  :: zse(ms)
+  character*140 :: fglobal(10)
+  integer       :: jglobal,bgcopt,jopt,jmodel
   ! local variables
   real(r_2), dimension(nlon)            :: lon
   real(r_2), dimension(nlat)            :: lat
   real(r_2), dimension(ntime)           :: time
   real(r_2), dimension(nlon,nlat,mpft)  :: patchfrac
-  integer ncid1,ncid3,ok,lonid,latid,timeid,varid,n,np,ns
+  integer :: ncid1,ncid3,ok,lonid,latid,timeid,varid,n,np,ns
   !
-  integer i,j,k,npx,isoilx,sorderx
+  integer :: i,j,k,npx,isoilx,sorderx
   integer, dimension(:),        allocatable  :: ilon,jlat, fcluster
   integer, dimension(:,:),      allocatable  :: varx2_int
   real*8, dimension(:),         allocatable  :: varmp1_db
@@ -395,8 +395,8 @@ contains
   real*8, dimension(:,:,:),     allocatable  :: varx3_db,varmp3_db,varsoc3_db,varbulk_db,varaoc_db
   real*8, dimension(:,:,:,:),   allocatable  :: varx4_db
   real(r_2), dimension(:),      allocatable  :: falo,fald,ffeo,ffed
-  integer   maxpft,pft, msite,sitemax,intval,isite
-  real*8    bulkd2
+  integer   :: maxpft,pft, msite,sitemax,intval,isite
+  real*8    :: bulkd2
 
 
     allocate(ilon(mp),jlat(mp),fcluster(mp))
@@ -801,9 +801,9 @@ subroutine getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal
   implicit none
   TYPE(mic_global_input), INTENT(INOUT)  :: micglobal
   TYPE(mic_parameter),    INTENT(INOUT)  :: micparam
-  real(r_2) zse(ms)
-  character*140 fglobal(10)
-  integer       jglobal,bgcopt,jopt,jmodel
+  real(r_2) :: zse(ms)
+  character*140 :: fglobal(10)
+  integer       :: jglobal,bgcopt,jopt,jmodel
   ! local variables
   real(r_2), dimension(nlon)            :: lon
   real(r_2), dimension(nlat)            :: lat
@@ -811,9 +811,9 @@ subroutine getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal
   real*4,    dimension(nlat)            :: lat_flt
   real(r_2), dimension(ntime)           :: time
   real(r_2), dimension(nlon,nlat,mpft)  :: patchfrac
-  integer ncid1,ncid3,ok,lonid,latid,timeid,varid,n,np,ns
+  integer :: ncid1,ncid3,ok,lonid,latid,timeid,varid,n,np,ns
   !
-  integer i,j,k,npx,isoilx,sorderx,ilonx,jlatx
+  integer :: i,j,k,npx,isoilx,sorderx,ilonx,jlatx
   integer, dimension(:),        allocatable  :: ilon,jlat, fcluster
   integer, dimension(:,:),      allocatable  :: varx2_int
   real*4, dimension(:,:),       allocatable  :: varx2_flt
@@ -826,8 +826,8 @@ subroutine getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal
   real(r_2), dimension(:),      allocatable  :: falo,fald,ffeo,ffed
   double precision, dimension(:,:),       allocatable  :: modisnpp
   double precision, dimension(:),         allocatable  :: modisnpp_mp
-  integer   maxpft,pft, msite,sitemax,intval,isite
-  real*8    bulkd2
+  integer   :: maxpft,pft, msite,sitemax,intval,isite
+  real*8    :: bulkd2
   ! data
   real*4, dimension(12)    :: sandx,clayx,siltx,porex,bulkdx,fcpx,wiltx
   data sandx/0.93,0.81,0.63,0.17,0.06,0.40,0.54,0.08,0.30,0.48,0.06,0.15/
@@ -1234,7 +1234,7 @@ end subroutine getdata_global4_orchidee
 subroutine cluster_hwsd(jmodel,bgctype,socobs,fclay,fsilt,fph,fald,falo,ffed,ffeo,fcluster)
   use mic_constant
   implicit none
-  integer jmodel
+  integer :: jmodel
   integer,   dimension(mp)     :: bgctype,fcluster
   real(r_2), dimension(mp,ms)  :: socobs
   real(r_2), dimension(mp)     :: fclay,fsilt,fph,fald,falo,ffed,ffeo
@@ -1243,7 +1243,7 @@ subroutine cluster_hwsd(jmodel,bgctype,socobs,fclay,fsilt,fph,fald,falo,ffed,ffe
   real(r_2), dimension(2)      :: claysd,siltsd,phsd,aldsd,alosd,fedsd,feosd
   real(r_2), dimension(7)      :: z
   real(r_2), dimension(10,7)   :: xdist
-  integer np,m,j
+  integer :: np,m,j
   ! results from K means cluster analysis  done 20260508 by Lingfei Wang
   data claymid/-0.9525_r_2,-0.8011_r_2,1.1920_r_2,-0.5146_r_2,0.1999_r_2,-0.2399_r_2,-0.7019_r_2,1.4337_r_2,0.8914_r_2,-1.0750_r_2,  &
                 1.4969_r_2,-1.0316_r_2,-0.8065_r_2,-0.1341_r_2,1.1403_r_2,1.5560_r_2,-1.082_r_2,0.6068_r_2,-0.3449_r_2,0.1033_r_2/
@@ -1400,7 +1400,7 @@ subroutine lonlat2mpx3a(ilon, jlat, ms3, zse3, bulkd3, varx3_db, varmp1_db)
 ! map varx3_db(nlon,nlat,1:3) to varmp1_db(mp)
     use mic_constant
     implicit none
-    integer ms3
+    integer :: ms3
     integer,   dimension(mp)              :: ilon,jlat
     real*8,    dimension(nlon,nlat,ms3)   :: bulkd3
     real*8,    dimension(ms3)             :: zse3
@@ -1469,7 +1469,7 @@ subroutine lonlat2mpx4b(ilon,jlat,xmin,xmax,xdef,varx4_db,varmp3_db)
     real*8, dimension(nlon,nlat,ms,ntime)       :: varx4_db
     real*8, dimension(mp,ms,ntime)              :: varmp3_db
     real*8  :: xmin, xmax,xdef
-    integer np,ns,nt
+    integer :: np,ns,nt
 
     ! Initialize output
     varmp3_db = xdef
@@ -1512,13 +1512,13 @@ end subroutine lonlat2mpx4b
     TYPE(mic_parameter), INTENT(INout)   :: micparam
     TYPE(mic_input),     INTENT(INout)   :: micinput
     TYPE(mic_npool),     INTENT(INOUT)   :: micnpool
-    real(r_2) zse(ms)       ! soil layer thickness in m-2
+    real(r_2) :: zse(ms)       ! soil layer thickness in m-2
 	! local variables
     integer:: ncid,varid,status
     integer:: np,ns,i,j
     integer:: nz
-    character*140 frac14c,f14c(5)
-	character*140 filecluster   ! cluster filename (not used)
+    character*140 :: frac14c,f14c(5)
+	character*140 :: filecluster   ! cluster filename (not used)
 
     character(len = nf90_max_name):: name
     real(r_2),dimension(:,:),allocatable:: fclay,fsilt,fph,ftemp,fmoist,fporosity,fmatpot
@@ -1802,8 +1802,8 @@ end subroutine lonlat2mpx4b
     use mic_constant
     use mic_variable
     implicit none
-    character*140 cfraction
-    integer mpx
+    character*140 :: cfraction
+    integer :: mpx
     integer:: ncid,varid,status
    ! open .nc file
     status = nf90_open(cfraction,nf90_nowrite,ncid)
@@ -1830,12 +1830,12 @@ end subroutine lonlat2mpx4b
     TYPE(mic_input),     INTENT(INout)   :: micinput
     TYPE(mic_npool),     INTENT(INOUT)   :: micnpool
     TYPE(mic_global_input),       INTENT(INout) :: micglobal
-    real(r_2)   zse(ms)
-    integer jglobal,bgcopt
+    real(r_2)   :: zse(ms)
+    integer :: jglobal,bgcopt
     integer:: ncid,varid,status
     integer:: np,ns,i,j
     integer:: nz
-    character*140 Cfraction
+    character*140 :: Cfraction
 
     character(len = nf90_max_name):: name
     real(r_2),dimension(:),         allocatable:: fclay,fsilt,fph,ftemp,fmoist,fporosity,fmatpot
@@ -1845,7 +1845,7 @@ end subroutine lonlat2mpx4b
     integer,dimension(:),           allocatable:: fid,fpft,ftop,fbot,fdataid,fcluster
     double precision, dimension(:), allocatable:: lat,lon
     ! local variation for clustering
-    integer n,msite
+    integer :: n,msite
 
 
     allocate(fsoc(mp))
@@ -2184,9 +2184,9 @@ end subroutine lonlat2mpx4b
     use mic_variable
     implicit none
     TYPE(mic_parameter), INTENT(INout)   :: micparam
-    integer i, nz, ny, nc14atm(100,5)
-    real(r_2)  year,c14del,sdx1,c14fm,sdx2
-    character*140 f14cz
+    integer :: i, nz, ny, nc14atm(100,5)
+    real(r_2)  :: year,c14del,sdx1,c14fm,sdx2
+    character*140 :: f14cz
     ! give 14C zones globally
     ! 14C zone        region code
     ! NH zone 1       11
@@ -2220,8 +2220,8 @@ end subroutine lonlat2mpx4b
     use mic_constant
     use mic_variable
     implicit none
-    character*140 fhwsdsoc
-    integer mpx,timex
+    character*140 :: fhwsdsoc
+    integer :: mpx,timex
     integer:: ncid,varid,status
    ! open .nc file
     status = nf90_open(fhwsdsoc,nf90_nowrite,ncid)
@@ -2250,11 +2250,11 @@ end subroutine lonlat2mpx4b
     use mic_constant
     use mic_variable
     implicit none
-    character*140 fhwsdsoc,fmodis,fanoc
-    integer jglobal,bgcopt,jopt,jmodel
+    character*140 :: fhwsdsoc,fmodis,fanoc
+    integer :: jglobal,bgcopt,jopt,jmodel
     TYPE(mic_parameter),          INTENT(INout) :: micparam
     TYPE(mic_global_input),       INTENT(INout) :: micglobal
-    real(r_2) zse(ms)
+    real(r_2) :: zse(ms)
     ! local variables
     integer:: ncid,varid,status
     integer:: np,ns,k,ipft,nsocobs,ilonx,jlatx
@@ -2620,10 +2620,10 @@ end subroutine getdata_hwsd
 subroutine screenout(runmodel,jmodel,bgcopt,xopt,cost)
     use mic_constant
     implicit none
-    character*10 runmodel
-    integer jmodel,bgcopt
+    character*10 :: runmodel
+    integer :: jmodel,bgcopt
     real*8,    dimension(16)           :: xopt
-    real*8     cost
+    real*8     :: cost
     write(*,901) runmodel,jmodel,bgcopt,cost,xopt(1:14)
 901 format(a10,2(i3,1x),f12.3,1x,14(f7.3,1x))
 
@@ -2636,8 +2636,8 @@ end subroutine screenout
     use mic_constant
     use mic_variable
     implicit none
-    character*140 faustsoc
-    integer mpx,timex
+    character*140 :: faustsoc
+    integer :: mpx,timex
     integer:: ncid,varid,status
    ! open .nc file
     status = nf90_open(faustsoc,nf90_nowrite,ncid)
@@ -2675,11 +2675,11 @@ end subroutine screenout
     data ligcleaf/0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28/
     data ligcwood/0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4/
     data ligcroot/0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28/
-    character*140 faustsoc
-    integer jglobal,bgcopt,jopt,jmodel
+    character*140 :: faustsoc
+    integer :: jglobal,bgcopt,jopt,jmodel
     TYPE(mic_parameter),          INTENT(INout) :: micparam
     TYPE(mic_global_input),       INTENT(INout) :: micglobal
-    real(r_2) zse(ms)
+    real(r_2) :: zse(ms)
     ! local variables
     integer:: ncid,varid,status
     integer:: np,k,ipft,ns

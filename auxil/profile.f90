@@ -42,12 +42,12 @@ module mic_constant
   integer,  parameter  :: diag=0       ! =1 for printout 0 no prinout
   integer,  parameter  :: outp=1       ! output site
   !integer,  parameter  :: msite=213   ! number of sites
-  integer                 mp           ! number of site the model runs for
-  integer                 ntime        ! 365  !12 * 4 ! 4 year's monthly global forcings
-  integer                 mpft         ! =17 !15      ! number of PFTs =17 FOR cable AND =19 FOR orchidee
-  integer                 mbgc         ! number of soil categories
+  integer                 :: mp           ! number of site the model runs for
+  integer                 :: ntime        ! 365  !12 * 4 ! 4 year's monthly global forcings
+  integer                 :: mpft         ! =17 !15      ! number of PFTs =17 FOR cable AND =19 FOR orchidee
+  integer                 :: mbgc         ! number of soil categories
   integer,  parameter  :: ms= 7        !15       ! soil layers
-  real(r_2) zse(ms)
+  real(r_2) :: zse(ms)
   data zse/0.2,0.2,0.2,0.2,0.2,0.5,0.5/
   integer,  parameter  :: nlon =180
   integer,  parameter  :: nlat =90
@@ -248,7 +248,7 @@ module mic_variable
    IMPLICIT NONE
    TYPE(mic_parameter),    INTENT(INOUT)  :: micparam
    TYPE(mic_param_xscale), INTENT(INOUT)  :: micpxdef
-   integer  mpft,mbgc,mp,ms
+   integer  :: mpft,mbgc,mp,ms
 
     allocate(micpxdef%xav(mbgc),  &
       micpxdef%xak(mbgc),         &
@@ -344,7 +344,7 @@ module mic_variable
 
   SUBROUTINE mic_allocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
    IMPLICIT NONE
-   integer mp,ms,nlon,nlat,ntime
+   integer :: mp,ms,nlon,nlat,ntime
    TYPE(mic_input),        INTENT(INOUT)  :: micinput
    TYPE(mic_global_input), INTENT(INOUT)  :: micglobal
 
@@ -398,7 +398,7 @@ module mic_variable
   SUBROUTINE mic_allocate_output(mp,micoutput)
    IMPLICIT NONE
    TYPE(mic_output), INTENT(INOUT)  :: micoutput
-   integer  mp
+   integer  :: mp
 
    allocate(micoutput%fluxcinput(mp))
    allocate(micoutput%fluxrsoil(mp))
@@ -408,7 +408,7 @@ module mic_variable
 
  SUBROUTINE mic_allocate_cpool(mp,ms,miccpool)
    IMPLICIT NONE
-   integer mp,ms
+   integer :: mp,ms
    TYPE(mic_cpool), INTENT(INOUT)  :: miccpool
    allocate(miccpool%cpool(mp,ms,mcpool), &
             miccpool%cpooleq(mp,ms,mcpool), &
@@ -421,7 +421,7 @@ module mic_variable
 
   SUBROUTINE mic_allocate_npool(mp,ms,micnpool)
    IMPLICIT NONE
-   integer mp,ms
+   integer :: mp,ms
    TYPE(mic_npool), INTENT(INOUT)  :: micnpool
 
    ALLOCATE(micnpool%mineralN(mp,ms))
@@ -434,7 +434,7 @@ module mic_variable
    IMPLICIT NONE
    TYPE(mic_parameter), INTENT(INOUT)     :: micparam
    TYPE(mic_param_xscale), INTENT(INOUT)  :: micpxdef
-   integer  mpft,mbgc,mp,ms
+   integer  :: mpft,mbgc,mp,ms
 
     deallocate(micpxdef%xav,  &
       micpxdef%xak,         &
@@ -530,7 +530,7 @@ module mic_variable
 
   SUBROUTINE mic_deallocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
    IMPLICIT NONE
-   integer mp,ms,nlon,nlat,ntime
+   integer :: mp,ms,nlon,nlat,ntime
    TYPE(mic_input), INTENT(INOUT)        :: micinput
    TYPE(mic_global_input), INTENT(INOUT) :: micglobal
 
@@ -585,7 +585,7 @@ module mic_variable
   SUBROUTINE mic_deallocate_output(mp,micoutput)
    IMPLICIT NONE
    TYPE(mic_output), INTENT(INOUT)  :: micoutput
-   integer  mp
+   integer  :: mp
     deallocate(micoutput%fluxcinput)
     deallocate(micoutput%fluxrsoil)
     deallocate(micoutput%fluxcleach)
@@ -594,7 +594,7 @@ module mic_variable
 
  SUBROUTINE mic_deallocate_cpool(mp,ms,miccpool)
    IMPLICIT NONE
-   integer mp,ms
+   integer :: mp,ms
    TYPE(mic_cpool), INTENT(INOUT)  :: miccpool
    deallocate(miccpool%cpool,  &
               miccpool%cpooleq, &
@@ -608,7 +608,7 @@ module mic_variable
 
   SUBROUTINE mic_deallocate_npool(mp,ms,micnpool)
    IMPLICIT NONE
-   integer mp,ms
+   integer :: mp,ms
    TYPE(mic_npool), INTENT(INOUT)  :: micnpool
 
    DEALLOCATE(micnpool%mineralN)
@@ -632,14 +632,14 @@ end module mic_variable
 
     !local variables
     real*8,    dimension(16)           :: xparam16
-    integer    nx
+    integer    :: nx
     integer,   dimension(16)           :: nxopt
     real*8,    dimension(16)           :: xopt
-    real*8     totcost1,totcost2
-    integer    ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
-    integer jrestart,nparam
-    character*99 frestart_in,frestart_out,foutput
-    character*120 frac14c,f14c(5)
+    real*8     :: totcost1,totcost2
+    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    integer :: jrestart,nparam
+    character*99 :: frestart_in,frestart_out,foutput
+    character*120 :: frac14c,f14c(5)
 
       jrestart=0;xopt(:)=1.0
       do nparam=1,16
@@ -744,15 +744,15 @@ real*8 function functn_frc(nx,xparam16)
     TYPE(mic_output)          :: micoutput
 
     !local variables
-    integer    nx
+    integer    :: nx
     integer,   dimension(16)           :: nxopt
     real*8,    dimension(16)           :: xparam16
     real*8,    dimension(16)           :: xopt
-    real*8     totcost1
-    integer    ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
-    integer jrestart,nparam
-    character*99 frestart_in,frestart_out,foutput
-    character*120 Cfraction
+    real*8     :: totcost1
+    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    integer :: jrestart,nparam
+    character*99 :: frestart_in,frestart_out,foutput
+    character*120 :: Cfraction
 
 
       jrestart=0;xopt(:)=1.0
@@ -838,15 +838,15 @@ real*8 function functn_soc_wosis(nx,xparam16)
     TYPE(mic_output)          :: micoutput
 
     !local variables
-    integer    nx
+    integer    :: nx
     integer,   dimension(16)           :: nxopt
     real*8,    dimension(16)           :: xparam16
     real*8,    dimension(16)           :: xopt
-    real*8     totcost1
-    integer    ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
-    integer jrestart,nparam
-    character*99 frestart_in,frestart_out,foutput
-    character*120 finputsoc
+    real*8     :: totcost1
+    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    integer :: jrestart,nparam
+    character*99 :: frestart_in,frestart_out,foutput
+    character*120 :: finputsoc
 
 
       jrestart=0;xopt(:)=1.0
@@ -923,7 +923,7 @@ real*8 function functn(nx,xparam16)
    use mic_variable
    implicit none
     !local variables
-    integer    nx
+    integer    :: nx
     integer,   dimension(16)           :: nxopt
     real*8,    dimension(16)           :: xparam16
     real*8,    dimension(16)           :: xopt
@@ -937,11 +937,11 @@ real*8 function functn(nx,xparam16)
     TYPE(mic_output)          :: micoutput
 
     !local variables
-    integer    ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
-    integer jrestart,nf,ok,nparam,mpx,timex
-    character*99  frestart_in,frestart_out,fparam_global,foutput
-    character*120 fhwsdsoc
-    real(r_2)     totcost1
+    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    integer :: jrestart,nf,ok,nparam,mpx,timex
+    character*99  :: frestart_in,frestart_out,fparam_global,foutput
+    character*120 :: fhwsdsoc
+    real(r_2)     :: totcost1
 
       isoc14=0;nyeqpool = 500;ok=0;totcost1=0.0
 
@@ -1026,10 +1026,10 @@ END function functn
     implicit none
     TYPE(mic_cpool),              INTENT(INOUT)   :: miccpool
     TYPE(mic_npool),              INTENT(INOUT)   :: micnpool
-    character frestart_in*99
+    character :: frestart_in*99
     ! local variables
-    integer mpx,msx,mcpoolx
-    integer status,ncid,varid
+    integer :: mpx,msx,mcpoolx
+    integer :: status,ncid,varid
     real(r_2), dimension(mp,ms,mcpool)  :: fcpool
     real(r_2), dimension(mp,ms)         :: fnpool
 
@@ -1093,7 +1093,7 @@ END function functn
     CHARACTER                :: CDATE*10,frestart_out*99
     INTEGER*4                :: cmic_ID, nmic_ID
     integer :: values(10)
-    real(r_2)  missreal
+    real(r_2)  :: missreal
 
     missreal=-1.0e10
     call date_and_time(values=values)
@@ -1168,7 +1168,7 @@ END function functn
     implicit None
     TYPE(mic_input),         INTENT(INout)   :: micinput
     TYPE(mic_output),        INTENT(INout)   :: micoutput
-    real(r_2)     missreal
+    real(r_2)     :: missreal
     INTEGER*4                :: STATUS
     INTEGER*4                :: FILE_ID, mp_ID
     CHARACTER                :: CDATE*10,foutput*99
@@ -1243,7 +1243,7 @@ END function functn
     use mic_variable
     implicit none
     TYPE(mic_param_xscale)    :: micpxdef
-    integer npft,ipft,n
+    integer :: npft,ipft,n
     real(r_2), dimension(20)    :: x
 
     open(100,file='parameters_global.csv')
@@ -1290,7 +1290,7 @@ END function functn
     integer:: ncid,varid,status
     integer:: np,ns,i,j
     integer:: nz
-    character*120 frac14c,f14c(5)
+    character*120 :: frac14c,f14c(5)
 
     character(len = nf90_max_name):: name
     real(r_2),dimension(:,:),allocatable:: fclay,fsilt,fph,ftemp,fmoist,fporosity,fmatpot
@@ -1561,7 +1561,7 @@ END function functn
     integer:: ncid,varid,status
     integer:: np,ns,i,j
     integer:: nz
-    character*120 Cfraction
+    character*120 :: Cfraction
 
     character(len = nf90_max_name):: name
     real(r_2),dimension(:),allocatable:: fclay,fsilt,fph,ftemp,fmoist,fporosity,fmatpot
@@ -1794,7 +1794,7 @@ END function functn
     TYPE(mic_input),     INTENT(INout)   :: micinput
     TYPE(mic_npool),     INTENT(INOUT)   :: micnpool
 
-    character*120 finputsoc
+    character*120 :: finputsoc
     integer:: ncid,varid,status
     integer:: np,ns,i,j
     character(len = nf90_max_name):: name
@@ -1994,9 +1994,9 @@ END function functn
     use mic_variable
     implicit none
     TYPE(mic_parameter), INTENT(INout)   :: micparam
-    integer i, nz, ny, nc14atm(100,5)
-    real(r_2)  year,c14del,sdx1,c14fm,sdx2
-    character*80 f14cz
+    integer :: i, nz, ny, nc14atm(100,5)
+    real(r_2)  :: year,c14del,sdx1,c14fm,sdx2
+    character*80 :: f14cz
     ! give 14C zones globally
     ! 14C zone        region code
     ! NH zone 1       11
@@ -2030,8 +2030,8 @@ END function functn
     use mic_constant
     use mic_variable
     implicit none
-    character*120 fhwsdsoc
-    integer mpx,timex
+    character*120 :: fhwsdsoc
+    integer :: mpx,timex
     integer:: ncid,varid,status
    ! open .nc file
     status = nf90_open(fhwsdsoc,nf90_nowrite,ncid)
@@ -2060,8 +2060,8 @@ END function functn
     use mic_constant
     use mic_variable
     implicit none
-    character*120 fhwsdsoc
-    integer jglobal,bgcopt,jopt,jmodel
+    character*120 :: fhwsdsoc
+    integer :: jglobal,bgcopt,jopt,jmodel
     TYPE(mic_parameter),          INTENT(INout) :: micparam
     TYPE(mic_global_input),       INTENT(INout) :: micglobal
     ! local variables
@@ -2329,15 +2329,15 @@ SUBROUTINE profile_hwsd(jmodel,micparam)
     use mic_constant
     use mic_variable
     implicit none
-    integer jmodel
+    integer :: jmodel
     TYPE(mic_parameter),          INTENT(INout) :: micparam
     ! local variables
-    real(r_2)  sdepth1,sdepth2
+    real(r_2)  :: sdepth1,sdepth2
     real(r_2), dimension(ms)  :: sdepth,y
     real(r_2), dimension(mp)  :: y0,slope,corr
     real(r_2), dimension(mpft):: avgslope,sdslope
     integer,   dimension(mpft):: nslope
-    integer ns,p,np
+    integer :: ns,p,np
 
         open(21,file='profile_hwsd.txt')
         sdepth1=0.0; sdepth2=0.0
@@ -2388,13 +2388,13 @@ subroutine linreg(ndata,x,y,a,b,r)
    use mic_constant
    implicit none                                                                    ! no default data types
    ! input
-   integer ndata
+   integer :: ndata
    real(r_2), dimension(ndata)       ::  x, y
    ! output
-   real(r_2) a,b,r
+   real(r_2) :: a,b,r
    !local variables
-   integer n
-   real(r_2) sumx,sumy,sumx2, sumy2, sumxy
+   integer :: n
+   real(r_2) :: sumx,sumy,sumx2, sumy2, sumxy
 
    sumx =0.0; sumx2=0.0; sumxy=0.0;sumy=0.0;sumy2=0.0
    a=0.0;b=0.0;r=0.0
@@ -2424,8 +2424,8 @@ SUBROUTINE vmic_param_constant(kinetics,micpxdef,micpdef,micparam)
     !local variables
     real(r_2), dimension(:,:), allocatable      :: froot
     real(r_2), dimension(:),   allocatable      :: totroot
-    integer    nopt,npft,np,ns,kinetics
-    real(r_2)  depths1,depths2,krootx
+    integer    :: nopt,npft,np,ns,kinetics
+    real(r_2)  :: depths1,depths2,krootx
 
 
       allocate(froot(mpft,ms))
@@ -2515,7 +2515,7 @@ subroutine vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool)
     TYPE(mic_input),              INTENT(INout)   :: micinput
     TYPE(mic_npool),              INTENT(INOUT)   :: micnpool
 
-    integer  kinetics
+    integer  :: kinetics
       ! compute fractions
       call bgc_fractions(micpxdef,micpdef,micparam,micinput)
       ! compute microbial growth efficiency
@@ -2534,7 +2534,7 @@ subroutine vmic_init(miccpool,micnpool)
     implicit none
     TYPE(mic_cpool),              INTENT(INOUT)   :: miccpool
     TYPE(mic_npool),              INTENT(INOUT)   :: micnpool
-    integer ip
+    integer :: ip
     real(r_2), dimension(:), allocatable    :: cpooldef
 
       allocate(cpooldef(mcpool))
@@ -2558,13 +2558,13 @@ subroutine vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
     use mic_variable
     implicit none
     TYPE(mic_param_xscale),  INTENT(INOUT)   :: micpxdef
-    integer bgcopt,jmodel
+    integer :: bgcopt,jmodel
     real*8, dimension(16)                    :: xopt
     real(r_2), dimension(17)                 :: xrootcable
     real(r_2), dimension(18)                 :: xrootorchidee
     data xrootcable/1.43,0.94,1.43,1.04,0.77,0.85,0.62,1.77,0.94,0.94,1.43,0.94,1.04,0.53,1.00,1.00,1.00/
     data xrootorchidee/0.94,0.94,1.04,1.04,1.04,1.43,1.43,1.43,0.85,0.62,0.94,0.94,0.85,0.85,0.85,0.85,0.85,0.85/
-    integer i
+    integer :: i
 
 !  1: xav:      scaling factor for V                            [1]                 (0-30)
 !  2: xak:      scaling factor for K                            [1]                 (0-30)
@@ -2637,11 +2637,11 @@ subroutine variable_time(year,doy,micglobal,micinput,micnpool)
     use mic_constant
     use mic_variable
     implicit none
-    integer year,doy
+    integer :: year,doy
     TYPE(mic_global_input),  INTENT(INout)   :: micglobal
     TYPE(mic_input),         INTENT(INout)   :: micinput
     TYPE(mic_npool),         INTENT(INOUT)   :: micnpool
-    integer np,ns
+    integer :: np,ns
 
 
 !        print *, 'calling global2np- ntime', ntime
@@ -2681,7 +2681,7 @@ end subroutine variable_time
     TYPE(mic_npool),         INTENT(INOUT)   :: micnpool
     TYPE(mic_output),        INTENT(INout)   :: micoutput
 
-    integer ifsoc14,isoc14,kinetics,bgcopt,nyeqpool
+    integer :: ifsoc14,isoc14,kinetics,bgcopt,nyeqpool
 
     ! local variables
     real(r_2),    dimension(mcpool)    :: xpool0,xpool1
@@ -2689,21 +2689,21 @@ end subroutine variable_time
     real(r_2),    dimension(ms)        :: cfluxa
 
 !    integer       ndelt,n1,n2,i,j,year,ip,np,ns,ny,nyrun
-    integer       ndelt,i,j,year,ip,np,ns,ny,nyrun
-    real(r_2)     timex,delty,fluxdocsx,diffsocxx
+    integer       :: ndelt,i,j,year,ip,np,ns,ny,nyrun
+    real(r_2)     :: timex,delty,fluxdocsx,diffsocxx
 
-    integer    jrestart
-    character*99 frestart_in,frestart_out,foutput
-    real(r_2)  cpool0, cpool1, totcinput
+    integer    :: jrestart
+    character*99 :: frestart_in,frestart_out,foutput
+    real(r_2)  :: cpool0, cpool1, totcinput
 
    ! local variables
-   real(r_2)                      deltD !,tot0,tot1,totflux
+   real(r_2)                      :: deltD !,tot0,tot1,totflux
    real(r_2), dimension(:), allocatable    :: xzse
    real(r_2), dimension(:), allocatable    :: sdepthx
-   real(r_2)                                coeffA, coeffB
+   real(r_2)                                :: coeffA, coeffB
    real(r_2), dimension(:), allocatable    :: at,bt,ct,rt
    real(r_2), dimension(:), allocatable    :: xpool
-   real(r_2)  cleachloss
+   real(r_2)  :: cleachloss
 
 
     allocate(xzse(ms))
@@ -2903,18 +2903,18 @@ end subroutine variable_time
     TYPE(mic_npool),         INTENT(INOUT)   :: micnpool
     TYPE(mic_output),        INTENT(INout)   :: micoutput
 
-    integer isoc14,kinetics,bgcopt,nyeqpool
+    integer :: isoc14,kinetics,bgcopt,nyeqpool
     ! local variables
     real(r_2),    dimension(mcpool)    :: xpool0,xpool1
     real(r_2),    dimension(ms)        :: ypooli,ypoole,fluxsoc
     real(r_2),    dimension(ms)        :: cfluxa
 
-    integer       ndelt,i,j,year,ip,np,ns,ny
-    real(r_2)     timex,delty,fluxdocsx,diffsocxx
+    integer       :: ndelt,i,j,year,ip,np,ns,ny
+    real(r_2)     :: timex,delty,fluxdocsx,diffsocxx
 
-    integer    jrestart
-    character*99 frestart_in,frestart_out,foutput
-    real(r_2)  cpool0, cpool1, totcinput
+    integer    :: jrestart
+    character*99 :: frestart_in,frestart_out,foutput
+    real(r_2)  :: cpool0, cpool1, totcinput
 
        ! local variables
    ! for numerical solution
@@ -2924,13 +2924,13 @@ end subroutine variable_time
    integer,      parameter            :: ntrial = 100
 
    ! local variables
-   real(r_2)                      deltD !,tot0,tot1,totflux
+   real(r_2)                      :: deltD !,tot0,tot1,totflux
    real(r_2), dimension(:), allocatable    :: xzse
    real(r_2), dimension(:), allocatable    :: sdepthx
-   real(r_2)                      coeffA, coeffB
+   real(r_2)                      :: coeffA, coeffB
    real(r_2), dimension(:), allocatable    :: at,bt,ct,rt
    real(r_2), dimension(:), allocatable    :: xpool
-   real(r_2)  cleachloss
+   real(r_2)  :: cleachloss
 
 
     allocate(xzse(ms))
@@ -3132,18 +3132,18 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     TYPE(mic_npool),         INTENT(INOUT)   :: micnpool
     TYPE(mic_output),        INTENT(INout)   :: micoutput
 
-    integer jrestart,isoc14,kinetics,bgcopt,nyeqpool
+    integer :: jrestart,isoc14,kinetics,bgcopt,nyeqpool
 
     ! local variables
     real(r_2),    dimension(:), allocatable  :: xpool0,xpool1
     real(r_2),    dimension(:), allocatable  :: ypooli,ypoole,fluxsoc,cfluxa
 
-    integer       ndelt,i,j,year,ip,np,ns,ny
-    integer       nyrun,ip5
-    real(r_2)     timex,delty,fluxdocsx,diffsocxx
+    integer       :: ndelt,i,j,year,ip,np,ns,ny
+    integer       :: nyrun,ip5
+    real(r_2)     :: timex,delty,fluxdocsx,diffsocxx
 
-    character*99  frestart_in,frestart_out,foutput
-    real(r_2)     cpool0, cpool1, totcinput
+    character*99  :: frestart_in,frestart_out,foutput
+    real(r_2)     :: cpool0, cpool1, totcinput
 
 
        allocate(xpool0(mcpool),xpool1(mcpool))
@@ -3289,19 +3289,19 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     TYPE(mic_npool),         INTENT(INOUT)   :: micnpool
     TYPE(mic_output),        INTENT(INout)   :: micoutput
 
-    integer isoc14,kinetics,bgcopt,nyeqpool
+    integer :: isoc14,kinetics,bgcopt,nyeqpool
     ! local variables
     real(r_2),    dimension(:), allocatable  :: xpool0,xpool1
     real(r_2),    dimension(:), allocatable  :: ypooli,ypoole,fluxsoc,cfluxa
 
 
-    integer       ndelt,i,j,year,ip,np,ns,ny
-    integer       nyrun
-    real(r_2)     timex,delty,fluxdocsx,diffsocxx
+    integer       :: ndelt,i,j,year,ip,np,ns,ny
+    integer       :: nyrun
+    real(r_2)     :: timex,delty,fluxdocsx,diffsocxx
 
-    integer    jrestart
-    character*99 frestart_in,frestart_out,foutput
-    real(r_2)  cpool0, cpool1, totcinput
+    integer    :: jrestart
+    character*99 :: frestart_in,frestart_out,foutput
+    real(r_2)  :: cpool0, cpool1, totcinput
 
    ! local variables
    ! for numerical solution
@@ -3311,13 +3311,13 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
    integer,      parameter            :: ntrial = 100
 
    ! local variables
-   real(r_2)                      deltD !,tot0,tot1,totflux
+   real(r_2)                      :: deltD !,tot0,tot1,totflux
    real(r_2), dimension(:), allocatable    :: xzse
    real(r_2), dimension(:), allocatable    :: sdepthx
-   real(r_2)                      coeffA, coeffB
+   real(r_2)                      :: coeffA, coeffB
    real(r_2), dimension(:), allocatable    :: at,bt,ct,rt
    real(r_2), dimension(:), allocatable    :: xpool
-   real(r_2)  cleachloss
+   real(r_2)  :: cleachloss
 
     allocate(xpool0(mcpool),xpool1(mcpool))
     allocate(ypooli(ms),ypoole(ms),fluxsoc(ms),cfluxa(ms))
@@ -3519,19 +3519,19 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     TYPE(mic_parameter), INTENT(INOUT) :: micparam
     TYPE(mic_cpool),     INTENT(INOUT) :: miccpool
     TYPE(mic_input),     INTENT(IN)    :: micinput
-    integer nx,isoc14,bgcopt
-    real*8  totcost
+    integer :: nx,isoc14,bgcopt
+    real*8  :: totcost
     real*8, dimension(16)              :: xopt
 
     ! cost function
     real(r_2), dimension(:), allocatable           :: xcost,xobs,xobsp,xobsm
     real(r_2), dimension(:), allocatable           :: xmod,xmodp,xmodm !! weighted modelled SOC, POC and MAOC
     real(r_2), dimension(:), allocatable           :: xfracpmod,xfracmmod,xfracpobs,xfracmobs
-    integer   np,ns,ip
-    real(r_2)  xbdz,small
+    integer   :: np,ns,ip
+    real(r_2)  :: xbdz,small
 
-    real(r_2) xtop,xbot,x1,x2 !! cm
-    real(r_2) weight
+    real(r_2) :: xtop,xbot,x1,x2 !! cm
+    real(r_2) :: weight
 
 
 
@@ -3636,18 +3636,18 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     TYPE(mic_parameter), INTENT(IN)    :: micparam
     TYPE(mic_cpool),     INTENT(INOUT) :: miccpool
     TYPE(mic_input),     INTENT(IN)    :: micinput
-    integer nx,bgcopt
-    real*8  totcost
+    integer :: nx,bgcopt
+    real*8  :: totcost
     real*8, dimension(16)              :: xopt
 
     ! cost function
     real(r_2), dimension(:), allocatable        :: xcost,xobs,xobsp,xobsm
     real(r_2), dimension(:), allocatable        :: xmod,xmodp,xmodm !! weighted modelled SOC, POC and MAOC
-    integer   np,ns,ip,ipsite
-    real(r_2)  xbdz
+    integer   :: np,ns,ip,ipsite
+    real(r_2)  :: xbdz
 
-    real(r_2) xtop,xbot,x1,x2 !! cm
-    real(r_2) weight
+    real(r_2) :: xtop,xbot,x1,x2 !! cm
+    real(r_2) :: weight
     real(r_2),dimension(:), allocatable         :: xmodfracp,xmodfracm,xobsfracp,xobsfracm
 
 
@@ -3743,15 +3743,15 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     TYPE(mic_parameter), INTENT(IN)    :: micparam
     TYPE(mic_cpool),     INTENT(INOUT) :: miccpool
     TYPE(mic_input),     INTENT(IN)    :: micinput
-    integer nx,isoc14,bgcopt
-    real*8  totcost
+    integer :: nx,isoc14,bgcopt
+    real*8  :: totcost
     real*8, dimension(16)              :: xopt
     ! cost function
     real(r_2), dimension(:),   allocatable        :: xcost
     real(r_2), dimension(:,:), allocatable        :: xobs, xmod
     real(r_2), dimension(5)            :: xobsv, xmodv
-    integer   np,ns,ipsite,v,ip
-    real(r_2)  xbdz
+    integer   :: np,ns,ipsite,v,ip
+    real(r_2)  :: xbdz
 
     allocate(xcost(mp))
     allocate(xobs(mp,ms), xmod(mp,ms))
@@ -3833,15 +3833,15 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     TYPE(mic_input),        INTENT(IN)    :: micinput
     TYPE(mic_global_input), INTENT(IN)    :: micglobal
 
-    integer nx,bgcopt
-    real*8  totcost
+    integer :: nx,bgcopt
+    real*8  :: totcost
     real*8, dimension(16)              :: xopt
     ! cost function
     real(r_2), dimension(:),   allocatable        :: xcost
     real(r_2), dimension(:,:), allocatable        :: xobs, xmod
     real(r_2)                                     :: fracpocm,fracmaocm,fracmicm,fraclabm
-    integer   np,ns,ipsite,v,ip
-    real(r_2)  xbdz
+    integer   :: np,ns,ipsite,v,ip
+    real(r_2)  :: xbdz
 
     allocate(xcost(mp))
     allocate(xobs(mp,ms), xmod(mp,ms))
@@ -3899,8 +3899,8 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     TYPE(mic_param_default), INTENT(IN)  :: micpdef
     TYPE(mic_parameter),     INTENT(IN)  :: micparam
     TYPE(mic_input),         INTENT(IN)  :: micinput
-    integer      np,ns, kinetics,ny,isoc14
-    real(r_2)    timex,delty,h
+    integer      :: np,ns, kinetics,ny,isoc14
+    real(r_2)    :: timex,delty,h
     real(r_2),   dimension(mcpool),intent(inout)     :: xpool0,xpool1
     real(r_2),   dimension(mcpool)                   :: y1,y2,y3,y4,dy1dt,dy2dt,dy3dt,dy4dt
 
@@ -3940,7 +3940,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
 
       ! local variable
       real(r_2), dimension(:,:), allocatable   :: xkclay,km,kmx
-      integer nopt,np,ns
+      integer :: nopt,np,ns
 
      allocate(xkclay(mp,ms),km(mp,ms),kmx(mp,ms))
      do np=1,mp
@@ -3985,7 +3985,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
 
       ! local variables
       real(r_2),dimension(:,:), allocatable :: vmax
-      integer nopt,np,ns
+      integer :: nopt,np,ns
       real(r_2), dimension(:), allocatable   :: sdepthz
 
       allocate(vmax(mp,ms))
@@ -4041,7 +4041,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
       TYPE(mic_param_default), INTENT(IN)     :: micpdef
       TYPE(mic_parameter), INTENT(INOUT)      :: micparam
       TYPE(mic_input), INTENT(IN)             :: micinput
-      integer nopt,np,ns
+      integer :: nopt,np,ns
 
      do np=1,mp
       do ns=1,ms
@@ -4067,7 +4067,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
      TYPE(mic_npool),         INTENT(IN)     :: micnpool
 
      ! local variables
-     integer np,ns
+     integer :: np,ns
 
       do np=1,mp
        do ns=1,ms
@@ -4116,11 +4116,11 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
       TYPE(mic_parameter),     INTENT(INOUT)   :: micparam
       TYPE(mic_input),         INTENT(IN)      :: micinput
 
-      integer nx,kinetics
-      real(r_2)  xbeta
+      integer :: nx,kinetics
+      real(r_2)  :: xbeta
 
       ! local variable
-      integer nopt,np,ns
+      integer :: nopt,np,ns
       real(r_2), dimension(:), allocatable    :: tvref
 
       allocate(tvref(mp))
@@ -4160,7 +4160,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     TYPE(mic_parameter),     INTENT(INOUT)  :: micparam
     TYPE(mic_input),         INTENT(INOUT)  :: micinput
     !local variables
-    integer npft,np,ns
+    integer :: npft,np,ns
     real(r_2), dimension(:),     allocatable :: fmetleaf,fmetroot,fmetwood
     real(r_2), dimension(:,:),   allocatable :: dleafx,drootx,dwoodx
     real(r_2), dimension(:,:),   allocatable :: cinputm,cinputs
@@ -4298,16 +4298,16 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
    !      for diffsion coefficient: cm2/delt
    use mic_constant,  ONLY : r_2
    implicit none
-   integer                        ndelt,ms
+   integer                        :: ndelt,ms
    real(r_2), dimension(ms)    :: zse
-   real(r_2)                      delt,diffsocxx
+   real(r_2)                      :: delt,diffsocxx
    real(r_2), dimension(ms)    :: xpooli,xpoole,xpool,fluxsoc
    ! local variables
-   integer                        i,j
-   real(r_2)                      deltD,tot0, tot1, totflux
+   integer                        :: i,j
+   real(r_2)                      :: deltD,tot0, tot1, totflux
    real(r_2), dimension(ms)    :: xzse
    real(r_2), dimension(ms+1)  :: sdepthx
-   real(r_2)                      coeffA, coeffB
+   real(r_2)                      :: coeffA, coeffB
    real(r_2), dimension(ms)    :: at,bt,ct,rt
 
       ! calculate the mid-point of each layer
@@ -4385,10 +4385,10 @@ end subroutine bioturb
     use mic_constant,  ONLY : r_2
     implicit none
     integer, parameter    :: nmax=500
-    integer ms
+    integer :: ms
     real(r_2), dimension(ms)    :: at,bt,ct,rt,u
-    integer j
-    real(r_2) bet
+    integer :: j
+    real(r_2) :: bet
     real(r_2), dimension(nmax) :: gam
 
       bet  = bt(1)
@@ -4413,11 +4413,11 @@ end subroutine bioturb
     !
     use mic_constant
     implicit none
-    real(r_2)                          deltx
+    real(r_2)                          :: deltx
     real(r_2), dimension(ms)        :: fluxsoilwx,vsoilwx,ypool
     real(r_2), dimension(ms)        :: dypool,ypool1
-    real(r_2)                          fluxdocsx,totdoc0,totdoc1,fluxdocbot
-    integer ns,iter
+    real(r_2)                          :: fluxdocsx,totdoc0,totdoc1,fluxdocbot
+    integer :: ns,iter
 
      ypool1= ypool
      fluxdocbot = 0.0
@@ -4474,9 +4474,9 @@ end subroutine bioturb
      real(r_2),  dimension(mcpool),  INTENT(IN)        :: xpool
      real(r_2),  dimension(mcpool),  INTENT(INOUT)     :: y   !=dxpool/dt     ! local variables
      ! local variables
-     integer     np,ns,kinetics,ny,isoc14,ip
+     integer     :: np,ns,kinetics,ny,isoc14,ip
 
-     real(r_2)  betamicR,betamicK,                 &
+     real(r_2)  :: betamicR,betamicK,                 &
                 cinputmx,cinputsx,fmx,fsx,         &
                 fr2px,fr2cx,fr2ax,                 &
                 fk2px,fk2cx,fk2ax,                 &
@@ -4490,17 +4490,17 @@ end subroutine bioturb
                 Q1x,Q2x
 
 
-     real(r_2) cfluxm2r, cfluxm2k, cfluxs2r, cfluxs2k, cfluxr,   cfluxk
-     real(r_2) cfluxr2p, cfluxk2p, cfluxp2a, cfluxr2c, cfluxk2c
-     real(r_2) cfluxc2a, cfluxr2a, cfluxk2a, cfluxa2r, cfluxa2k
+     real(r_2) :: cfluxm2r, cfluxm2k, cfluxs2r, cfluxs2k, cfluxr,   cfluxk
+     real(r_2) :: cfluxr2p, cfluxk2p, cfluxp2a, cfluxr2c, cfluxk2c
+     real(r_2) :: cfluxc2a, cfluxr2a, cfluxk2a, cfluxa2r, cfluxa2k
 
      ! additional variables for kinetics3
-     real(r_2)  cfluxa,cfluxp,cfluxc2p,cfluxa2c,cfluxp2c
-     real(r_2)  kadsorpx,kdesorpx,fp2ax,moistx,soilphx,porex,xwater,phx1,phx2,phx3,siltx,tvcpoolx,tvppoolx,tvacx
-     real(r_2)  smexpa,smopt,qmaxcoeffx,qmax
-     real(r_2)  swbx,swdx,matpotx,xwater1,xwater2
-     real(r_2)  rsoil
-     real(r_2)  cfluxp2m,cfluxp2s
+     real(r_2)  :: cfluxa,cfluxp,cfluxc2p,cfluxa2c,cfluxp2c
+     real(r_2)  :: kadsorpx,kdesorpx,fp2ax,moistx,soilphx,porex,xwater,phx1,phx2,phx3,siltx,tvcpoolx,tvppoolx,tvacx
+     real(r_2)  :: smexpa,smopt,qmaxcoeffx,qmax
+     real(r_2)  :: swbx,swdx,matpotx,xwater1,xwater2
+     real(r_2)  :: rsoil
+     real(r_2)  :: cfluxp2m,cfluxp2s
 
       ! matpotx =-15.0 !dummy value for the time being
 

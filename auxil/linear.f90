@@ -3,14 +3,14 @@ program lreg
   implicit none
   real, dimension(10000,4) :: varx,vary
   real, dimension(10000)   :: x,y
-  real a,b,r,a1,a2,b1,b2,r1,r2
-  integer ndata,n,n1,n2,n3,n4,n5,i,ndataset,idata,ms,is
-  real x1,x2,x3,x4,y1,y2,y3,y4,obs1,mod1,area
+  real :: a,b,r,a1,a2,b1,b2,r1,r2
+  integer :: ndata,n,n1,n2,n3,n4,n5,i,ndataset,idata,ms,is
+  real :: x1,x2,x3,x4,y1,y2,y3,y4,obs1,mod1,area
   ! idata=3
-  integer siteid,pft,isoil,sorder,ns,bgctype
-  real    xobs,xmod,fracpocm,fracmaocm,fracmicm,fraclabm
+  integer :: siteid,pft,isoil,sorder,ns,bgctype
+  real    :: xobs,xmod,fracpocm,fracmaocm,fracmicm,fraclabm
   real, dimension(7)  :: zsoil,profobs,profmod
-  character*20 dataset(4)
+  character*20 :: dataset(4)
 
     open(1,file='input.txt')
     open(2,file='output.txt')
@@ -127,13 +127,13 @@ subroutine linreg(ndata,x,y,a,b,r)
 
    implicit none                                                                    ! no default data types
    ! input
-   integer ndata
+   integer :: ndata
    real, dimension(ndata)       ::  x, y
    ! output
-   real a,b,r
+   real :: a,b,r
    !local variables
-   integer n
-   real sumx,sumy,sumx2, sumy2, sumxy
+   integer :: n
+   real :: sumx,sumy,sumx2, sumy2, sumxy
 
    sumx =0.0; sumx2=0.0; sumxy=0.0;sumy=0.0;sumy2=0.0
    a=0.0;b=0.0;r=0.0

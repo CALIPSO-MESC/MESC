@@ -7,11 +7,11 @@
  real*8,  dimension(6)    :: param
  real*8,  dimension(3)    :: y
  integer, dimension(6)    :: nparam
- integer n,nx,ny
- real*8   cost
- character*135 chdata
- real y0,ymin,ymax,y1,y2,y3
- character data*30, data1*30,data2*20
+ integer :: n,nx,ny
+ real*8   :: cost
+ character*135 :: chdata
+ real :: y0,ymin,ymax,y1,y2,y3
+ character :: data*30, data1*30,data2*20
     ! input files
     open(11,file='last2_hwsd_param.txt')       ! last two lines in the hwsd_soc parameter file
     open(12,file='last1_hwsd_sceout.txt')      ! last line of sceout from hwsd_soc optimization

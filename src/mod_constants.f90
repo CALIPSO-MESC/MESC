@@ -5,13 +5,13 @@ module mic_constant
   integer,  parameter  :: diag=0       ! =1 for printout 0 no prinout
   integer,  parameter  :: outp=1       ! output site
   !integer,  parameter  :: msite=213   ! number of sites
-  integer                 mp           ! number of site the model runs for
-  integer                 ntime        ! 365  !12 * 4 ! 4 year's monthly global forcings
-  integer                 mpft         ! =17 !15      ! number of PFTs =17 FOR cable AND =19 FOR orchidee
-  integer                 mbgc         ! number of soil categories
-  integer                 ms
-  integer                 nlon
-  integer                 nlat
+  integer                 :: mp           ! number of site the model runs for
+  integer                 :: ntime        ! 365  !12 * 4 ! 4 year's monthly global forcings
+  integer                 :: mpft         ! =17 !15      ! number of PFTs =17 FOR cable AND =19 FOR orchidee
+  integer                 :: mbgc         ! number of soil categories
+  integer                 :: ms
+  integer                 :: nlon
+  integer                 :: nlat
 !  integer,  parameter  :: ms= 10      !7       ! soil layers
 !  real(r_2) zse(ms)
 !  data zse/0.2,0.2,0.2,0.2,0.2,0.5,0.5/

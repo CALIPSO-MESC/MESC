@@ -6,9 +6,9 @@
  real*8,  dimension(14)   :: xparam
  real*8,  dimension(6)    :: param
  integer, dimension(6)    :: nparam
- integer n,nx
- real*8   cost
- character*135 chdata
+ integer :: n,nx
+ real*8   :: cost
+ character*135 :: chdata
 
     open(11,file='last_nx_frc.txt')
     open(12,file='last_xp_frc.txt')

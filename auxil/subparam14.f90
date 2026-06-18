@@ -1,8 +1,8 @@
     program substitue
     ! produce a line of 14 parameter values for replacing default values in "params1.txt"
     implicit none
-    integer i,nx(6)
-    real cost,x(14),xp(6)
+    integer :: i,nx(6)
+    real :: cost,x(14),xp(6)
 
       open(1,file='last2.txt')
       open(2,file='p14.txt')

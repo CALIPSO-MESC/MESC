@@ -24,14 +24,14 @@ module function_module
 
     !local variables
     real*8,    dimension(16)           :: xparam16
-    integer    nx
+    integer    :: nx
     integer,   dimension(16)           :: nxopt
     real*8,    dimension(16)           :: xopt
-    real*8     totcost1,totcost2
-    integer    ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
-    integer jrestart,nparam
-    character*140 frestart_in,frestart_out,foutput
-    character*140 frac14c,f14c(5),filecluster
+    real*8     :: totcost1,totcost2
+    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    integer :: jrestart,nparam
+    character*140 :: frestart_in,frestart_out,foutput
+    character*140 :: frac14c,f14c(5),filecluster
     real(r_2), dimension(:), allocatable :: zse
 
       jrestart=0;xopt(:)=1.0
@@ -131,17 +131,17 @@ real*8 function functn_frc1(nx,xparam16)
     TYPE(mic_output)          :: micoutput
 
     !local variables
-    integer    nx
+    integer    :: nx
     integer,   dimension(16)           :: nxopt
     real*8,    dimension(16)           :: xparam16
     real*8,    dimension(16)           :: xopt
-    real*8     totcost1
-    integer    ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
-    integer jrestart,nparam
-    character*140 frestart_in,frestart_out,foutput
-    character*140 cfraction
+    real*8     :: totcost1
+    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    integer :: jrestart,nparam
+    character*140 :: frestart_in,frestart_out,foutput
+    character*140 :: cfraction
     real(r_2), dimension(:), allocatable :: zse
-    integer mpx
+    integer :: mpx
 
       jrestart=0;xopt(:)=1.0
       do nparam=1,16
@@ -217,7 +217,7 @@ END function functn_frc1
 
   real*8 function functn_soc_hwsd(nx,xparam16)
     !local variables
-    integer    nx
+    integer    :: nx
     integer,   dimension(16)           :: nxopt
     real*8,    dimension(16)           :: xparam16
     real*8,    dimension(16)           :: xopt
@@ -231,12 +231,12 @@ END function functn_frc1
     TYPE(mic_output)          :: micoutput
 
     !local variables
-    integer    ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
-    integer jrestart,nf,ok,nparam,mpx,timex
-    character*140  frestart_in,frestart_out,fparam_global,foutput
-    character*140 fhwsdsoc,fmodis,fanoc
-    real(r_2)     totcost1
-    integer       ns
+    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    integer :: jrestart,nf,ok,nparam,mpx,timex
+    character*140  :: frestart_in,frestart_out,fparam_global,foutput
+    character*140 :: fhwsdsoc,fmodis,fanoc
+    real(r_2)     :: totcost1
+    integer       :: ns
     real(r_2), dimension(:), allocatable :: zse
 
 
@@ -315,7 +315,7 @@ END function functn_soc_hwsd
    implicit none
    ! this function is yet to bet set up for running with SCE_UA optimization
    !local variables
-    integer    nx
+    integer    :: nx
     integer,   dimension(16)  :: nxopt
     real*8,    dimension(16)  :: xparam16
     real*8,    dimension(16)  :: xopt
@@ -329,11 +329,11 @@ END function functn_soc_hwsd
     TYPE(mic_output)          :: micoutput
 
     !local variables
-    integer    ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
-    integer    jrestart,nf,ok,nparam
-    character*140 frestart_in,frestart_out,fparam_global,foutput
-    character*140 fglobal(10)
-    real(r_2) totcost1
+    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    integer    :: jrestart,nf,ok,nparam
+    character*140 :: frestart_in,frestart_out,fparam_global,foutput
+    character*140 :: fglobal(10)
+    real(r_2) :: totcost1
     real(r_2), dimension(:), allocatable :: zse
 
       isoc14=0
@@ -421,7 +421,7 @@ END function functn_global4
 
   real*8 function functn_soc_aust(nx,xparam16)
     !local variables
-    integer    nx
+    integer    :: nx
     integer,   dimension(16)           :: nxopt
     real*8,    dimension(16)           :: xparam16
     real*8,    dimension(16)           :: xopt
@@ -435,12 +435,12 @@ END function functn_global4
     TYPE(mic_output)          :: micoutput
 
     !local variables
-    integer    ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
-    integer    jrestart,nf,ok,nparam,mpx,timex
-    character*140 frestart_in,frestart_out,foutput
-    character*140 faustsoc
-    real(r_2)     totcost1
-    integer       ns
+    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    integer    :: jrestart,nf,ok,nparam,mpx,timex
+    character*140 :: frestart_in,frestart_out,foutput
+    character*140 :: faustsoc
+    real(r_2)     :: totcost1
+    integer       :: ns
     real(r_2), dimension(:), allocatable :: zse
 
 
@@ -507,7 +507,7 @@ END function functn_soc_aust
 
 real*8 function functn(nx,xparam16)
    !local variables
-    integer    nx,runcase
+    integer    :: nx,runcase
     real*8,    dimension(16)  :: xparam16
 
     open(1,file='case.txt')
