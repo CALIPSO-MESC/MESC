@@ -12,20 +12,20 @@ module calcost_module
     TYPE(mic_parameter), INTENT(INOUT) :: micparam
     TYPE(mic_cpool),     INTENT(INOUT) :: miccpool
     TYPE(mic_input),     INTENT(IN)    :: micinput
-    real(r_2) zse(ms)
-    integer nx,isoc14,bgcopt
-    real*8  totcost
+    real(r_2) :: zse(ms)
+    integer :: nx,isoc14,bgcopt
+    real*8  :: totcost
     real*8, dimension(16)              :: xopt
 
     ! cost function
     real(r_2), dimension(:), allocatable           :: xcost,xobs,xobsp,xobsm
     real(r_2), dimension(:), allocatable           :: xmod,xmodp,xmodm !! weighted modelled SOC, POC and MAOC
     real(r_2), dimension(:), allocatable           :: xfracpmod,xfracmmod,xfracpobs,xfracmobs
-    integer   np,ns,ip
-    real(r_2)  xbdz,small
+    integer   :: np,ns,ip
+    real(r_2)  :: xbdz,small
 
-    real(r_2) xtop,xbot,x1,x2 !! cm
-    real(r_2) weight
+    real(r_2) :: xtop,xbot,x1,x2 !! cm
+    real(r_2) :: weight
 
 
 
@@ -130,19 +130,19 @@ module calcost_module
     TYPE(mic_cpool),     INTENT(INOUT) :: miccpool
     TYPE(mic_input),     INTENT(IN)    :: micinput
     TYPE(mic_global_input), INTENT(IN) :: micglobal
-    real(r_2) zse(ms)
-    integer nx,bgcopt
-    real*8  totcost
+    real(r_2) :: zse(ms)
+    integer :: nx,bgcopt
+    real*8  :: totcost
     real*8, dimension(16)              :: xopt
 
     ! cost function
     real(r_2), dimension(:), allocatable        :: xcost,xobs,xobsp,xobsm
     real(r_2), dimension(:), allocatable        :: xmod,xmodp,xmodm !! weighted modelled SOC, POC and MAOC
-    integer   np,ns,ip,ipsite
-    real(r_2)  xbdz
+    integer   :: np,ns,ip,ipsite
+    real(r_2)  :: xbdz
 
-    real(r_2) xtop,xbot,x1,x2 !! cm
-    real(r_2) weight
+    real(r_2) :: xtop,xbot,x1,x2 !! cm
+    real(r_2) :: weight
     real(r_2),dimension(:), allocatable         :: xmodfracp,xmodfracm,xobsfracp,xobsfracm
 
 
@@ -246,17 +246,17 @@ module calcost_module
     TYPE(mic_cpool),        INTENT(INOUT) :: miccpool
     TYPE(mic_input),        INTENT(IN)    :: micinput
     TYPE(mic_global_input), INTENT(IN)    :: micglobal
-    real(r_2) zse(ms)
-    integer nx,bgcopt,msobs
-    real*8  totcost
+    real(r_2) :: zse(ms)
+    integer :: nx,bgcopt,msobs
+    real*8  :: totcost
     real*8, dimension(16)              :: xopt
     ! cost function
     real(r_2), dimension(:),   allocatable        :: xcost,xtop,xbot
     real(r_2), dimension(:,:), allocatable        :: xmod
     real(r_2), dimension(:,:), allocatable        :: xobs7, xmod7
     real(r_2)                                     :: fracpocm,fracmaocm,fracmicm,fraclabm
-    integer   np,ns,ipsite,v,ip
-    real(r_2)  xbdz
+    integer   :: np,ns,ipsite,v,ip
+    real(r_2)  :: xbdz
 
     msobs=ms
     allocate(xcost(mp))
@@ -338,17 +338,17 @@ module calcost_module
     TYPE(mic_cpool),        INTENT(INOUT) :: miccpool
     TYPE(mic_input),        INTENT(IN)    :: micinput
     TYPE(mic_global_input), INTENT(IN)    :: micglobal
-    real(r_2) zse(ms)
-    integer nx,bgcopt,msobs
-    real*8  totcost
+    real(r_2) :: zse(ms)
+    integer :: nx,bgcopt,msobs
+    real*8  :: totcost
     real*8, dimension(16)              :: xopt
     ! cost function
     real(r_2), dimension(:),   allocatable        :: xcost,xtop,xbot
     real(r_2), dimension(:,:), allocatable        :: xmod
     real(r_2), dimension(:,:), allocatable        :: xobs7, xmod7
     real(r_2)                                     :: fracpocm,fracmaocm,fracmicm,fraclabm
-    integer   np,ns,ipsite,v,ip
-    real(r_2)  xbdz
+    integer   :: np,ns,ipsite,v,ip
+    real(r_2)  :: xbdz
 
     msobs=7
     allocate(xcost(mp))
@@ -431,16 +431,16 @@ module calcost_module
     TYPE(mic_cpool),        INTENT(INOUT) :: miccpool
     TYPE(mic_input),        INTENT(IN)    :: micinput
     TYPE(mic_global_input), INTENT(IN)    :: micglobal
-    real(r_2) zse(ms)
-    integer nx,bgcopt,msobs
-    real*8  totcost
+    real(r_2) :: zse(ms)
+    integer :: nx,bgcopt,msobs
+    real*8  :: totcost
     real*8, dimension(16)              :: xopt
     ! cost function
     real(r_2), dimension(:),   allocatable        :: xcost
     real(r_2), dimension(:,:), allocatable        :: xmod,xobs
     real(r_2), dimension(:,:), allocatable        :: xmodpoc,xmodmaoc
-    integer   np,ns,ip
-    real(r_2)  totpoc,totmaoc,xmodpocavg,xmodmaocavg,fracpocm,fracmaocm,fracmicm,fraclabm
+    integer   :: np,ns,ip
+    real(r_2)  :: totpoc,totmaoc,xmodpocavg,xmodmaocavg,fracpocm,fracmaocm,fracmicm,fraclabm
 
     msobs=3
     allocate(xcost(mp))

@@ -1,9 +1,9 @@
     program substitue
     ! use the last unfinished SCEUA parameter values as the initial values for next SCEUA
     implicit none
-    integer nx,ny,n
-    real y0,ymin,ymax
-    character data*30, data1*30,data2*20
+    integer :: nx,ny,n
+    real :: y0,ymin,ymax
+    character :: data*30, data1*30,data2*20
 
 
     real, dimension(:), allocatable  :: varx,vary,y

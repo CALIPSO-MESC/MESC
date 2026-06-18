@@ -17,8 +17,8 @@ contains
     TYPE(mic_param_default), INTENT(IN)  :: micpdef
     TYPE(mic_parameter),     INTENT(IN)  :: micparam
     TYPE(mic_input),         INTENT(IN)  :: micinput
-    integer      np,ns, kinetics,ny,isoc14
-    real(r_2)    timex,delty,h
+    integer      :: np,ns, kinetics,ny,isoc14
+    real(r_2)    :: timex,delty,h
     real(r_2),   dimension(mcpool),intent(inout)     :: xpool0,xpool1
     real(r_2),   dimension(mcpool)                   :: y1,y2,y3,y4,dy1dt,dy2dt,dy3dt,dy4dt
 
@@ -58,7 +58,7 @@ contains
 
       ! local variable
       real(r_2), dimension(:,:), allocatable   :: xkclay,km,kmx
-      integer nopt,np,ns
+      integer :: nopt,np,ns
 
      allocate(xkclay(mp,ms),km(mp,ms),kmx(mp,ms))
      do np=1,mp
@@ -104,7 +104,7 @@ contains
 
       ! local variable
       real(r_2), dimension(:,:), allocatable   :: xkclay,km,kmx
-      integer nopt,ns
+      integer :: nopt,ns
 
       allocate(xkclay(mp,ms),km(mp,ms),kmx(mp,ms))
       do ns=1,ms
@@ -148,7 +148,7 @@ contains
 
       ! local variables
       real(r_2),dimension(:,:), allocatable :: vmax
-      integer nopt,np,ns
+      integer :: nopt,np,ns
       real(r_2), dimension(:), allocatable   :: sdepthz
 
       allocate(vmax(mp,ms))
@@ -209,7 +209,7 @@ contains
 
       ! local variables
       real(r_2),dimension(:,:), allocatable :: vmax
-      integer nopt,ns
+      integer :: nopt,ns
       real(r_2), dimension(:), allocatable   :: sdepthz
 
       allocate(vmax(mp,ms))
@@ -266,7 +266,7 @@ contains
 !      TYPE(mic_param_default), INTENT(IN)     :: micpdef
       TYPE(mic_parameter), INTENT(INOUT)      :: micparam
       TYPE(mic_input), INTENT(IN)             :: micinput
-      integer nopt,np,ns
+      integer :: nopt,np,ns
 
      do np=1,mp
       do ns=1,ms
@@ -294,7 +294,7 @@ contains
       TYPE(mic_parameter), INTENT(INOUT)      :: micparam
       TYPE(mic_input), INTENT(IN)             :: micinput
       integer,                 INTENT(IN)    :: np
-      integer nopt,ns
+      integer :: nopt,ns
 
 
       do ns=1,ms
@@ -321,7 +321,7 @@ contains
      TYPE(mic_npool),         INTENT(IN)     :: micnpool
 
      ! local variables
-     integer np,ns
+     integer :: np,ns
 
       do np=1,mp
        do ns=1,ms
@@ -373,7 +373,7 @@ contains
      integer,                 INTENT(IN)     :: np
 
      ! local variables
-     integer ns
+     integer :: ns
 
 
       do ns=1,ms
@@ -422,11 +422,11 @@ contains
       TYPE(mic_parameter),     INTENT(INOUT)   :: micparam
       TYPE(mic_input),         INTENT(IN)      :: micinput
 
-      integer nx,kinetics
-      real(r_2)  xbeta
+      integer :: nx,kinetics
+      real(r_2)  :: xbeta
 
       ! local variable
-      integer nopt,np,ns
+      integer :: nopt,np,ns
       real(r_2), dimension(:), allocatable    :: tvref
 
       allocate(tvref(mp))
@@ -467,11 +467,11 @@ contains
       TYPE(mic_input),         INTENT(IN)      :: micinput
       integer,                 INTENT(IN)      :: np
 
-      integer nx,kinetics
-      real(r_2)  xbeta
+      integer :: nx,kinetics
+      real(r_2)  :: xbeta
 
       ! local variable
-      integer nopt,ns
+      integer :: nopt,ns
       real(r_2), dimension(:), allocatable    :: tvref
 
       allocate(tvref(mp))
@@ -513,7 +513,7 @@ contains
     TYPE(mic_parameter),     INTENT(INOUT)  :: micparam
     TYPE(mic_input),         INTENT(INOUT)  :: micinput
     !local variables
-    integer npft,np,ns
+    integer :: npft,np,ns
     real(r_2), dimension(:),     allocatable :: fmetleaf,fmetroot,fmetwood
     real(r_2), dimension(:,:),   allocatable :: dleafx,drootx,dwoodx
     real(r_2), dimension(:,:),   allocatable :: cinputm,cinputs
@@ -648,7 +648,7 @@ contains
       TYPE(mic_input),         INTENT(INOUT)  :: micinput
       integer,                 INTENT(IN)     :: np
       !local variables
-      integer npft,ns
+      integer :: npft,ns
       real(r_2), dimension(:),     allocatable :: fmetleaf,fmetroot,fmetwood
       real(r_2), dimension(:,:),   allocatable :: dleafx,drootx,dwoodx
       real(r_2), dimension(:,:),   allocatable :: cinputm,cinputs
@@ -789,16 +789,16 @@ contains
    !      for diffsion coefficient: cm2/delt
    use mic_constant,  ONLY : r_2
    implicit none
-   integer                        ndelt,ms
+   integer                        :: ndelt,ms
    real(r_2), dimension(ms)    :: zse
-   real(r_2)                      delt,diffsocxx
+   real(r_2)                      :: delt,diffsocxx
    real(r_2), dimension(ms)    :: xpooli,xpoole,xpool,fluxsoc
    ! local variables
-   integer                        i,j
-   real(r_2)                      deltD,tot0, tot1, totflux
+   integer                        :: i,j
+   real(r_2)                      :: deltD,tot0, tot1, totflux
    real(r_2), dimension(ms)    :: xzse
    real(r_2), dimension(ms+1)  :: sdepthx
-   real(r_2)                      coeffA, coeffB
+   real(r_2)                      :: coeffA, coeffB
    real(r_2), dimension(ms)    :: at,bt,ct,rt
 
       ! calculate the mid-point of each layer
@@ -876,10 +876,10 @@ end subroutine bioturb
     use mic_constant,  ONLY : r_2
     implicit none
     integer, parameter    :: nmax=500
-    integer ms
+    integer :: ms
     real(r_2), dimension(ms)    :: at,bt,ct,rt,u
-    integer j
-    real(r_2) bet
+    integer :: j
+    real(r_2) :: bet
     real(r_2), dimension(nmax) :: gam
 
       bet  = bt(1)
@@ -904,11 +904,11 @@ end subroutine bioturb
     !
     use mic_constant
     implicit none
-    real(r_2)                          deltx
+    real(r_2)                          :: deltx
     real(r_2), dimension(ms)        :: zse,fluxsoilwx,vsoilwx,ypool
     real(r_2), dimension(ms)        :: dypool,ypool1
-    real(r_2)                          fluxdocsx,totdoc0,totdoc1,fluxdocbot
-    integer ns,iter
+    real(r_2)                          :: fluxdocsx,totdoc0,totdoc1,fluxdocbot
+    integer :: ns,iter
 
      ypool1= ypool
      fluxdocbot = 0.0
@@ -965,9 +965,9 @@ end subroutine bioturb
      real(r_2),  dimension(mcpool),  INTENT(IN)        :: xpool
      real(r_2),  dimension(mcpool),  INTENT(INOUT)     :: y   !=dxpool/dt     ! local variables
      ! local variables
-     integer     np,ns,kinetics,ny,isoc14,ip
+     integer     :: np,ns,kinetics,ny,isoc14,ip
 
-     real(r_2)  betamicR,betamicK,                 &
+     real(r_2)  :: betamicR,betamicK,                 &
                 cinputmx,cinputsx,fmx,fsx,         &
                 fr2px,fr2cx,fr2ax,                 &
                 fk2px,fk2cx,fk2ax,                 &
@@ -981,17 +981,17 @@ end subroutine bioturb
                 Q1x,Q2x
 
 
-     real(r_2) cfluxm2r, cfluxm2k, cfluxs2r, cfluxs2k, cfluxr,   cfluxk
-     real(r_2) cfluxr2p, cfluxk2p, cfluxp2a, cfluxr2c, cfluxk2c
-     real(r_2) cfluxc2a, cfluxr2a, cfluxk2a, cfluxa2r, cfluxa2k
+     real(r_2) :: cfluxm2r, cfluxm2k, cfluxs2r, cfluxs2k, cfluxr,   cfluxk
+     real(r_2) :: cfluxr2p, cfluxk2p, cfluxp2a, cfluxr2c, cfluxk2c
+     real(r_2) :: cfluxc2a, cfluxr2a, cfluxk2a, cfluxa2r, cfluxa2k
 
      ! additional variables for kinetics3
-     real(r_2)  cfluxa,cfluxp,cfluxc2p,cfluxa2c,cfluxp2c
-     real(r_2)  kadsorpx,kdesorpx,fp2ax,moistx,soilphx,porex,xwater,phx1,phx2,phx3,siltx,tvcpoolx,tvppoolx,tvacx
-     real(r_2)  smexpa,smopt,qmaxcoeffx,qmax
-     real(r_2)  swbx,swdx,matpotx,xwater1,xwater2
-     real(r_2)  rsoil
-     real(r_2)  cfluxp2m,cfluxp2s
+     real(r_2)  :: cfluxa,cfluxp,cfluxc2p,cfluxa2c,cfluxp2c
+     real(r_2)  :: kadsorpx,kdesorpx,fp2ax,moistx,soilphx,porex,xwater,phx1,phx2,phx3,siltx,tvcpoolx,tvppoolx,tvacx
+     real(r_2)  :: smexpa,smopt,qmaxcoeffx,qmax
+     real(r_2)  :: swbx,swdx,matpotx,xwater1,xwater2
+     real(r_2)  :: rsoil
+     real(r_2)  :: cfluxp2m,cfluxp2s
 
       ! matpotx =-15.0 !dummy value for the time being
 

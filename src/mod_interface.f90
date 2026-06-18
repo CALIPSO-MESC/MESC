@@ -26,12 +26,12 @@ SUBROUTINE vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
     TYPE(mic_param_xscale),       INTENT(IN)    :: micpxdef
     TYPE(mic_param_default),      INTENT(IN)    :: micpdef
     TYPE(mic_parameter),          INTENT(INout) :: micparam
-    real(r_2) zse(ms)
+    real(r_2) :: zse(ms)
     !local variables
     real(r_2), dimension(:,:), allocatable      :: froot
     real(r_2), dimension(:),   allocatable      :: totroot
-    integer    nopt,npft,np,ns,kinetics
-    real(r_2)  depths1,depths2,krootx
+    integer    :: nopt,npft,np,ns,kinetics
+    real(r_2)  :: depths1,depths2,krootx
 
 
       allocate(froot(mpft,ms))
@@ -121,7 +121,7 @@ subroutine vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool)
     TYPE(mic_input),              INTENT(INout)   :: micinput
     TYPE(mic_npool),              INTENT(INOUT)   :: micnpool
 
-    integer  kinetics
+    integer  :: kinetics
       ! compute fractions
       call bgc_fractions(micpxdef,micpdef,micparam,micinput)
       ! compute microbial growth efficiency
@@ -149,7 +149,7 @@ subroutine vmic_param_time_single(kinetics,micpxdef,micpdef,micparam,micinput,mi
     TYPE(mic_npool),              INTENT(INOUT)   :: micnpool
     integer,                      INTENT(IN)      :: np
 
-    integer  kinetics
+    integer  :: kinetics
       ! compute fractions
       call bgc_fractions_single(micpxdef,micpdef,micparam,micinput,np)
       ! compute microbial growth efficiency
@@ -169,7 +169,7 @@ subroutine vmic_init(miccpool,micnpool)
     implicit none
     TYPE(mic_cpool),              INTENT(INOUT)   :: miccpool
     TYPE(mic_npool),              INTENT(INOUT)   :: micnpool
-    integer ip
+    integer :: ip
     real(r_2), dimension(:), allocatable    :: cpooldef
 
       allocate(cpooldef(mcpool))
@@ -193,13 +193,13 @@ subroutine vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
     use mic_variable
     implicit none
     TYPE(mic_param_xscale),  INTENT(INOUT)   :: micpxdef
-    integer bgcopt,jmodel
+    integer :: bgcopt,jmodel
     real*8, dimension(16)                    :: xopt
 !    real(r_2), dimension(17)                 :: xrootcable
 !    real(r_2), dimension(18)                 :: xrootorchidee
 !    data xrootcable/1.43,0.94,1.43,1.04,0.77,0.85,0.62,1.77,0.94,0.94,1.43,0.94,1.04,0.53,1.00,1.00,1.00/
 !    data xrootorchidee/0.94,0.94,1.04,1.04,1.04,1.43,1.43,1.43,0.85,0.62,0.94,0.94,0.85,0.85,0.85,0.85,0.85,0.85/
-    integer i
+    integer :: i
 
 ! the order is fixed.
 !  1: xav:      scaling factor for V                            [1]            (0-30)                 8.0e-6
@@ -278,11 +278,11 @@ subroutine variable_time(year,doy,micglobal,micinput,micnpool)
     use mic_constant
     use mic_variable
     implicit none
-    integer year,doy
+    integer :: year,doy
     TYPE(mic_global_input),  INTENT(INout)   :: micglobal
     TYPE(mic_input),         INTENT(INout)   :: micinput
     TYPE(mic_npool),         INTENT(INOUT)   :: micnpool
-    integer np,ns
+    integer :: np,ns
 
 
 !        print *, 'calling global2np- ntime', ntime
@@ -311,12 +311,12 @@ subroutine variable_time_single(year,doy,micglobal,micinput,micnpool,np)
     use mic_constant
     use mic_variable
     implicit none
-    integer year,doy
+    integer :: year,doy
     TYPE(mic_global_input),  INTENT(IN)   :: micglobal
     TYPE(mic_input),         INTENT(INout)   :: micinput
     TYPE(mic_npool),         INTENT(INOUT)   :: micnpool
     integer, INTENT(IN) :: np
-    integer ns
+    integer :: ns
 
 
 !        print *, 'calling global2np- ntime', ntime
@@ -353,8 +353,8 @@ end subroutine variable_time_single
     TYPE(mic_cpool),         INTENT(INOUT)   :: miccpool
     TYPE(mic_npool),         INTENT(INOUT)   :: micnpool
     TYPE(mic_output),        INTENT(INout)   :: micoutput
-    real(r_2) zse(ms)
-    integer ifsoc14,isoc14,kinetics,bgcopt,nyeqpool
+    real(r_2) :: zse(ms)
+    integer :: ifsoc14,isoc14,kinetics,bgcopt,nyeqpool
 
     ! local variables
     real(r_2),    dimension(mcpool)    :: xpool0,xpool1
@@ -362,21 +362,21 @@ end subroutine variable_time_single
     real(r_2),    dimension(ms)        :: cfluxa
 
 !    integer       ndelt,n1,n2,i,j,year,ip,np,ns,ny,nyrun
-    integer       ndelt,i,j,year,ip,np,ns,ny,nyrun
-    real(r_2)     timex,delty,fluxdocsx,diffsocxx
+    integer       :: ndelt,i,j,year,ip,np,ns,ny,nyrun
+    real(r_2)     :: timex,delty,fluxdocsx,diffsocxx
 
-    integer    jrestart
-    character*140 frestart_in,frestart_out,foutput
-    real(r_2)  cpool0, cpool1, totcinput
+    integer    :: jrestart
+    character*140 :: frestart_in,frestart_out,foutput
+    real(r_2)  :: cpool0, cpool1, totcinput
 
    ! local variables
-   real(r_2)                      deltD !,tot0,tot1,totflux
+   real(r_2)                      :: deltD !,tot0,tot1,totflux
    real(r_2), dimension(ms)   :: xzse
    real(r_2), dimension(ms+1) :: sdepthx
-   real(r_2)                     coeffA, coeffB
+   real(r_2)                     :: coeffA, coeffB
    real(r_2), dimension(ms)   :: at,bt,ct,rt
    real(r_2), dimension(ms)   :: xpool
-   real(r_2)  cleachloss
+   real(r_2)  :: cleachloss
 
 
   !  allocate(xzse(ms))
@@ -575,8 +575,8 @@ end subroutine variable_time_single
     TYPE(mic_cpool),         INTENT(INOUT)   :: miccpool
     TYPE(mic_npool),         INTENT(INOUT)   :: micnpool
     TYPE(mic_output),        INTENT(INout)   :: micoutput
-    real(r_2) zse(ms)
-    integer ifsoc14,isoc14,kinetics,bgcopt,nyeqpool
+    real(r_2) :: zse(ms)
+    integer :: ifsoc14,isoc14,kinetics,bgcopt,nyeqpool
 
     ! local variables
     real(r_2),    dimension(mcpool)    :: xpool0,xpool1
@@ -584,22 +584,22 @@ end subroutine variable_time_single
     real(r_2),    dimension(ms)        :: cfluxa
 
 !    integer       ndelt,n1,n2,i,j,year,ip,np,ns,ny,nyrun
-    integer       ndelt,i,j,year,ip,np,ns,ny,nyrun
-    real(r_2)     timex,delty,fluxdocsx,diffsocxx
+    integer       :: ndelt,i,j,year,ip,np,ns,ny,nyrun
+    real(r_2)     :: timex,delty,fluxdocsx,diffsocxx
 
-    integer    jrestart
-    character*140 frestart_in,frestart_out,foutput
-    real(r_2)  cpool0, cpool1, totcinput
+    integer    :: jrestart
+    character*140 :: frestart_in,frestart_out,foutput
+    real(r_2)  :: cpool0, cpool1, totcinput
 
    ! local variables
-   real(r_2)                      deltD !,tot0,tot1,totflux
+   real(r_2)                      :: deltD !,tot0,tot1,totflux
    real(r_2), dimension(ms)    :: xzse
    real(r_2), dimension(ms+1)  :: sdepthx
-   real(r_2)                      coeffA, coeffB
+   real(r_2)                      :: coeffA, coeffB
    real(r_2), dimension(ms)    :: at,bt,ct,rt
    real(r_2), dimension(ms)    :: xpool
-   real(r_2)  cleachloss
-   real(r_2)  depthx1,depthx2
+   real(r_2)  :: cleachloss
+   real(r_2)  :: depthx1,depthx2
 
 
       call vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
@@ -709,8 +709,8 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     TYPE(mic_cpool),         INTENT(INOUT)   :: miccpool
     TYPE(mic_npool),         INTENT(INOUT)   :: micnpool
     TYPE(mic_output),        INTENT(INout)   :: micoutput
-    real(r_2) zse(ms)
-    integer jrestart,isoc14,kinetics,bgcopt,nyeqpool
+    real(r_2) :: zse(ms)
+    integer :: jrestart,isoc14,kinetics,bgcopt,nyeqpool
 
     ! local variables
     real(r_2),    dimension(:), allocatable  :: xpool0,xpool1
@@ -719,13 +719,13 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
  !   real(r_2),    dimension(mcpool)  :: xpool0,xpool1
  !   real(r_2),    dimension(ms)      :: ypooli,ypoole,fluxsoc,cfluxa
 
-    integer       ndelt,i,j,year,ip,np,ns,ny
-    integer       nyrun,ip5
-    real(r_2)     timex,delty,fluxdocsx,diffsocxx
+    integer       :: ndelt,i,j,year,ip,np,ns,ny
+    integer       :: nyrun,ip5
+    real(r_2)     :: timex,delty,fluxdocsx,diffsocxx
 
-    character*140  frestart_in,frestart_out,foutput
-    real(r_2)      cpool0, cpool1, totcinput
-    integer       station_count, station_index
+    character*140  :: frestart_in,frestart_out,foutput
+    real(r_2)      :: cpool0, cpool1, totcinput
+    integer       :: station_count, station_index
     integer, dimension(:), allocatable :: stations_used
 
        allocate(xpool0(mcpool),xpool1(mcpool))
@@ -891,8 +891,8 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     TYPE(mic_cpool),         INTENT(INOUT)   :: miccpool
     TYPE(mic_npool),         INTENT(INOUT)   :: micnpool
     TYPE(mic_output),        INTENT(INout)   :: micoutput
-    real(r_2) zse(ms)
-    integer isoc14,kinetics,bgcopt,nyeqpool
+    real(r_2) :: zse(ms)
+    integer :: isoc14,kinetics,bgcopt,nyeqpool
     ! local variables
   !  real(r_2),    dimension(:), allocatable  :: xpool0,xpool1
   !  real(r_2),    dimension(:), allocatable  :: ypooli,ypoole,fluxsoc,cfluxa
@@ -900,13 +900,13 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     real(r_2),    dimension(mcpool)  :: xpool0,xpool1
     real(r_2),    dimension(ms)      :: ypooli,ypoole,fluxsoc,cfluxa
 
-    integer       ndelt,i,j,year,ip,np,ns,ny
-    integer       nyrun
-    real(r_2)     timex,delty,fluxdocsx,diffsocxx
+    integer       :: ndelt,i,j,year,ip,np,ns,ny
+    integer       :: nyrun
+    real(r_2)     :: timex,delty,fluxdocsx,diffsocxx
 
-    integer    jrestart
-    character*140 frestart_in,frestart_out,foutput
-    real(r_2)  cpool0, cpool1, totcinput
+    integer    :: jrestart
+    character*140 :: frestart_in,frestart_out,foutput
+    real(r_2)  :: cpool0, cpool1, totcinput
 
    ! local variables
    ! for numerical solution
@@ -916,13 +916,13 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
    integer,      parameter            :: ntrial = 100
 
    ! local variables
-   real(r_2)                      deltD !,tot0,tot1,totflux
+   real(r_2)                      :: deltD !,tot0,tot1,totflux
    real(r_2), dimension(ms)    :: xzse
    real(r_2), dimension(ms+1)  :: sdepthx
-   real(r_2)                      coeffA, coeffB
+   real(r_2)                      :: coeffA, coeffB
    real(r_2), dimension(ms)    :: at,bt,ct,rt
    real(r_2), dimension(ms)    :: xpool
-   real(r_2)  cleachloss
+   real(r_2)  :: cleachloss
 
   !  allocate(xpool0(mcpool),xpool1(mcpool))
   !  allocate(ypooli(ms),ypoole(ms),fluxsoc(ms),cfluxa(ms))

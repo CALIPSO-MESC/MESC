@@ -227,7 +227,7 @@ module mic_variable
    IMPLICIT NONE
    TYPE(mic_parameter),    INTENT(INOUT)  :: micparam
    TYPE(mic_param_xscale), INTENT(INOUT)  :: micpxdef
-   integer  mpft,mbgc,mp,ms
+   integer  :: mpft,mbgc,mp,ms
 
     allocate(micpxdef%xav(mbgc),  &
       micpxdef%xak(mbgc),         &
@@ -324,7 +324,7 @@ module mic_variable
 
   subroutine mic_allocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
    IMPLICIT NONE
-   integer mp,ms,nlon,nlat,ntime
+   integer :: mp,ms,nlon,nlat,ntime
    TYPE(mic_input),        INTENT(INOUT)  :: micinput
    TYPE(mic_global_input), INTENT(INOUT)  :: micglobal
 
@@ -379,7 +379,7 @@ module mic_variable
   subroutine mic_allocate_output(mp,micoutput)
    IMPLICIT NONE
    TYPE(mic_output), INTENT(INOUT)  :: micoutput
-   integer  mp
+   integer  :: mp
 
    allocate(micoutput%fluxcinput(mp))
    allocate(micoutput%fluxrsoil(mp))
@@ -389,7 +389,7 @@ module mic_variable
 
  subroutine mic_allocate_cpool(mp,ms,miccpool)
    IMPLICIT NONE
-   integer mp,ms
+   integer :: mp,ms
    TYPE(mic_cpool), INTENT(INOUT)  :: miccpool
    allocate(miccpool%cpool(mp,ms,mcpool), &
             miccpool%cpooleq(mp,ms,mcpool), &
@@ -402,7 +402,7 @@ module mic_variable
 
   subroutine mic_allocate_npool(mp,ms,micnpool)
    IMPLICIT NONE
-   integer mp,ms
+   integer :: mp,ms
    TYPE(mic_npool), INTENT(INOUT)  :: micnpool
 
    ALLOCATE(micnpool%mineralN(mp,ms))
@@ -415,7 +415,7 @@ module mic_variable
    IMPLICIT NONE
    TYPE(mic_parameter), INTENT(INOUT)     :: micparam
    TYPE(mic_param_xscale), INTENT(INOUT)  :: micpxdef
-   integer  mpft,mbgc,mp,ms
+   integer  :: mpft,mbgc,mp,ms
 
     deallocate(micpxdef%xav,  &
       micpxdef%xak,         &
@@ -512,7 +512,7 @@ module mic_variable
 
   subroutine mic_deallocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
    IMPLICIT NONE
-   integer mp,ms,nlon,nlat,ntime
+   integer :: mp,ms,nlon,nlat,ntime
    TYPE(mic_input), INTENT(INOUT)        :: micinput
    TYPE(mic_global_input), INTENT(INOUT) :: micglobal
 
@@ -568,7 +568,7 @@ module mic_variable
   subroutine mic_deallocate_output(mp,micoutput)
    implicit none
    type(mic_output), intent(inout)  :: micoutput
-   integer mp
+   integer :: mp
     deallocate(micoutput%fluxcinput)
     deallocate(micoutput%fluxrsoil)
     deallocate(micoutput%fluxcleach)
@@ -577,7 +577,7 @@ module mic_variable
 
  subroutine mic_deallocate_cpool(mp,ms,miccpool)
    implicit none
-   integer mp,ms
+   integer :: mp,ms
    type(mic_cpool), intent(inout)  :: miccpool
    deallocate(miccpool%cpool,  &
               miccpool%cpooleq, &
@@ -591,7 +591,7 @@ module mic_variable
 
   subroutine mic_deallocate_npool(mp,ms,micnpool)
    implicit none
-   integer mp,ms
+   integer :: mp,ms
    type(mic_npool), intent(inout)  :: micnpool
 
    deallocate(micnpool%mineralN)
