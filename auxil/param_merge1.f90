@@ -8,7 +8,7 @@
  integer, dimension(6)    :: nparam
  integer :: n,nx
  real*8   :: cost
- character*135 :: chdata
+ character(len=135) :: chdata
 
     open(11,file='last_nx_frc.txt')
     open(12,file='last_xp_frc.txt')

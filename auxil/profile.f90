@@ -638,8 +638,8 @@ end module mic_variable
     real*8     :: totcost1,totcost2
     integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer :: jrestart,nparam
-    character*99 :: frestart_in,frestart_out,foutput
-    character*120 :: frac14c,f14c(5)
+    character(len=99) :: frestart_in,frestart_out,foutput
+    character(len=120) :: frac14c,f14c(5)
 
       jrestart=0;xopt(:)=1.0
       do nparam=1,16
@@ -751,8 +751,8 @@ real*8 function functn_frc(nx,xparam16)
     real*8     :: totcost1
     integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer :: jrestart,nparam
-    character*99 :: frestart_in,frestart_out,foutput
-    character*120 :: Cfraction
+    character(len=99) :: frestart_in,frestart_out,foutput
+    character(len=120) :: Cfraction
 
 
       jrestart=0;xopt(:)=1.0
@@ -845,8 +845,8 @@ real*8 function functn_soc_wosis(nx,xparam16)
     real*8     :: totcost1
     integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer :: jrestart,nparam
-    character*99 :: frestart_in,frestart_out,foutput
-    character*120 :: finputsoc
+    character(len=99) :: frestart_in,frestart_out,foutput
+    character(len=120) :: finputsoc
 
 
       jrestart=0;xopt(:)=1.0
@@ -939,8 +939,8 @@ real*8 function functn(nx,xparam16)
     !local variables
     integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer :: jrestart,nf,ok,nparam,mpx,timex
-    character*99  :: frestart_in,frestart_out,fparam_global,foutput
-    character*120 :: fhwsdsoc
+    character(len=99)  :: frestart_in,frestart_out,fparam_global,foutput
+    character(len=120) :: fhwsdsoc
     real(r_2)     :: totcost1
 
       isoc14=0;nyeqpool = 500;ok=0;totcost1=0.0
@@ -1290,7 +1290,7 @@ END function functn
     integer:: ncid,varid,status
     integer:: np,ns,i,j
     integer:: nz
-    character*120 :: frac14c,f14c(5)
+    character(len=120) :: frac14c,f14c(5)
 
     character(len = nf90_max_name):: name
     real(r_2),dimension(:,:),allocatable:: fclay,fsilt,fph,ftemp,fmoist,fporosity,fmatpot
@@ -1561,7 +1561,7 @@ END function functn
     integer:: ncid,varid,status
     integer:: np,ns,i,j
     integer:: nz
-    character*120 :: Cfraction
+    character(len=120) :: Cfraction
 
     character(len = nf90_max_name):: name
     real(r_2),dimension(:),allocatable:: fclay,fsilt,fph,ftemp,fmoist,fporosity,fmatpot
@@ -1794,7 +1794,7 @@ END function functn
     TYPE(mic_input),     INTENT(INout)   :: micinput
     TYPE(mic_npool),     INTENT(INOUT)   :: micnpool
 
-    character*120 :: finputsoc
+    character(len=120) :: finputsoc
     integer:: ncid,varid,status
     integer:: np,ns,i,j
     character(len = nf90_max_name):: name
@@ -1996,7 +1996,7 @@ END function functn
     TYPE(mic_parameter), INTENT(INout)   :: micparam
     integer :: i, nz, ny, nc14atm(100,5)
     real(r_2)  :: year,c14del,sdx1,c14fm,sdx2
-    character*80 :: f14cz
+    character(len=80) :: f14cz
     ! give 14C zones globally
     ! 14C zone        region code
     ! NH zone 1       11
@@ -2030,7 +2030,7 @@ END function functn
     use mic_constant
     use mic_variable
     implicit none
-    character*120 :: fhwsdsoc
+    character(len=120) :: fhwsdsoc
     integer :: mpx,timex
     integer:: ncid,varid,status
    ! open .nc file
@@ -2060,7 +2060,7 @@ END function functn
     use mic_constant
     use mic_variable
     implicit none
-    character*120 :: fhwsdsoc
+    character(len=120) :: fhwsdsoc
     integer :: jglobal,bgcopt,jopt,jmodel
     TYPE(mic_parameter),          INTENT(INout) :: micparam
     TYPE(mic_global_input),       INTENT(INout) :: micglobal
@@ -2693,7 +2693,7 @@ end subroutine variable_time
     real(r_2)     :: timex,delty,fluxdocsx,diffsocxx
 
     integer    :: jrestart
-    character*99 :: frestart_in,frestart_out,foutput
+    character(len=99) :: frestart_in,frestart_out,foutput
     real(r_2)  :: cpool0, cpool1, totcinput
 
    ! local variables
@@ -2913,7 +2913,7 @@ end subroutine variable_time
     real(r_2)     :: timex,delty,fluxdocsx,diffsocxx
 
     integer    :: jrestart
-    character*99 :: frestart_in,frestart_out,foutput
+    character(len=99) :: frestart_in,frestart_out,foutput
     real(r_2)  :: cpool0, cpool1, totcinput
 
        ! local variables
@@ -3142,7 +3142,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     integer       :: nyrun,ip5
     real(r_2)     :: timex,delty,fluxdocsx,diffsocxx
 
-    character*99  :: frestart_in,frestart_out,foutput
+    character(len=99)  :: frestart_in,frestart_out,foutput
     real(r_2)     :: cpool0, cpool1, totcinput
 
 
@@ -3300,7 +3300,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     real(r_2)     :: timex,delty,fluxdocsx,diffsocxx
 
     integer    :: jrestart
-    character*99 :: frestart_in,frestart_out,foutput
+    character(len=99) :: frestart_in,frestart_out,foutput
     real(r_2)  :: cpool0, cpool1, totcinput
 
    ! local variables

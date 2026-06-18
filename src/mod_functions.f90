@@ -30,8 +30,8 @@ module function_module
     real*8     :: totcost1,totcost2
     integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer :: jrestart,nparam
-    character*140 :: frestart_in,frestart_out,foutput
-    character*140 :: frac14c,f14c(5),filecluster
+    character(len=140) :: frestart_in,frestart_out,foutput
+    character(len=140) :: frac14c,f14c(5),filecluster
     real(r_2), dimension(:), allocatable :: zse
 
       jrestart=0;xopt(:)=1.0
@@ -138,8 +138,8 @@ real*8 function functn_frc1(nx,xparam16)
     real*8     :: totcost1
     integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer :: jrestart,nparam
-    character*140 :: frestart_in,frestart_out,foutput
-    character*140 :: cfraction
+    character(len=140) :: frestart_in,frestart_out,foutput
+    character(len=140) :: cfraction
     real(r_2), dimension(:), allocatable :: zse
     integer :: mpx
 
@@ -233,8 +233,8 @@ END function functn_frc1
     !local variables
     integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer :: jrestart,nf,ok,nparam,mpx,timex
-    character*140  :: frestart_in,frestart_out,fparam_global,foutput
-    character*140 :: fhwsdsoc,fmodis,fanoc
+    character(len=140)  :: frestart_in,frestart_out,fparam_global,foutput
+    character(len=140) :: fhwsdsoc,fmodis,fanoc
     real(r_2)     :: totcost1
     integer       :: ns
     real(r_2), dimension(:), allocatable :: zse
@@ -331,8 +331,8 @@ END function functn_soc_hwsd
     !local variables
     integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer    :: jrestart,nf,ok,nparam
-    character*140 :: frestart_in,frestart_out,fparam_global,foutput
-    character*140 :: fglobal(10)
+    character(len=140) :: frestart_in,frestart_out,fparam_global,foutput
+    character(len=140) :: fglobal(10)
     real(r_2) :: totcost1
     real(r_2), dimension(:), allocatable :: zse
 
@@ -437,8 +437,8 @@ END function functn_global4
     !local variables
     integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer    :: jrestart,nf,ok,nparam,mpx,timex
-    character*140 :: frestart_in,frestart_out,foutput
-    character*140 :: faustsoc
+    character(len=140) :: frestart_in,frestart_out,foutput
+    character(len=140) :: faustsoc
     real(r_2)     :: totcost1
     integer       :: ns
     real(r_2), dimension(:), allocatable :: zse
