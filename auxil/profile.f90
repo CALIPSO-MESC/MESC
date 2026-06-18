@@ -1268,7 +1268,7 @@ END function functn
        micpxdef%xvmaxbeta(npft)  = x(14)
        ! the following parameters are fixed to 1.0
        micpxdef%xfp2ax(npft)     = x(15)
-	   micpxdef%xbeta(npft)      = x(16)
+       micpxdef%xbeta(npft)      = x(16)
        micpxdef%xdesorp(npft)    = x(17)
     enddo
     close(100)
@@ -2543,7 +2543,7 @@ subroutine vmic_init(miccpool,micnpool)
       cpooldef(1) = 16.5*0.1;     cpooldef(2) = 16.5*0.1
       cpooldef(3) = 16.5*0.025;   cpooldef(4) = 16.5*0.025
       cpooldef(5) = 16.5*0.1125;  cpooldef(6) = 16.5*0.375;  cpooldef(7) = 16.5*0.2625
-	  cpooldef(8) = 0.0;          cpooldef(9) = 0.0;         cpooldef(10)= 0.0
+      cpooldef(8) = 0.0;          cpooldef(9) = 0.0;         cpooldef(10)= 0.0
 
       do ip=1,mcpool
          miccpool%cpool(:,:,ip) = cpooldef(ip)
@@ -4679,10 +4679,10 @@ end subroutine bioturb
 
          !active SOM: [far*A4+fak*A8+A9+A10-A3-A7]
          y(7) = cfluxr2a + cfluxk2a + cfluxp2a + cfluxc2a - cfluxa2r - cfluxa2k
-		 ! additional dummy pools
-		 y(8) = 0.0
-		 y(9) = 0.0
-		 y(10)= 0.0
+         ! additional dummy pools
+         y(8) = 0.0
+         y(9) = 0.0
+         y(10)= 0.0
 
       endif
 

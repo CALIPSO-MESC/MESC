@@ -1170,10 +1170,10 @@ end subroutine bioturb
 
          !active SOM: [far*A4+fak*A8+A9+A10-A3-A7]
          y(7) = cfluxr2a + cfluxk2a + cfluxp2a + cfluxc2a - cfluxa2r - cfluxa2k
-		 ! additional dummy pools
-		 y(8) = 0.0
-		 y(9) = 0.0
-		 y(10)= 0.0
+         ! additional dummy pools
+         y(8) = 0.0
+         y(9) = 0.0
+         y(10)= 0.0
 
       endif
 

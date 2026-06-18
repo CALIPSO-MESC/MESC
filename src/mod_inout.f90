@@ -1513,12 +1513,12 @@ end subroutine lonlat2mpx4b
     TYPE(mic_input),     INTENT(INout)   :: micinput
     TYPE(mic_npool),     INTENT(INOUT)   :: micnpool
     real(r_2) :: zse(ms)       ! soil layer thickness in m-2
-	! local variables
+    ! local variables
     integer:: ncid,varid,status
     integer:: np,ns,i,j
     integer:: nz
     character*140 :: frac14c,f14c(5)
-	character*140 :: filecluster   ! cluster filename (not used)
+    character*140 :: filecluster   ! cluster filename (not used)
 
     character(len = nf90_max_name):: name
     real(r_2),dimension(:,:),allocatable:: fclay,fsilt,fph,ftemp,fmoist,fporosity,fmatpot
