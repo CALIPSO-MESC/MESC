@@ -178,7 +178,7 @@ subroutine vmic_init(miccpool,micnpool)
       cpooldef(1) = 16.5*0.1;     cpooldef(2) = 16.5*0.1
       cpooldef(3) = 16.5*0.025;   cpooldef(4) = 16.5*0.025
       cpooldef(5) = 16.5*0.1125;  cpooldef(6) = 16.5*0.375;  cpooldef(7) = 16.5*0.2625
-	  cpooldef(8) = 0.0;          cpooldef(9) = 0.0;         cpooldef(10)= 0.0
+      cpooldef(8) = 0.0;          cpooldef(9) = 0.0;         cpooldef(10)= 0.0
 
       do ip=1,mcpool
          miccpool%cpool(:,:,ip) = cpooldef(ip)
