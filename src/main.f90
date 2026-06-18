@@ -4,7 +4,7 @@ program testvmic
     real(8) :: xparam(16),xcost,fa
     integer :: nx
 
-    nx=6  
+    nx=6
     open(20,file='params_val.txt')
     read(20,*) xcost,xparam(1:nx)
     close(20)
