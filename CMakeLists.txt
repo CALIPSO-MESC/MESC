@@ -13,14 +13,10 @@ set(CMAKE_Fortran_STANDARD_REQUIRED ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # ------------------------------------------------------------
-# 2) Find NetCDF Fortran
-#   - Prefer nf-config from module environment
-#   - Fallback to NetCDFFortran_ROOT / env NETCDF_FORTRAN / env NETCDF
+# 2) Find NetCDF
+#    Delegates to cmake/FindNetCDFFortran.cmake
 # ------------------------------------------------------------
 find_package(NetCDFFortran REQUIRED)
-
-message(STATUS "NetCDFFortran include: ${NetCDFFortran_INCLUDE_DIRS}")
-message(STATUS "NetCDFFortran libs   : ${NetCDFFortran_LIBRARIES}")
 
 # ------------------------------------------------------------
 # 3) Sources and executable
@@ -45,18 +41,14 @@ set_target_properties(main PROPERTIES
 
 # ------------------------------------------------------------
 # 4) Include + Link
-#   - include: netcdf.mod location
-#   - link: nf-config --flibs output or fallback libs
 # ------------------------------------------------------------
 target_include_directories(main PRIVATE
   "${CMAKE_BINARY_DIR}/mod"
-  ${NetCDFFortran_INCLUDE_DIRS}
+  ${NETCDF_INCLUDE_DIRS}
 )
 
-# NetCDFFortran_LIBRARIES may be a list of raw flags (e.g., -L... -lnetcdff -lnetcdf ...)
-# CMake is OK with passing these through to the linker.
 target_link_libraries(main PRIVATE
-  ${NetCDFFortran_LIBRARIES}
+  ${NETCDF_LINK_FLAGS}
 )
 
 # ------------------------------------------------------------
