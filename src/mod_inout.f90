@@ -19,7 +19,7 @@ contains
     implicit none
     TYPE(mic_cpool),              INTENT(INOUT)   :: miccpool
     TYPE(mic_npool),              INTENT(INOUT)   :: micnpool
-    character*140 :: frestart_in                        ! restart filename
+    character(len=140) :: frestart_in                        ! restart filename
     ! local variables
     integer :: mpx,msx,mcpoolx                          ! array dimensions
     integer :: status,ncid,varid                        ! local variables
@@ -253,7 +253,7 @@ contains
     use mic_variable
     implicit none
     TYPE(mic_param_xscale)    :: micpxdef
-    character*140  :: fglobalparam
+    character(len=140)  :: fglobalparam
     integer :: jmodel
     integer :: ibgc,ipft,n
     real(r_2), dimension(14)    :: x
@@ -302,7 +302,7 @@ contains
   ! read in global patch area fraction and calculate the number of land cell using sum(PFTfrac(lon,lat,pft))
   use netcdf
   use mic_constant
-  character*140 :: fpatch
+  character(len=140) :: fpatch
   integer :: jmodel,mpx
   real*8, dimension(:,:,:),   allocatable :: xfield3
   real*4, dimension(:,:,:,:), allocatable :: xfield4
@@ -376,7 +376,7 @@ contains
   TYPE(mic_global_input), INTENT(INOUT)  :: micglobal
   TYPE(mic_parameter),    INTENT(INOUT)  :: micparam
   real(r_2)  :: zse(ms)
-  character*140 :: fglobal(10)
+  character(len=140) :: fglobal(10)
   integer       :: jglobal,bgcopt,jopt,jmodel
   ! local variables
   real(r_2), dimension(nlon)            :: lon
@@ -802,7 +802,7 @@ subroutine getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal
   TYPE(mic_global_input), INTENT(INOUT)  :: micglobal
   TYPE(mic_parameter),    INTENT(INOUT)  :: micparam
   real(r_2) :: zse(ms)
-  character*140 :: fglobal(10)
+  character(len=140) :: fglobal(10)
   integer       :: jglobal,bgcopt,jopt,jmodel
   ! local variables
   real(r_2), dimension(nlon)            :: lon
@@ -1517,8 +1517,8 @@ end subroutine lonlat2mpx4b
     integer:: ncid,varid,status
     integer:: np,ns,i,j
     integer:: nz
-    character*140 :: frac14c,f14c(5)
-    character*140 :: filecluster   ! cluster filename (not used)
+    character(len=140) :: frac14c,f14c(5)
+    character(len=140) :: filecluster   ! cluster filename (not used)
 
     character(len = nf90_max_name):: name
     real(r_2),dimension(:,:),allocatable:: fclay,fsilt,fph,ftemp,fmoist,fporosity,fmatpot
@@ -1802,7 +1802,7 @@ end subroutine lonlat2mpx4b
     use mic_constant
     use mic_variable
     implicit none
-    character*140 :: cfraction
+    character(len=140) :: cfraction
     integer :: mpx
     integer:: ncid,varid,status
    ! open .nc file
@@ -1835,7 +1835,7 @@ end subroutine lonlat2mpx4b
     integer:: ncid,varid,status
     integer:: np,ns,i,j
     integer:: nz
-    character*140 :: Cfraction
+    character(len=140) :: Cfraction
 
     character(len = nf90_max_name):: name
     real(r_2),dimension(:),         allocatable:: fclay,fsilt,fph,ftemp,fmoist,fporosity,fmatpot
@@ -2186,7 +2186,7 @@ end subroutine lonlat2mpx4b
     TYPE(mic_parameter), INTENT(INout)   :: micparam
     integer :: i, nz, ny, nc14atm(100,5)
     real(r_2)  :: year,c14del,sdx1,c14fm,sdx2
-    character*140 :: f14cz
+    character(len=140) :: f14cz
     ! give 14C zones globally
     ! 14C zone        region code
     ! NH zone 1       11
@@ -2220,7 +2220,7 @@ end subroutine lonlat2mpx4b
     use mic_constant
     use mic_variable
     implicit none
-    character*140 :: fhwsdsoc
+    character(len=140) :: fhwsdsoc
     integer :: mpx,timex
     integer:: ncid,varid,status
    ! open .nc file
@@ -2250,7 +2250,7 @@ end subroutine lonlat2mpx4b
     use mic_constant
     use mic_variable
     implicit none
-    character*140 :: fhwsdsoc,fmodis,fanoc
+    character(len=140) :: fhwsdsoc,fmodis,fanoc
     integer :: jglobal,bgcopt,jopt,jmodel
     TYPE(mic_parameter),          INTENT(INout) :: micparam
     TYPE(mic_global_input),       INTENT(INout) :: micglobal
@@ -2620,7 +2620,7 @@ end subroutine getdata_hwsd
 subroutine screenout(runmodel,jmodel,bgcopt,xopt,cost)
     use mic_constant
     implicit none
-    character*10 :: runmodel
+    character(len=10) :: runmodel
     integer :: jmodel,bgcopt
     real*8,    dimension(16)           :: xopt
     real*8     :: cost
@@ -2636,7 +2636,7 @@ end subroutine screenout
     use mic_constant
     use mic_variable
     implicit none
-    character*140 :: faustsoc
+    character(len=140) :: faustsoc
     integer :: mpx,timex
     integer:: ncid,varid,status
    ! open .nc file
@@ -2675,7 +2675,7 @@ end subroutine screenout
     data ligcleaf/0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28/
     data ligcwood/0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4/
     data ligcroot/0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28/
-    character*140 :: faustsoc
+    character(len=140) :: faustsoc
     integer :: jglobal,bgcopt,jopt,jmodel
     TYPE(mic_parameter),          INTENT(INout) :: micparam
     TYPE(mic_global_input),       INTENT(INout) :: micglobal

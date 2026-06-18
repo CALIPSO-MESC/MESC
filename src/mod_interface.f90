@@ -366,7 +366,7 @@ end subroutine variable_time_single
     real(r_2)     :: timex,delty,fluxdocsx,diffsocxx
 
     integer    :: jrestart
-    character*140 :: frestart_in,frestart_out,foutput
+    character(len=140) :: frestart_in,frestart_out,foutput
     real(r_2)  :: cpool0, cpool1, totcinput
 
    ! local variables
@@ -588,7 +588,7 @@ end subroutine variable_time_single
     real(r_2)     :: timex,delty,fluxdocsx,diffsocxx
 
     integer    :: jrestart
-    character*140 :: frestart_in,frestart_out,foutput
+    character(len=140) :: frestart_in,frestart_out,foutput
     real(r_2)  :: cpool0, cpool1, totcinput
 
    ! local variables
@@ -723,7 +723,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     integer       :: nyrun,ip5
     real(r_2)     :: timex,delty,fluxdocsx,diffsocxx
 
-    character*140  :: frestart_in,frestart_out,foutput
+    character(len=140)  :: frestart_in,frestart_out,foutput
     real(r_2)      :: cpool0, cpool1, totcinput
     integer       :: station_count, station_index
     integer, dimension(:), allocatable :: stations_used
@@ -905,7 +905,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     real(r_2)     :: timex,delty,fluxdocsx,diffsocxx
 
     integer    :: jrestart
-    character*140 :: frestart_in,frestart_out,foutput
+    character(len=140) :: frestart_in,frestart_out,foutput
     real(r_2)  :: cpool0, cpool1, totcinput
 
    ! local variables

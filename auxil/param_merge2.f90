@@ -9,7 +9,7 @@
  integer, dimension(6)    :: nparam
  integer :: n,nx,ny
  real*8   :: cost
- character*135 :: chdata
+ character(len=135) :: chdata
  real :: y0,ymin,ymax,y1,y2,y3
  character :: data*30, data1*30,data2*20
     ! input files

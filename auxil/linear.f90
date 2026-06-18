@@ -10,7 +10,7 @@ program lreg
   integer :: siteid,pft,isoil,sorder,ns,bgctype
   real    :: xobs,xmod,fracpocm,fracmaocm,fracmicm,fraclabm
   real, dimension(7)  :: zsoil,profobs,profmod
-  character*20 :: dataset(4)
+  character(len=20) :: dataset(4)
 
     open(1,file='input.txt')
     open(2,file='output.txt')
