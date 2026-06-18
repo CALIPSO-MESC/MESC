@@ -1,6 +1,6 @@
 !> declarre all variables and assign values to model constants
 !! allocate   variables
-!! deallocate variables 
+!! deallocate variables
 !!
 
 ! this version is designed to work with monthly focings from CABLE/ORCHIDEE model
@@ -21,7 +21,7 @@
 ! (10) use bgctype based cluster analysis to group soils "micglobal%bgctype(mbgc)"
 ! (11) need to "functn_frc" and "functn_c14" working with new approach
 !
-! this version run the model for global sensitivity analysis for 
+! this version run the model for global sensitivity analysis for
 ! for kinetcs=3 (the combined model)                        [defualt values] (scaling factor range)
 !  1: xav:      scaling factor for V                            [1]              (0-30)               8.0e-6
 !  2: xak:      scaling factor for K                            [1]              (0-30)               10.0
@@ -38,9 +38,9 @@
 ! 12: xNPP:      carbon input                                   [1]            (0.5,2.0)              NPP
 ! 13: xrootbeta: scaling for depth-dependent of root C input    [1]            (0.5,5.0)              2.0
 ! 14: xvmaxbeta: scaling for depth-dependent of vmax            [1]            (0.5,5.0)              2.0
-! 15: xfp2ax:    scaling factor for fp2ax                       [1]            (0.5-2.0)                              ! not used 
-! 16: xdesorp:   desorption coefficient (kinetics=1,2)          [1]            (0.1,10.0)                             ! not used   
-! 17: xbeta:     beta parameter 
+! 15: xfp2ax:    scaling factor for fp2ax                       [1]            (0.5-2.0)                              ! not used
+! 16: xdesorp:   desorption coefficient (kinetics=1,2)          [1]            (0.1,10.0)                             ! not used
+! 17: xbeta:     beta parameter
 module mic_variable
   use mic_constant
   implicit none
@@ -65,9 +65,9 @@ module mic_variable
       xnpp,        &
       xdesorp,     &
       xrootbeta,   &
-      xvmaxbeta        
+      xvmaxbeta
   end type mic_param_xscale
-  
+
   TYPE mic_param_default
      !default values for Michaelis-Menten K
      real(r_2)  ::   &
@@ -80,9 +80,9 @@ module mic_variable
      xk3 =4.0,       &
      xj1 =2.0,       &
      xj2 =4.0,       &
-     xj3 =6.0 
+     xj3 =6.0
      !default values for Michaelis-Menten Vmax
-     real(r_2)  ::   &     
+     real(r_2)  ::   &
      sv = 0.063,     &
      av = 10.0*8.0e-6,    &
      bv = 5.47,      &
@@ -93,26 +93,26 @@ module mic_variable
      xw2= 3.0,       &
      xw3= 2.0
      ! default values of MM kinetics (Wieder et al. 2015)
-     real(r_2)  ::   & 
+     real(r_2)  ::   &
      Q1=4.0,         &
      Q2=4.0,         &
      fm=0.1,         &
      fs=0.1
      ! microbial turnover rate parameter values (Wieder et al. (2015))
-     real(r_2)  ::        &   
+     real(r_2)  ::        &
      xtv      = 100.0,    &
      betamic  = 2.0,      &
      tvmicR   = 0.00052,  &
-     tvmicK   = 0.00024     
+     tvmicK   = 0.00024
      !dependence on the partitioning of necromass on soil clay and substrate quality
-     real(r_2)  ::   &    
+     real(r_2)  ::   &
      fmicsom1=0.432, &
      fmicsom2=0.098, &
      fmicsom3=10.56, &
      fmicsom4=29.78, &
      fmicsom5=2.61
      !microbial carbon use efficiency
-     real(r_2)  ::          &    
+     real(r_2)  ::          &
      cuemax    = 0.80,      &
      cue_coef1 = 0.66,      &
      cue_coef2 = 1.23,      &
@@ -121,16 +121,16 @@ module mic_variable
      epislon3 = 0.7,        &
      epislon4 = 0.35
      !adsorption dependence on soil pH (!Table A1 Abramoff et al. (2022))
-     real(r_2)  ::          & 
-     phcoeff1 = 0.2429,      &      
-     phcoeff2 = -0.3632        
-!     phcoeff1 = 0.186,      &      
-!     phcoeff2 = 0.216   
+     real(r_2)  ::          &
+     phcoeff1 = 0.2429,      &
+     phcoeff2 = -0.3632
+!     phcoeff1 = 0.186,      &
+!     phcoeff2 = 0.216
      !dependence on soil moisture  Yan et al (2018)
-     real(r_2)  ::          & 
-     smkdesorp = 0.1,       & 
-     smexpns   = 2.0,       & 
-     smexpb    = 0.75 
+     real(r_2)  ::          &
+     smkdesorp = 0.1,       &
+     smexpns   = 2.0,       &
+     smexpb    = 0.75
      ! dependence of Qmax on soil texture
      real(r_2) :: qmaxcoeff = 0.4 * 0.5   ! Georgiou et al. (2022)
      ! SOC diffusion coefficient. see Table 1,Camino-Serrano et al. (2018)
@@ -150,7 +150,7 @@ module mic_variable
    !   rootbeta = 2.0,          &
    !   tvcpoolx = 0.102 * 0.02/24.0/2.0,  &
    !   tvppoolx = 4.705 * 0.019/24./10.00, &
-   !   tvacx    = 0.1   * 0.0015/24.0,&                                                
+   !   tvacx    = 0.1   * 0.0015/24.0,&
   END TYPE mic_param_default
 
   TYPE mic_parameter
@@ -165,15 +165,15 @@ module mic_variable
   real(r_2), dimension(:,:),    allocatable  :: fr2p,fk2p,fr2c,fk2c,fr2a,fk2a
   real(r_2), dimension(:),      allocatable  :: xcnleaf,xcnroot,xcnwood,fligleaf,fligroot,fligwood
   real(r_2), dimension(:),      allocatable  :: diffsocx
-  ! additional parameters for kinetics3 
+  ! additional parameters for kinetics3
   real(r_2), dimension(:,:),    allocatable  :: kdesorp   !mg C cm-3 hour-1
   real(r_2), dimension(:,:),    allocatable  :: kadsorp   !1/hour
   real(r_2), dimension(:,:),    allocatable  :: fp2a
   real(r_2), dimension(:,:),    allocatable  :: tvcpool   !1/hour
   real(r_2), dimension(:,:),    allocatable  :: tvppool   !1/hour
   real(r_2), dimension(:,:),    allocatable  :: tvac      !1/hour (leaching rate coefficient)
-  real(r_2), dimension(:,:),    allocatable  :: qmaxcoeff !coefficient relating qmax to soil clay+silt 
-  
+  real(r_2), dimension(:,:),    allocatable  :: qmaxcoeff !coefficient relating qmax to soil clay+silt
+
   ! the following are alrealy available in CABLE
   integer,   dimension(:),      allocatable  :: pft,bgctype,isoil,sorder,region,siteid,dataid
   real(r_2), dimension(:,:),    allocatable  :: sdepth,fracroot
@@ -182,7 +182,7 @@ module mic_variable
   real(r_2), dimension(:,:,:),  allocatable  :: c14atm         !atmospheric 14C
   integer,   dimension(:),      allocatable  :: nyc14obs       !year at which 14C was observed
   integer,   dimension(:),      allocatable  :: top,bot
-  
+
   END TYPE mic_parameter
 
   TYPE mic_input
@@ -191,7 +191,7 @@ module mic_variable
   real(r_2), dimension(:,:),    allocatable  :: cinputm
   real(r_2), dimension(:,:),    allocatable  :: cinputs
   real(r_2), dimensioN(:),      allocatable  :: fcnpp
-  
+
   END TYPE mic_input
 
   TYPE mic_global_input
@@ -203,24 +203,24 @@ module mic_variable
     real(r_2), dimension(:),      allocatable  :: ligleaf,ligwood,ligroot
     real(r_2), dimension(:,:),    allocatable  :: dleaf,dwood,droot,cnleaf,cnwood,cnroot
   END TYPE mic_global_input
-  
+
   TYPE mic_output
-  real(r_2), dimension(:),    allocatable  :: fluxcinput   
-  real(r_2), dimension(:),    allocatable  :: fluxrsoil   
+  real(r_2), dimension(:),    allocatable  :: fluxcinput
+  real(r_2), dimension(:),    allocatable  :: fluxrsoil
   real(r_2), dimension(:),    allocatable  :: fluxcleach
   END TYPE mic_output
-  
+
   TYPE mic_cpool
   real(r_2), dimension(:,:,:),  allocatable  :: cpool
   real(r_2), dimension(:,:,:),  allocatable  :: cpooleq
   real(r_2), dimension(:),      allocatable  :: cpooleqp,cpooleqm,c12pooleqp,c12pooleqm
   END TYPE mic_cpool
- 
+
   TYPE mic_npool
   real(r_2), dimension(:,:),    allocatable  :: mineralN
-  END TYPE mic_npool 
-  
- 
+  END TYPE mic_npool
+
+
  CONTAINS
 
   subroutine mic_allocate_parameter(mpft,mbgc,mp,ms,micpxdef,micparam)
@@ -248,39 +248,39 @@ module mic_variable
       micpxdef%xvmaxbeta(mbgc))
 
     allocate(micparam%K1(mp,ms),  &
-             micparam%K2(mp,ms),  & 
-             micparam%K3(mp,ms),  & 
-             micparam%J1(mp,ms),  & 
-             micparam%J2(mp,ms),  & 
-             micparam%J3(mp,ms),  & 
-             micparam%V1(mp,ms),  & 
-             micparam%V2(mp,ms),  & 
-             micparam%V3(mp,ms),  & 
-             micparam%W1(mp,ms),  & 
-             micparam%W2(mp,ms),  & 
-             micparam%W3(mp,ms),  & 
+             micparam%K2(mp,ms),  &
+             micparam%K3(mp,ms),  &
+             micparam%J1(mp,ms),  &
+             micparam%J2(mp,ms),  &
+             micparam%J3(mp,ms),  &
+             micparam%V1(mp,ms),  &
+             micparam%V2(mp,ms),  &
+             micparam%V3(mp,ms),  &
+             micparam%W1(mp,ms),  &
+             micparam%W2(mp,ms),  &
+             micparam%W3(mp,ms),  &
              micparam%desorp(mp,ms),  &
              micparam%Q1(mp,ms),      &
              micparam%Q2(mp,ms),      &
              micparam%fm(mp,ms),      &
              micparam%fs(mp,ms),      &
-             micparam%mgeR1(mp,ms),   & 
-             micparam%mgeR2(mp,ms),   & 
-             micparam%mgeR3(mp,ms),   & 
-             micparam%mgeK1(mp,ms),   & 
-             micparam%mgeK2(mp,ms),   & 
-             micparam%mgeK3(mp,ms),   & 
+             micparam%mgeR1(mp,ms),   &
+             micparam%mgeR2(mp,ms),   &
+             micparam%mgeR3(mp,ms),   &
+             micparam%mgeK1(mp,ms),   &
+             micparam%mgeK2(mp,ms),   &
+             micparam%mgeK3(mp,ms),   &
              micparam%fmetave(mp,ms), &
              micparam%tvmicR(mp,ms),  &
              micparam%tvmicK(mp,ms),  &
              micparam%betamicR(mp,ms),     &
              micparam%betamicK(mp,ms),     &
              micparam%cn_r(mp,ms,mcpool),  &
-             micparam%fr2p(mp,ms),   & 
-             micparam%fk2p(mp,ms),   & 
-             micparam%fr2c(mp,ms),   & 
+             micparam%fr2p(mp,ms),   &
+             micparam%fk2p(mp,ms),   &
+             micparam%fr2c(mp,ms),   &
              micparam%fk2c(mp,ms),   &
-             micparam%fr2a(mp,ms),   & 
+             micparam%fr2a(mp,ms),   &
              micparam%fk2a(mp,ms))
 
     allocate(micparam%xcnleaf(mp),   &
@@ -302,7 +302,7 @@ module mic_variable
     allocate(micparam%sdepth(mp,ms),   &
              micparam%fracroot(mp,ms), &
              micparam%csoilobs(mp,ms), &
-             micparam%fracaoc(mp,ms), &             
+             micparam%fracaoc(mp,ms), &
              micparam%csoilobsp(mp,ms), &
              micparam%csoilobsm(mp,ms), &
              micparam%c14soilobsp(mp), &
@@ -312,16 +312,16 @@ module mic_variable
              micparam%top(mp),        &
              micparam%bot(mp))
 
-! additional variables for kinetics3              
+! additional variables for kinetics3
     allocate(micparam%kdesorp(mp,ms), &
              micparam%kadsorp(mp,ms), &
              micparam%fp2a(mp,ms),    &
              micparam%tvcpool(mp,ms), &
-             micparam%tvppool(mp,ms), & 
+             micparam%tvppool(mp,ms), &
              micparam%tvac(mp,ms),    &
              micparam%qmaxcoeff(mp,ms))
   end subroutine mic_allocate_parameter
-  
+
   subroutine mic_allocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
    IMPLICIT NONE
    integer mp,ms,nlon,nlat,ntime
@@ -348,13 +348,13 @@ module mic_variable
              micglobal%lat(mp),             &
              micglobal%time(ntime),         &
              micglobal%pft(mp),             &
-             micglobal%bgctype(mp),         &             
+             micglobal%bgctype(mp),         &
              micglobal%isoil(mp),           &
              micglobal%sorder(mp),          &
              micglobal%siteid(mp),          &
-             micglobal%area(mp),            &             
-             micglobal%patchfrac(mp,mpft),  &       
-             micglobal%npp(mp),             &   
+             micglobal%area(mp),            &
+             micglobal%patchfrac(mp,mpft),  &
+             micglobal%npp(mp),             &
              micglobal%ph(mp),              &
              micglobal%clay(mp),            &
              micglobal%silt(mp),            &
@@ -363,7 +363,7 @@ module mic_variable
              micglobal%avgts(mp),           &
              micglobal%avgms(mp),           &
              micglobal%tsoil(mp,ms,ntime),  &
-             micglobal%moist(mp,ms,ntime),  &             
+             micglobal%moist(mp,ms,ntime),  &
              micglobal%matpot(mp,ms,ntime), &
              micglobal%ligleaf(mp),         &
              micglobal%ligwood(mp),         &
@@ -373,15 +373,15 @@ module mic_variable
              micglobal%droot(mp,ntime),     &
              micglobal%cnleaf(mp,ntime),    &
              micglobal%cnwood(mp,ntime),    &
-             micglobal%cnroot(mp,ntime))       
+             micglobal%cnroot(mp,ntime))
   end subroutine mic_allocate_input
-  
+
   subroutine mic_allocate_output(mp,micoutput)
    IMPLICIT NONE
    TYPE(mic_output), INTENT(INOUT)  :: micoutput
    integer  mp
 
-   allocate(micoutput%fluxcinput(mp))   
+   allocate(micoutput%fluxcinput(mp))
    allocate(micoutput%fluxrsoil(mp))
    allocate(micoutput%fluxcleach(mp))
 
@@ -396,21 +396,21 @@ module mic_variable
             miccpool%cpooleqp(mp),   &
             miccpool%cpooleqm(mp),  &
             miccpool%c12pooleqp(mp), &
-            miccpool%c12pooleqm(mp)) 
- end subroutine mic_allocate_cpool 
+            miccpool%c12pooleqm(mp))
+ end subroutine mic_allocate_cpool
 
- 
+
   subroutine mic_allocate_npool(mp,ms,micnpool)
    IMPLICIT NONE
    integer mp,ms
    TYPE(mic_npool), INTENT(INOUT)  :: micnpool
 
    ALLOCATE(micnpool%mineralN(mp,ms))
-   
-  end subroutine mic_allocate_npool 
-  
+
+  end subroutine mic_allocate_npool
+
   ! deallocate to free up storage
-  
+
   subroutine mic_deallocate_parameter(mpft,mbgc,mp,ms,micpxdef,micparam)
    IMPLICIT NONE
    TYPE(mic_parameter), INTENT(INOUT)     :: micparam
@@ -437,39 +437,39 @@ module mic_variable
 
 
     deallocate(micparam%K1,  &
-             micparam%K2,  & 
-             micparam%K3,  & 
-             micparam%J1,  & 
-             micparam%J2,  & 
-             micparam%J3,  & 
-             micparam%V1,  & 
-             micparam%V2,  & 
-             micparam%V3,  & 
-             micparam%W1,  & 
-             micparam%W2,  & 
-             micparam%W3,  & 
+             micparam%K2,  &
+             micparam%K3,  &
+             micparam%J1,  &
+             micparam%J2,  &
+             micparam%J3,  &
+             micparam%V1,  &
+             micparam%V2,  &
+             micparam%V3,  &
+             micparam%W1,  &
+             micparam%W2,  &
+             micparam%W3,  &
              micparam%desorp,  &
              micparam%Q1,      &
              micparam%Q2,      &
              micparam%fm,      &
              micparam%fs,      &
-             micparam%mgeR1,   & 
-             micparam%mgeR2,   & 
-             micparam%mgeR3,   & 
-             micparam%mgeK1,   & 
-             micparam%mgeK2,   & 
-             micparam%mgeK3,   & 
+             micparam%mgeR1,   &
+             micparam%mgeR2,   &
+             micparam%mgeR3,   &
+             micparam%mgeK1,   &
+             micparam%mgeK2,   &
+             micparam%mgeK3,   &
              micparam%fmetave, &
              micparam%tvmicR,  &
              micparam%tvmicK,  &
              micparam%betamicR,     &
              micparam%betamicK,     &
              micparam%cn_r,   &
-             micparam%fr2p,   & 
-             micparam%fk2p,   & 
-             micparam%fr2c,   & 
+             micparam%fr2p,   &
+             micparam%fk2p,   &
+             micparam%fr2c,   &
              micparam%fk2c,   &
-             micparam%fr2a,   & 
+             micparam%fr2a,   &
              micparam%fk2a)
 
     deallocate(micparam%xcnleaf,   &
@@ -483,7 +483,7 @@ module mic_variable
     deallocate(micparam%pft,     &
              micparam%bgctype,     &
              micparam%isoil,     &
-             micparam%sorder,    &    
+             micparam%sorder,    &
              micparam%region,    &
              micparam%siteid)
 
@@ -500,16 +500,16 @@ module mic_variable
              micparam%top,        &
              micparam%bot)
 
-! additional variables for kinetics3              
+! additional variables for kinetics3
     deallocate(micparam%kdesorp,  &
              micparam%kadsorp,  &
              micparam%fp2a,     &
              micparam%tvcpool,  &
-             micparam%tvppool,  & 
+             micparam%tvppool,  &
              micparam%tvac,     &
              micparam%qmaxcoeff)
   end subroutine mic_deallocate_parameter
-  
+
   subroutine mic_deallocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
    IMPLICIT NONE
    integer mp,ms,nlon,nlat,ntime
@@ -531,27 +531,27 @@ module mic_variable
                micinput%cinputm, &
                micinput%cinputs)
 
-               
+
     deallocate(micglobal%lon,     &
                micglobal%lat,     &
                micglobal%time,    &
                micglobal%pft,     &
-               micglobal%bgctype, &               
+               micglobal%bgctype, &
                micglobal%isoil,   &
                micglobal%sorder,  &
                micglobal%siteid,  &
-               micglobal%area,    &             
-               micglobal%patchfrac, &         
-               micglobal%npp,     &      
+               micglobal%area,    &
+               micglobal%patchfrac, &
+               micglobal%npp,     &
                micglobal%ph,      &
                micglobal%clay,    &
                micglobal%silt,    &
                micglobal%poros,   &
                micglobal%bulkd,   &
-               micglobal%avgts,   &               
-               micglobal%avgms,   &   
+               micglobal%avgts,   &
+               micglobal%avgms,   &
                micglobal%tsoil,   &
-               micglobal%moist,   &             
+               micglobal%moist,   &
                micglobal%matpot,  &
                micglobal%ligleaf, &
                micglobal%ligwood, &
@@ -561,18 +561,18 @@ module mic_variable
                micglobal%droot,   &
                micglobal%cnleaf,  &
                micglobal%cnwood,  &
-               micglobal%cnroot)       
-             
+               micglobal%cnroot)
+
   end subroutine mic_deallocate_input
-  
+
   subroutine mic_deallocate_output(mp,micoutput)
    implicit none
    type(mic_output), intent(inout)  :: micoutput
    integer mp
-    deallocate(micoutput%fluxcinput)   
+    deallocate(micoutput%fluxcinput)
     deallocate(micoutput%fluxrsoil)
     deallocate(micoutput%fluxcleach)
- 
+
   end subroutine mic_deallocate_output
 
  subroutine mic_deallocate_cpool(mp,ms,miccpool)
@@ -584,19 +584,19 @@ module mic_variable
               miccpool%cpooleqp, &
               miccpool%cpooleqm, &
               miccpool%c12pooleqp,&
-              miccpool%c12pooleqm) 
-    
- end subroutine mic_deallocate_cpool 
+              miccpool%c12pooleqm)
 
- 
+ end subroutine mic_deallocate_cpool
+
+
   subroutine mic_deallocate_npool(mp,ms,micnpool)
    implicit none
    integer mp,ms
    type(mic_npool), intent(inout)  :: micnpool
 
    deallocate(micnpool%mineralN)
-   
-  end subroutine mic_deallocate_npool   
-  
+
+  end subroutine mic_deallocate_npool
+
 end module mic_variable
 
