@@ -196,7 +196,7 @@ real*8 function functn_frc1(nx,xparam16)
     !  call vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,ifsoc14,bgcopt,nyeqpool, &
     !                         zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
-      call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
+      call vmicsoil_hwsd_cpu(jopt,jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
                          zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
     !  print *, 'calcost_frc1'
@@ -291,7 +291,7 @@ END function functn_frc1
       !  call profile()
       call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef) 
 
-      call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
+      call vmicsoil_hwsd_cpu(jopt,jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
                          zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
       call calcost_hwsd3(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost1)      
@@ -355,9 +355,6 @@ END function functn_soc_hwsd
       enddo
       xopt = 1.0
       
-!      open(91,file='modobs.txt')
-!      open(92,file='modobs2.txt')
-
       open(1,file='params1.txt')      
       read(1,*) 
       read(1,*) jglobal,ifsoc14,kinetics,bgcopt,jopt,jrestart,jmodel
@@ -399,19 +396,16 @@ END function functn_soc_hwsd
       if(jopt==1) call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)  ! parameter optimization
 
       print *, 'vmicsoil_global'
-      call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
+      call vmicsoil_hwsd_cpu(jopt,jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
                          zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
-      call calcost_hwsd3(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost1)      
+      if(jopt==1) call calcost_hwsd3(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost1)      
       
       call mic_deallocate_parameter(mpft,mbgc,mp,ms,micpxdef,micparam)
       call mic_deallocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
       call mic_deallocate_output(mp,micoutput)
       call mic_deallocate_cpool(mp,ms,miccpool)
       call mic_deallocate_npool(mp,ms,micnpool) 
-
-!      close(91)
-!      close(92)
 
       functn_global4=totcost1
       print *, 'total cost =', totcost1
@@ -489,7 +483,7 @@ END function functn_global4
       !  call profile()
       call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef) 
 
-      call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
+      call vmicsoil_hwsd_cpu(jopt,jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
                          zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
       call calcost_aust(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost1)      

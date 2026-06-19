@@ -551,8 +551,8 @@ end subroutine variable_time_single
   
     miccpool%cpooleq(:,:,:) = miccpool%cpool(:,:,:)
      
-   !  call vmic_output_write(foutput,micinput,micoutput)
-   !  call vmic_restart_write(frestart_out,miccpool,micnpool)
+   !  call vmic_output_write(foutput,micglobal,micinput,micoutput)
+   !  call vmic_restart_write(frestart_out,micglobal,miccpool,micnpool)
 
    ! deallocate(xzse)
    ! deallocate(sdepthx)
@@ -688,14 +688,14 @@ end subroutine variable_time_single
   
     miccpool%cpooleq(:,:,:) = miccpool%cpool(:,:,:)
      
-   !  call vmic_output_write(foutput,micinput,micoutput)
-   !  call vmic_restart_write(frestart_out,miccpool,micnpool)
+   !  call vmic_output_write(foutput,micglobal,micinput,micoutput)
+   !  call vmic_restart_write(frestart_out,micglobal,miccpool,micnpool)
 
     end SUBROUTINE vmicsoil_frc1_cpu
 
    
     
-subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
+subroutine vmicsoil_hwsd_cpu(jopt,jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
                     zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
     use mic_constant 
     use mic_variable
@@ -710,7 +710,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     TYPE(mic_npool),         INTENT(INOUT)   :: micnpool
     TYPE(mic_output),        INTENT(INout)   :: micoutput
     real(r_2) zse(ms)
-    integer jrestart,isoc14,kinetics,bgcopt,nyeqpool
+    integer jopt,jrestart,isoc14,kinetics,bgcopt,nyeqpool
 
     ! local variables
     real(r_2),    dimension(:), allocatable  :: xpool0,xpool1
@@ -745,11 +745,20 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
    station_count = 0
    allocate(stations_used(mp))
    do station_index=1,mp
-      if (micparam%bgctype(station_index)==bgcopt .and. micglobal%area(station_index)>0.0) then
-         stations_used(station_count+1) = station_index
-         station_count = station_count + 1
-      endif   !bgctype(np) = bgcopt
+
+      if (jopt == 0) then
+
+          station_count = station_count + 1
+          stations_used(station_count) = station_index
+
+      else if (micparam%bgctype(station_index) == bgcopt .and. micglobal%area(station_index) > 0.0) then
+
+          station_count = station_count + 1
+          stations_used(station_count) = station_index
+
+      end if   
    enddo
+
    
 !$OMP PARALLEL DEFAULT(NONE) SHARED (micparam,micpxdef,micnpool,micinput,micglobal,miccpool,micoutput,micpdef,&
 !$OMP kinetics,isoc14,nyeqpool,bgcopt,ndelt,zse,mp,ms,ny,i,year,stations_used) &
@@ -869,8 +878,10 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
 
      miccpool%cpooleq(:,:,:) = miccpool%cpool(:,:,:)
      
-    ! call vmic_output_write(foutput,micinput,micoutput)
-    ! call vmic_restart_write(frestart_out,miccpool,micnpool)
+    if(jopt==0) then 
+       call vmic_output_write(foutput,micglobal,micinput,micoutput)
+       call vmic_restart_write(frestart_out,micglobal,miccpool,micnpool)
+    endif
 
     deallocate(xpool0,xpool1)
     deallocate(ypooli,ypoole,fluxsoc,cfluxa)
@@ -1105,8 +1116,8 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
   
     miccpool%cpooleq(:,:,:) = miccpool%cpool(:,:,:)
      
-   !  call vmic_output_write(foutput,micinput,micoutput)
-   !  call vmic_restart_write(frestart_out,miccpool,micnpool)
+   !  call vmic_output_write(foutput,micglobal,micinput,micoutput)
+   !  call vmic_restart_write(frestart_out,micglobal,miccpool,micnpool)
   !  deallocate(xpool0,xpool1)
   !  deallocate(ypooli,ypoole,fluxsoc,cfluxa)
   !  deallocate(xzse)

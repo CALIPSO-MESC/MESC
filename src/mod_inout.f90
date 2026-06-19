@@ -75,7 +75,7 @@ contains
 !! input: frestart_out
 !! output: miccpool%cpool, micnpool%npool
 !!  
-  subroutine vmic_restart_write(frestart_out,miccpool,micnpool)
+  subroutine vmic_restart_write(frestart_out,micglobal,miccpool,micnpool)
   ! write out soil carbon pool sizes "miccpool%cpool(mp,ms,mcpool)"
     use netcdf
     use mic_constant
@@ -83,11 +83,12 @@ contains
     implicit None
     TYPE(mic_cpool),              INTENT(INOUT)   :: miccpool
     TYPE(mic_npool),              INTENT(INOUT)   :: micnpool
+    TYPE(mic_global_input),       INTENT(INOUT)   :: micglobal
 ! local variables for writing netcdf file
     INTEGER*4                :: STATUS
     INTEGER*4                :: FILE_ID, mp_ID, miccarb_ID, soil_ID   
     CHARACTER                :: CDATE*10,frestart_out*99
-    INTEGER*4                :: cmic_ID, nmic_ID
+    INTEGER*4                :: cmic_ID, nmic_ID, lat_ID, lon_ID, pft_ID, isoil_ID, bgctype_ID
     integer :: values(10)
     real(r_2)  missreal
 
@@ -118,6 +119,25 @@ contains
     STATUS = NF90_def_dim(FILE_ID, 'mcpool', mcpool, miccarb_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining mic_carbon_pools dimension ' )
 
+    ! latitude
+    STATUS = NF90_def_var(FILE_ID,'lat',NF90_FLOAT,(/mp_ID/),lat_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining lat variable ' )  
+    
+    ! longtitude
+    STATUS = NF90_def_var(FILE_ID,'lon',NF90_FLOAT,(/mp_ID/),lon_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining lon variable ' )     
+
+    ! pft
+    STATUS = NF90_def_var(FILE_ID,'pft',NF90_INT,(/mp_ID/),pft_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining pft variable ' ) 
+    
+    ! soil texture
+    STATUS = NF90_def_var(FILE_ID,'isoil',NF90_INT,(/mp_ID/),isoil_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining isoil variable ' )     
+    ! bgctype
+    STATUS = NF90_def_var(FILE_ID,'bgctype',NF90_INT,(/mp_ID/),bgctype_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining bgctype variable ' )       
+
     STATUS = NF90_def_var(FILE_ID,'mic_cpool',NF90_FLOAT,(/mp_ID,soil_ID,miccarb_ID/),cmic_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining mic_cpool variable ' )
 
@@ -129,6 +149,21 @@ contains
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error ending define mode ' )
 
     ! PUT VARS
+    STATUS = NF90_PUT_VAR(FILE_ID, lat_ID, REAL(micglobal%lat, 4) )
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing lat variable ' )
+
+    STATUS = NF90_PUT_VAR(FILE_ID, lon_ID, REAL(micglobal%lon, 4) )
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing lon variable ' )
+
+    STATUS = NF90_PUT_VAR(FILE_ID, pft_ID, INT(micglobal%pft) )
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing PFT variable ' )
+ 
+    STATUS = NF90_PUT_VAR(FILE_ID, isoil_ID, INT(micglobal%isoil) )
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing isoil variable ' ) 
+ 
+    STATUS = NF90_PUT_VAR(FILE_ID, bgctype_ID, INT(micglobal%bgctype) )
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing bgctype variable ' ) 
+
     STATUS = NF90_PUT_VAR(FILE_ID, cmic_ID, REAL(miccpool%cpool, 4) )
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing mic_cpool variable ' )
 
@@ -165,7 +200,7 @@ contains
 !! output: netcdf foutput
 !! "micinput" not used yet
 !!
-  subroutine vmic_output_write(foutput,micinput,micoutput)
+  subroutine vmic_output_write(foutput,micglobal,micinput,micoutput)
     ! fNPP is not quite right yet. It shoudl be the sump of "cinputm+cinputs"
     use netcdf
     use mic_constant
@@ -173,11 +208,12 @@ contains
     implicit None
     TYPE(mic_input),         INTENT(INout)   :: micinput
     TYPE(mic_output),        INTENT(INout)   :: micoutput
+    TYPE(mic_global_input),  INTENT(INOUT)   :: micglobal
     real(r_2)     missreal
     INTEGER*4                :: STATUS
     INTEGER*4                :: FILE_ID, mp_ID
     CHARACTER                :: CDATE*10,foutput*99
-    INTEGER*4                :: cinput_ID, rsoil_ID, cleach_ID
+    INTEGER*4                :: cinput_ID, rsoil_ID, cleach_ID, lat_ID, lon_ID, pft_ID, isoil_ID, bgctype_ID
     integer :: values(10)
 
     missreal=-1.0e10
@@ -198,11 +234,29 @@ contains
     ! Define dimensions:
     ! mp (number of patches)
     STATUS = NF90_def_dim(FILE_ID, 'mp'   , mp     , mp_ID)
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining mp dimension ')
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining mp dimension ' )
+
+    ! latitude
+    STATUS = NF90_def_var(FILE_ID,'lat',NF90_FLOAT,(/mp_ID/),lat_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining lat variable ' )  
+    
+    ! longtitude
+    STATUS = NF90_def_var(FILE_ID,'lon',NF90_FLOAT,(/mp_ID/),lon_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining lon variable ' )     
+
+    ! pft
+    STATUS = NF90_def_var(FILE_ID,'pft',NF90_INT,(/mp_ID/),pft_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining pft variable ' )
+    
+    ! soil texture
+    STATUS = NF90_def_var(FILE_ID,'isoil',NF90_INT,(/mp_ID/),isoil_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining isoil variable ' )     
+    ! bgctype
+    STATUS = NF90_def_var(FILE_ID,'bgctype',NF90_INT,(/mp_ID/),bgctype_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining bgctype variable ' )  
 
     STATUS = NF90_def_var(FILE_ID,'Cinput',NF90_FLOAT,(/mp_ID/),cinput_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining NPP ' )
-
 
     STATUS = NF90_def_var(FILE_ID,'rsoil',NF90_FLOAT,(/mp_ID/),rsoil_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining rsoil ' )
@@ -226,6 +280,21 @@ contains
     STATUS = NF90_PUT_ATT(FILE_ID,cleach_ID,'missing_value', real(missreal,4))
     
     ! PUT VARS
+    STATUS = NF90_PUT_VAR(FILE_ID, lat_ID, REAL(micglobal%lat, 4) )
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing lat variable ' )
+
+    STATUS = NF90_PUT_VAR(FILE_ID, lon_ID, REAL(micglobal%lon, 4) )
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing lon variable ' )
+
+    STATUS = NF90_PUT_VAR(FILE_ID, pft_ID, INT(micglobal%pft) )
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing PFT variable ' )
+ 
+    STATUS = NF90_PUT_VAR(FILE_ID, isoil_ID, INT(micglobal%isoil) )
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing isoil variable ' ) 
+ 
+    STATUS = NF90_PUT_VAR(FILE_ID, bgctype_ID, INT(micglobal%bgctype) )
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing bgctype variable ' ) 
+
     STATUS = NF90_PUT_VAR(FILE_ID, cinput_ID, REAL(micoutput%fluxcinput,4) )
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing NPP ' )
 
@@ -621,12 +690,11 @@ contains
        if(micglobal%silt(np) /= micglobal%silt(np)) micglobal%silt(np)=-1.0
        if(micglobal%clay(np) /= micglobal%clay(np)) micglobal%clay(np)=-1.0
     enddo
+
     ! call "cluster_hwsd" to use ORCHIDEE centroid
     micglobal%bgctype = -1
-    micparam%bgctype  = -1
-    call cluster_hwsd(2,micglobal%bgctype,micparam%csoilobs,micglobal%clay,micglobal%silt,micglobal%ph,fald,falo,ffed,ffeo,fcluster)    
-    micparam%bgctype =fcluster  
-    micglobal%bgctype=fcluster       
+    call cluster_hwsd(2,micglobal%bgctype,micparam%csoilobs,micglobal%clay,micglobal%silt,micglobal%ph,fald,falo,ffed,ffeo,micparam%bgctype)    
+    micglobal%bgctype=micparam%bgctype     
 
     ! reading time-varying data
     ! temporary solution
@@ -689,16 +757,14 @@ contains
 
 
     ! filter out land cells with "bgctype<0"
-  !  print *, 'calculations are not done for the following cells' 
-    
+     
     msite = 0
     do np=1,mp
+       !filter out site bgctype outside the range
        if(micparam%bgctype(np) <1 .or. micparam%bgctype(np) >mbgc &
          .or. minval(micparam%csoilobs(np,:)) < 0.0               &
          .or. maxval(micparam%csoilobs(np,:)) > 120.0) then    
-  !        print *, np, micparam%bgctype(np),micglobal%area(np),micglobal%isoil(np), &
-  !                 micglobal%sorder(np),micglobal%bgctype(np), micglobal%npp(np)
-          micparam%bgctype(np)= mbgc
+          micparam%bgctype(np)= -1
           micglobal%area(np)  = -1.0
        endif
        ! replacing NPP in the time-invariant input file using the mean of time-varying input
@@ -720,7 +786,12 @@ contains
     micparam%xcnroot(:) = micglobal%cnroot(:,1)
     micparam%xcnwood(:) = micglobal%cnwood(:,1)
 
-    sitemax=1000
+    if(jopt==1) then
+       sitemax=1000   ! parameter optimization
+    else
+       sitemax=1e9    ! global simulation, unlimited sitemax    
+    endif   
+    
     if(msite>2*sitemax) then
 
        intval = msite/sitemax; isite=0
@@ -729,27 +800,24 @@ contains
              isite = isite +1
              if(int(isite/intval)*intval /= isite.or. isite>sitemax*intval) micglobal%area(np) = -1.0
           endif
- !         if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
- !            write(*,103) isite,np, micglobal%bgctype(np), micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
- !         endif
        enddo
     else 
 
-      isite=0
-      do np=1,mp
-         if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
-            isite=isite+1     
- !           write(*,103) isite,np,micglobal%bgctype(np),micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
-         endif     
-      enddo
-      if(isite<10) print *, 'too few sites ', isite
+       isite=0
+       do np=1,mp
+          if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
+             isite=isite+1     
+          endif     
+       enddo
+       if(isite<10) print *, 'too few sites ', isite
 
-    endif   
-
+    endif !msite>2*sitemax   
+      
     micglobal%avgts(:) = sum(sum(micglobal%tsoil(:,:,:),dim=3),dim=2)/real(ms*ntime)
     micglobal%avgms(:) = sum(sum(micglobal%moist(:,:,:),dim=3),dim=2)/real(ms*ntime)
 
-! write out time-invariant input data
+    print *, 'write out input data to ', fglobal(5)
+
     if(jglobal==1) then
        open(31,file=fglobal(5))
        do np=1,mp
@@ -1036,10 +1104,9 @@ subroutine getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal
     enddo
 
    ! use the cluster centres to estimate bgctype
-   ! micglobal%bgctype=-1       
-   ! call cluster_hwsd(jmodel,micglobal%bgctype,micparam%csoilobs,micglobal%clay,micglobal%silt,micglobal%ph,fald,falo,ffed,ffeo,fcluster)    
-   ! micparam%bgctype =fcluster  
-   ! micglobal%bgctype=fcluster
+    micglobal%bgctype=-1       
+    call cluster_hwsd(jmodel,micglobal%bgctype,micparam%csoilobs,micglobal%clay,micglobal%silt,micglobal%ph,fald,falo,ffed,ffeo,micparam%bgctype)    
+    micglobal%bgctype = micparam%bgctype 
 
     ! reading time-varying data
     ! temporary solution
@@ -1134,9 +1201,7 @@ subroutine getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal
        if(micparam%bgctype(np) <1 .or. micparam%bgctype(np) >mbgc &
          .or. minval(micparam%csoilobs(np,:)) < 0.0               &
          .or. maxval(micparam%csoilobs(np,:)) > 120.0) then    
-    !      print *, np, micparam%bgctype(np),micglobal%area(np),micglobal%isoil(np), &
-    !               micglobal%sorder(np),micglobal%bgctype(np), micglobal%npp(np)
-          micparam%bgctype(np)= mbgc
+          micparam%bgctype(np)= -1
           micglobal%area(np)  = -1.0
        endif
        ! replacing NPP in the time-invariant input file using the mean of time-varying input
@@ -1288,7 +1353,8 @@ subroutine cluster_hwsd(jmodel,bgctype,socobs,fclay,fsilt,fph,fald,falo,ffed,ffe
        if(bgctype(np)>1 .and. bgctype(np) < 10) then
           fcluster(np) = bgctype(np)
        else 
-         if(min(fclay(np),fsilt(np),fph(np),fald(np),falo(np),ffed(np),ffeo(np)) >0.0 .and. minval(socobs(np,:)) > 0.0) then       
+         if(min(fclay(np),fsilt(np),fph(np),fald(np),falo(np),ffed(np),ffeo(np)) >0.0 .and. minval(socobs(np,:)) > 0.0 &
+            .and. minval(socobs(np,:)) <120.0) then       
             xdist(:,:) = 1.0e6
             z(1) = (fclay(np)*100.0 - clayavg(j))/claysd(j)
             z(2) = (fsilt(np)*100.0 - siltavg(j))/siltsd(j)
