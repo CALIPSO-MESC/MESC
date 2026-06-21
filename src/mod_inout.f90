@@ -200,23 +200,36 @@ contains
 !! output: netcdf foutput
 !! "micinput" not used yet
 !!
-  subroutine vmic_output_write(foutput,micglobal,micinput,micoutput)
+  subroutine vmic_output_write(foutput,micglobal,micinput,micoutput,miccpool)
     ! fNPP is not quite right yet. It shoudl be the sump of "cinputm+cinputs"
+    ! map field varx(mp,:) to vary(nlon,nlat,:) for plotting 
     use netcdf
     use mic_constant
     use mic_variable  
     implicit None
+    TYPE(mic_global_input),  INTENT(INOUT)   :: micglobal
     TYPE(mic_input),         INTENT(INout)   :: micinput
     TYPE(mic_output),        INTENT(INout)   :: micoutput
-    TYPE(mic_global_input),  INTENT(INOUT)   :: micglobal
+    TYPE(mic_cpool),         INTENT(INOUT)   :: miccpool
     real(r_2)     missreal
     INTEGER*4                :: STATUS
-    INTEGER*4                :: FILE_ID, mp_ID
+    INTEGER*4                :: FILE_ID, mp_ID, missint,np,ns
     CHARACTER                :: CDATE*10,foutput*99
-    INTEGER*4                :: cinput_ID, rsoil_ID, cleach_ID, lat_ID, lon_ID, pft_ID, isoil_ID, bgctype_ID
+    INTEGER*4                :: cinput_ID, rsoil_ID, cleach_ID, lat_ID, lon_ID
+    INTEGER*4                :: nlon_ID,nlat_ID,mcpool_ID,ms_ID,pft_ID,isoil_ID,bgctype_ID,cpool_ID
     integer :: values(10)
+    integer*4, dimension(nlon,nlat)            :: varx2_int
+    real*8,    dimension(nlon,nlat)            :: varx2_db
+    real*8,    dimension(nlon,nlat,ms,mcpool)  :: varx4_db    
+    real*8     cpool(mp,ms,mcpool)    
 
-    missreal=-1.0e10
+
+  !  print *, 'writing output'
+  !  print *, 'ilon', micglobal%ilon
+  !  print *, 'jlat', micglobal%jlat
+  !  print *, 'lon_global', micglobal%lon_global
+  !  print *, 'lat_global', micglobal%lat_global
+    missreal=-1.0; missint=-1
     call date_and_time(values=values)
     WRITE(CDATE, '(I4.4,"-",I2.2,"-",I2.2)') values(1),values(2),values(3)
     ! Create NetCDF file:
@@ -232,78 +245,110 @@ contains
     STATUS = NF90_PUT_ATT( FILE_ID, NF90_GLOBAL, "Valid output date", CDATE  )
 
     ! Define dimensions:
-    ! mp (number of patches)
-    STATUS = NF90_def_dim(FILE_ID, 'mp'   , mp     , mp_ID)
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining mp dimension ' )
+    ! nlon 
+    STATUS = NF90_def_dim(FILE_ID, 'nlon', nlon, nlon_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining lon dimension ' )
+    
+    ! nlat 
+    STATUS = NF90_def_dim(FILE_ID, 'nlat', nlat, nlat_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining lat dimension ' )
 
-    ! latitude
-    STATUS = NF90_def_var(FILE_ID,'lat',NF90_FLOAT,(/mp_ID/),lat_ID)
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining lat variable ' )  
+    ! mcpool 
+    STATUS = NF90_def_dim(FILE_ID, 'mcpool', mcpool, mcpool_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining mcpool dimension ' )
+
+    ! ms 
+    STATUS = NF90_def_dim(FILE_ID, 'ms', ms, ms_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining ms dimension ' )
     
     ! longtitude
-    STATUS = NF90_def_var(FILE_ID,'lon',NF90_FLOAT,(/mp_ID/),lon_ID)
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining lon variable ' )     
+    STATUS = NF90_def_var(FILE_ID,'lon',NF90_FLOAT,(/nlon_ID/),lon_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining lon variable ' )      
 
+    ! latitude
+    STATUS = NF90_def_var(FILE_ID,'lat',NF90_FLOAT,(/nlat_ID/),lat_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining lat variable ' )  
+   
     ! pft
-    STATUS = NF90_def_var(FILE_ID,'pft',NF90_INT,(/mp_ID/),pft_ID)
+    STATUS = NF90_def_var(FILE_ID,'pft',NF90_INT,(/nlon_ID,nlat_ID/),pft_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining pft variable ' )
     
     ! soil texture
-    STATUS = NF90_def_var(FILE_ID,'isoil',NF90_INT,(/mp_ID/),isoil_ID)
+    STATUS = NF90_def_var(FILE_ID,'isoil',NF90_INT,(/nlon_ID,nlat_ID/),isoil_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining isoil variable ' )     
     ! bgctype
-    STATUS = NF90_def_var(FILE_ID,'bgctype',NF90_INT,(/mp_ID/),bgctype_ID)
+    STATUS = NF90_def_var(FILE_ID,'bgctype',NF90_INT,(/nlon_ID,nlat_ID/),bgctype_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining bgctype variable ' )  
 
-    STATUS = NF90_def_var(FILE_ID,'Cinput',NF90_FLOAT,(/mp_ID/),cinput_ID)
+    STATUS = NF90_def_var(FILE_ID,'Cinput',NF90_FLOAT,(/nlon_ID,nlat_ID/),cinput_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining NPP ' )
 
-    STATUS = NF90_def_var(FILE_ID,'rsoil',NF90_FLOAT,(/mp_ID/),rsoil_ID)
+    STATUS = NF90_def_var(FILE_ID,'rsoil',NF90_FLOAT,(/nlon_ID,nlat_ID/),rsoil_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining rsoil ' )
 
-
-    STATUS = NF90_def_var(FILE_ID,'Cleach',NF90_FLOAT,(/mp_ID/),cleach_ID)
+    STATUS = NF90_def_var(FILE_ID,'Cleach',NF90_FLOAT,(/nlon_ID,nlat_ID/),cleach_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining cleach ' )
-    
+
+    STATUS = NF90_def_var(FILE_ID,'cpool',NF90_FLOAT,(/nlon_ID,nlat_ID,ms_ID,mcpool_ID/),cpool_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining cpool ' )
+
     ! End define mode:
     STATUS = NF90_enddef(FILE_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error ending define mode ' )
 
     ! put attributes
     STATUS = NF90_PUT_ATT(FILE_ID,cinput_ID,'unit','g C m-2 year-1')
-    STATUS = NF90_PUT_ATT(FILE_ID,cinput_ID,'missing_value', real(missreal,4))
+    STATUS = NF90_PUT_ATT(FILE_ID,cinput_ID,'missing_value', real(missreal,8))
     
     STATUS = NF90_PUT_ATT(FILE_ID,rsoil_ID,'unit','g C m-2 year-1')
-    STATUS = NF90_PUT_ATT(FILE_ID,rsoil_ID,'missing_value', real(missreal,4))
+    STATUS = NF90_PUT_ATT(FILE_ID,rsoil_ID,'missing_value', real(missreal,8))
         
     STATUS = NF90_PUT_ATT(FILE_ID,cleach_ID,'unit','g C m-2 year-1')
-    STATUS = NF90_PUT_ATT(FILE_ID,cleach_ID,'missing_value', real(missreal,4))
+    STATUS = NF90_PUT_ATT(FILE_ID,cleach_ID,'missing_value', real(missreal,8))
+
+    STATUS = NF90_PUT_ATT(FILE_ID,cpool_ID,'unit','g kg-1')
+    STATUS = NF90_PUT_ATT(FILE_ID,cpool_ID,'missing_value', real(missreal,8))
     
     ! PUT VARS
-    STATUS = NF90_PUT_VAR(FILE_ID, lat_ID, REAL(micglobal%lat, 4) )
+    STATUS = NF90_PUT_VAR(FILE_ID, lat_ID, REAL(micglobal%lat_global, 8) )
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing lat variable ' )
 
-    STATUS = NF90_PUT_VAR(FILE_ID, lon_ID, REAL(micglobal%lon, 4) )
+    STATUS = NF90_PUT_VAR(FILE_ID, lon_ID, REAL(micglobal%lon_global, 8) )
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing lon variable ' )
 
-    STATUS = NF90_PUT_VAR(FILE_ID, pft_ID, INT(micglobal%pft) )
+    call mp2lonlatint(micglobal%ilon, micglobal%jlat, missint, INT(micglobal%pft), varx2_int)
+    STATUS = NF90_PUT_VAR(FILE_ID, pft_ID, varx2_int )
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing PFT variable ' )
- 
-    STATUS = NF90_PUT_VAR(FILE_ID, isoil_ID, INT(micglobal%isoil) )
+
+    call mp2lonlatint(micglobal%ilon, micglobal%jlat, missint, INT(micglobal%isoil), varx2_int) 
+    STATUS = NF90_PUT_VAR(FILE_ID, isoil_ID, varx2_int )
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing isoil variable ' ) 
- 
-    STATUS = NF90_PUT_VAR(FILE_ID, bgctype_ID, INT(micglobal%bgctype) )
+
+    call mp2lonlatint(micglobal%ilon, micglobal%jlat, missint, INT(micglobal%bgctype), varx2_int) 
+    STATUS = NF90_PUT_VAR(FILE_ID, bgctype_ID, varx2_int )
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing bgctype variable ' ) 
 
-    STATUS = NF90_PUT_VAR(FILE_ID, cinput_ID, REAL(micoutput%fluxcinput,4) )
+    call mp2lonlatreal2(micglobal%ilon, micglobal%jlat, missreal, REAL(micoutput%fluxcinput,8), varx2_db)
+    STATUS = NF90_PUT_VAR(FILE_ID, cinput_ID, varx2_db )
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing NPP ' )
 
-    STATUS = NF90_PUT_VAR(FILE_ID, rsoil_ID, REAL(micoutput%fluxrsoil,4) )
+    call mp2lonlatreal2(micglobal%ilon, micglobal%jlat, missreal, REAL(micoutput%fluxrsoil,8), varx2_db)
+    STATUS = NF90_PUT_VAR(FILE_ID, rsoil_ID, varx2_db )
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing Rsoil ')
 
-    STATUS = NF90_PUT_VAR(FILE_ID, cleach_ID, REAL(micoutput%fluxcleach,4) )
+    call mp2lonlatreal2(micglobal%ilon, micglobal%jlat, missreal, REAL(micoutput%fluxcleach,8), varx2_db)
+    STATUS = NF90_PUT_VAR(FILE_ID, cleach_ID, varx2_db )
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing Cleach ')
-    
+
+    do np=1,mp
+    do ns=1,ms
+       cpool(np,ns,:) = 1000.0 * miccpool%cpool(np,ns,:)/micinput%bulkd(np,1)  ! convert from mg/cm3 to g/kg
+    enddo
+    enddo    
+    call mpxlonlatrealx(micglobal%ilon, micglobal%jlat, missreal, REAL(cpool,8), varx4_db)
+    STATUS = NF90_PUT_VAR(FILE_ID, cpool_ID, varx4_db )
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing Cpool ')    
+
     ! Close NetCDF file:
     STATUS = NF90_close(FILE_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error closing restart file '  )
@@ -816,6 +861,10 @@ contains
     micglobal%avgts(:) = sum(sum(micglobal%tsoil(:,:,:),dim=3),dim=2)/real(ms*ntime)
     micglobal%avgms(:) = sum(sum(micglobal%moist(:,:,:),dim=3),dim=2)/real(ms*ntime)
 
+    micglobal%ilon(:)  = ilon(:)
+    micglobal%jlat(:)  = jlat(:)
+    micglobal%lon_global(:) = lon(:)
+    micglobal%lat_global(:) = lat(:)
     print *, 'write out input data to ', fglobal(5)
 
     if(jglobal==1) then
@@ -1253,7 +1302,11 @@ subroutine getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal
 
     micglobal%avgts(:) = sum(sum(micglobal%tsoil(:,:,:),dim=3),dim=2)/real(ms*ntime)
     micglobal%avgms(:) = sum(sum(micglobal%moist(:,:,:),dim=3),dim=2)/real(ms*ntime)
-
+    micglobal%ilon(:)  = ilon(:)
+    micglobal%jlat(:)  = jlat(:)
+    micglobal%lon_global(:) = lon(:)
+    micglobal%lat_global(:) = lat(:)
+    
 ! write out time-invariant input data
     if(jglobal==1) then
        open(31,file=fglobal(5))
@@ -1562,6 +1615,95 @@ subroutine lonlat2mpx4b(ilon,jlat,xmin,xmax,xdef,varx4_db,varmp3_db)
     
 end subroutine lonlat2mpx4b    
 
+!> map 1d:(mp) variable into 2d:(non,nlat)
+!! input:  varmp1_int(mp) 
+!! output: varx2_int(nlon,nlat)
+!!      
+subroutine mp2lonlatint(ilon, jlat, defint, varmp1_int, varx2_int)
+    ! map varmp1_int(mp)  into varx2_int(nlon,nlat) 
+    use mic_constant
+    implicit none
+    integer    defint
+    integer,   dimension(mp)              :: ilon,jlat
+    integer,   dimension(nlon,nlat)       :: varx2_int
+    integer,   dimension(mp)              :: varmp1_int
+    integer :: np
+
+    ! Initialize output (optional)
+    varx2_int = defint
+
+    do np = 1, mp
+        ! Assign value
+        varx2_int(ilon(np), jlat(np)) = varmp1_int(np) 
+    end do
+
+end subroutine mp2lonlatint
+
+!> mapping 1d double: (mp) real variables to 2d (nlon,nlat)
+!! input:  varmp1_db 
+!! output: varx2_db
+!!   
+subroutine mp2lonlatreal2(ilon, jlat, defreal, varmp1_db, varx2_db)
+! map varmp2_db(mp) varx3time_db(nlon,nlat)
+    use mic_constant
+    implicit none
+    real*8     defreal
+    integer,   dimension(mp)              :: ilon,jlat
+    real*8,    dimension(nlon,nlat)       :: varx2_db
+    real*8,    dimension(mp)              :: varmp1_db
+    integer :: np
+
+    ! Initialize output
+    varx2_db = defreal
+
+    do np = 1, mp
+    
+       if (ilon(np) < 1 .or. ilon(np) > nlon .or. &
+           jlat(np) < 1 .or. jlat(np) > nlat) then
+           write(*,*) 'ERROR in mp2lonlatreal2'
+           write(*,*) 'np=', np
+           write(*,*) 'ilon=', ilon(np), ' valid range 1:', nlon
+           write(*,*) 'jlat=', jlat(np), ' valid range 1:', nlat
+           stop
+       endif
+
+       varx2_db(ilon(np), jlat(np)) = varmp1_db(np)
+    enddo    
+
+end subroutine mp2lonlatreal2
+
+!> mapping 3d double: (mp,:,:) real variables to 4d (nlon,nlat,:,:)
+!! input:  varmp3_db 
+!! output: varx4_db
+!!   
+subroutine mpxlonlatrealx(ilon, jlat, defreal, varmp3_db, varx4_db)
+! map varmp2_db(mp) varx3time_db(nlon,nlat)
+    use mic_constant
+    implicit none
+    real*8     defreal
+    integer,   dimension(mp)                      :: ilon,jlat
+    real*8,    dimension(nlon,nlat,ms,mcpool)     :: varx4_db
+    real*8,    dimension(mp,ms,mcpool)            :: varmp3_db
+    integer :: np
+
+    ! Initialize output
+    varx4_db = defreal
+
+    do np = 1, mp
+    
+       if (ilon(np) < 1 .or. ilon(np) > nlon .or. &
+           jlat(np) < 1 .or. jlat(np) > nlat) then
+           write(*,*) 'ERROR in mpxlonlatrealx'
+           write(*,*) 'np=', np
+           write(*,*) 'ilon=', ilon(np), ' valid range 1:', nlon
+           write(*,*) 'jlat=', jlat(np), ' valid range 1:', nlat
+           stop
+       endif
+
+       varx4_db(ilon(np), jlat(np),:,:) = varmp3_db(np,:,:)
+    enddo    
+
+end subroutine mpxlonlatrealx
 
 !> read in global atmospheric C14 data and input data for model run with 14C
 !! input 1: file 1 "frac14c" with all observed C14, carbon input, soil properties and other site-sepefici

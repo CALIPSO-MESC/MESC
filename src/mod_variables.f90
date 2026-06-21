@@ -195,8 +195,9 @@ module mic_variable
   END TYPE mic_input
 
   TYPE mic_global_input
+    real(r_2), dimension(:),      allocatable  :: lon_global, lat_global
     real(r_2), dimension(:),      allocatable  :: lon,lat,time
-    integer,   dimension(:),      allocatable  :: pft,bgctype,isoil,sorder,siteid
+    integer,   dimension(:),      allocatable  :: pft,bgctype,isoil,sorder,siteid,ilon,jlat
     real(r_2), dimension(:),      allocatable  :: area,npp,ph,clay,silt,poros,bulkd,avgts,avgms
     real(r_2), dimension(:,:),    allocatable  :: patchfrac
     real(r_2), dimension(:,:,:),  allocatable  :: tsoil,moist,matpot
@@ -344,13 +345,17 @@ module mic_variable
              micinput%cinputm(mp,ms), &
              micinput%cinputs(mp,ms) )
 
-    allocate(micglobal%lon(mp),             &
+    allocate(micglobal%lon_global(nlon),    &
+             micglobal%lat_global(nlat),    &
+             micglobal%lon(mp),             &
              micglobal%lat(mp),             &
              micglobal%time(ntime),         &
              micglobal%pft(mp),             &
              micglobal%bgctype(mp),         &             
              micglobal%isoil(mp),           &
              micglobal%sorder(mp),          &
+             micglobal%ilon(mp),            &
+             micglobal%jlat(mp),            &
              micglobal%siteid(mp),          &
              micglobal%area(mp),            &             
              micglobal%patchfrac(mp,mpft),  &       
@@ -531,8 +536,9 @@ module mic_variable
                micinput%cinputm, &
                micinput%cinputs)
 
-               
-    deallocate(micglobal%lon,     &
+    deallocate(micglobal%lon_global,    &
+               micglobal%lat_global,    &
+               micglobal%lon,     &
                micglobal%lat,     &
                micglobal%time,    &
                micglobal%pft,     &
@@ -540,6 +546,8 @@ module mic_variable
                micglobal%isoil,   &
                micglobal%sorder,  &
                micglobal%siteid,  &
+               micglobal%ilon,    &
+               micglobal%jlat,    &
                micglobal%area,    &             
                micglobal%patchfrac, &         
                micglobal%npp,     &      

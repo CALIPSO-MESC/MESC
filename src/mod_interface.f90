@@ -551,7 +551,7 @@ end subroutine variable_time_single
   
     miccpool%cpooleq(:,:,:) = miccpool%cpool(:,:,:)
      
-   !  call vmic_output_write(foutput,micglobal,micinput,micoutput)
+   !  call vmic_output_write(foutput,micglobal,micinput,micoutput,miccpool)
    !  call vmic_restart_write(frestart_out,micglobal,miccpool,micnpool)
 
    ! deallocate(xzse)
@@ -688,7 +688,7 @@ end subroutine variable_time_single
   
     miccpool%cpooleq(:,:,:) = miccpool%cpool(:,:,:)
      
-   !  call vmic_output_write(foutput,micglobal,micinput,micoutput)
+   !  call vmic_output_write(foutput,micglobal,micinput,micoutput,miccpool)
    !  call vmic_restart_write(frestart_out,micglobal,miccpool,micnpool)
 
     end SUBROUTINE vmicsoil_frc1_cpu
@@ -879,7 +879,7 @@ subroutine vmicsoil_hwsd_cpu(jopt,jrestart,frestart_in,frestart_out,foutput,kine
      miccpool%cpooleq(:,:,:) = miccpool%cpool(:,:,:)
      
     if(jopt==0) then 
-       call vmic_output_write(foutput,micglobal,micinput,micoutput)
+       call vmic_output_write(foutput,micglobal,micinput,micoutput,miccpool)
        call vmic_restart_write(frestart_out,micglobal,miccpool,micnpool)
     endif
 
@@ -1116,7 +1116,7 @@ subroutine vmicsoil_hwsd_cpu(jopt,jrestart,frestart_in,frestart_out,foutput,kine
   
     miccpool%cpooleq(:,:,:) = miccpool%cpool(:,:,:)
      
-   !  call vmic_output_write(foutput,micglobal,micinput,micoutput)
+   !  call vmic_output_write(foutput,micglobal,micinput,micoutput,miccpool)
    !  call vmic_restart_write(frestart_out,micglobal,miccpool,micnpool)
   !  deallocate(xpool0,xpool1)
   !  deallocate(ypooli,ypoole,fluxsoc,cfluxa)
