@@ -54,7 +54,7 @@ module mic_constant
   integer,  parameter  :: mcpool=10    ! number of C pools
   integer,  parameter  :: nfvar=22     ! number of data input variables
   real(r_2),parameter  :: delt= 1.0    ! one hour
-  real(r_2),PARAMETER  :: tvc14 = (1.0/(24.0*365.0))* alog(2.0)/5730.0    ! 1/hour
+  real(r_2),PARAMETER  :: tvc14 = (1.0/(24.0*365.0))* log(2.0)/5730.0    ! 1/hour
   integer,  parameter  :: nyic14=1940  ! year 0 of 14C record
   integer,  parameter  :: nyec14=2020  ! last yr of 14C calculation
   real(r_2),parameter  :: thresh_patchfrac=1.0e-6   ! minimial patch area fraction
