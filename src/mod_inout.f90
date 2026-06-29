@@ -118,10 +118,10 @@ contains
     STATUS = NF90_def_dim(FILE_ID, 'mcpool', mcpool, miccarb_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining mic_carbon_pools dimension ' )
 
-    STATUS = NF90_def_var(FILE_ID,'mic_cpool',NF90_FLOAT,(/mp_ID,soil_ID,miccarb_ID/),cmic_ID)
+    STATUS = NF90_def_var(FILE_ID,'mic_cpool',NF90_FLOAT,[mp_ID,soil_ID,miccarb_ID],cmic_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining mic_cpool variable ' )
 
-    STATUS = NF90_def_var(FILE_ID,'mic_npool',NF90_FLOAT,(/mp_ID,soil_ID/),nmic_ID)
+    STATUS = NF90_def_var(FILE_ID,'mic_npool',NF90_FLOAT,[mp_ID,soil_ID],nmic_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining mic_npool variable ' )
 
     ! End define mode:
@@ -200,15 +200,15 @@ contains
     STATUS = NF90_def_dim(FILE_ID, 'mp'   , mp     , mp_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining mp dimension ')
 
-    STATUS = NF90_def_var(FILE_ID,'Cinput',NF90_FLOAT,(/mp_ID/),cinput_ID)
+    STATUS = NF90_def_var(FILE_ID,'Cinput',NF90_FLOAT,[mp_ID],cinput_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining NPP ' )
 
 
-    STATUS = NF90_def_var(FILE_ID,'rsoil',NF90_FLOAT,(/mp_ID/),rsoil_ID)
+    STATUS = NF90_def_var(FILE_ID,'rsoil',NF90_FLOAT,[mp_ID],rsoil_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining rsoil ' )
 
 
-    STATUS = NF90_def_var(FILE_ID,'Cleach',NF90_FLOAT,(/mp_ID/),cleach_ID)
+    STATUS = NF90_def_var(FILE_ID,'Cleach',NF90_FLOAT,[mp_ID],cleach_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining cleach ' )
 
     ! End define mode:
