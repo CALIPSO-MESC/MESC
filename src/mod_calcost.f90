@@ -14,8 +14,8 @@ module calcost_module
     TYPE(mic_input),     INTENT(IN)    :: micinput
     real(r_2) :: zse(ms)
     integer :: nx,isoc14,bgcopt
-    real*8  :: totcost
-    real*8, dimension(16)              :: xopt
+    real(dp) :: totcost
+    real(dp), dimension(16)              :: xopt
 
     ! cost function
     real(r_2), dimension(:), allocatable           :: xcost,xobs,xobsp,xobsm
@@ -132,8 +132,8 @@ module calcost_module
     TYPE(mic_global_input), INTENT(IN) :: micglobal
     real(r_2) :: zse(ms)
     integer :: nx,bgcopt
-    real*8  :: totcost
-    real*8, dimension(16)              :: xopt
+    real(dp) :: totcost
+    real(dp), dimension(16)              :: xopt
 
     ! cost function
     real(r_2), dimension(:), allocatable        :: xcost,xobs,xobsp,xobsm
@@ -248,8 +248,8 @@ module calcost_module
     TYPE(mic_global_input), INTENT(IN)    :: micglobal
     real(r_2) :: zse(ms)
     integer :: nx,bgcopt,msobs
-    real*8  :: totcost
-    real*8, dimension(16)              :: xopt
+    real(dp) :: totcost
+    real(dp), dimension(16)              :: xopt
     ! cost function
     real(r_2), dimension(:),   allocatable        :: xcost,xtop,xbot
     real(r_2), dimension(:,:), allocatable        :: xmod
@@ -340,8 +340,8 @@ module calcost_module
     TYPE(mic_global_input), INTENT(IN)    :: micglobal
     real(r_2) :: zse(ms)
     integer :: nx,bgcopt,msobs
-    real*8  :: totcost
-    real*8, dimension(16)              :: xopt
+    real(dp) :: totcost
+    real(dp), dimension(16)              :: xopt
     ! cost function
     real(r_2), dimension(:),   allocatable        :: xcost,xtop,xbot
     real(r_2), dimension(:,:), allocatable        :: xmod
@@ -433,8 +433,8 @@ module calcost_module
     TYPE(mic_global_input), INTENT(IN)    :: micglobal
     real(r_2) :: zse(ms)
     integer :: nx,bgcopt,msobs
-    real*8  :: totcost
-    real*8, dimension(16)              :: xopt
+    real(dp) :: totcost
+    real(dp), dimension(16)              :: xopt
     ! cost function
     real(r_2), dimension(:),   allocatable        :: xcost
     real(r_2), dimension(:,:), allocatable        :: xmod,xobs

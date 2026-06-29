@@ -194,7 +194,7 @@ subroutine vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
     implicit none
     TYPE(mic_param_xscale),  INTENT(INOUT)   :: micpxdef
     integer :: bgcopt,jmodel
-    real*8, dimension(16)                    :: xopt
+    real(dp), dimension(16)                    :: xopt
 !    real(r_2), dimension(17)                 :: xrootcable
 !    real(r_2), dimension(18)                 :: xrootorchidee
 !    data xrootcable/1.43,0.94,1.43,1.04,0.77,0.85,0.62,1.77,0.94,0.94,1.43,0.94,1.04,0.53,1.00,1.00,1.00/

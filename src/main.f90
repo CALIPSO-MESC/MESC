@@ -1,7 +1,8 @@
 program testvmic
+    use precision_module, only: dp
     use function_module, only: functn
     implicit none
-    real(8) :: xparam(16),xcost,fa
+    real(dp) :: xparam(16),xcost,fa
     integer :: nx
 
     nx=6

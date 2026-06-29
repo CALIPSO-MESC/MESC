@@ -1,7 +1,6 @@
 module mic_constant
-
+  use precision_module
   IMPLICIT NONE
-  integer,  parameter  :: r_2 = SELECTED_REAL_KIND(12, 60)
   integer,  parameter  :: diag=0       ! =1 for printout 0 no prinout
   integer,  parameter  :: outp=1       ! output site
   !integer,  parameter  :: msite=213   ! number of sites

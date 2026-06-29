@@ -12,7 +12,7 @@ module function_module
 
  Contains
 
- real*8 function functn_c14(nx,xparam16)
+ real(dp) function functn_c14(nx,xparam16)
     TYPE(mic_param_xscale)    :: micpxdef
     TYPE(mic_param_default)   :: micpdef
     TYPE(mic_parameter)       :: micparam
@@ -23,11 +23,11 @@ module function_module
     TYPE(mic_output)          :: micoutput
 
     !local variables
-    real*8,    dimension(16)           :: xparam16
+    real(dp),    dimension(16)           :: xparam16
     integer    :: nx
     integer,   dimension(16)           :: nxopt
-    real*8,    dimension(16)           :: xopt
-    real*8     :: totcost1,totcost2
+    real(dp),    dimension(16)           :: xopt
+    real(dp)     :: totcost1,totcost2
     integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer :: jrestart,nparam
     character(len=140) :: frestart_in,frestart_out,foutput
@@ -119,7 +119,7 @@ module function_module
 END function functn_c14
 
 
-real*8 function functn_frc1(nx,xparam16)
+real(dp) function functn_frc1(nx,xparam16)
    ! only one layer without bioturbation for SOC fraction data only
     TYPE(mic_param_xscale)    :: micpxdef
     TYPE(mic_param_default)   :: micpdef
@@ -133,9 +133,9 @@ real*8 function functn_frc1(nx,xparam16)
     !local variables
     integer    :: nx
     integer,   dimension(16)           :: nxopt
-    real*8,    dimension(16)           :: xparam16
-    real*8,    dimension(16)           :: xopt
-    real*8     :: totcost1
+    real(dp),    dimension(16)           :: xparam16
+    real(dp),    dimension(16)           :: xopt
+    real(dp)     :: totcost1
     integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer :: jrestart,nparam
     character(len=140) :: frestart_in,frestart_out,foutput
@@ -215,12 +215,12 @@ real*8 function functn_frc1(nx,xparam16)
 END function functn_frc1
 
 
-  real*8 function functn_soc_hwsd(nx,xparam16)
+  real(dp) function functn_soc_hwsd(nx,xparam16)
     !local variables
     integer    :: nx
     integer,   dimension(16)           :: nxopt
-    real*8,    dimension(16)           :: xparam16
-    real*8,    dimension(16)           :: xopt
+    real(dp),    dimension(16)           :: xparam16
+    real(dp),    dimension(16)           :: xopt
     TYPE(mic_param_xscale)    :: micpxdef
     TYPE(mic_param_default)   :: micpdef
     TYPE(mic_parameter)       :: micparam
@@ -309,7 +309,7 @@ END function functn_frc1
       deallocate(zse)
 END function functn_soc_hwsd
 
- real*8 function functn_global4(nx,xparam16)
+ real(dp) function functn_global4(nx,xparam16)
    use mic_constant
    use mic_variable
    implicit none
@@ -317,8 +317,8 @@ END function functn_soc_hwsd
    !local variables
     integer    :: nx
     integer,   dimension(16)  :: nxopt
-    real*8,    dimension(16)  :: xparam16
-    real*8,    dimension(16)  :: xopt
+    real(dp),    dimension(16)  :: xparam16
+    real(dp),    dimension(16)  :: xopt
     TYPE(mic_param_xscale)    :: micpxdef
     TYPE(mic_param_default)   :: micpdef
     TYPE(mic_parameter)       :: micparam
@@ -419,12 +419,12 @@ END function functn_soc_hwsd
 
 END function functn_global4
 
-  real*8 function functn_soc_aust(nx,xparam16)
+  real(dp) function functn_soc_aust(nx,xparam16)
     !local variables
     integer    :: nx
     integer,   dimension(16)           :: nxopt
-    real*8,    dimension(16)           :: xparam16
-    real*8,    dimension(16)           :: xopt
+    real(dp),    dimension(16)           :: xparam16
+    real(dp),    dimension(16)           :: xopt
     TYPE(mic_param_xscale)    :: micpxdef
     TYPE(mic_param_default)   :: micpdef
     TYPE(mic_parameter)       :: micparam
@@ -505,10 +505,10 @@ END function functn_global4
 END function functn_soc_aust
 
 
-real*8 function functn(nx,xparam16)
+real(dp) function functn(nx,xparam16)
    !local variables
     integer    :: nx,runcase
-    real*8,    dimension(16)  :: xparam16
+    real(dp),    dimension(16)  :: xparam16
 
     open(1,file='case.txt')
     read(1,*) runcase

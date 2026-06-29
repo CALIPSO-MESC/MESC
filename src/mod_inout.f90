@@ -84,10 +84,10 @@ contains
     TYPE(mic_cpool),              INTENT(INOUT)   :: miccpool
     TYPE(mic_npool),              INTENT(INOUT)   :: micnpool
 ! local variables for writing netcdf file
-    INTEGER*4                :: STATUS
-    INTEGER*4                :: FILE_ID, mp_ID, miccarb_ID, soil_ID
+    integer                :: STATUS
+    integer                :: FILE_ID, mp_ID, miccarb_ID, soil_ID
     CHARACTER                :: CDATE*10,frestart_out*99
-    INTEGER*4                :: cmic_ID, nmic_ID
+    integer                :: cmic_ID, nmic_ID
     integer :: values(10)
     real(r_2)  :: missreal
 
@@ -174,10 +174,10 @@ contains
     TYPE(mic_input),         INTENT(INout)   :: micinput
     TYPE(mic_output),        INTENT(INout)   :: micoutput
     real(r_2)     :: missreal
-    INTEGER*4                :: STATUS
-    INTEGER*4                :: FILE_ID, mp_ID
+    integer                :: STATUS
+    integer                :: FILE_ID, mp_ID
     CHARACTER                :: CDATE*10,foutput*99
-    INTEGER*4                :: cinput_ID, rsoil_ID, cleach_ID
+    integer                :: cinput_ID, rsoil_ID, cleach_ID
     integer :: values(10)
 
     missreal=-1.0e10
@@ -304,8 +304,8 @@ contains
   use mic_constant
   character(len=140) :: fpatch
   integer :: jmodel,mpx
-  real*8, dimension(:,:,:),   allocatable :: xfield3
-  real*4, dimension(:,:,:,:), allocatable :: xfield4
+  real(dp), dimension(:,:,:),   allocatable :: xfield3
+  real(sp), dimension(:,:,:,:), allocatable :: xfield4
   integer :: i,j,np,ncid1,ok,varid,maxpft
 
     print *, 'patch filename', fpatch
@@ -367,8 +367,8 @@ contains
   ! read in global forcing from CABLE/ORCHIDEE from time-invarying and time-varying data files
   ! averaging the input files for each land cell using PFTfrac
   ! read in the following data
-  ! real*4, dim(lon,lat) :: Ald,Alo,Fed,Feo
-  ! real*8, dimension(lon,lat): cell_area
+  ! real(sp), dim(lon,lat) :: Ald,Alo,Fed,Feo
+  ! real(dp), dimension(lon,lat): cell_area
   use netcdf
   use mic_constant
   use mic_variable
@@ -388,15 +388,15 @@ contains
   integer :: i,j,k,npx,isoilx,sorderx
   integer, dimension(:),        allocatable  :: ilon,jlat, fcluster
   integer, dimension(:,:),      allocatable  :: varx2_int
-  real*8, dimension(:),         allocatable  :: varmp1_db
-  real*4, dimension(:,:),       allocatable  :: varx2_flt
-  real*8, dimension(:,:),       allocatable  :: varx2_db,varmp2_db
-  real*8, dimension(:,:,:),     allocatable  :: varx3time_db,varx3ms_db,varx3ms5_db
-  real*8, dimension(:,:,:),     allocatable  :: varx3_db,varmp3_db,varsoc3_db,varbulk_db,varaoc_db
-  real*8, dimension(:,:,:,:),   allocatable  :: varx4_db
+  real(dp), dimension(:),         allocatable  :: varmp1_db
+  real(sp), dimension(:,:),       allocatable  :: varx2_flt
+  real(dp), dimension(:,:),       allocatable  :: varx2_db,varmp2_db
+  real(dp), dimension(:,:,:),     allocatable  :: varx3time_db,varx3ms_db,varx3ms5_db
+  real(dp), dimension(:,:,:),     allocatable  :: varx3_db,varmp3_db,varsoc3_db,varbulk_db,varaoc_db
+  real(dp), dimension(:,:,:,:),   allocatable  :: varx4_db
   real(r_2), dimension(:),      allocatable  :: falo,fald,ffeo,ffed
   integer   :: maxpft,pft, msite,sitemax,intval,isite
-  real*8    :: bulkd2
+  real(dp)    :: bulkd2
 
 
     allocate(ilon(mp),jlat(mp),fcluster(mp))
@@ -791,8 +791,8 @@ subroutine getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal
   ! read in global forcing from ORCHIDEE from time-invarying and time-varying data files
   ! averaging the input files for each land cell using PFTfrac
   ! read in the following data
-  ! real*4, dim(lon,lat) :: Ald,Alo,Fed,Feo
-  ! real*8, dimension(lon,lat): cell_area
+  ! real(sp), dim(lon,lat) :: Ald,Alo,Fed,Feo
+  ! real(dp), dimension(lon,lat): cell_area
   ! use soil-grid or deafult values of soil silt, sand and clay fraction, soil pH and bulk density
   !
   use netcdf
@@ -807,8 +807,8 @@ subroutine getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal
   ! local variables
   real(r_2), dimension(nlon)            :: lon
   real(r_2), dimension(nlat)            :: lat
-  real*4,    dimension(nlon)            :: lon_flt
-  real*4,    dimension(nlat)            :: lat_flt
+  real(sp),    dimension(nlon)            :: lon_flt
+  real(sp),    dimension(nlat)            :: lat_flt
   real(r_2), dimension(ntime)           :: time
   real(r_2), dimension(nlon,nlat,mpft)  :: patchfrac
   integer :: ncid1,ncid3,ok,lonid,latid,timeid,varid,n,np,ns
@@ -816,20 +816,20 @@ subroutine getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal
   integer :: i,j,k,npx,isoilx,sorderx,ilonx,jlatx
   integer, dimension(:),        allocatable  :: ilon,jlat, fcluster
   integer, dimension(:,:),      allocatable  :: varx2_int
-  real*4, dimension(:,:),       allocatable  :: varx2_flt
-  real*4, dimension(:,:,:,:),   allocatable  :: varx4_flt
-  real*8, dimension(:),         allocatable  :: varmp1_db
-  real*8, dimension(:,:),       allocatable  :: varx2_db,varmp2_db
-  real*8, dimension(:,:,:),     allocatable  :: varx3time_db,varx3ms_db,varx3ms5_db
-  real*8, dimension(:,:,:),     allocatable  :: varx3_db,varmp3_db,varsoc3_db,varbulk_db,varaoc_db
-  real*8, dimension(:,:,:,:),   allocatable  :: varx4_db
+  real(sp), dimension(:,:),       allocatable  :: varx2_flt
+  real(sp), dimension(:,:,:,:),   allocatable  :: varx4_flt
+  real(dp), dimension(:),         allocatable  :: varmp1_db
+  real(dp), dimension(:,:),       allocatable  :: varx2_db,varmp2_db
+  real(dp), dimension(:,:,:),     allocatable  :: varx3time_db,varx3ms_db,varx3ms5_db
+  real(dp), dimension(:,:,:),     allocatable  :: varx3_db,varmp3_db,varsoc3_db,varbulk_db,varaoc_db
+  real(dp), dimension(:,:,:,:),   allocatable  :: varx4_db
   real(r_2), dimension(:),      allocatable  :: falo,fald,ffeo,ffed
-  double precision, dimension(:,:),       allocatable  :: modisnpp
-  double precision, dimension(:),         allocatable  :: modisnpp_mp
+  real(dp), dimension(:,:),       allocatable  :: modisnpp
+  real(dp), dimension(:),         allocatable  :: modisnpp_mp
   integer   :: maxpft,pft, msite,sitemax,intval,isite
-  real*8    :: bulkd2
+  real(dp)    :: bulkd2
   ! data
-  real*4, dimension(12)    :: sandx,clayx,siltx,porex,bulkdx,fcpx,wiltx
+  real(sp), dimension(12)    :: sandx,clayx,siltx,porex,bulkdx,fcpx,wiltx
   data sandx/0.93,0.81,0.63,0.17,0.06,0.40,0.54,0.08,0.30,0.48,0.06,0.15/
   data clayx/0.03,0.06,0.11,0.19,0.10,0.20,0.27,0.33,0.33,0.41,0.46,0.55/
   data siltx/0.04,0.13,0.26,0.64,0.84,0.40,0.19,0.59,0.37,0.11,0.48,0.30/
@@ -1322,8 +1322,8 @@ subroutine lonlat2mpx2(ilon, jlat, varx2_db, varmp1_db)
     implicit none
 
     integer,   dimension(mp)              :: ilon,jlat
-    real*8,    dimension(nlon,nlat)       :: varx2_db
-    real*8,    dimension(mp)              :: varmp1_db
+    real(dp),    dimension(nlon,nlat)       :: varx2_db
+    real(dp),    dimension(mp)              :: varmp1_db
     integer :: np
 
     ! Initialize output (optional)
@@ -1372,11 +1372,11 @@ subroutine lonlat2mpx3(ilon, jlat, patchfrac, varx3_db, varmp1_db)
 
     integer,   dimension(mp)              :: ilon,jlat
     real(r_2), dimension(nlon,nlat,mpft)  :: patchfrac
-    real*8,    dimension(nlon,nlat,mpft)  :: varx3_db
-    real*8,    dimension(mp)              :: varmp1_db
+    real(dp),    dimension(nlon,nlat,mpft)  :: varx3_db
+    real(dp),    dimension(mp)              :: varmp1_db
     integer :: np
-    real*8, dimension(mpft)               :: varx_slice, weights
-    real*8  :: areatot
+    real(dp), dimension(mpft)               :: varx_slice, weights
+    real(dp) :: areatot
 
     ! Initialize output
     varmp1_db = 0.0d0
@@ -1402,12 +1402,12 @@ subroutine lonlat2mpx3a(ilon, jlat, ms3, zse3, bulkd3, varx3_db, varmp1_db)
     implicit none
     integer :: ms3
     integer,   dimension(mp)              :: ilon,jlat
-    real*8,    dimension(nlon,nlat,ms3)   :: bulkd3
-    real*8,    dimension(ms3)             :: zse3
-    real*8,    dimension(nlon,nlat,ms3)   :: varx3_db
-    real*8,    dimension(mp)              :: varmp1_db
+    real(dp),    dimension(nlon,nlat,ms3)   :: bulkd3
+    real(dp),    dimension(ms3)             :: zse3
+    real(dp),    dimension(nlon,nlat,ms3)   :: varx3_db
+    real(dp),    dimension(mp)              :: varmp1_db
     integer :: np,ns
-    real*8, dimension(ms3)                :: varx_slice, weights
+    real(dp), dimension(ms3)                :: varx_slice, weights
 
     ! Initialize output
     varmp1_db = 0.0d0
@@ -1433,8 +1433,8 @@ subroutine lonlat2mpx3time(ilon, jlat, varx3time_db, varmp2_db)
     implicit none
 
     integer,   dimension(mp)              :: ilon,jlat
-    real*8,    dimension(nlon,nlat,ntime) :: varx3time_db
-    real*8,    dimension(mp,ntime)        :: varmp2_db
+    real(dp),    dimension(nlon,nlat,ntime) :: varx3time_db
+    real(dp),    dimension(mp,ntime)        :: varmp2_db
     integer :: np
 
     ! Initialize output
@@ -1466,9 +1466,9 @@ subroutine lonlat2mpx4b(ilon,jlat,xmin,xmax,xdef,varx4_db,varmp3_db)
     implicit none
 
     integer, dimension(mp)                      :: ilon, jlat
-    real*8, dimension(nlon,nlat,ms,ntime)       :: varx4_db
-    real*8, dimension(mp,ms,ntime)              :: varmp3_db
-    real*8  :: xmin, xmax,xdef
+    real(dp), dimension(nlon,nlat,ms,ntime)       :: varx4_db
+    real(dp), dimension(mp,ms,ntime)              :: varmp3_db
+    real(dp) :: xmin, xmax,xdef
     integer :: np,ns,nt
 
     ! Initialize output
@@ -1525,7 +1525,7 @@ end subroutine lonlat2mpx4b
     real(r_2),dimension(:),  allocatable:: fsoc,fpoc,fmaoc,ffmpoc,ffmmaoc,fbulkd
     real(r_2),dimension(:),  allocatable:: fnpp,fanpp,fbnpp,flignin,fcna,fcnb
     integer,  dimension(:),  allocatable:: fid,fpft,ftop,fbot,fyear,fregion,fcluster
-    real*8,   dimension(:),  allocatable:: lat,lon
+    real(dp),   dimension(:),  allocatable:: lat,lon
 
     ! allocate variable for reading
     allocate(fsoc(mp))
@@ -1843,7 +1843,7 @@ end subroutine lonlat2mpx4b
     real(r_2),dimension(:),         allocatable:: fnpp,fanpp,fbnpp,flignin,fcna,fcnb
     real(r_2),dimension(:),         allocatable:: fmg,fca,falo,fald,ffeo,ffed
     integer,dimension(:),           allocatable:: fid,fpft,ftop,fbot,fdataid,fcluster
-    double precision, dimension(:), allocatable:: lat,lon
+    real(dp), dimension(:), allocatable:: lat,lon
     ! local variation for clustering
     integer :: n,msite
 
@@ -2262,12 +2262,12 @@ end subroutine lonlat2mpx4b
     integer,           dimension(:),     allocatable     :: ivarx1,fcluster
     real,              dimension(:),     allocatable     :: varx1float
     real,              dimension(:,:),   allocatable     :: fracaoc
-    double precision,  dimension(:),     allocatable     :: varx1db,avgts,avgms
-    double precision,  dimension(:,:),   allocatable     :: varx2db,fsoc7,bulkd
-    double precision,  dimension(:,:,:), allocatable     :: tsoil7,moist7,watpot7
-    double precision,  dimension(:),     allocatable     :: fald,falo,ffed,ffeo
-    double precision,  dimension(:,:),   allocatable     :: modisnpp
-    double precision,  dimension(:),     allocatable     :: modisnpp_mp
+    real(dp),  dimension(:),     allocatable     :: varx1db,avgts,avgms
+    real(dp),  dimension(:,:),   allocatable     :: varx2db,fsoc7,bulkd
+    real(dp),  dimension(:,:,:), allocatable     :: tsoil7,moist7,watpot7
+    real(dp),  dimension(:),     allocatable     :: fald,falo,ffed,ffeo
+    real(dp),  dimension(:,:),   allocatable     :: modisnpp
+    real(dp),  dimension(:),     allocatable     :: modisnpp_mp
 
     allocate(ivarx1(mp),fcluster(mp))
     allocate(varx1float(mp),varx1db(mp),avgts(mp),avgms(mp))
@@ -2622,8 +2622,8 @@ subroutine screenout(runmodel,jmodel,bgcopt,xopt,cost)
     implicit none
     character(len=10) :: runmodel
     integer :: jmodel,bgcopt
-    real*8,    dimension(16)           :: xopt
-    real*8     :: cost
+    real(dp),    dimension(16)           :: xopt
+    real(dp)     :: cost
     write(*,901) runmodel,jmodel,bgcopt,cost,xopt(1:14)
 901 format(a10,2(i3,1x),f12.3,1x,14(f7.3,1x))
 
