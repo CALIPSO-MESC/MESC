@@ -1149,6 +1149,7 @@ END function functn
 
   SUBROUTINE nc_abort( ok, message )
     USE netcdf
+    implicit none
     ! Input arguments
     CHARACTER(LEN=*), INTENT(IN) :: message
     INTEGER, INTENT(IN) :: ok
