@@ -687,7 +687,7 @@ end module mic_variable
       call mic_allocate_npool(mp,ms,micnpool)
 
           isoc14 = 0
-          print *, "isoc14 =",isoc14,'--getdata_c14'
+          print *, 'isoc14 =',isoc14,'--getdata_c14'
           call getdata_c14(frac14c,f14c,micinput,micparam,micnpool)
           call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
           print *, 'vmicsoil_c14'
@@ -701,7 +701,7 @@ end module mic_variable
           miccpool%c12pooleqm(:) = miccpool%cpooleqm(:)
 
           isoc14 = 1
-          print *, "isoc14 =",isoc14,'--getdata_c14'
+          print *, 'isoc14 =',isoc14,'--getdata_c14'
           call getdata_c14(frac14c,f14c,micinput,micparam,micnpool)
           call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
           print *, 'vmicsoil_c14'
@@ -711,8 +711,8 @@ end module mic_variable
           print *, 'calcost_c14'
           call calcost_c14(nx,isoc14,bgcopt,xopt,micparam,miccpool,micinput,totcost2)
           functn_c14 = totcost1+totcost2
-          print *,"tot1 = ",totcost1
-          print *,"tot2 = ",totcost2
+          print *,'tot1 = ',totcost1
+          print *,'tot2 = ',totcost2
 
       close(1)
 !      close(91)
@@ -798,7 +798,7 @@ real*8 function functn_frc(nx,xparam16)
       call mic_allocate_npool(mp,ms,micnpool)
 
 
-          print *, "isoc14 =",isoc14,'--getdata_frc'
+          print *, 'isoc14 =',isoc14,'--getdata_frc'
           call getdata_frc(Cfraction,micinput,micparam,micnpool)
           call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
           print *, 'vmicsoil_frc'
@@ -1107,7 +1107,7 @@ END function functn
     ! Put the file in define mode:
     STATUS = NF90_redef(FILE_ID)
 
-    STATUS = NF90_PUT_ATT( FILE_ID, NF90_GLOBAL, "Valid restart date", CDATE )
+    STATUS = NF90_PUT_ATT( FILE_ID, NF90_GLOBAL, 'Valid restart date', CDATE )
 
     ! Define dimensions:
     ! mp (number of patches)
@@ -1188,7 +1188,7 @@ END function functn
     ! Put the file in define mode:
     STATUS = NF90_redef(FILE_ID)
 
-    STATUS = NF90_PUT_ATT( FILE_ID, NF90_GLOBAL, "Valid output date", CDATE  )
+    STATUS = NF90_PUT_ATT( FILE_ID, NF90_GLOBAL, 'Valid output date', CDATE  )
 
     ! Define dimensions:
     ! mp (number of patches)

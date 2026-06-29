@@ -103,7 +103,7 @@ contains
     ! Put the file in define mode:
     STATUS = NF90_redef(FILE_ID)
 
-    STATUS = NF90_PUT_ATT( FILE_ID, NF90_GLOBAL, "Valid restart date", CDATE )
+    STATUS = NF90_PUT_ATT( FILE_ID, NF90_GLOBAL, 'Valid restart date', CDATE )
 
     ! Define dimensions:
     ! mp (number of patches)
@@ -193,7 +193,7 @@ contains
     ! Put the file in define mode:
     STATUS = NF90_redef(FILE_ID)
 
-    STATUS = NF90_PUT_ATT( FILE_ID, NF90_GLOBAL, "Valid output date", CDATE  )
+    STATUS = NF90_PUT_ATT( FILE_ID, NF90_GLOBAL, 'Valid output date', CDATE  )
 
     ! Define dimensions:
     ! mp (number of patches)
