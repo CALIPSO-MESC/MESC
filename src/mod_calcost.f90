@@ -1,3 +1,9 @@
+!> Cost functions for model calibration against observational datasets.
+!>
+!> Provides five specialized cost functions for calibrating MESC model
+!> parameters against different observation types: 14C dating, POC/MAOC
+!> fractions, HWSD soil carbon profiles, global HWSD data, and Australian
+!> soil carbon measurements.
 module calcost_module
     use mic_constant
     use mic_variable
@@ -5,17 +11,26 @@ module calcost_module
 
   Contains
 
+    !> Compute cost for 14C calibration against observed SOC, POC, MAOC and (optionally) 14C ages.
     subroutine calcost_c14(nx,isoc14,bgcopt,xopt,micparam,miccpool,micinput,zse,totcost)
-!    use mic_constant
-!    use mic_variable
-!    implicit none
+    integer, intent(in) :: nx
+        !! Number of optimization parameters.
+    integer, intent(in) :: isoc14
+        !! 0 = use bulk SOC/POC/MAOC fractions; 1 = use 14C ages.
+    integer, intent(in) :: bgcopt
+        !! Biogeochemistry type filter for site selection.
+    real(dp), intent(in), dimension(16) :: xopt
+        !! Optimization parameter vector.
     TYPE(mic_parameter), INTENT(INOUT) :: micparam
+        !! Model parameters and observational data.
     TYPE(mic_cpool),     INTENT(INOUT) :: miccpool
+        !! Model carbon pool states.
     TYPE(mic_input),     INTENT(IN)    :: micinput
-    real(r_2) :: zse(ms)
-    integer :: nx,isoc14,bgcopt
-    real(dp) :: totcost
-    real(dp), dimension(16)              :: xopt
+        !! Environmental forcing inputs.
+    real(r_2), intent(in) :: zse(ms)
+        !! Soil layer thicknesses.
+    real(dp), intent(out) :: totcost
+        !! Summed cost over all sites.
 
     ! cost function
     real(r_2), dimension(:), allocatable           :: xcost,xobs,xobsp,xobsm
@@ -121,19 +136,31 @@ module calcost_module
     end subroutine calcost_c14
 
 
+    !> Computes cost for POC/MAOC fraction calibration against observed SOC partitioning.
+    !>
+    !> Uses log-transformed cost for fraction and absolute SOC to balance
+    !> relative and absolute errors.
     SUBROUTINE calcost_frc1(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost)
-   ! use mic_constant
-   ! use mic_variable
-   ! implicit none
-    TYPE(mic_param_xscale),INTENT(IN)  :: micpxdef
+    integer, intent(in) :: nx
+        !! Number of optimization parameters.
+    integer, intent(in) :: bgcopt
+        !! Biogeochemistry type filter for site selection.
+    real(dp), intent(in), dimension(16) :: xopt
+        !! Optimization parameter vector.
+    TYPE(mic_param_xscale), INTENT(IN) :: micpxdef
+        !! Parameter scaling definitions.
     TYPE(mic_parameter), INTENT(IN)    :: micparam
+        !! Model parameters and observed data.
     TYPE(mic_cpool),     INTENT(INOUT) :: miccpool
+        !! Model carbon pool states.
     TYPE(mic_input),     INTENT(IN)    :: micinput
+        !! Environmental forcing inputs.
     TYPE(mic_global_input), INTENT(IN) :: micglobal
-    real(r_2) :: zse(ms)
-    integer :: nx,bgcopt
-    real(dp) :: totcost
-    real(dp), dimension(16)              :: xopt
+        !! Global-scale input data (area, NPP).
+    real(r_2), intent(in) :: zse(ms)
+        !! Soil layer thicknesses.
+    real(dp), intent(out) :: totcost
+        !! Summed cost over all sites.
 
     ! cost function
     real(r_2), dimension(:), allocatable        :: xcost,xobs,xobsp,xobsm
@@ -237,25 +264,38 @@ module calcost_module
     end SUBROUTINE calcost_frc1
 
 
+    !> Computes cost for HWSD soil carbon profile calibration.
+    !>
+    !> Compares modeled SOC against HWSD observations across 7 layers
+    !> (0-0.2m in 0.2m increments, then 1.0-1.5m and 1.5-2.0m). Uses
+    !> log-transformed squared error for valid observations.
     subroutine calcost_hwsd3(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost)
-   ! use mic_constant
-   ! use mic_variable
-   ! implicit none
+    integer, intent(in) :: nx
+        !! Number of optimization parameters.
+    integer, intent(in) :: bgcopt
+        !! Biogeochemistry type filter.
+    real(dp), intent(in), dimension(16) :: xopt
+        !! Optimization parameter vector.
     TYPE(mic_param_xscale), INTENT(IN)    :: micpxdef
+        !! Parameter scaling definitions.
     TYPE(mic_parameter),    INTENT(IN)    :: micparam
+        !! Model parameters and HWSD observations.
     TYPE(mic_cpool),        INTENT(INOUT) :: miccpool
+        !! Model carbon pool states.
     TYPE(mic_input),        INTENT(IN)    :: micinput
+        !! Environmental forcing inputs.
     TYPE(mic_global_input), INTENT(IN)    :: micglobal
-    real(r_2) :: zse(ms)
-    integer :: nx,bgcopt,msobs
-    real(dp) :: totcost
-    real(dp), dimension(16)              :: xopt
+        !! Global-scale input data.
+    real(r_2), intent(in) :: zse(ms)
+        !! Soil layer thicknesses.
+    real(dp), intent(out) :: totcost
+        !! Summed cost over all sites.
     ! cost function
     real(r_2), dimension(:),   allocatable        :: xcost,xtop,xbot
     real(r_2), dimension(:,:), allocatable        :: xmod
     real(r_2), dimension(:,:), allocatable        :: xobs7, xmod7
     real(r_2)                                     :: fracpocm,fracmaocm,fracmicm,fraclabm
-    integer   :: np,ns,ipsite,v,ip
+    integer   :: np,ns,ipsite,v,ip,msobs
     real(r_2)  :: xbdz
 
     msobs=ms
@@ -326,29 +366,38 @@ module calcost_module
 
 
 
+    !> Computes cost for global-scale HWSD soil carbon calibration.
+    !>
+    !> Similar to [[calcost_hwsd3]] but sums across all 9 carbon pools
+    !> (including plant-derived pools 1, 2) for global-scale runs.
+    !> Uses a fixed 7-layer structure matching HWSD.
     subroutine calcost_global_hwsd(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost)
-    ! this cost function is specific to the setup of zse
-    ! data zse/0.2,0.2,0.2,0.2,0.2,0.5,0.5/
-    !
-    use mic_constant
-    use mic_variable
-    implicit none
+    integer, intent(in) :: nx
+        !! Number of optimization parameters.
+    integer, intent(in) :: bgcopt
+        !! Biogeochemistry type filter.
+    real(dp), intent(in), dimension(16) :: xopt
+        !! Optimization parameter vector.
     TYPE(mic_param_xscale), INTENT(IN)    :: micpxdef
+        !! Parameter scaling definitions.
     TYPE(mic_parameter),    INTENT(IN)    :: micparam
+        !! Model parameters and HWSD observations.
     TYPE(mic_cpool),        INTENT(INOUT) :: miccpool
+        !! Model carbon pool states.
     TYPE(mic_input),        INTENT(IN)    :: micinput
+        !! Environmental forcing inputs.
     TYPE(mic_global_input), INTENT(IN)    :: micglobal
-    real(r_2) :: zse(ms)
-    integer :: nx,bgcopt,msobs
-    real(dp) :: totcost
-    real(dp), dimension(16)              :: xopt
+        !! Global-scale input data.
+    real(r_2), intent(in) :: zse(ms)
+        !! Soil layer thicknesses (0.2m x 5, then 0.5m x 2).
+    real(dp), intent(out) :: totcost
+        !! Summed cost over all sites.
     ! cost function
     real(r_2), dimension(:),   allocatable        :: xcost,xtop,xbot
     real(r_2), dimension(:,:), allocatable        :: xmod
     real(r_2), dimension(:,:), allocatable        :: xobs7, xmod7
     real(r_2)                                     :: fracpocm,fracmaocm,fracmicm,fraclabm
-    integer   :: np,ns,ipsite,v,ip
-    real(r_2)  :: xbdz
+    integer   :: np,ns,ipsite,v,ip,msobs
 
     msobs=7
     allocate(xcost(mp))
@@ -417,30 +466,45 @@ module calcost_module
 921   format(i6,1x,4(i3,1x),2(f8.3,1x),i2,1x,20(f12.4,1x))
     end subroutine calcost_global_hwsd
 
-!  cost function for Australian soil C
+
+    !> Computes cost for Australian soil carbon calibration.
+    !>
+    !> Uses 3 observed layers (0-0.1, 0.1-0.2, 0.2-0.3 m) for total SOC,
+    !> plus average POC and MAOC for the top 0-0.3 m. POC pools: 3,4,5,7,8;
+    !> MAOC pools: 6,9. Uses log-transformed squared error.
     subroutine calcost_aust(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost)
-    ! calculate the SOC cost function for Australian sites with
-    ! observed total SOC in g/kg for the top 3 layers (0-0.1,0.1-0.2 and 0.2-0.3m)
-    ! use the first layer POC and HOC in g/kg as the average POC and MAOC for the top 0-0.3m
-    ! POC: pool 3,4,5,7,8; MAOC: 6,9
-   ! use mic_constant
-   ! use mic_variable
-   ! implicit none
+    integer, intent(in) :: nx
+        !! Number of optimization parameters.
+    integer, intent(in) :: bgcopt
+        !! Biogeochemistry type filter.
+    real(dp), intent(in), dimension(16) :: xopt
+        !! Optimization parameter vector.
     TYPE(mic_param_xscale), INTENT(IN)    :: micpxdef
+        !! Parameter scaling definitions.
     TYPE(mic_parameter),    INTENT(IN)    :: micparam
+        !! Model parameters and Australian SOC observations.
     TYPE(mic_cpool),        INTENT(INOUT) :: miccpool
+        !! Model carbon pool states.
     TYPE(mic_input),        INTENT(IN)    :: micinput
+        !! Environmental forcing inputs.
     TYPE(mic_global_input), INTENT(IN)    :: micglobal
-    real(r_2) :: zse(ms)
-    integer :: nx,bgcopt,msobs
-    real(dp) :: totcost
-    real(dp), dimension(16)              :: xopt
+        !! Global-scale input data.
+    real(r_2), intent(in) :: zse(ms)
+        !! Soil layer thicknesses.
+    real(dp), intent(out) :: totcost
+        !! Summed cost over all sites.
+
     ! cost function
     real(r_2), dimension(:),   allocatable        :: xcost
+        !! Per-site cost accumulator.
     real(r_2), dimension(:,:), allocatable        :: xmod,xobs
+        !! Modeled and observed SOC (g/kg) per site and layer.
     real(r_2), dimension(:,:), allocatable        :: xmodpoc,xmodmaoc
-    integer   :: np,ns,ip
+        !! Modeled POC and MAOC per site and layer.
+    integer   :: np,ns,ip,msobs
+        !! Loop indices: site, layer, pool; msobs = number of observed layers.
     real(r_2)  :: totpoc,totmaoc,xmodpocavg,xmodmaocavg,fracpocm,fracmaocm,fracmicm,fraclabm
+        !! Intermediate POC/MAOC totals and fractions.
 
     msobs=3
     allocate(xcost(mp))
