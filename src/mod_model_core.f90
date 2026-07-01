@@ -1,3 +1,5 @@
+!> Core model physics: RK4 integrator, Michaelis-Menten kinetics, bioturbation, and C-flux RHS.
+!! Supports three kinetics variants (MIMICS, MILLENNIAL2, combined)
 module mesc_model_module
   use mic_constant
   use mic_variable
@@ -5,39 +7,41 @@ module mesc_model_module
 
 contains
 
-!> The core routines for the mesc_model
-!! calculate model parameters as function of enrvironmental variablles that vary with time
-!! model integration using rk4
-!!
-!
-    subroutine rk4modelx(timex,delty,ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,xpool0,xpool1)
-    use mic_constant
-    use mic_variable
-    implicit none
-    TYPE(mic_param_default), INTENT(IN)  :: micpdef
-    TYPE(mic_parameter),     INTENT(IN)  :: micparam
-    TYPE(mic_input),         INTENT(IN)  :: micinput
-    integer      :: np,ns, kinetics,ny,isoc14
-    real(r_2)    :: timex,delty,h
-    real(r_2),   dimension(mcpool),intent(inout)     :: xpool0,xpool1
+ !> Fourth-order Runge-Kutta integrator for the soil C ODE system.
+ subroutine rk4modelx(timex,delty,ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,xpool0,xpool1)
+     use mic_constant
+     use mic_variable
+     implicit none
+     TYPE(mic_param_default), INTENT(IN)    :: micpdef           !! fixed model parameters
+     TYPE(mic_parameter),     INTENT(IN)    :: micparam          !! computed model parameters
+     TYPE(mic_input),         INTENT(IN)    :: micinput          !! environmental model inputs
+     integer,                 INTENT(IN)    :: np,ns             !! grid point and layer indices
+     integer,                 INTENT(IN)    :: kinetics          !! kinetics model selector (1/2/3)
+     integer,                 INTENT(IN)    :: ny,isoc14         !! model year and 14C flag
+     real(r_2),               INTENT(IN)    :: timex             !! current simulation time
+     real(r_2),               INTENT(IN)    :: delty             !! integration time step (hours)
+     real(r_2),   dimension(mcpool),intent(inout)     :: xpool0,xpool1  !! pool state: initial and updated (mg C/cm3)
+    real(r_2)    :: h
     real(r_2),   dimension(mcpool)                   :: y1,y2,y3,y4,dy1dt,dy2dt,dy3dt,dy4dt
 
      h=delty
      y1(:) = xpool0(:)
+     call vmic_c(ny, isoc14, np, ns, kinetics, micpdef, micparam, micinput, y1, dy1dt)
 
-     call vmic_c(ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,y1,dy1dt)
      y2(:) = y1(:) + 0.5 * h * dy1dt(:)
-     call vmic_c(ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,y2,dy2dt)
+     call vmic_c(ny, isoc14, np, ns, kinetics, micpdef, micparam, micinput, y2, dy2dt)
+
      y3(:) = y1(:) + 0.5 * h * dy2dt(:)
-     call vmic_c(ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,y3,dy3dt)
+     call vmic_c(ny, isoc14, np, ns, kinetics, micpdef, micparam, micinput, y3, dy3dt)
+
      y4(:) = y1(:) +       h * dy3dt(:)
-     call vmic_c(ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,y4,dy4dt)
+     call vmic_c(ny, isoc14, np, ns, kinetics, micpdef, micparam, micinput, y4, dy4dt)
+
     ! RK4
      xpool1(:) = xpool0(:) + (dy1dt(:)/6.0 + dy2dt(:)/3.0 + dy3dt(:)/3.0 + dy4dt(:)/6.0) * h
 
     ! Euler
     ! xpool1(:) = xpool0(:) + dy1dt(:) * h
-
 
 !    write(*,101) np,ns,delty,micinput%cinputm(np,ns)+micinput%cinputs(np,ns),sum(dy1dt(1:7)), &
 !                 micinput%cinputm(np,ns)+micinput%cinputs(np,ns)-sum(dy1dt(1:7))
@@ -45,18 +49,16 @@ contains
 
     end subroutine rk4modelx
 
-    subroutine Kmt(micpxdef,micpdef,micparam,micinput)
-      ! unit: mg Mic C/cm3
+ !> Computes Michaelis-Menten half-saturation constants (K and J) for all grid points.
+ !! Values are temperature- and clay-dependent. Unit: mg Mic C/cm3.
+ subroutine Kmt(micpxdef,micpdef,micparam,micinput)
       use mic_constant
       use mic_variable
       implicit none
-      TYPE(mic_param_xscale), INTENT(IN)       :: micpxdef
-      TYPE(mic_param_default), INTENT(IN)      :: micpdef
-      TYPE(mic_parameter),     INTENT(INOUT)   :: micparam
-      TYPE(mic_input),         INTENT(IN)      :: micinput
-
-
-      ! local variable
+      TYPE(mic_param_xscale),  INTENT(IN)      :: micpxdef      !! PFT-specific scaling factors
+      TYPE(mic_param_default), INTENT(IN)      :: micpdef       !! fixed default parameters
+      TYPE(mic_parameter),     INTENT(INOUT)   :: micparam      !! computed model parameters. K1:K3, J1:J3 updated per (np,ns) here
+      TYPE(mic_input),         INTENT(IN)      :: micinput      !! environmental model inputs
       real(r_2), dimension(:,:), allocatable   :: xkclay,km,kmx
       integer :: nopt,np,ns
 
@@ -91,8 +93,8 @@ contains
     end subroutine Kmt
 
 
-    subroutine Kmt_single(micpxdef,micpdef,micparam,micinput,np)
-      ! unit: mg Mic C/cm3
+ !> Single-grid-point variant of @see Kmt.
+ subroutine Kmt_single(micpxdef,micpdef,micparam,micinput,np)
       use mic_constant
       use mic_variable
       implicit none
@@ -101,8 +103,6 @@ contains
       TYPE(mic_parameter),     INTENT(INOUT)   :: micparam
       TYPE(mic_input),         INTENT(IN)      :: micinput
       integer,                 INTENT(IN)      :: np
-
-      ! local variable
       real(r_2), dimension(:,:), allocatable   :: xkclay,km,kmx
       integer :: nopt,ns
 
@@ -135,18 +135,16 @@ contains
     end subroutine Kmt_single
 
 
-    subroutine Vmaxt(micpxdef,micpdef,micparam,micinput)
-      ! mg Cs per mg mic C per hour
+ !> Computes Vmax-based enzymatic rate constants (V1:V3, W1:W3) for all grid points.
+ !! Values are temperature-, depth-, and PFT-dependent. Unit: mg C per mg mic C per hour.
+ subroutine Vmaxt(micpxdef,micpdef,micparam,micinput)
       use mic_constant
       use mic_variable
       implicit none
-      TYPE(mic_param_xscale),  INTENT(IN)     :: micpxdef
-      TYPE(mic_param_default), INTENT(IN)     :: micpdef
-      TYPE(mic_parameter),     INTENT(INOUT)  :: micparam
-      TYPE(mic_input),         INTENT(IN)     :: micinput
-
-
-      ! local variables
+      TYPE(mic_param_xscale),  INTENT(IN)     :: micpxdef      !! PFT-specific scaling factors
+      TYPE(mic_param_default), INTENT(IN)     :: micpdef       !! fixed default parameters
+      TYPE(mic_parameter),     INTENT(INOUT)  :: micparam      !! computed model parameters. V1:V3, W1:W3 updated per (np,ns) here
+      TYPE(mic_input),         INTENT(IN)     :: micinput      !! environmental model inputs
       real(r_2),dimension(:,:), allocatable :: vmax
       integer :: nopt,np,ns
       real(r_2), dimension(:), allocatable   :: sdepthz
@@ -196,8 +194,8 @@ contains
     end subroutine Vmaxt
 
 
-    subroutine Vmaxt_single(micpxdef,micpdef,micparam,micinput,np)
-      ! mg Cs per mg mic C per hour
+ !> Single-grid-point variant of @see Vmaxt
+ subroutine Vmaxt_single(micpxdef,micpdef,micparam,micinput,np)
       use mic_constant
       use mic_variable
       implicit none
@@ -206,8 +204,6 @@ contains
       TYPE(mic_parameter),     INTENT(INOUT)  :: micparam
       TYPE(mic_input),         INTENT(IN)     :: micinput
       integer,                 INTENT(IN)     :: np
-
-      ! local variables
       real(r_2),dimension(:,:), allocatable :: vmax
       integer :: nopt,ns
       real(r_2), dimension(:), allocatable   :: sdepthz
@@ -257,15 +253,15 @@ contains
     end subroutine Vmaxt_single
 
 
-    subroutine Desorpt(micpxdef,micparam,micinput)
+ !> Computes clay-dependent desorption rate (desorp) for all grid points.
+ !! Controls physical protection pool turnover.
+ subroutine Desorpt(micpxdef,micparam,micinput)
       use mic_constant
       use mic_variable
       implicit none
-!      real(r_2)              xdesorp
-      TYPE(mic_param_xscale),  INTENT(IN)     :: micpxdef
-!      TYPE(mic_param_default), INTENT(IN)     :: micpdef
-      TYPE(mic_parameter), INTENT(INOUT)      :: micparam
-      TYPE(mic_input), INTENT(IN)             :: micinput
+      TYPE(mic_param_xscale), INTENT(IN)      :: micpxdef      !! PFT-specific scaling factors
+      TYPE(mic_parameter),    INTENT(INOUT)   :: micparam      !! computed model parameters, desorp updated per (np,ns) here
+      TYPE(mic_input),        INTENT(IN)      :: micinput      !! environmental model inputs
       integer :: nopt,np,ns
 
      do np=1,mp
@@ -283,17 +279,15 @@ contains
     end subroutine Desorpt
 
 
-    subroutine Desorpt_single(micpxdef,micparam,micinput,np)
+ !> Single-point variant of @see Desorpt
+ subroutine Desorpt_single(micpxdef,micparam,micinput,np)
       use mic_constant
       use mic_variable
       implicit none
-!      real(r_2)              xdesorp
-!,micpdef
-      TYPE(mic_param_xscale),  INTENT(IN)     :: micpxdef
-!      TYPE(mic_param_default), INTENT(IN)     :: micpdef
-      TYPE(mic_parameter), INTENT(INOUT)      :: micparam
-      TYPE(mic_input), INTENT(IN)             :: micinput
-      integer,                 INTENT(IN)    :: np
+      TYPE(mic_param_xscale), INTENT(IN)      :: micpxdef
+      TYPE(mic_parameter),    INTENT(INOUT)   :: micparam
+      TYPE(mic_input),        INTENT(IN)      :: micinput
+      integer,                INTENT(IN)      :: np
       integer :: nopt,ns
 
 
@@ -311,14 +305,15 @@ contains
     end subroutine Desorpt_single
 
 
-  subroutine mget(micpdef,micparam,micinput,micnpool)
+ !> Computes microbial growth efficiency (mgeR, mgeK) for all grid points.
+ subroutine mget(micpdef,micparam,micinput,micnpool)
      use mic_constant
      use mic_variable
      implicit none
-     TYPE(mic_param_default), INTENT(IN)     :: micpdef
-     TYPE(mic_parameter),     INTENT(INOUT)  :: micparam
-     TYPE(mic_input),         INTENT(IN)     :: micinput
-     TYPE(mic_npool),         INTENT(IN)     :: micnpool
+     TYPE(mic_param_default), INTENT(IN)     :: micpdef       !! fixed default parameters
+     TYPE(mic_parameter),     INTENT(INOUT)  :: micparam      !! computed model parameters. mgeR1:3, mgeK1:3 updated per (np,ns) here
+     TYPE(mic_input),         INTENT(IN)     :: micinput      !! environmental model inputs
+     TYPE(mic_npool),         INTENT(IN)     :: micnpool      !! nitrogen pools (unused at present)
 
      ! local variables
      integer :: np,ns
@@ -362,7 +357,8 @@ contains
   end subroutine mget
 
 
-  subroutine mget_single(micpdef,micparam,micinput,micnpool,np)
+ !> Single-point variant of @see mget
+ subroutine mget_single(micpdef,micparam,micinput,micnpool,np)
      use mic_constant
      use mic_variable
      implicit none
@@ -413,20 +409,20 @@ contains
   end subroutine mget_single
 
 
-  subroutine turnovert(kinetics,micpxdef,micpdef,micparam,micinput)
+ !> Computes microbial turnover rate coefficients (tvmicR/K, betamicR/K) for all grid points.
+ !! Turnover is PFT-, P-, and metabolic-fraction-dependent.
+ subroutine turnovert(kinetics,micpxdef,micpdef,micparam,micinput)
       use mic_constant
       use mic_variable
       implicit none
-      TYPE(mic_param_xscale),  INTENT(IN)      :: micpxdef
-      TYPE(mic_param_default), INTENT(IN)      :: micpdef
-      TYPE(mic_parameter),     INTENT(INOUT)   :: micparam
-      TYPE(mic_input),         INTENT(IN)      :: micinput
+      integer,                 INTENT(IN)     :: kinetics      !! kinetics model selector (1/2/3) (unused here)
+      TYPE(mic_param_xscale),  INTENT(IN)     :: micpxdef      !! PFT-specific scaling factors
+      TYPE(mic_param_default), INTENT(IN)     :: micpdef       !! fixed default parameters
+      TYPE(mic_parameter),     INTENT(INOUT)  :: micparam      !! computed model parameters. tvmicR/K, betamicR/K updated per (np,ns) here
+      TYPE(mic_input),         INTENT(IN)     :: micinput      !! environmental model inputs
 
-      integer :: nx,kinetics
+      integer :: nx,nopt,np,ns
       real(r_2)  :: xbeta
-
-      ! local variable
-      integer :: nopt,np,ns
       real(r_2), dimension(:), allocatable    :: tvref
 
       allocate(tvref(mp))
@@ -457,21 +453,20 @@ contains
   end subroutine turnovert
 
 
-  subroutine turnovert_single(kinetics,micpxdef,micpdef,micparam,micinput,np)
+ !> Single-point variant of @see turnovert
+ subroutine turnovert_single(kinetics,micpxdef,micpdef,micparam,micinput,np)
       use mic_constant
       use mic_variable
       implicit none
+      integer,                 INTENT(IN)      :: np
+      integer,                 INTENT(IN)      :: kinetics
       TYPE(mic_param_xscale),  INTENT(IN)      :: micpxdef
       TYPE(mic_param_default), INTENT(IN)      :: micpdef
       TYPE(mic_parameter),     INTENT(INOUT)   :: micparam
       TYPE(mic_input),         INTENT(IN)      :: micinput
-      integer,                 INTENT(IN)      :: np
 
-      integer :: nx,kinetics
+      integer :: nx,nopt,ns
       real(r_2)  :: xbeta
-
-      ! local variable
-      integer :: nopt,ns
       real(r_2), dimension(:), allocatable    :: tvref
 
       allocate(tvref(mp))
@@ -504,14 +499,16 @@ contains
 
 
 
-    subroutine bgc_fractions(micpxdef,micpdef,micparam,micinput)
-    use mic_constant
-    use mic_variable
-    implicit none
-    TYPE(mic_param_xscale), INTENT(IN)      :: micpxdef
-    TYPE(mic_param_default), INTENT(IN)     :: micpdef
-    TYPE(mic_parameter),     INTENT(INOUT)  :: micparam
-    TYPE(mic_input),         INTENT(INOUT)  :: micinput
+ !> Computes C input partitioning (metabolic vs structural litter) and SOM routing fractions (fr2*, fk2*).
+ !! All-grid-point variant. C:N ratios, fmetave, and clay-dependent routing are computed per layer.
+ subroutine bgc_fractions(micpxdef,micpdef,micparam,micinput)
+     use mic_constant
+     use mic_variable
+     implicit none
+     TYPE(mic_param_xscale), INTENT(IN)      :: micpxdef       !! PFT-specific scaling factors
+     TYPE(mic_param_default), INTENT(IN)     :: micpdef        !! fixed default parameters (currently unused)
+     TYPE(mic_parameter),     INTENT(INOUT)  :: micparam       !! computed model parameters. cn_r, fmetave, fr2p/c/a, fk2p/c/a updated per (np,ns) here
+     TYPE(mic_input),         INTENT(INOUT)  :: micinput       !! environmental model inputs. Updated here.
     !local variables
     integer :: npft,np,ns
     real(r_2), dimension(:),     allocatable :: fmetleaf,fmetroot,fmetwood
@@ -556,8 +553,8 @@ contains
                 dwoodx(np,ns) = 0.0
              endif
 
-          !! calculate soil texture and litter quaility dependent parameter values
-          ! C input to metabolic litter
+           !! calculate soil texture and litter quality dependent parameter values
+           ! C input to metabolic litter
              micinput%cinputm(np,ns) = dleafx(np,ns)*fmetleaf(np)        &
                                      + drootx(np,ns)*fmetroot(np)        &
                                      + dwoodx(np,ns)*fmetwood(np)
@@ -638,15 +635,16 @@ contains
    end subroutine bgc_fractions
 
 
-   subroutine bgc_fractions_single(micpxdef,micpdef,micparam,micinput,np)
-      use mic_constant
-      use mic_variable
-      implicit none
-      TYPE(mic_param_xscale),  INTENT(IN)     :: micpxdef
-      TYPE(mic_param_default), INTENT(IN)     :: micpdef
-      TYPE(mic_parameter),     INTENT(INOUT)  :: micparam
-      TYPE(mic_input),         INTENT(INOUT)  :: micinput
-      integer,                 INTENT(IN)     :: np
+ !> Single-point variant of @see bgc_fractions
+ subroutine bgc_fractions_single(micpxdef,micpdef,micparam,micinput,np)
+   use mic_constant
+   use mic_variable
+   implicit none
+   integer,                 INTENT(IN)     :: np
+   TYPE(mic_param_xscale),  INTENT(IN)     :: micpxdef
+   TYPE(mic_param_default), INTENT(IN)     :: micpdef
+   TYPE(mic_parameter),     INTENT(INOUT)  :: micparam
+   TYPE(mic_input),         INTENT(INOUT)  :: micinput
       !local variables
       integer :: npft,ns
       real(r_2), dimension(:),     allocatable :: fmetleaf,fmetroot,fmetwood
@@ -690,8 +688,8 @@ contains
             dwoodx(np,ns) = 0.0
          endif
 
-         !! calculate soil texture and litter quaility dependent parameter values
-         ! C input to metabolic litter
+          ! calculate soil texture and litter quality dependent parameter values
+          ! C input to metabolic litter
          micinput%cinputm(np,ns) = dleafx(np,ns)*fmetleaf(np)        &
                                  + drootx(np,ns)*fmetroot(np)        &
                                  + dwoodx(np,ns)*fmetwood(np)
@@ -774,27 +772,22 @@ contains
    end subroutine bgc_fractions_single
 
 
-   subroutine bioturb(ndelt,ms,zse,delt,diffsocxx,fluxsoc,xpooli,xpoole)
-   ! multi-layered soil BGC including DOC and bioturbation using microbially-based BGC modeling
-   ! step 1: litter-C and SOC bioturbation treated as a diffusion process
-   ! step 2: advection of DOC along with water flux
-   ! solve dc/dt=Dd2c/dx +F(z) where c is total SOC concentration in each soil layer
-   ! bioturbation diffusion rate
-   ! boundary conditions: at the top     -Ddc/dx = F0+F(1)  at x=0
-   !                      at the bottom: dC/dx=0            at x=h
-   ! using the fully implicit method together with Thomas method
-   ! unit for pool:                 mgc/cm3      (=kg C/m3)
-   !      for flux:                 mgc/cm3/delt (=kg c/m3/delt): g/m2/delt = 0.1 mg/cm2/delt
-   !      for length:               cm
-   !      for diffsion coefficient: cm2/delt
-   use mic_constant,  ONLY : r_2
-   implicit none
-   integer                        :: ndelt,ms
-   real(r_2), dimension(ms)    :: zse
-   real(r_2)                      :: delt,diffsocxx
-   real(r_2), dimension(ms)    :: xpooli,xpoole,xpool,fluxsoc
-   ! local variables
-   integer                        :: i,j
+ !> Treats litter-C and SOC bioturbation as a diffusion process.
+ !! Solves `dc/dt = D * d2c/dx2 + F(z)` with Crank-Nicolson discretisation + Thomas algorithm.
+ !! Top BC: `-D* dc/dx = F0 + F(1)` at x=0. Bottom BC: `dc/dx = 0` at x=h.
+ !! Units: pools in mg C/cm3, flux in mg C/cm3/delt, length in cm, diffusion coefficient in cm2/delt.
+ subroutine bioturb(ndelt,ms,zse,delt,diffsocxx,fluxsoc,xpooli,xpoole)
+     use mic_constant, ONLY : r_2
+     implicit none
+     integer,                 INTENT(IN)    :: ndelt,ms          !! number of bioturbation sub-steps and soil layers
+     real(r_2), dimension(ms),INTENT(IN)    :: zse               !! soil layer thickness (m), converted to cm internally
+     real(r_2),               INTENT(IN)    :: delt              !! model time step (hours)
+     real(r_2),               INTENT(IN)    :: diffsocxx         !! diffusion coefficient (cm²/delt)
+     real(r_2), dimension(ms),INTENT(IN)    :: xpooli            !! initial pool state per layer (mg C/cm3)
+     real(r_2), dimension(ms),INTENT(IN)    :: fluxsoc           !! external C flux per layer (mg C/cm3/delt)
+     real(r_2), dimension(ms),INTENT(OUT)   :: xpoole            !! pool state per layer after bioturbation (mg C/cm3)
+   real(r_2), dimension(ms)    :: xpool
+   integer                       :: i,j
    real(r_2)                      :: deltD,tot0, tot1, totflux
    real(r_2), dimension(ms)    :: xzse
    real(r_2), dimension(ms+1)  :: sdepthx
@@ -805,7 +798,7 @@ contains
      sdepthx(1) = 0.0          ! depth of a layer from the top (x_0.5=0.0 eg soil surface)
      do j=2,ms+1
         sdepthx(j) = sdepthx(j-1) + zse(j-1)*100.0     ! depth of the bottom of each layer (eg x_j+0.5)
-                                                       !*100 to convert from m to cm
+                                                        ! *100 to convert from m to cm
      enddo
 
      do j=1,ms
@@ -817,7 +810,7 @@ contains
       xpool = xpooli
       tot0 = 0.0
      do j=1,ms
-        tot0 = tot0 + xpool(j) * zse(j)*100.0         !*100 convert m to cm
+         tot0 = tot0 + xpool(j) * zse(j)*100.0         ! *100 convert m to cm
      enddo
 
      do i=1,ndelt
@@ -868,16 +861,19 @@ contains
 
 end subroutine bioturb
 
-   subroutine tridag(at,bt,ct,rt,u,ms)
-   ! solving the triadigonal matrix (numerical recipes, p43)
-   ! linear equation: A* u(i-1) + B *u(i) + C * u(i+1) = R,
-   ! where i is soil layer, u(i-1), u(i) and u(i+1) are at time step t
-   ! NOTE: bt(1) should not be equal to 0.0, otherwise rewrite the equation
-    use mic_constant,  ONLY : r_2
-    implicit none
-    integer, parameter    :: nmax=500
-    integer :: ms
-    real(r_2), dimension(ms)    :: at,bt,ct,rt,u
+ !> Solves a tridiagonal linear system via the Thomas algorithm.
+ !! `A*u(i-1) + B*u(i) + C*u(i+1) = R`, where i is the soil layer index.
+ !! Adapted from Numerical Recipes. Requires bt(1) != 0.
+ subroutine tridag(at,bt,ct,rt,u,ms)
+     use mic_constant, ONLY : r_2
+     implicit none
+     integer, parameter :: nmax = 500
+     integer,                 INTENT(IN)    :: ms              !! number of layers (must be <= nmax)
+     real(r_2), dimension(ms),INTENT(IN)    :: at              !! sub-diagonal coefficients
+     real(r_2), dimension(ms),INTENT(IN)    :: bt              !! main diagonal coefficients
+     real(r_2), dimension(ms),INTENT(IN)    :: ct              !! super-diagonal coefficients
+     real(r_2), dimension(ms),INTENT(IN)    :: rt              !! right-hand side
+     real(r_2), dimension(ms),INTENT(OUT)   :: u               !! solution vector
     integer :: j
     real(r_2) :: bet
     real(r_2), dimension(nmax) :: gam
@@ -899,15 +895,20 @@ end subroutine bioturb
     end subroutine tridag
 
 
-    subroutine advecdoc(deltx,zse,fluxsoilwx,fluxdocsx,vsoilwx,ypool)
-    ! to be modified using an implicit solver to ensure mass conservation
-    !
-    use mic_constant
-    implicit none
-    real(r_2)                          :: deltx
-    real(r_2), dimension(ms)        :: zse,fluxsoilwx,vsoilwx,ypool
+ !> Advances dissolved organic carbon (DOC) pool via explicit advection along soil water flux.
+ !! Uses iterative Euler steps to prevent negative concentrations.
+ !! @note To be replaced with an implicit solver for strict mass conservation.
+ subroutine advecdoc(deltx,zse,fluxsoilwx,fluxdocsx,vsoilwx,ypool)
+     use mic_constant
+     implicit none
+     real(r_2),                INTENT(IN)    :: deltx         !! time step for advection sub-step
+     real(r_2), dimension(ms), INTENT(IN)    :: zse           !! soil layer thickness
+     real(r_2), dimension(ms), INTENT(IN)    :: fluxsoilwx    !! soil water flux per layer
+     real(r_2), dimension(ms), INTENT(IN)    :: vsoilwx       !! soil water volume per layer
+     real(r_2),                INTENT(IN)    :: fluxdocsx     !! external DOC flux from above
+     real(r_2), dimension(ms), INTENT(INOUT) :: ypool         !! DOC concentration; updated via iterative Euler (mg C/cm3)
     real(r_2), dimension(ms)        :: dypool,ypool1
-    real(r_2)                          :: fluxdocsx,totdoc0,totdoc1,fluxdocbot
+    real(r_2)                          :: totdoc0,totdoc1,fluxdocbot
     integer :: ns,iter
 
      ypool1= ypool
@@ -939,33 +940,30 @@ end subroutine bioturb
     end subroutine advecdoc
 
 
-    subroutine vmic_c(ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,xpool,y)
-    ! MIMICS as modified by Zhang et al. (2019, GCB).
-    ! Seven pools: metabolic litter (1), Structural litter, microbe-R (3), microbe-K(4),
-    !              Physical protected (5), chemically-protected (6), active (7)
-    ! for each layer
-    ! input: aboveground litter and belowground in the surface layer
-    !        belowground input in other layers
-    ! kinetics: Michaelis-Mennten
-    ! unit:
-    ! all carbon pools : mg C/cm3
-    ! time step :        one hour
-    !
+ !> ODE right-hand side: computes carbon fluxes (dxpool/dt) for all pools in a single grid layer.
+ !! Implements three kinetics variants (1=MIMICS forward MM, 2=reverse MM, 3=combined with adsorption/desorption).
+ !! Pools: metabolic litter (1), structural litter (2), microbe-R (3), microbe-K (4),
+ !! physically protected (5), chemically protected (6), active/LWC (7), and additional pools (8-10) for kinetics 3.
+ !! Pools in mg C/cm3, time step in hours. Adapted from Zhang et al. (2019, GCB) and Abramoff et al. (2022).
+ subroutine vmic_c(ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,xpool,y)
      use mic_constant
      use mic_variable
      implicit none
 
-     TYPE(mic_param_default), INTENT(IN)     :: micpdef
-     TYPE(mic_parameter),     INTENT(IN)     :: micparam
-     TYPE(mic_input),         INTENT(IN)     :: micinput
+     TYPE(mic_param_default), INTENT(IN)     :: micpdef       !! fixed default parameters
+     TYPE(mic_parameter),     INTENT(IN)     :: micparam      !! computed model parameters.
+     TYPE(mic_input),         INTENT(IN)     :: micinput      !! environmental model inputs
+     integer,                 INTENT(IN)     :: np,ns         !! grid point and layer indices
+     integer,                 INTENT(IN)     :: kinetics      !! kinetics model selector (1/2/3)
+     integer,                 INTENT(IN)     :: ny            !! model year index (for 14C)
+     integer,                 INTENT(IN)     :: isoc14        !! 14C mode flag (1=14C, 0=standard)
+     real(r_2),  dimension(mcpool),  INTENT(IN)     :: xpool  !! current pool state (mg C/cm3)
+     real(r_2),  dimension(mcpool),  INTENT(OUT)    :: y      !! dxpool/dt, rates of change for each pool
 
-     real(r_2),  parameter                           ::  kamin = 0.2      !          Abramoff et al. (2022)
-     real(r_2),  parameter                           ::  lamda = 2.01e-4  !1/kPa     Abramoof et al. (2022)
+     real(r_2),  parameter                           ::  kamin = 0.2      ! Abramoff et al. (2022)
+     real(r_2),  parameter                           ::  lamda = 2.01e-4  ! 1/kPa, Abramoff et al. (2022)
 
-     real(r_2),  dimension(mcpool),  INTENT(IN)        :: xpool
-     real(r_2),  dimension(mcpool),  INTENT(INOUT)     :: y   !=dxpool/dt     ! local variables
-     ! local variables
-     integer     :: np,ns,kinetics,ny,isoc14,ip
+     integer     :: ip
 
      real(r_2)  :: betamicR,betamicK,                 &
                 cinputmx,cinputsx,fmx,fsx,         &
