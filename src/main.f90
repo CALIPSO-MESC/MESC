@@ -20,5 +20,5 @@ program testvmic
 
     fa = functn(nx,xparam)
     print *, 'cost12', xcost,xparam(1:nx),fa
-    stop
+
 end program testvmic
