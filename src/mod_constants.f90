@@ -1,17 +1,16 @@
 module mic_constant
-
+  use precision_module
   IMPLICIT NONE
-  integer,  parameter  :: r_2 = SELECTED_REAL_KIND(12, 60)
   integer,  parameter  :: diag=0       ! =1 for printout 0 no prinout
   integer,  parameter  :: outp=1       ! output site
   !integer,  parameter  :: msite=213   ! number of sites
-  integer                 mp           ! number of site the model runs for
-  integer                 ntime        ! 365  !12 * 4 ! 4 year's monthly global forcings
-  integer                 mpft         ! =17 !15      ! number of PFTs =17 FOR cable AND =19 FOR orchidee 
-  integer                 mbgc         ! number of soil categories
-  integer                 ms
-  integer                 nlon      
-  integer                 nlat     
+  integer                 :: mp           ! number of site the model runs for
+  integer                 :: ntime        ! 365  !12 * 4 ! 4 year's monthly global forcings
+  integer                 :: mpft         ! =17 !15      ! number of PFTs =17 FOR cable AND =19 FOR orchidee
+  integer                 :: mbgc         ! number of soil categories
+  integer                 :: ms
+  integer                 :: nlon
+  integer                 :: nlat
 !  integer,  parameter  :: ms= 10      !7       ! soil layers
 !  real(r_2) zse(ms)
 !  data zse/0.2,0.2,0.2,0.2,0.2,0.5,0.5/
@@ -21,11 +20,11 @@ module mic_constant
   integer,  parameter  :: mcpool=10    ! number of C pools
   integer,  parameter  :: nfvar=22     ! number of data input variables
   real(r_2),parameter  :: delt= 1.0    ! one hour
-  real(r_2),parameter  :: tvc14 = (1.0/(24.0*365.0))* alog(2.0)/5730.0    ! 1/hour 
-  integer,  parameter  :: nyic14=1940  ! year 0 of 14C record 
-  integer,  parameter  :: nyec14=2020  ! last yr of 14C calculation   
+  real(r_2),parameter  :: tvc14 = (1.0/(24.0*365.0))* log(2.0)/5730.0    ! 1/hour
+  integer,  parameter  :: nyic14=1940  ! year 0 of 14C record
+  integer,  parameter  :: nyec14=2020  ! last yr of 14C calculation
   real(r_2),parameter  :: thresh_patchfrac=1.0e-6   ! minimial patch area fraction
-!  real(r_2),parameter  :: diffsoc  =(1.0/24.0)* 2.74e-3  !cm2/hour   
+!  real(r_2),parameter  :: diffsoc  =(1.0/24.0)* 2.74e-3  !cm2/hour
 !                                       ! m2/hour  ! see Table 1,Camino-Serrano et al. (2018)
   ! CABLE PFT-dependent parameter values
   real(r_2), dimension(17) :: cnleaf1,cnroot1,cnwood1,ligleaf1,ligroot1,ligwood1
@@ -43,7 +42,7 @@ module mic_constant
 !  data cnroot2/78.89,81.43,82.53,151.87,87.49,100.00,151.87,100.00,65.57,45.64,61.60,45.64,54.90,45.64,61.60,45.64,61.60,45.64,61.60/
 !  data ligleaf2/0.15,0.20,0.20,0.25,0.20,0.20,0.25,0.20,0.25,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10/
 !  data ligwood2/0.4,0.25,0.25,0.30,0.25,0.25,0.30,0.25,0.30,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10/
-!  data ligroot2/0.15,0.20,0.20,0.25,0.20,0.20,0.25,0.20,0.25,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10/  
+!  data ligroot2/0.15,0.20,0.20,0.25,0.20,0.20,0.25,0.20,0.25,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10,0.10/
   ! based on CALIPSO EXCLE spreadsheet
   data cnleaf2/100.0,46.2,46.2,99.6,46.2,62.8,99.6,62.8,118.6,69.6,88.0,43.2,50.0,69.6,88.0,69.6,88.0,69.6,88.0/
   data cnwood2/157.9,142.00,142.00,250.63,142.00,164.42,250.63,164.42,256.63,157.89,157.89,157.89,131.58,157.89,157.89,157.89,157.89,157.89,157.89/
@@ -52,8 +51,8 @@ module mic_constant
   data ligwood2/0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4/
   data ligroot2/0.15,0.2,0.2,0.25,0.2,0.2,0.25,0.2,0.2,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1/
   real(r_2), dimension(17) :: xrootcable
-  real(r_2), dimension(19) :: xrootorchidee   
+  real(r_2), dimension(19) :: xrootorchidee
   data xrootcable/1.43,0.94,1.43,1.04,0.77,0.85,0.62,1.77,0.94,0.94,1.43,0.94,1.04,0.53,1.00,1.00,1.00/
   data xrootorchidee/0.94,0.94,1.04,1.04,1.04,1.43,1.43,1.43,0.85,0.62,0.94,0.94,0.85,0.85,0.85,0.85,0.85,0.85,0.85/
-  
+
 end module mic_constant

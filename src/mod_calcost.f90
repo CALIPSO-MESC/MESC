@@ -2,9 +2,9 @@ module calcost_module
     use mic_constant
     use mic_variable
     implicit none
-    
+
   Contains
-  
+
     subroutine calcost_c14(nx,isoc14,bgcopt,xopt,micparam,miccpool,micinput,zse,totcost)
 !    use mic_constant
 !    use mic_variable
@@ -12,29 +12,29 @@ module calcost_module
     TYPE(mic_parameter), INTENT(INOUT) :: micparam
     TYPE(mic_cpool),     INTENT(INOUT) :: miccpool
     TYPE(mic_input),     INTENT(IN)    :: micinput
-    real(r_2) zse(ms)
-    integer nx,isoc14,bgcopt
-    real*8  totcost
-    real*8, dimension(16)              :: xopt
+    real(r_2) :: zse(ms)
+    integer :: nx,isoc14,bgcopt
+    real(dp) :: totcost
+    real(dp), dimension(16)              :: xopt
 
     ! cost function
-    real(r_2), dimension(:), allocatable           :: xcost,xobs,xobsp,xobsm 
+    real(r_2), dimension(:), allocatable           :: xcost,xobs,xobsp,xobsm
     real(r_2), dimension(:), allocatable           :: xmod,xmodp,xmodm !! weighted modelled SOC, POC and MAOC
     real(r_2), dimension(:), allocatable           :: xfracpmod,xfracmmod,xfracpobs,xfracmobs
-    integer   np,ns,ip
-    real(r_2)  xbdz,small
+    integer   :: np,ns,ip
+    real(r_2)  :: xbdz,small
 
-    real(r_2) xtop,xbot,x1,x2 !! cm
-    real(r_2) weight
- 
+    real(r_2) :: xtop,xbot,x1,x2 !! cm
+    real(r_2) :: weight
+
 
 
       allocate(xcost(mp),xobs(mp),xobsp(mp),xobsm(mp))
       allocate(xmod(mp),xmodp(mp),xmodm(mp))
       allocate(xfracpmod(mp),xfracmmod(mp),xfracpobs(mp),xfracmobs(mp))
-      
+
       small = 1.0e-6
-      xcost(:)=0.0 
+      xcost(:)=0.0
       xobs(:)=0.0; xobsp(:)=0.0;xobsm(:)=0.0
 
       do np=1,mp
@@ -48,7 +48,7 @@ module calcost_module
            !! calculated weighted average of modelled values to correspond to observations
             xmod(np)=0.0; xmodp(np)=0.0; xmodm(np)=0.0
             xtop = real(micparam%top(np))*0.01   ! convert from cm to m
-            xbot = real(micparam%bot(np))*0.01  
+            xbot = real(micparam%bot(np))*0.01
 
             x1 =0.0; x2 =0.0
             do ns=1,ms
@@ -65,10 +65,10 @@ module calcost_module
            xmod(np)   = 1000.0 * xmod(np) /((xbot-xtop) * micinput%bulkd(np,1))   !! unit: g C/kg soil
            xmodp(np)  = 1000.0 * xmodp(np)/((xbot-xtop) * micinput%bulkd(np,1))
            xmodm(np)  = 1000.0 * xmodm(np)/((xbot-xtop) * micinput%bulkd(np,1))
-           
+
            xfracpmod(np) = min(1.0,max(0.0,xmodp(np)/(xmodp(np)+xmodm(np))))
            xfracmmod(np) = 1.0 - xfracpmod(np)
-           
+
            miccpool%cpooleqp(np) = xmodp(np)
            miccpool%cpooleqm(np) = xmodm(np)
            ! avoid dividing by zero
@@ -82,22 +82,22 @@ module calcost_module
                print *, 'parameter values = ',  xopt(1:nx)
             !   stop
            endif
-            
+
            if(isoc14 == 0) then
              if((xobsp(np)+xobsm(np))>0.0 .and. (xobsp(np)+xobsm(np))<1000.0) then
         !     xcost(np) = xcost(np) + ((xmodp(np) - xobsp(np))/xobsp(np))**2 +((xmodm(np) - xobsm(np))/xobsm(np))**2
               xcost(np) = xcost(np) + (xfracpmod(np)-xfracpobs(np))** 2 + (xfracmmod(np) - xfracmobs(np))**2
              endif
              write(91,901) micparam%siteid(np),micparam%pft(np),micparam%top(np),micparam%bot(np),xobs(np),xmod(np),xobsp(np),xmodp(np),xobsm(np),xmodm(np)
-                  
+
              do ns = 1,ms
                 write(92,*) micparam%siteid(np),micparam%pft(np), ns, (1000.0*miccpool%cpooleq(np,ns,ip)/micinput%bulkd(np,ns),ip=1,mcpool)
              enddo
 
-           else 
+           else
              xcost(np) = xcost(np) +(micparam%c14soilobsp(np) - xmodp(np)/miccpool%c12pooleqp(np))**2  &
                                    +(micparam%c14soilobsm(np) - xmodm(np)/miccpool%c12pooleqm(np))**2
-                 
+
              write(93,901) micparam%siteid(np),micparam%pft(np),micparam%top(np),micparam%bot(np), &
                            xfracpobs(np),xfracpmod(np),xfracmobs(np),xfracmmod(np),                &
                            micparam%c14soilobsp(np),xmodp(np)/miccpool%c12pooleqp(np),             &
@@ -106,8 +106,8 @@ module calcost_module
              do ns = 1,ms
                 write(94,*) micparam%siteid(np),micparam%pft(np), ns, (1000.0*miccpool%cpooleq(np,ns,ip)/micinput%bulkd(np,ns),ip=1,mcpool)
              enddo
-           endif 
-                        
+           endif
+
         endif  !bgctype(np)=bgcopt
       enddo  !"np"
       totcost = sum(xcost(1:mp))
@@ -130,34 +130,34 @@ module calcost_module
     TYPE(mic_cpool),     INTENT(INOUT) :: miccpool
     TYPE(mic_input),     INTENT(IN)    :: micinput
     TYPE(mic_global_input), INTENT(IN) :: micglobal
-    real(r_2) zse(ms)
-    integer nx,bgcopt
-    real*8  totcost
-    real*8, dimension(16)              :: xopt
+    real(r_2) :: zse(ms)
+    integer :: nx,bgcopt
+    real(dp) :: totcost
+    real(dp), dimension(16)              :: xopt
 
     ! cost function
-    real(r_2), dimension(:), allocatable        :: xcost,xobs,xobsp,xobsm 
+    real(r_2), dimension(:), allocatable        :: xcost,xobs,xobsp,xobsm
     real(r_2), dimension(:), allocatable        :: xmod,xmodp,xmodm !! weighted modelled SOC, POC and MAOC
-    integer   np,ns,ip,ipsite
-    real(r_2)  xbdz
+    integer   :: np,ns,ip,ipsite
+    real(r_2)  :: xbdz
 
-    real(r_2) xtop,xbot,x1,x2 !! cm
-    real(r_2) weight
+    real(r_2) :: xtop,xbot,x1,x2 !! cm
+    real(r_2) :: weight
     real(r_2),dimension(:), allocatable         :: xmodfracp,xmodfracm,xobsfracp,xobsfracm
- 
- 
+
+
       allocate(xcost(mp),xobs(mp),xobsp(mp),xobsm(mp))
       allocate(xmod(mp),xmodp(mp),xmodm(mp))
       allocate(xmodfracp(mp),xmodfracm(mp),xobsfracp(mp),xobsfracm(mp))
-      
-      
+
+
       ipsite=-999
-      xcost(:)=0.0 
+      xcost(:)=0.0
       xobs(:)=0.0; xobsp(:)=0.0;xobsm(:)=0.0;xmodfracp(:)=0.0;xmodfracm(:)=0.0;xobsfracp(:)=0.0;xobsfracm(:)=0.0
 
       do np=1,mp
          if(micparam%bgctype(np)==bgcopt) then
-            ipsite=np         
+            ipsite=np
             xobs(np)  = micparam%csoilobs(np,1) !! only one observation for each site
             xobsp(np) = micparam%csoilobsp(np,1)
             xobsm(np) = micparam%csoilobsm(np,1)
@@ -165,7 +165,7 @@ module calcost_module
            !! calculated weighted average of modelled values to correspond to observations
             xmod(np)=0.0; xmodp(np)=0.0; xmodm(np)=0.0
             xtop = real(micparam%top(np))*0.01   ! convert from cm to m
-            xbot = real(micparam%bot(np))*0.01  
+            xbot = real(micparam%bot(np))*0.01
 
             x1 =0.0; x2 =0.0
             do ns=1,ms
@@ -182,7 +182,7 @@ module calcost_module
            xmod(np)   = 1000.0 * xmod(np) /((xbot-xtop)*micinput%bulkd(np,1))   !! unit: g C/kg soil
            xmodp(np)  = 1000.0 * xmodp(np)/((xbot-xtop)*micinput%bulkd(np,1))
            xmodm(np)  = 1000.0 * xmodm(np)/((xbot-xtop)*micinput%bulkd(np,1))
-            
+
            xmodfracp(np) = xmodp(np)/(xmodp(np)+xmodm(np)+1.0e-6)
            xmodfracm(np) = xmodm(np)/(xmodp(np)+xmodm(np)+1.0e-6)
            xobsfracp(np) = xobsp(np)/(xobsp(np)+xobsm(np)+1.0e-6)
@@ -194,12 +194,12 @@ module calcost_module
                print *, xmodp(np),xmodm(np)
             !   stop
             endif
-            
+
 
             if(xobsp(np) >0.0 .and. xobsm(np)>0.0 .and. xobsfracm(np) >1.0e-10) then  !! POC is not available for some sites
             !   xcost(np) = xcost(np) + 400.0*(xmodfracm(np) - xobsfracm(np))**2 &
             !                         + 0.01 *(xmodm(np)+xmodp(np) - xobsm(np)-xobsp(np))**2
-            
+
             !    xcost(np) = xcost(np) + 2.0 *(log(xmodfracm(np)) - log(xobsfracm(np)))**2 &
             !                          + 0.1 *(log(xmodm(np)+xmodp(np)) - log(xobsm(np)+xobsp(np)))**2
             !    xcost(np) = xcost(np) + 20.0 *(xmodfracm(np) - xobsfracm(np))**2 &
@@ -213,7 +213,7 @@ module calcost_module
                           micparam%bgctype(np),micglobal%area(np),xtop,xbot, &
                           xobsp(np),xmodp(np),xobsm(np),xmodm(np),xobsfracp(np),xmodfracp(np),xobsfracm(np),xmodfracm(np)
 
-                  
+
             do ns = 1,ms
                write(92,921) micparam%siteid(np),micparam%pft(np), &
                              micparam%bgctype(np),micglobal%area(np),ns,xtop,xbot,                        &
@@ -221,7 +221,7 @@ module calcost_module
 
             enddo
 
-                        
+
         endif  !bgctype(np)=bgcopt
       enddo  !"np"
       totcost = sum(xcost(1:mp))
@@ -235,7 +235,7 @@ module calcost_module
 
 
     end SUBROUTINE calcost_frc1
-        
+
 
     subroutine calcost_hwsd3(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost)
    ! use mic_constant
@@ -245,42 +245,42 @@ module calcost_module
     TYPE(mic_parameter),    INTENT(IN)    :: micparam
     TYPE(mic_cpool),        INTENT(INOUT) :: miccpool
     TYPE(mic_input),        INTENT(IN)    :: micinput
-    TYPE(mic_global_input), INTENT(IN)    :: micglobal    
-    real(r_2) zse(ms)    
-    integer nx,bgcopt,msobs
-    real*8  totcost
-    real*8, dimension(16)              :: xopt
+    TYPE(mic_global_input), INTENT(IN)    :: micglobal
+    real(r_2) :: zse(ms)
+    integer :: nx,bgcopt,msobs
+    real(dp) :: totcost
+    real(dp), dimension(16)              :: xopt
     ! cost function
     real(r_2), dimension(:),   allocatable        :: xcost,xtop,xbot
     real(r_2), dimension(:,:), allocatable        :: xmod
     real(r_2), dimension(:,:), allocatable        :: xobs7, xmod7
     real(r_2)                                     :: fracpocm,fracmaocm,fracmicm,fraclabm
-    integer   np,ns,ipsite,v,ip
-    real(r_2)  xbdz
+    integer   :: np,ns,ipsite,v,ip
+    real(r_2)  :: xbdz
 
     msobs=ms
     allocate(xcost(mp))
     allocate(xmod(mp,ms))
     allocate(xobs7(mp,msobs), xmod7(mp,msobs),xtop(msobs),xbot(msobs))
-    
+
     ! specific to HWSD_SOC, total 7 layers with thickness of 0.2 for the top 5 layers, and 0.5m for the next 2 layers
     do ns=1,5
        xtop(ns) =(ns-1) * 0.2
        xbot(ns) = ns    * 0.2
     enddo
-    xbot(6)=1.5;     xbot(7)=2.0    
-    xtop(6)=xbot(5); xtop(7)=xbot(6)    
+    xbot(6)=1.5;     xbot(7)=2.0
+    xtop(6)=xbot(5); xtop(7)=xbot(6)
 
     xobs7(:,:)=0.0; xmod7(:,:)=0.0;xmod(:,:)=0.0;xcost(:)=0.0
 
     do np=1,mp
-       if(micparam%bgctype(np)==bgcopt .and. micglobal%area(np) > 0.0) then      
+       if(micparam%bgctype(np)==bgcopt .and. micglobal%area(np) > 0.0) then
          do ns = 1,ms
             xmod(np,ns) = 1000.0 * sum(miccpool%cpooleq(np,ns,3:mcpool))/micinput%bulkd(np,ns)   ! gC/kg soil
-         enddo   
+         enddo
 
          do ns = 1,msobs
-            xobs7(np,ns) = micparam%csoilobs(np,ns) * (1.0- micparam%fracaoc(np,ns))  
+            xobs7(np,ns) = micparam%csoilobs(np,ns) * (1.0- micparam%fracaoc(np,ns))
             xmod7(np,ns) = xmod(np,ns)                                     ! gC/kg soil
             if(xmod7(np,ns) <0.0 .or. xmod7(np,ns) >1.0e3) then
                print *, 'abnormal value of model simulation site=', micparam%siteid(np)
@@ -288,11 +288,11 @@ module calcost_module
                print *,  xobs7(np,ns),xmod7(np,ns),xobs7(np,ns)-xmod7(np,ns)
                print *, ' modelled pool size= ', ns,1000.0 * miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
                !stop
-            endif   
+            endif
 
             if(xobs7(np,ns) > 0.0 .and. xobs7(np,ns) <1.0e3) then
-               xcost(np) = xcost(np) + (log(xobs7(np,ns))-log(xmod7(np,ns)))**2 
-            !   xcost(np) = xcost(np) + (xobs7(np,ns)-xmod7(np,ns))**2 
+               xcost(np) = xcost(np) + (log(xobs7(np,ns))-log(xmod7(np,ns)))**2
+            !   xcost(np) = xcost(np) + (xobs7(np,ns)-xmod7(np,ns))**2
 
                write(91,901) micparam%siteid(np),micparam%pft(np),micparam%isoil(np),micparam%sorder(np), &
                              micparam%bgctype(np),micglobal%area(np),micglobal%npp(np),ns,                &
@@ -303,9 +303,9 @@ module calcost_module
 
          do ns = 1,ms
             fracpocm  = (sum(miccpool%cpooleq(np,ns,3:8))-miccpool%cpooleq(np,ns,6))/(sum(miccpool%cpooleq(np,ns,3:mcpool))+1.0e-6)
-            fracmaocm = (miccpool%cpooleq(np,ns,6)+miccpool%cpooleq(np,ns,9))/(sum(miccpool%cpooleq(np,ns,3:mcpool))+1.0e-6)    
-            fracmicm  = (miccpool%cpooleq(np,ns,3)+miccpool%cpooleq(np,ns,4))/(sum(miccpool%cpooleq(np,ns,3:mcpool))+1.0e-6)                   
-            fraclabm  = miccpool%cpooleq(np,ns,7)/(sum(miccpool%cpooleq(np,ns,3:mcpool))+1.0e-6)  
+            fracmaocm = (miccpool%cpooleq(np,ns,6)+miccpool%cpooleq(np,ns,9))/(sum(miccpool%cpooleq(np,ns,3:mcpool))+1.0e-6)
+            fracmicm  = (miccpool%cpooleq(np,ns,3)+miccpool%cpooleq(np,ns,4))/(sum(miccpool%cpooleq(np,ns,3:mcpool))+1.0e-6)
+            fraclabm  = miccpool%cpooleq(np,ns,7)/(sum(miccpool%cpooleq(np,ns,3:mcpool))+1.0e-6)
             write(92,921) micparam%siteid(np),micparam%pft(np),micparam%isoil(np),micparam%sorder(np), &
                           micparam%bgctype(np),micglobal%area(np),micglobal%npp(np), ns,  &
                           (1000.0*miccpool%cpooleq(np,ns,ip)/micinput%bulkd(np,ns),ip=1,mcpool), &
@@ -325,7 +325,7 @@ module calcost_module
     end subroutine calcost_hwsd3
 
 
-    
+
     subroutine calcost_global_hwsd(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost)
     ! this cost function is specific to the setup of zse
     ! data zse/0.2,0.2,0.2,0.2,0.2,0.5,0.5/
@@ -337,56 +337,56 @@ module calcost_module
     TYPE(mic_parameter),    INTENT(IN)    :: micparam
     TYPE(mic_cpool),        INTENT(INOUT) :: miccpool
     TYPE(mic_input),        INTENT(IN)    :: micinput
-    TYPE(mic_global_input), INTENT(IN)    :: micglobal    
-    real(r_2) zse(ms)
-    integer nx,bgcopt,msobs
-    real*8  totcost
-    real*8, dimension(16)              :: xopt
+    TYPE(mic_global_input), INTENT(IN)    :: micglobal
+    real(r_2) :: zse(ms)
+    integer :: nx,bgcopt,msobs
+    real(dp) :: totcost
+    real(dp), dimension(16)              :: xopt
     ! cost function
     real(r_2), dimension(:),   allocatable        :: xcost,xtop,xbot
     real(r_2), dimension(:,:), allocatable        :: xmod
     real(r_2), dimension(:,:), allocatable        :: xobs7, xmod7
     real(r_2)                                     :: fracpocm,fracmaocm,fracmicm,fraclabm
-    integer   np,ns,ipsite,v,ip
-    real(r_2)  xbdz
+    integer   :: np,ns,ipsite,v,ip
+    real(r_2)  :: xbdz
 
     msobs=7
     allocate(xcost(mp))
     allocate(xmod(mp,ms))
     allocate(xobs7(mp,msobs), xmod7(mp,msobs),xtop(msobs),xbot(msobs))
-    
+
     ! specific to HWSD_SOC, total 7 layers with thickness of 0.2 for the top 5 layers, and 0.5m for the next 2 layers
     do ns=1,5
        xtop(ns) =(ns-1) * 0.2
        xbot(ns) = ns    * 0.2
     enddo
-    xbot(6)=1.5;     xbot(7)=2.0    
-    xtop(6)=xbot(5); xtop(7)=xbot(6)    
+    xbot(6)=1.5;     xbot(7)=2.0
+    xtop(6)=xbot(5); xtop(7)=xbot(6)
 
     xobs7(:,:)=0.0; xmod7(:,:)=0.0;xmod(:,:)=0.0;xcost(:)=0.0
     ipsite=-999
 
     do np=1,mp
-       if(micparam%bgctype(np)==bgcopt .and. micglobal%area(np) > 0.0) then      
+       if(micparam%bgctype(np)==bgcopt .and. micglobal%area(np) > 0.0) then
          do ns = 1,ms
             xmod(np,ns) = 1000.0 * sum(miccpool%cpooleq(np,ns,1:mcpool))/micinput%bulkd(np,ns)   ! gC/kg soil
-         enddo   
+         enddo
 
          do ns = 1,msobs
-           xobs7(np,ns) = micparam%csoilobs(np,ns) * (1.0- micparam%fracaoc(np,ns))  
+           xobs7(np,ns) = micparam%csoilobs(np,ns) * (1.0- micparam%fracaoc(np,ns))
            xmod7(np,ns) = xmod(np,ns)                                       ! gC/kg soil
-              
+
             if(xmod7(np,ns) <0.0 .or. xmod7(np,ns) >1.0e3) then
                print *, 'abnormal value of model simulation site=', micparam%siteid(np)
                print *, 'parameter values = ',  xopt(1:nx)
                print *,  xobs7(np,ns),xmod7(np,ns),xobs7(np,ns)-xmod7(np,ns)
                print *, ' modelled pool size= ', ns,miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
                !stop
-            endif   
+            endif
 
             if(xobs7(np,ns) > 0.0 .and. xobs7(np,ns) <1.0e3) then
-               xcost(np) = xcost(np) + (log(xobs7(np,ns))-log(xmod7(np,ns)))**2 
-            !   xcost(np) = xcost(np) + (xobs7(np,ns)-xmod7(np,ns))**2 
+               xcost(np) = xcost(np) + (log(xobs7(np,ns))-log(xmod7(np,ns)))**2
+            !   xcost(np) = xcost(np) + (xobs7(np,ns)-xmod7(np,ns))**2
 
                write(91,901) micparam%siteid(np),micparam%pft(np),micparam%isoil(np),micparam%sorder(np), &
                              micparam%bgctype(np),micglobal%area(np),micglobal%npp(np),ns,                &
@@ -396,9 +396,9 @@ module calcost_module
 
          do ns = 1,ms
             fracpocm  = (sum(miccpool%cpooleq(np,ns,1:8))-miccpool%cpooleq(np,ns,6))/(sum(miccpool%cpooleq(np,ns,1:mcpool))+1.0e-6)
-            fracmaocm = (miccpool%cpooleq(np,ns,6)+miccpool%cpooleq(np,ns,9))/(sum(miccpool%cpooleq(np,ns,1:mcpool))+1.0e-6)    
-            fracmicm  = (miccpool%cpooleq(np,ns,3)+miccpool%cpooleq(np,ns,4))/(sum(miccpool%cpooleq(np,ns,1:mcpool))+1.0e-6)                   
-            fraclabm  = miccpool%cpooleq(np,ns,7)/(sum(miccpool%cpooleq(np,ns,1:mcpool))+1.0e-6)  
+            fracmaocm = (miccpool%cpooleq(np,ns,6)+miccpool%cpooleq(np,ns,9))/(sum(miccpool%cpooleq(np,ns,1:mcpool))+1.0e-6)
+            fracmicm  = (miccpool%cpooleq(np,ns,3)+miccpool%cpooleq(np,ns,4))/(sum(miccpool%cpooleq(np,ns,1:mcpool))+1.0e-6)
+            fraclabm  = miccpool%cpooleq(np,ns,7)/(sum(miccpool%cpooleq(np,ns,1:mcpool))+1.0e-6)
             write(92,921) micparam%siteid(np),micparam%pft(np),micparam%isoil(np),micparam%sorder(np), &
                           micparam%bgctype(np),micglobal%area(np),micglobal%npp(np), ns,  &
                           (1000.0*miccpool%cpooleq(np,ns,ip)/micinput%bulkd(np,ns),ip=1,mcpool), &
@@ -415,11 +415,11 @@ module calcost_module
 
 901   format(i6,1x,4(i3,1x),2(f8.3,1x),i2,1x,10(f12.4,1x))
 921   format(i6,1x,4(i3,1x),2(f8.3,1x),i2,1x,20(f12.4,1x))
-    end subroutine calcost_global_hwsd    
+    end subroutine calcost_global_hwsd
 
 !  cost function for Australian soil C
     subroutine calcost_aust(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost)
-    ! calculate the SOC cost function for Australian sites with 
+    ! calculate the SOC cost function for Australian sites with
     ! observed total SOC in g/kg for the top 3 layers (0-0.1,0.1-0.2 and 0.2-0.3m)
     ! use the first layer POC and HOC in g/kg as the average POC and MAOC for the top 0-0.3m
     ! POC: pool 3,4,5,7,8; MAOC: 6,9
@@ -430,28 +430,28 @@ module calcost_module
     TYPE(mic_parameter),    INTENT(IN)    :: micparam
     TYPE(mic_cpool),        INTENT(INOUT) :: miccpool
     TYPE(mic_input),        INTENT(IN)    :: micinput
-    TYPE(mic_global_input), INTENT(IN)    :: micglobal    
-    real(r_2) zse(ms)    
-    integer nx,bgcopt,msobs
-    real*8  totcost
-    real*8, dimension(16)              :: xopt
+    TYPE(mic_global_input), INTENT(IN)    :: micglobal
+    real(r_2) :: zse(ms)
+    integer :: nx,bgcopt,msobs
+    real(dp) :: totcost
+    real(dp), dimension(16)              :: xopt
     ! cost function
     real(r_2), dimension(:),   allocatable        :: xcost
     real(r_2), dimension(:,:), allocatable        :: xmod,xobs
     real(r_2), dimension(:,:), allocatable        :: xmodpoc,xmodmaoc
-    integer   np,ns,ip
-    real(r_2)  totpoc,totmaoc,xmodpocavg,xmodmaocavg,fracpocm,fracmaocm,fracmicm,fraclabm
+    integer   :: np,ns,ip
+    real(r_2)  :: totpoc,totmaoc,xmodpocavg,xmodmaocavg,fracpocm,fracmaocm,fracmicm,fraclabm
 
     msobs=3
     allocate(xcost(mp))
     allocate(xmod(mp,msobs),xobs(mp,msobs))
     allocate(xmodpoc(mp,msobs),xmodmaoc(mp,msobs))
-    
-    ! specific to AUST_SOC, total 3 layers with thickness of 0.1m 
+
+    ! specific to AUST_SOC, total 3 layers with thickness of 0.1m
     xmod(:,:)=0.0;xobs(:,:)=0.0;xmodpoc(:,:)=0.0;xmodmaoc(:,:)=0.0
     xcost(:)=0.0
     do np=1,mp
-       if(micparam%bgctype(np)==bgcopt .and. micglobal%area(np) > 0.0) then      
+       if(micparam%bgctype(np)==bgcopt .and. micglobal%area(np) > 0.0) then
          do ns = 1,msobs
             totmaoc = miccpool%cpooleq(np,ns,6)+miccpool%cpooleq(np,ns,9)
             totpoc = sum(miccpool%cpooleq(np,ns,3:mcpool)) - totmaoc
@@ -459,21 +459,21 @@ module calcost_module
             xmodmaoc(np,ns) = 1000.0 * totmaoc/micinput%bulkd(np,ns)   ! gC/kg soil
             xmod(np,ns)     = xmodpoc(np,ns) + xmodmaoc(np,ns)
             xobs(np,ns)     = micparam%csoilobs(np,ns)
-         enddo   
+         enddo
 
          do ns = 1,msobs
-            
+
             if(xmod(np,ns) <0.0 .or. xmod(np,ns) >1.0e3) then
                print *, 'abnormal value of model simulation site=', micparam%siteid(np)
                print *, 'parameter values = ',  xopt(1:nx)
                print *,  xobs(np,ns),xmod(np,ns),xobs(np,ns)-xmod(np,ns)
                print *, ' modelled pool size= ', ns,1000.0*miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
                !stop
-            endif   
+            endif
 
             if(xobs(np,ns) > 0.0 .and. xobs(np,ns) <1.0e3) then
-               xcost(np) = xcost(np) + (log(xobs(np,ns))-log(xmod(np,ns)))**2 
-            !   xcost(np) = xcost(np) + (xobs7(np,ns)-xmod7(np,ns))**2 
+               xcost(np) = xcost(np) + (log(xobs(np,ns))-log(xmod(np,ns)))**2
+            !   xcost(np) = xcost(np) + (xobs7(np,ns)-xmod7(np,ns))**2
 
                write(91,901) micparam%siteid(np),micparam%pft(np),micparam%isoil(np),micparam%sorder(np), &
                              micparam%bgctype(np),micglobal%area(np),ns,&
@@ -485,12 +485,12 @@ module calcost_module
          xmodmaocavg = sum(xmodmaoc(np,1:msobs))/real(msobs)
          if(micparam%csoilobsp(np,1) >0.0 .and. micparam%csoilobsm(np,1) > 0.0) then
             xcost(np) = xcost(np) + (log(xmodpocavg)-log(micparam%csoilobsp(np,1)))** 2 &
-                                  + (log(xmodmaocavg)-log(micparam%csoilobsm(np,1)))** 2 
+                                  + (log(xmodmaocavg)-log(micparam%csoilobsm(np,1)))** 2
          endif
          write(92,921) micparam%siteid(np),micparam%pft(np),micparam%isoil(np),micparam%sorder(np), &
                        micparam%bgctype(np),micglobal%area(np),xmodpocavg,micparam%csoilobsp(np,1), &
                        xmodmaocavg,micparam%csoilobsm(np,1)
- 
+
       endif !"pft"
    enddo  !"np"
    totcost = sum(xcost(1:mp))
@@ -501,7 +501,7 @@ module calcost_module
 
 901   format(i6,1x,4(i3,1x),f8.3,1x,i2,1x,10(f12.4,1x))
 921   format(i6,1x,4(i3,1x),f8.3,1x,20(f12.4,1x))
-    end subroutine calcost_aust  
+    end subroutine calcost_aust
 
 
 end module calcost_module

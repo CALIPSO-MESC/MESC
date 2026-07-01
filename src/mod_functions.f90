@@ -10,9 +10,9 @@ module function_module
  use calcost_module, only: calcost_c14, calcost_frc1, calcost_hwsd3, calcost_global_hwsd, calcost_aust
  implicit none
 
- Contains 
+ Contains
 
- real*8 function functn_c14(nx,xparam16)
+ real(dp) function functn_c14(nx,xparam16)
     TYPE(mic_param_xscale)    :: micpxdef
     TYPE(mic_param_default)   :: micpdef
     TYPE(mic_parameter)       :: micparam
@@ -23,28 +23,28 @@ module function_module
     TYPE(mic_output)          :: micoutput
 
     !local variables
-    real*8,    dimension(16)           :: xparam16
-    integer    nx
+    real(dp),    dimension(16)           :: xparam16
+    integer    :: nx
     integer,   dimension(16)           :: nxopt
-    real*8,    dimension(16)           :: xopt
-    real*8     totcost1,totcost2
-    integer    ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
-    integer jrestart,nparam
-    character*140 frestart_in,frestart_out,foutput
-    character*140 frac14c,f14c(5),filecluster
+    real(dp),    dimension(16)           :: xopt
+    real(dp)     :: totcost1,totcost2
+    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    integer :: jrestart,nparam
+    character(len=140) :: frestart_in,frestart_out,foutput
+    character(len=140) :: frac14c,f14c(5),filecluster
     real(r_2), dimension(:), allocatable :: zse
 
       jrestart=0;xopt(:)=1.0
       do nparam=1,16
          nxopt(nparam) = nparam
       enddo
-      
+
       frestart_in='miccpool_in.nc'
       frestart_out='miccpool_out.nc'
       foutput='vmic_output.nc'
 
       open(1,file='params1.txt')
-      read(1,*) 
+      read(1,*)
       read(1,*) jglobal,ifsoc14,kinetics,bgcopt,jopt,jrestart
       read(1,11) frac14c
       read(1,11) f14c(1)
@@ -55,7 +55,7 @@ module function_module
       read(1,11) filecluster
 11    format(a140)
       read(1,*) xopt(1:14)
-      
+
       if(jopt==0) then
          read(1,*) nxopt(1:nx)
          do nparam=1,nx
@@ -71,7 +71,7 @@ module function_module
       ms=15
       allocate(zse(ms))
       zse(1:ms)=0.1
-      
+
       call mic_allocate_parameter(mpft,mbgc,mp,ms,micpxdef,micparam)
       call mic_allocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
       call mic_allocate_output(mp,micoutput)
@@ -79,9 +79,9 @@ module function_module
       call mic_allocate_npool(mp,ms,micnpool)
 
           isoc14 = 0
-      !    print *, "isoc14 =",isoc14,'--getdata_c14'  
+      !    print *, "isoc14 =",isoc14,'--getdata_c14'
           call getdata_c14(frac14c,f14c,filecluster,micinput,micparam,micnpool,zse)
-          call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)    
+          call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
       !    print *, 'vmicsoil_c14'
           call vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,ifsoc14,bgcopt,nyeqpool, &
                         zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
@@ -93,9 +93,9 @@ module function_module
           miccpool%c12pooleqm(:) = miccpool%cpooleqm(:)
 
           isoc14 = 1
-       !   print *, "isoc14 =",isoc14,'--getdata_c14'  
+       !   print *, "isoc14 =",isoc14,'--getdata_c14'
           call getdata_c14(frac14c,f14c,filecluster,micinput,micparam,micnpool,zse)
-          call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)    
+          call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
        !   print *, 'vmicsoil_c14'
           call vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,ifsoc14,bgcopt,nyeqpool+2000, &
                         zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
@@ -107,19 +107,19 @@ module function_module
         !  print *,"tot2 = ",totcost2
            call screenout('c14run    ',jmodel,bgcopt,xopt,functn_c14)
       close(1)
-  
+
 !      functn = totcost
-      
+
       call mic_deallocate_parameter(mpft,mbgc,mp,ms,micpxdef,micparam)
       call mic_deallocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
       call mic_deallocate_output(mp,micoutput)
       call mic_deallocate_cpool(mp,ms,miccpool)
-      call mic_deallocate_npool(mp,ms,micnpool) 
-      deallocate(zse)      
+      call mic_deallocate_npool(mp,ms,micnpool)
+      deallocate(zse)
 END function functn_c14
 
 
-real*8 function functn_frc1(nx,xparam16)
+real(dp) function functn_frc1(nx,xparam16)
    ! only one layer without bioturbation for SOC fraction data only
     TYPE(mic_param_xscale)    :: micpxdef
     TYPE(mic_param_default)   :: micpdef
@@ -131,34 +131,34 @@ real*8 function functn_frc1(nx,xparam16)
     TYPE(mic_output)          :: micoutput
 
     !local variables
-    integer    nx
+    integer    :: nx
     integer,   dimension(16)           :: nxopt
-    real*8,    dimension(16)           :: xparam16
-    real*8,    dimension(16)           :: xopt
-    real*8     totcost1
-    integer    ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
-    integer jrestart,nparam
-    character*140 frestart_in,frestart_out,foutput
-    character*140 cfraction
+    real(dp),    dimension(16)           :: xparam16
+    real(dp),    dimension(16)           :: xopt
+    real(dp)     :: totcost1
+    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    integer :: jrestart,nparam
+    character(len=140) :: frestart_in,frestart_out,foutput
+    character(len=140) :: cfraction
     real(r_2), dimension(:), allocatable :: zse
-    integer mpx
-    
+    integer :: mpx
+
       jrestart=0;xopt(:)=1.0
       do nparam=1,16
          nxopt(nparam) = nparam
       enddo
-      
+
       frestart_in='miccpool_in.nc'
       frestart_out='miccpool_out.nc'
       foutput='vmic_output.nc'
 
       open(1,file='params1.txt')
-      read(1,*) 
+      read(1,*)
       read(1,*) jglobal,ifsoc14,kinetics,bgcopt,jopt,jrestart
       read(1,11) cfraction
 11    format(a140)
       read(1,*) xopt(1:14)
-      
+
       if(jopt==0) then
          read(1,*) nxopt(1:nx)
          do nparam=1,nx
@@ -166,16 +166,16 @@ real*8 function functn_frc1(nx,xparam16)
          enddo
       endif
     !  print *, xopt
-      
+
       close(1)
       !mp = 2206
       ntime=365
-      
+
       totcost1 = 0.0
       nyeqpool= 1000
       isoc14 = 0
       jmodel=1;mpft=17;mbgc=12;nlon=1;nlat=1
-      ms = 10      
+      ms = 10
       allocate(zse(ms))
       zse(1) =0.02;zse(2)=0.04;zse(3)=0.06;zse(4)=0.08
       zse(5:8)=0.2;zse(9:10)=0.5
@@ -187,10 +187,10 @@ real*8 function functn_frc1(nx,xparam16)
       call mic_allocate_cpool(mp,ms,miccpool)
       call mic_allocate_npool(mp,ms,micnpool)
 
-          
-    !  print *, "isoc14 =",isoc14,'--getdata_frc'  
+
+    !  print *, "isoc14 =",isoc14,'--getdata_frc'
       call getdata_frc(cfraction,jglobal,bgcopt,micinput,micparam,micnpool,micglobal,zse)
-      call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)    
+      call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
 
     !  print *, 'vmicsoil_frc1_cpu'
     !  call vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,ifsoc14,bgcopt,nyeqpool, &
@@ -201,7 +201,7 @@ real*8 function functn_frc1(nx,xparam16)
 
     !  print *, 'calcost_frc1'
       call calcost_frc1(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost1)
-      
+
       close(1)
 
       functn_frc1    = totcost1
@@ -210,36 +210,36 @@ real*8 function functn_frc1(nx,xparam16)
       call mic_deallocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
       call mic_deallocate_output(mp,micoutput)
       call mic_deallocate_cpool(mp,ms,miccpool)
-      call mic_deallocate_npool(mp,ms,micnpool) 
-      deallocate(zse)        
+      call mic_deallocate_npool(mp,ms,micnpool)
+      deallocate(zse)
 END function functn_frc1
 
 
-  real*8 function functn_soc_hwsd(nx,xparam16)
+  real(dp) function functn_soc_hwsd(nx,xparam16)
     !local variables
-    integer    nx
+    integer    :: nx
     integer,   dimension(16)           :: nxopt
-    real*8,    dimension(16)           :: xparam16
-    real*8,    dimension(16)           :: xopt   
+    real(dp),    dimension(16)           :: xparam16
+    real(dp),    dimension(16)           :: xopt
     TYPE(mic_param_xscale)    :: micpxdef
     TYPE(mic_param_default)   :: micpdef
     TYPE(mic_parameter)       :: micparam
     TYPE(mic_input)           :: micinput
-    TYPE(mic_global_input)    :: micglobal  
+    TYPE(mic_global_input)    :: micglobal
     TYPE(mic_cpool)           :: miccpool
     TYPE(mic_npool)           :: micnpool
     TYPE(mic_output)          :: micoutput
 
     !local variables
-    integer    ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
-    integer jrestart,nf,ok,nparam,mpx,timex
-    character*140  frestart_in,frestart_out,fparam_global,foutput
-    character*140 fhwsdsoc,fmodis,fanoc
-    real(r_2)     totcost1
-    integer       ns
+    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    integer :: jrestart,nf,ok,nparam,mpx,timex
+    character(len=140)  :: frestart_in,frestart_out,fparam_global,foutput
+    character(len=140) :: fhwsdsoc,fmodis,fanoc
+    real(r_2)     :: totcost1
+    integer       :: ns
     real(r_2), dimension(:), allocatable :: zse
 
-    
+
       isoc14=0;nyeqpool = 500;ok=0;totcost1=0.0
 
       jrestart=0;xopt(:)=1.0
@@ -251,8 +251,8 @@ END function functn_frc1
       frestart_out='miccpool_out.nc'
       foutput='vmic_output.nc'
 
-      open(1,file='params1.txt')      
-      read(1,*) 
+      open(1,file='params1.txt')
+      read(1,*)
       read(1,*) jglobal,ifsoc14,kinetics,bgcopt,jopt,jrestart,jmodel
       read(1,101) fhwsdsoc
       read(1,101) fmodis
@@ -262,12 +262,12 @@ END function functn_frc1
       do nparam=1,nx
          xopt(nxopt(nparam)) = xparam16(nparam)
       enddo
-      close(1)      
+      close(1)
 
 !      print *, 'nx xparam16 =', nx, nxopt(1:nx),xparam16(1:nx)
 !      print *, 'parameter values used= ', xopt
 !      print *, 'ms zse', ms, zse(:)
-101   format(a140)      
+101   format(a140)
 
       ! get dimensions
       call getdata_hwsd_dim(fhwsdsoc,mpx,timex)
@@ -279,7 +279,7 @@ END function functn_frc1
       ms=7
       allocate(zse(ms))
       zse(1:5)=0.2;zse(6:7)=0.5
-      
+
       call mic_allocate_parameter(mpft,mbgc,mp,ms,micpxdef,micparam)
       call mic_allocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
       call mic_allocate_output(mp,micoutput)
@@ -287,55 +287,55 @@ END function functn_frc1
       call mic_allocate_npool(mp,ms,micnpool)
 
       call getdata_hwsd(fhwsdsoc,fmodis,fanoc,jglobal,bgcopt,jopt,jmodel,micparam,micglobal,zse)
-      
+
       !  call profile()
-      call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef) 
+      call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
 
       call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
                          zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
-      call calcost_hwsd3(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost1)      
+      call calcost_hwsd3(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost1)
       call mic_deallocate_parameter(mpft,mbgc,mp,ms,micpxdef,micparam)
       call mic_deallocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
       call mic_deallocate_output(mp,micoutput)
       call mic_deallocate_cpool(mp,ms,miccpool)
-      call mic_deallocate_npool(mp,ms,micnpool) 
+      call mic_deallocate_npool(mp,ms,micnpool)
 
-      call screenout('hwsd_soc  ',jmodel,bgcopt,xopt,totcost1)      
-        
+      call screenout('hwsd_soc  ',jmodel,bgcopt,xopt,totcost1)
+
 
       functn_soc_hwsd = totcost1
 
       deallocate(zse)
 END function functn_soc_hwsd
 
- real*8 function functn_global4(nx,xparam16)
+ real(dp) function functn_global4(nx,xparam16)
    use mic_constant
    use mic_variable
    implicit none
    ! this function is yet to bet set up for running with SCE_UA optimization
    !local variables
-    integer    nx
+    integer    :: nx
     integer,   dimension(16)  :: nxopt
-    real*8,    dimension(16)  :: xparam16
-    real*8,    dimension(16)  :: xopt   
+    real(dp),    dimension(16)  :: xparam16
+    real(dp),    dimension(16)  :: xopt
     TYPE(mic_param_xscale)    :: micpxdef
     TYPE(mic_param_default)   :: micpdef
     TYPE(mic_parameter)       :: micparam
     TYPE(mic_input)           :: micinput
-    TYPE(mic_global_input)    :: micglobal  
+    TYPE(mic_global_input)    :: micglobal
     TYPE(mic_cpool)           :: miccpool
     TYPE(mic_npool)           :: micnpool
     TYPE(mic_output)          :: micoutput
 
     !local variables
-    integer    ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
-    integer    jrestart,nf,ok,nparam
-    character*140 frestart_in,frestart_out,fparam_global,foutput
-    character*140 fglobal(10)
-    real(r_2) totcost1
+    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    integer    :: jrestart,nf,ok,nparam
+    character(len=140) :: frestart_in,frestart_out,fparam_global,foutput
+    character(len=140) :: fglobal(10)
+    real(r_2) :: totcost1
     real(r_2), dimension(:), allocatable :: zse
-      
+
       isoc14=0
       nyeqpool = 500
       ok=0
@@ -344,7 +344,7 @@ END function functn_soc_hwsd
       ms=7
       allocate(zse(ms))
       zse(1:5)=0.2;zse(6:7)=0.5
-      
+
       frestart_in='miccpool_in.nc'
       frestart_out='miccpool_out.nc'
       foutput='vmic_output.nc'
@@ -354,12 +354,12 @@ END function functn_soc_hwsd
          nxopt(nparam) = nparam
       enddo
       xopt = 1.0
-      
+
 !      open(91,file='modobs.txt')
 !      open(92,file='modobs2.txt')
 
-      open(1,file='params1.txt')      
-      read(1,*) 
+      open(1,file='params1.txt')
+      read(1,*)
       read(1,*) jglobal,ifsoc14,kinetics,bgcopt,jopt,jrestart,jmodel
       do nf=1,7
          read(1,101) fglobal(nf)
@@ -369,8 +369,8 @@ END function functn_soc_hwsd
       do nparam=1,nx
          xopt(nxopt(nparam)) = xparam16(nparam)
       enddo
-      close(1)      
-     
+      close(1)
+
       close(1)
 101   format(a140)
       print *, xopt
@@ -382,7 +382,7 @@ END function functn_soc_hwsd
       ! reading global parameter values here      xopt =xparam16(1:nx)
       call getpatch_global(fglobal(1),jmodel,mp)
       print *, 'total number of patches= ', mp
- 
+
       call mic_allocate_parameter(mpft,mbgc,mp,ms,micpxdef,micparam)
       call mic_allocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
       call mic_allocate_output(mp,micoutput)
@@ -394,7 +394,7 @@ END function functn_soc_hwsd
       if(jmodel==1)                call getdata_global4_cable(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal,micparam,zse)
       if(jmodel==2 .or. jmodel==3) call getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal,micparam,zse)
       print *, 'global input data are read in'
-      
+
       if(jopt==0) call getparam_global(fglobal(4),jmodel,micpxdef)     ! reading global parameter lookup table
       if(jopt==1) call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)  ! parameter optimization
 
@@ -402,13 +402,13 @@ END function functn_soc_hwsd
       call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
                          zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
-      call calcost_hwsd3(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost1)      
-      
+      call calcost_hwsd3(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost1)
+
       call mic_deallocate_parameter(mpft,mbgc,mp,ms,micpxdef,micparam)
       call mic_deallocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
       call mic_deallocate_output(mp,micoutput)
       call mic_deallocate_cpool(mp,ms,miccpool)
-      call mic_deallocate_npool(mp,ms,micnpool) 
+      call mic_deallocate_npool(mp,ms,micnpool)
 
 !      close(91)
 !      close(92)
@@ -416,34 +416,34 @@ END function functn_soc_hwsd
       functn_global4=totcost1
       print *, 'total cost =', totcost1
       deallocate(zse)
-      
+
 END function functn_global4
 
-  real*8 function functn_soc_aust(nx,xparam16)
+  real(dp) function functn_soc_aust(nx,xparam16)
     !local variables
-    integer    nx
+    integer    :: nx
     integer,   dimension(16)           :: nxopt
-    real*8,    dimension(16)           :: xparam16
-    real*8,    dimension(16)           :: xopt   
+    real(dp),    dimension(16)           :: xparam16
+    real(dp),    dimension(16)           :: xopt
     TYPE(mic_param_xscale)    :: micpxdef
     TYPE(mic_param_default)   :: micpdef
     TYPE(mic_parameter)       :: micparam
     TYPE(mic_input)           :: micinput
-    TYPE(mic_global_input)    :: micglobal  
+    TYPE(mic_global_input)    :: micglobal
     TYPE(mic_cpool)           :: miccpool
     TYPE(mic_npool)           :: micnpool
     TYPE(mic_output)          :: micoutput
 
     !local variables
-    integer    ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
-    integer    jrestart,nf,ok,nparam,mpx,timex
-    character*140 frestart_in,frestart_out,foutput
-    character*140 faustsoc
-    real(r_2)     totcost1
-    integer       ns
+    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    integer    :: jrestart,nf,ok,nparam,mpx,timex
+    character(len=140) :: frestart_in,frestart_out,foutput
+    character(len=140) :: faustsoc
+    real(r_2)     :: totcost1
+    integer       :: ns
     real(r_2), dimension(:), allocatable :: zse
 
-    
+
       isoc14=0;nyeqpool = 500;ok=0;totcost1=0.0
 
       jrestart=0;xopt(:)=1.0
@@ -455,8 +455,8 @@ END function functn_global4
       frestart_out='miccpool_out.nc'
       foutput='vmic_output.nc'
 
-      open(1,file='params1.txt')      
-      read(1,*) 
+      open(1,file='params1.txt')
+      read(1,*)
       read(1,*) jglobal,ifsoc14,kinetics,bgcopt,jopt,jrestart,jmodel
       read(1,101) faustsoc
       read(1,*)   xopt(1:14)
@@ -464,9 +464,9 @@ END function functn_global4
       do nparam=1,nx
          xopt(nxopt(nparam)) = xparam16(nparam)
       enddo
-      close(1)      
+      close(1)
 
-101   format(a140)      
+101   format(a140)
 
       ! get dimensions
       call getdata_aust_dim(faustsoc,mpx,timex)
@@ -476,8 +476,8 @@ END function functn_global4
       ms=5
       allocate(zse(ms))
       zse(1:5)=0.1
-      
-      
+
+
       call mic_allocate_parameter(mpft,mbgc,mp,ms,micpxdef,micparam)
       call mic_allocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
       call mic_allocate_output(mp,micoutput)
@@ -485,19 +485,19 @@ END function functn_global4
       call mic_allocate_npool(mp,ms,micnpool)
 
       call getdata_aust(faustsoc,jglobal,bgcopt,jopt,jmodel,micparam,micglobal,zse)
-      
+
       !  call profile()
-      call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef) 
+      call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
 
       call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
                          zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
-      call calcost_aust(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost1)      
+      call calcost_aust(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost1)
       call mic_deallocate_parameter(mpft,mbgc,mp,ms,micpxdef,micparam)
       call mic_deallocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
       call mic_deallocate_output(mp,micoutput)
       call mic_deallocate_cpool(mp,ms,miccpool)
-      call mic_deallocate_npool(mp,ms,micnpool) 
+      call mic_deallocate_npool(mp,ms,micnpool)
 
       functn_soc_aust = totcost1
 
@@ -505,29 +505,29 @@ END function functn_global4
 END function functn_soc_aust
 
 
-real*8 function functn(nx,xparam16)
+real(dp) function functn(nx,xparam16)
    !local variables
-    integer    nx,runcase
-    real*8,    dimension(16)  :: xparam16
-    
+    integer    :: nx,runcase
+    real(dp),    dimension(16)  :: xparam16
+
     open(1,file='case.txt')
     read(1,*) runcase
     close(1)
     SELECT CASE (runcase)
       CASE(0)
         functn = functn_soc_aust(nx,xparam16)
-      CASE (1)    ! run model for 14C                                
+      CASE (1)    ! run model for 14C
         functn = functn_c14(nx,xparam16)
       CASE (2)    ! run model for POC/MAOC fractions
-        functn = functn_frc1(nx,xparam16)  
-      CASE (3)    ! run model for site HWSD SOC profile  
-        functn = functn_soc_hwsd(nx,xparam16)  
-      CASE (4)  ! run model globally with CABLE/ORCHIDEE spatial resolution 
-        functn = functn_global4(nx,xparam16)          
+        functn = functn_frc1(nx,xparam16)
+      CASE (3)    ! run model for site HWSD SOC profile
+        functn = functn_soc_hwsd(nx,xparam16)
+      CASE (4)  ! run model globally with CABLE/ORCHIDEE spatial resolution
+        functn = functn_global4(nx,xparam16)
     !  CASE (5)  ! run model with prescribed forcing (not developed yet for 1% per year offline)
-    !    functn = functn_offline(nx,xparam16)          
-    END SELECT  
-    
+    !    functn = functn_offline(nx,xparam16)
+    END SELECT
+
  END function functn
 
 end module function_module
