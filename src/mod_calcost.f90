@@ -5,9 +5,10 @@
 !> fractions, HWSD soil carbon profiles, global HWSD data, and Australian
 !> soil carbon measurements.
 module calcost_module
-    use mic_constant
-    use mic_variable
-    implicit none
+  use precision_module, only : dp, r_2
+  use mic_constant, only : mcpool, mp, ms
+  use mic_variable, only : mic_param_xscale, mic_param_default, mic_parameter, mic_cpool, mic_input, mic_global_input
+  implicit none
 
   Contains
 
