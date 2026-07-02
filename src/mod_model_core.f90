@@ -1,7 +1,7 @@
 !> Core model physics: RK4 integrator, Michaelis-Menten kinetics, bioturbation, and C-flux RHS.
 !! Supports three kinetics variants (MIMICS, MILLENNIAL2, combined)
 module mesc_model_module
-  use precision_module, only : dp, r_2
+  use precision_module, only : dp
   use mic_constant, only : diag, outp, mcpool, delt, mp, ms, tvc14
   use mic_variable, only : mic_param_xscale, mic_param_default, mic_parameter, mic_input, mic_npool
   implicit none
@@ -16,11 +16,11 @@ contains
      integer,                 INTENT(IN)    :: np,ns             !! grid point and layer indices
      integer,                 INTENT(IN)    :: kinetics          !! kinetics model selector (1/2/3)
      integer,                 INTENT(IN)    :: ny,isoc14         !! model year and 14C flag
-     real(r_2),               INTENT(IN)    :: timex             !! current simulation time
-     real(r_2),               INTENT(IN)    :: delty             !! integration time step (hours)
-     real(r_2),   dimension(mcpool),intent(inout)     :: xpool0,xpool1  !! pool state: initial and updated (mg C/cm3)
-    real(r_2)    :: h
-    real(r_2),   dimension(mcpool)                   :: y1,y2,y3,y4,dy1dt,dy2dt,dy3dt,dy4dt
+     real(dp),               INTENT(IN)    :: timex             !! current simulation time
+     real(dp),               INTENT(IN)    :: delty             !! integration time step (hours)
+     real(dp),   dimension(mcpool),intent(inout)     :: xpool0,xpool1  !! pool state: initial and updated (mg C/cm3)
+    real(dp)    :: h
+    real(dp),   dimension(mcpool)                   :: y1,y2,y3,y4,dy1dt,dy2dt,dy3dt,dy4dt
 
      h=delty
      y1(:) = xpool0(:)
@@ -54,7 +54,7 @@ contains
       TYPE(mic_param_default), INTENT(IN)      :: micpdef       !! fixed default parameters
       TYPE(mic_parameter),     INTENT(INOUT)   :: micparam      !! computed model parameters. K1:K3, J1:J3 updated per (np,ns) here
       TYPE(mic_input),         INTENT(IN)      :: micinput      !! environmental model inputs
-      real(r_2), dimension(:,:), allocatable   :: xkclay,km,kmx
+      real(dp), dimension(:,:), allocatable   :: xkclay,km,kmx
       integer :: nopt,np,ns
 
      allocate(xkclay(mp,ms),km(mp,ms),kmx(mp,ms))
@@ -95,7 +95,7 @@ contains
       TYPE(mic_parameter),     INTENT(INOUT)   :: micparam
       TYPE(mic_input),         INTENT(IN)      :: micinput
       integer,                 INTENT(IN)      :: np
-      real(r_2), dimension(:,:), allocatable   :: xkclay,km,kmx
+      real(dp), dimension(:,:), allocatable   :: xkclay,km,kmx
       integer :: nopt,ns
 
       allocate(xkclay(mp,ms),km(mp,ms),kmx(mp,ms))
@@ -134,9 +134,9 @@ contains
       TYPE(mic_param_default), INTENT(IN)     :: micpdef       !! fixed default parameters
       TYPE(mic_parameter),     INTENT(INOUT)  :: micparam      !! computed model parameters. V1:V3, W1:W3 updated per (np,ns) here
       TYPE(mic_input),         INTENT(IN)     :: micinput      !! environmental model inputs
-      real(r_2),dimension(:,:), allocatable :: vmax
+      real(dp),dimension(:,:), allocatable :: vmax
       integer :: nopt,np,ns
-      real(r_2), dimension(:), allocatable   :: sdepthz
+      real(dp), dimension(:), allocatable   :: sdepthz
 
       allocate(vmax(mp,ms))
       allocate(sdepthz(ms))
@@ -190,9 +190,9 @@ contains
       TYPE(mic_parameter),     INTENT(INOUT)  :: micparam
       TYPE(mic_input),         INTENT(IN)     :: micinput
       integer,                 INTENT(IN)     :: np
-      real(r_2),dimension(:,:), allocatable :: vmax
+      real(dp),dimension(:,:), allocatable :: vmax
       integer :: nopt,ns
-      real(r_2), dimension(:), allocatable   :: sdepthz
+      real(dp), dimension(:), allocatable   :: sdepthz
 
       allocate(vmax(mp,ms))
       allocate(sdepthz(ms))
@@ -393,8 +393,8 @@ contains
       TYPE(mic_input),         INTENT(IN)     :: micinput      !! environmental model inputs
 
       integer :: nx,nopt,np,ns
-      real(r_2)  :: xbeta
-      real(r_2), dimension(:), allocatable    :: tvref
+      real(dp)  :: xbeta
+      real(dp), dimension(:), allocatable    :: tvref
 
       allocate(tvref(mp))
        do np=1,mp
@@ -434,8 +434,8 @@ contains
       TYPE(mic_input),         INTENT(IN)      :: micinput
 
       integer :: nx,nopt,ns
-      real(r_2)  :: xbeta
-      real(r_2), dimension(:), allocatable    :: tvref
+      real(dp)  :: xbeta
+      real(dp), dimension(:), allocatable    :: tvref
 
       allocate(tvref(mp))
       nopt=micparam%bgctype(np)
@@ -476,10 +476,10 @@ contains
      TYPE(mic_input),         INTENT(INOUT)  :: micinput       !! environmental model inputs. Updated here.
     !local variables
     integer :: npft,np,ns
-    real(r_2), dimension(:),     allocatable :: fmetleaf,fmetroot,fmetwood
-    real(r_2), dimension(:,:),   allocatable :: dleafx,drootx,dwoodx
-    real(r_2), dimension(:,:),   allocatable :: cinputm,cinputs
-    real(r_2), dimension(:,:,:), allocatable :: cninp
+    real(dp), dimension(:),     allocatable :: fmetleaf,fmetroot,fmetwood
+    real(dp), dimension(:,:),   allocatable :: dleafx,drootx,dwoodx
+    real(dp), dimension(:,:),   allocatable :: cinputm,cinputs
+    real(dp), dimension(:,:,:), allocatable :: cninp
 
 
      allocate(fmetleaf(mp),fmetroot(mp),fmetwood(mp))
@@ -609,10 +609,10 @@ contains
    TYPE(mic_input),         INTENT(INOUT)  :: micinput
       !local variables
       integer :: npft,ns
-      real(r_2), dimension(:),     allocatable :: fmetleaf,fmetroot,fmetwood
-      real(r_2), dimension(:,:),   allocatable :: dleafx,drootx,dwoodx
-      real(r_2), dimension(:,:),   allocatable :: cinputm,cinputs
-      real(r_2), dimension(:,:,:), allocatable :: cninp
+      real(dp), dimension(:),     allocatable :: fmetleaf,fmetroot,fmetwood
+      real(dp), dimension(:,:),   allocatable :: dleafx,drootx,dwoodx
+      real(dp), dimension(:,:),   allocatable :: cinputm,cinputs
+      real(dp), dimension(:,:,:), allocatable :: cninp
 
 
       allocate(fmetleaf(mp),fmetroot(mp),fmetwood(mp))
@@ -740,19 +740,19 @@ contains
  !! Units: pools in mg C/cm3, flux in mg C/cm3/delt, length in cm, diffusion coefficient in cm2/delt.
  subroutine bioturb(ndelt,ms,zse,delt,diffsocxx,fluxsoc,xpooli,xpoole)
      integer,                 INTENT(IN)    :: ndelt,ms          !! number of bioturbation sub-steps and soil layers
-     real(r_2), dimension(ms),INTENT(IN)    :: zse               !! soil layer thickness (m), converted to cm internally
-     real(r_2),               INTENT(IN)    :: delt              !! model time step (hours)
-     real(r_2),               INTENT(IN)    :: diffsocxx         !! diffusion coefficient (cm²/delt)
-     real(r_2), dimension(ms),INTENT(IN)    :: xpooli            !! initial pool state per layer (mg C/cm3)
-     real(r_2), dimension(ms),INTENT(IN)    :: fluxsoc           !! external C flux per layer (mg C/cm3/delt)
-     real(r_2), dimension(ms),INTENT(OUT)   :: xpoole            !! pool state per layer after bioturbation (mg C/cm3)
-   real(r_2), dimension(ms)    :: xpool
+     real(dp), dimension(ms),INTENT(IN)    :: zse               !! soil layer thickness (m), converted to cm internally
+     real(dp),               INTENT(IN)    :: delt              !! model time step (hours)
+     real(dp),               INTENT(IN)    :: diffsocxx         !! diffusion coefficient (cm²/delt)
+     real(dp), dimension(ms),INTENT(IN)    :: xpooli            !! initial pool state per layer (mg C/cm3)
+     real(dp), dimension(ms),INTENT(IN)    :: fluxsoc           !! external C flux per layer (mg C/cm3/delt)
+     real(dp), dimension(ms),INTENT(OUT)   :: xpoole            !! pool state per layer after bioturbation (mg C/cm3)
+   real(dp), dimension(ms)    :: xpool
    integer                       :: i,j
-   real(r_2)                      :: deltD,tot0, tot1, totflux
-   real(r_2), dimension(ms)    :: xzse
-   real(r_2), dimension(ms+1)  :: sdepthx
-   real(r_2)                      :: coeffA, coeffB
-   real(r_2), dimension(ms)    :: at,bt,ct,rt
+   real(dp)                      :: deltD,tot0, tot1, totflux
+   real(dp), dimension(ms)    :: xzse
+   real(dp), dimension(ms+1)  :: sdepthx
+   real(dp)                      :: coeffA, coeffB
+   real(dp), dimension(ms)    :: at,bt,ct,rt
 
       ! calculate the mid-point of each layer
      sdepthx(1) = 0.0          ! depth of a layer from the top (x_0.5=0.0 eg soil surface)
@@ -827,14 +827,14 @@ end subroutine bioturb
  subroutine tridag(at,bt,ct,rt,u,ms)
      integer, parameter :: nmax = 500
      integer,                 INTENT(IN)    :: ms              !! number of layers (must be <= nmax)
-     real(r_2), dimension(ms),INTENT(IN)    :: at              !! sub-diagonal coefficients
-     real(r_2), dimension(ms),INTENT(IN)    :: bt              !! main diagonal coefficients
-     real(r_2), dimension(ms),INTENT(IN)    :: ct              !! super-diagonal coefficients
-     real(r_2), dimension(ms),INTENT(IN)    :: rt              !! right-hand side
-     real(r_2), dimension(ms),INTENT(OUT)   :: u               !! solution vector
+     real(dp), dimension(ms),INTENT(IN)    :: at              !! sub-diagonal coefficients
+     real(dp), dimension(ms),INTENT(IN)    :: bt              !! main diagonal coefficients
+     real(dp), dimension(ms),INTENT(IN)    :: ct              !! super-diagonal coefficients
+     real(dp), dimension(ms),INTENT(IN)    :: rt              !! right-hand side
+     real(dp), dimension(ms),INTENT(OUT)   :: u               !! solution vector
     integer :: j
-    real(r_2) :: bet
-    real(r_2), dimension(nmax) :: gam
+    real(dp) :: bet
+    real(dp), dimension(nmax) :: gam
 
       bet  = bt(1)
       u(1) = rt(1)/bet
@@ -857,14 +857,14 @@ end subroutine bioturb
  !! Uses iterative Euler steps to prevent negative concentrations.
  !! @note To be replaced with an implicit solver for strict mass conservation.
  subroutine advecdoc(deltx,zse,fluxsoilwx,fluxdocsx,vsoilwx,ypool)
-     real(r_2),                INTENT(IN)    :: deltx         !! time step for advection sub-step
-     real(r_2), dimension(ms), INTENT(IN)    :: zse           !! soil layer thickness
-     real(r_2), dimension(ms), INTENT(IN)    :: fluxsoilwx    !! soil water flux per layer
-     real(r_2), dimension(ms), INTENT(IN)    :: vsoilwx       !! soil water volume per layer
-     real(r_2),                INTENT(IN)    :: fluxdocsx     !! external DOC flux from above
-     real(r_2), dimension(ms), INTENT(INOUT) :: ypool         !! DOC concentration; updated via iterative Euler (mg C/cm3)
-    real(r_2), dimension(ms)        :: dypool,ypool1
-    real(r_2)                          :: totdoc0,totdoc1,fluxdocbot
+     real(dp),                INTENT(IN)    :: deltx         !! time step for advection sub-step
+     real(dp), dimension(ms), INTENT(IN)    :: zse           !! soil layer thickness
+     real(dp), dimension(ms), INTENT(IN)    :: fluxsoilwx    !! soil water flux per layer
+     real(dp), dimension(ms), INTENT(IN)    :: vsoilwx       !! soil water volume per layer
+     real(dp),                INTENT(IN)    :: fluxdocsx     !! external DOC flux from above
+     real(dp), dimension(ms), INTENT(INOUT) :: ypool         !! DOC concentration; updated via iterative Euler (mg C/cm3)
+    real(dp), dimension(ms)        :: dypool,ypool1
+    real(dp)                          :: totdoc0,totdoc1,fluxdocbot
     integer :: ns,iter
 
      ypool1= ypool
@@ -910,15 +910,15 @@ end subroutine bioturb
      integer,                 INTENT(IN)     :: kinetics      !! kinetics model selector (1/2/3)
      integer,                 INTENT(IN)     :: ny            !! model year index (for 14C)
      integer,                 INTENT(IN)     :: isoc14        !! 14C mode flag (1=14C, 0=standard)
-     real(r_2),  dimension(mcpool),  INTENT(IN)     :: xpool  !! current pool state (mg C/cm3)
-     real(r_2),  dimension(mcpool),  INTENT(OUT)    :: y      !! dxpool/dt, rates of change for each pool
+     real(dp),  dimension(mcpool),  INTENT(IN)     :: xpool  !! current pool state (mg C/cm3)
+     real(dp),  dimension(mcpool),  INTENT(OUT)    :: y      !! dxpool/dt, rates of change for each pool
 
-     real(r_2),  parameter                           ::  kamin = 0.2      ! Abramoff et al. (2022)
-     real(r_2),  parameter                           ::  lamda = 2.01e-4  ! 1/kPa, Abramoff et al. (2022)
+     real(dp),  parameter                           ::  kamin = 0.2      ! Abramoff et al. (2022)
+     real(dp),  parameter                           ::  lamda = 2.01e-4  ! 1/kPa, Abramoff et al. (2022)
 
      integer     :: ip
 
-     real(r_2)  :: betamicR,betamicK,                 &
+     real(dp)  :: betamicR,betamicK,                 &
                 cinputmx,cinputsx,fmx,fsx,         &
                 fr2px,fr2cx,fr2ax,                 &
                 fk2px,fk2cx,fk2ax,                 &
@@ -932,17 +932,17 @@ end subroutine bioturb
                 Q1x,Q2x
 
 
-     real(r_2) :: cfluxm2r, cfluxm2k, cfluxs2r, cfluxs2k, cfluxr,   cfluxk
-     real(r_2) :: cfluxr2p, cfluxk2p, cfluxp2a, cfluxr2c, cfluxk2c
-     real(r_2) :: cfluxc2a, cfluxr2a, cfluxk2a, cfluxa2r, cfluxa2k
+     real(dp) :: cfluxm2r, cfluxm2k, cfluxs2r, cfluxs2k, cfluxr,   cfluxk
+     real(dp) :: cfluxr2p, cfluxk2p, cfluxp2a, cfluxr2c, cfluxk2c
+     real(dp) :: cfluxc2a, cfluxr2a, cfluxk2a, cfluxa2r, cfluxa2k
 
      ! additional variables for kinetics3
-     real(r_2)  :: cfluxa,cfluxp,cfluxc2p,cfluxa2c,cfluxp2c
-     real(r_2)  :: kadsorpx,kdesorpx,fp2ax,moistx,soilphx,porex,xwater,phx1,phx2,phx3,siltx,tvcpoolx,tvppoolx,tvacx
-     real(r_2)  :: smexpa,smopt,qmaxcoeffx,qmax
-     real(r_2)  :: swbx,swdx,matpotx,xwater1,xwater2
-     real(r_2)  :: rsoil
-     real(r_2)  :: cfluxp2m,cfluxp2s
+     real(dp)  :: cfluxa,cfluxp,cfluxc2p,cfluxa2c,cfluxp2c
+     real(dp)  :: kadsorpx,kdesorpx,fp2ax,moistx,soilphx,porex,xwater,phx1,phx2,phx3,siltx,tvcpoolx,tvppoolx,tvacx
+     real(dp)  :: smexpa,smopt,qmaxcoeffx,qmax
+     real(dp)  :: swbx,swdx,matpotx,xwater1,xwater2
+     real(dp)  :: rsoil
+     real(dp)  :: cfluxp2m,cfluxp2s
 
       ! matpotx =-15.0 !dummy value for the time being
 

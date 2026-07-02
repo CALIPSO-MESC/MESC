@@ -26,7 +26,7 @@
 !!     * (3e) call model for each of mp and integration over time
 
 module mesc_interface_module
-  use precision_module, only : dp, r_2
+  use precision_module, only : dp
   use mic_constant, only : diag, delt, mp, ms, mpft, mcpool, outp, tvc14, xrootcable, xrootorchidee
   use mic_variable, only : mic_param_xscale, mic_param_default, mic_parameter, &
                            mic_input, mic_npool, mic_cpool, mic_output, mic_global_input
@@ -47,12 +47,12 @@ contains
     TYPE(mic_param_xscale),       intent(in)      :: micpxdef        !! BGC-type scaling factors
     TYPE(mic_param_default),      intent(in)      :: micpdef         !! default parameter values
     TYPE(mic_parameter),          intent(inout)   :: micparam        !! computed model parameters
-    real(r_2),                    intent(in)      :: zse(ms)         !! soil layer thickness
+    real(dp),                    intent(in)      :: zse(ms)         !! soil layer thickness
     !local variables
-    real(r_2), dimension(:,:), allocatable      :: froot
-    real(r_2), dimension(:),   allocatable      :: totroot
+    real(dp), dimension(:,:), allocatable      :: froot
+    real(dp), dimension(:),   allocatable      :: totroot
     integer    :: nopt,npft,np,ns
-    real(r_2)  :: depths1,depths2,krootx
+    real(dp)  :: depths1,depths2,krootx
 
 
       allocate(froot(mpft,ms))
@@ -196,7 +196,7 @@ subroutine vmic_init(miccpool,micnpool)
     TYPE(mic_cpool),              intent(inout)   :: miccpool        !! carbon pool state (-initialized here)
     TYPE(mic_npool),              intent(inout)   :: micnpool        !! nitrogen pool state
     integer :: ip
-    real(r_2), dimension(:), allocatable    :: cpooldef
+    real(dp), dimension(:), allocatable    :: cpooldef
 
       allocate(cpooldef(mcpool))
 !	  print *, 'calling vmic_init'
@@ -244,8 +244,8 @@ subroutine vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
     integer,                 intent(in)  :: bgcopt            !! BGC type index to apply `xopt` to
     integer,                 intent(in)  :: jmodel            !! forcing model selector (1=CABLE, 2=ORCHIDEE)
     TYPE(mic_param_xscale),  intent(inout) :: micpxdef        !! scaling factors (populated here)
-!    real(r_2), dimension(17)                 :: xrootcable
-!    real(r_2), dimension(18)                 :: xrootorchidee
+!    real(dp), dimension(17)                 :: xrootcable
+!    real(dp), dimension(18)                 :: xrootorchidee
 !    data xrootcable/1.43,0.94,1.43,1.04,0.77,0.85,0.62,1.77,0.94,0.94,1.43,0.94,1.04,0.53,1.00,1.00,1.00/
 !    data xrootorchidee/0.94,0.94,1.04,1.04,1.04,1.43,1.43,1.43,0.85,0.62,0.94,0.94,0.85,0.85,0.85,0.85,0.85,0.85/
     integer :: i
@@ -387,7 +387,7 @@ subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc1
     integer,                     intent(in)    :: ifsoc14             !! 14C soil observation flag (1=run back to 1940)
     integer,                     intent(in)    :: bgcopt              !! target BGC type
     integer,                     intent(in)    :: nyeqpool            !! years to run for equilibrium
-    real(r_2),                   intent(in)    :: zse(ms)             !! soil layer thickness [m]
+    real(dp),                   intent(in)    :: zse(ms)             !! soil layer thickness [m]
     TYPE(mic_param_xscale),      intent(inout) :: micpxdef            !! BGC-type scaling factors
     TYPE(mic_param_default),     intent(in)    :: micpdef             !! default parameter values
     TYPE(mic_parameter),         intent(inout) :: micparam            !! working parameter array
@@ -398,23 +398,23 @@ subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc1
     TYPE(mic_output),            intent(inout) :: micoutput           !! output fluxes and diagnostics
 
     ! local variables
-    real(r_2),    dimension(mcpool)    :: xpool0,xpool1
-    real(r_2),    dimension(ms)        :: ypooli,ypoole,fluxsoc
-    real(r_2),    dimension(ms)        :: cfluxa
+    real(dp),    dimension(mcpool)    :: xpool0,xpool1
+    real(dp),    dimension(ms)        :: ypooli,ypoole,fluxsoc
+    real(dp),    dimension(ms)        :: cfluxa
 
 !    integer       ndelt,n1,n2,i,j,year,ip,np,ns,ny,nyrun
     integer       :: ndelt,i,j,year,ip,np,ns,ny,nyrun
-    real(r_2)     :: timex,delty,fluxdocsx,diffsocxx
-    real(r_2)  :: cpool0, cpool1, totcinput
+    real(dp)     :: timex,delty,fluxdocsx,diffsocxx
+    real(dp)  :: cpool0, cpool1, totcinput
 
    ! local variables
-    real(r_2)                      :: deltD !,tot0,tot1,totflux
-    real(r_2), dimension(ms)   :: xzse
-    real(r_2), dimension(ms+1) :: sdepthx
-    real(r_2)                     :: coeffA, coeffB
-    real(r_2), dimension(ms)   :: at,bt,ct,rt
-    real(r_2), dimension(ms)   :: xpool
-   real(r_2)  :: cleachloss
+    real(dp)                      :: deltD !,tot0,tot1,totflux
+    real(dp), dimension(ms)   :: xzse
+    real(dp), dimension(ms+1) :: sdepthx
+    real(dp)                     :: coeffA, coeffB
+    real(dp), dimension(ms)   :: at,bt,ct,rt
+    real(dp), dimension(ms)   :: xpool
+   real(dp)  :: cleachloss
 
 
   !  allocate(xzse(ms))
@@ -616,7 +616,7 @@ SUBROUTINE vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     integer,                     intent(in)    :: ifsoc14             !! 14C soil observation flag (1=run back to 1940)
     integer,                     intent(in)    :: bgcopt              !! target BGC type
     integer,                     intent(in)    :: nyeqpool            !! years to run for equilibrium
-    real(r_2),                   intent(in)    :: zse(ms)             !! soil layer thickness [m]
+    real(dp),                   intent(in)    :: zse(ms)             !! soil layer thickness [m]
     TYPE(mic_param_xscale),      intent(inout) :: micpxdef            !! BGC-type scaling factors
     TYPE(mic_param_default),     intent(in)    :: micpdef             !! default parameter values
     TYPE(mic_parameter),         intent(inout) :: micparam            !! working parameter array
@@ -627,24 +627,24 @@ SUBROUTINE vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     TYPE(mic_output),            intent(inout) :: micoutput           !! output fluxes and diagnostics
 
     ! local variables
-    real(r_2),    dimension(mcpool)    :: xpool0,xpool1
-    real(r_2),    dimension(ms)        :: ypooli,ypoole,fluxsoc
-    real(r_2),    dimension(ms)        :: cfluxa
+    real(dp),    dimension(mcpool)    :: xpool0,xpool1
+    real(dp),    dimension(ms)        :: ypooli,ypoole,fluxsoc
+    real(dp),    dimension(ms)        :: cfluxa
 
 !    integer       ndelt,n1,n2,i,j,year,ip,np,ns,ny,nyrun
     integer       :: ndelt,i,j,year,ip,np,ns,ny,nyrun
-    real(r_2)     :: timex,delty,fluxdocsx,diffsocxx
-    real(r_2)  :: cpool0, cpool1, totcinput
+    real(dp)     :: timex,delty,fluxdocsx,diffsocxx
+    real(dp)  :: cpool0, cpool1, totcinput
 
    ! local variables
-    real(r_2)                      :: deltD !,tot0,tot1,totflux
-   real(r_2), dimension(ms)    :: xzse
-   real(r_2), dimension(ms+1)  :: sdepthx
-   real(r_2)                      :: coeffA, coeffB
-   real(r_2), dimension(ms)    :: at,bt,ct,rt
-   real(r_2), dimension(ms)    :: xpool
-   real(r_2)  :: cleachloss
-   real(r_2)  :: depthx1,depthx2
+    real(dp)                      :: deltD !,tot0,tot1,totflux
+   real(dp), dimension(ms)    :: xzse
+   real(dp), dimension(ms+1)  :: sdepthx
+   real(dp)                      :: coeffA, coeffB
+   real(dp), dimension(ms)    :: at,bt,ct,rt
+   real(dp), dimension(ms)    :: xpool
+   real(dp)  :: cleachloss
+   real(dp)  :: depthx1,depthx2
 
 
       call vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
@@ -756,7 +756,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     integer,                     intent(in)    :: isoc14              !! 14C tracking flag
     integer,                     intent(in)    :: bgcopt              !! target BGC type
     integer,                     intent(in)    :: nyeqpool            !! years to run for equilibrium
-    real(r_2),                   intent(in)    :: zse(ms)             !! soil layer thickness [m]
+    real(dp),                   intent(in)    :: zse(ms)             !! soil layer thickness [m]
     TYPE(mic_param_xscale),      intent(inout) :: micpxdef            !! BGC-type scaling factors
     TYPE(mic_param_default),     intent(in)    :: micpdef             !! default parameter values
     TYPE(mic_parameter),         intent(inout) :: micparam            !! working parameter array
@@ -767,16 +767,16 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     TYPE(mic_output),            intent(inout) :: micoutput           !! output fluxes and diagnostics
 
     ! local variables
-    real(r_2),    dimension(:), allocatable  :: xpool0,xpool1
-    real(r_2),    dimension(:), allocatable  :: ypooli,ypoole,fluxsoc,cfluxa
+    real(dp),    dimension(:), allocatable  :: xpool0,xpool1
+    real(dp),    dimension(:), allocatable  :: ypooli,ypoole,fluxsoc,cfluxa
 
- !   real(r_2),    dimension(mcpool)  :: xpool0,xpool1
- !   real(r_2),    dimension(ms)      :: ypooli,ypoole,fluxsoc,cfluxa
+ !   real(dp),    dimension(mcpool)  :: xpool0,xpool1
+ !   real(dp),    dimension(ms)      :: ypooli,ypoole,fluxsoc,cfluxa
 
     integer       :: ndelt,i,j,year,ip,np,ns,ny
     integer       :: nyrun,ip5
-    real(r_2)     :: timex,delty,fluxdocsx,diffsocxx
-    real(r_2)      :: cpool0, cpool1, totcinput
+    real(dp)     :: timex,delty,fluxdocsx,diffsocxx
+    real(dp)      :: cpool0, cpool1, totcinput
     integer       :: station_count, station_index
     integer, dimension(:), allocatable :: stations_used
 
@@ -944,7 +944,7 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     integer,                     intent(in)    :: isoc14              !! 14C tracking flag
     integer,                     intent(in)    :: bgcopt              !! target BGC type
     integer,                     intent(in)    :: nyeqpool            !! years to run for equilibrium
-    real(r_2),                   intent(in)    :: zse(ms)             !! soil layer thickness [m]
+    real(dp),                   intent(in)    :: zse(ms)             !! soil layer thickness [m]
     TYPE(mic_param_xscale),      intent(inout) :: micpxdef            !! BGC-type scaling factors
     TYPE(mic_param_default),     intent(in)    :: micpdef             !! default parameter values
     TYPE(mic_parameter),         intent(inout) :: micparam            !! working parameter array
@@ -954,32 +954,32 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     TYPE(mic_npool),             intent(inout) :: micnpool            !! nitrogen pool state
     TYPE(mic_output),            intent(inout) :: micoutput           !! output fluxes and diagnostics
     ! local variables
-  !  real(r_2),    dimension(:), allocatable  :: xpool0,xpool1
-  !  real(r_2),    dimension(:), allocatable  :: ypooli,ypoole,fluxsoc,cfluxa
+  !  real(dp),    dimension(:), allocatable  :: xpool0,xpool1
+  !  real(dp),    dimension(:), allocatable  :: ypooli,ypoole,fluxsoc,cfluxa
 
-    real(r_2),    dimension(mcpool)  :: xpool0,xpool1
-    real(r_2),    dimension(ms)      :: ypooli,ypoole,fluxsoc,cfluxa
+    real(dp),    dimension(mcpool)  :: xpool0,xpool1
+    real(dp),    dimension(ms)      :: ypooli,ypoole,fluxsoc,cfluxa
 
     integer       :: ndelt,i,j,year,ip,np,ns,ny
     integer       :: nyrun
-    real(r_2)     :: timex,delty,fluxdocsx,diffsocxx
-    real(r_2)  :: cpool0, cpool1, totcinput
+    real(dp)     :: timex,delty,fluxdocsx,diffsocxx
+    real(dp)  :: cpool0, cpool1, totcinput
 
    ! local variables
    ! for numerical solution
-   real(r_2),    parameter            :: tol = 1.0E-04
-   real(r_2),    parameter            :: tolx = 0.0001
-   real(r_2),    parameter            :: tolf = 0.000001
+   real(dp),    parameter            :: tol = 1.0E-04
+   real(dp),    parameter            :: tolx = 0.0001
+   real(dp),    parameter            :: tolf = 0.000001
    integer,      parameter            :: ntrial = 100
 
    ! local variables
-   real(r_2)                      :: deltD !,tot0,tot1,totflux
-   real(r_2), dimension(ms)    :: xzse
-   real(r_2), dimension(ms+1)  :: sdepthx
-   real(r_2)                      :: coeffA, coeffB
-   real(r_2), dimension(ms)    :: at,bt,ct,rt
-   real(r_2), dimension(ms)    :: xpool
-   real(r_2)  :: cleachloss
+   real(dp)                      :: deltD !,tot0,tot1,totflux
+   real(dp), dimension(ms)    :: xzse
+   real(dp), dimension(ms+1)  :: sdepthx
+   real(dp)                      :: coeffA, coeffB
+   real(dp), dimension(ms)    :: at,bt,ct,rt
+   real(dp), dimension(ms)    :: xpool
+   real(dp)  :: cleachloss
 
   !  allocate(xpool0(mcpool),xpool1(mcpool))
   !  allocate(ypooli(ms),ypoole(ms),fluxsoc(ms),cfluxa(ms))

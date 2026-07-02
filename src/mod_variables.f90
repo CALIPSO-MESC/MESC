@@ -4,30 +4,30 @@
 !> and default parameter values. Provides paired allocation and deallocation
 !> subroutines for each type to manage dynamic array storage.
 module mic_variable
-  use precision_module, only : r_2
+  use precision_module, only : dp
   use mic_constant, only : mcpool
   implicit none
   save
 
   !> Scaling factors for model parameters, per BGC type.
   type mic_param_xscale
-      real(r_2),dimension(:), allocatable :: xav          !! Vmax scaling factor [1] (0-30)
-      real(r_2),dimension(:), allocatable :: xak          !! Km scaling factor [1] (0-30)
-      real(r_2),dimension(:), allocatable :: xfp2ax       !! fp2a scaling factor [1] (0.5-2.0)
-      real(r_2),dimension(:), allocatable :: xfm          !! fm scaling factor [1] (0.1-5.0)
-      real(r_2),dimension(:), allocatable :: xfs          !! fs scaling factor [1] (0.1-5.0)
-      real(r_2),dimension(:), allocatable :: xtvmic       !! microbial turnover rate scaling [1] (0.1-10)
-      real(r_2),dimension(:), allocatable :: xtvp         !! POC disaggregation rate scaling [1] (0.1-10)
-      real(r_2),dimension(:), allocatable :: xtvc         !! MAOC breakdown rate scaling [1] (0.1-10)
-      real(r_2),dimension(:), allocatable :: xtvac        !! leaching rate scaling [1] (0.1-10)
-      real(r_2),dimension(:), allocatable :: xkba         !! adsorption/desorption ratio scaling [1] (0.5-10)
-      real(r_2),dimension(:), allocatable :: xqmaxcoeff   !! Qmax-clay+silt coefficient scaling [1] (0.5-5.0)
-      real(r_2),dimension(:), allocatable :: xbeta        !! beta parameter scaling
-      real(r_2),dimension(:), allocatable :: xdiffsoc     !! SOC diffusion/bioturbation scaling [1] (0.1-10.0)
-      real(r_2),dimension(:), allocatable :: xnpp         !! carbon input scaling [1] (0.5-2.0)
-      real(r_2),dimension(:), allocatable :: xdesorp      !! desorption coefficient scaling [1] (0.1-10.0)
-      real(r_2),dimension(:), allocatable :: xrootbeta    !! depth-dependent root C input scaling [1] (0.5-5.0)
-      real(r_2),dimension(:), allocatable :: xvmaxbeta    !! depth-dependent Vmax scaling [1] (0.5-5.0)
+      real(dp),dimension(:), allocatable :: xav          !! Vmax scaling factor [1] (0-30)
+      real(dp),dimension(:), allocatable :: xak          !! Km scaling factor [1] (0-30)
+      real(dp),dimension(:), allocatable :: xfp2ax       !! fp2a scaling factor [1] (0.5-2.0)
+      real(dp),dimension(:), allocatable :: xfm          !! fm scaling factor [1] (0.1-5.0)
+      real(dp),dimension(:), allocatable :: xfs          !! fs scaling factor [1] (0.1-5.0)
+      real(dp),dimension(:), allocatable :: xtvmic       !! microbial turnover rate scaling [1] (0.1-10)
+      real(dp),dimension(:), allocatable :: xtvp         !! POC disaggregation rate scaling [1] (0.1-10)
+      real(dp),dimension(:), allocatable :: xtvc         !! MAOC breakdown rate scaling [1] (0.1-10)
+      real(dp),dimension(:), allocatable :: xtvac        !! leaching rate scaling [1] (0.1-10)
+      real(dp),dimension(:), allocatable :: xkba         !! adsorption/desorption ratio scaling [1] (0.5-10)
+      real(dp),dimension(:), allocatable :: xqmaxcoeff   !! Qmax-clay+silt coefficient scaling [1] (0.5-5.0)
+      real(dp),dimension(:), allocatable :: xbeta        !! beta parameter scaling
+      real(dp),dimension(:), allocatable :: xdiffsoc     !! SOC diffusion/bioturbation scaling [1] (0.1-10.0)
+      real(dp),dimension(:), allocatable :: xnpp         !! carbon input scaling [1] (0.5-2.0)
+      real(dp),dimension(:), allocatable :: xdesorp      !! desorption coefficient scaling [1] (0.1-10.0)
+      real(dp),dimension(:), allocatable :: xrootbeta    !! depth-dependent root C input scaling [1] (0.5-5.0)
+      real(dp),dimension(:), allocatable :: xvmaxbeta    !! depth-dependent Vmax scaling [1] (0.5-5.0)
   end type mic_param_xscale
 
   !> Default parameter values for model calibration.
@@ -39,60 +39,60 @@ module mic_variable
   !> xrootbeta (0.5-5.0), xvmaxbeta (0.5-5.0), xfp2ax (0.5-2.0),
   !> xdesorp (0.1-10.0)
   type mic_param_default
-      real(r_2)  :: sk =0.017       !! Km soil depth coefficient
-      real(r_2)  :: skx=0.027       !! Km soil texture coefficient
-      real(r_2)  :: ak = 10.0       !! Km baseline
-      real(r_2)  :: bk = 3.19       !! Km depth decay
-      real(r_2)  :: xk1 =8.0        !! Km param 1
-      real(r_2)  :: xk2 =2.0        !! Km param 2
-      real(r_2)  :: xk3 =4.0        !! Km param 3
-      real(r_2)  :: xj1 =2.0        !! Km param 1 substr1
-      real(r_2)  :: xj2 =4.0        !! Km param 2 substr2
-      real(r_2)  :: xj3 =6.0        !! Km param 3 substr3
-      real(r_2)  :: sv = 0.063      !! Vmax soil depth coefficient
-      real(r_2)  :: av = 10.0*8.0e-6 !! Vmax baseline
-      real(r_2)  :: bv = 5.47       !! Vmax depth decay
-      real(r_2)  :: xv1= 10.0       !! Vmax param 1
-      real(r_2)  :: xv2= 2.0        !! Vmax param 2
-      real(r_2)  :: xv3= 10.0       !! Vmax param 3
-      real(r_2)  :: xw1= 3.0        !! Vmax param 1 substr1
-      real(r_2)  :: xw2= 3.0        !! Vmax param 2 substr2
-      real(r_2)  :: xw3= 2.0        !! Vmax param 3 substr3
-      real(r_2)  :: Q1=4.0          !! temperature sensitivity Q10_1
-      real(r_2)  :: Q2=4.0          !! temperature sensitivity Q10_2
-      real(r_2)  :: fm=0.1          !! substrate quality modifier 1
-      real(r_2)  :: fs=0.1          !! substrate quality modifier 2
-      real(r_2)  :: xtv      = 100.0     !! microbial pool turnover base
-      real(r_2)  :: betamic  = 2.0      !! microbial turnover beta
-      real(r_2)  :: tvmicR   = 0.00052  !! microbial turnover rate R
-      real(r_2)  :: tvmicK   = 0.00024  !! microbial turnover rate K
-      real(r_2)  :: fmicsom1=0.432  !! necromass partitioning coeff 1
-      real(r_2)  :: fmicsom2=0.098  !! necromass partitioning coeff 2
-      real(r_2)  :: fmicsom3=10.56  !! necromass partitioning coeff 3
-      real(r_2)  :: fmicsom4=29.78  !! necromass partitioning coeff 4
-      real(r_2)  :: fmicsom5=2.61   !! necromass partitioning coeff 5
-      real(r_2)  :: cuemax    = 0.80  !! max carbon use efficiency
-      real(r_2)  :: cue_coef1 = 0.66  !! CUE coefficient 1
-      real(r_2)  :: cue_coef2 = 1.23  !! CUE coefficient 2
-      real(r_2)  :: epislon1 = 0.5    !! CUE epsilon 1
-      real(r_2)  :: epislon2 = 0.25   !! CUE epsilon 2
-      real(r_2)  :: epislon3 = 0.7    !! CUE epsilon 3
-      real(r_2)  :: epislon4 = 0.35   !! CUE epsilon 4
-      real(r_2)  :: phcoeff1 = 0.2429    !! adsorption pH coefficient 1
-      real(r_2)  :: phcoeff2 = -0.3632   !! adsorption pH coefficient 2
-      real(r_2)  :: smkdesorp = 0.1   !! soil moisture desorption threshold
-      real(r_2)  :: smexpns   = 2.0   !! soil moisture exponent NS
-      real(r_2)  :: smexpb    = 0.75  !! soil moisture exponent B
-      real(r_2)  :: qmaxcoeff = 0.4 * 0.5 !! Qmax-clay+silt coefficient
-      real(r_2)  :: diffsoc  =( 5.0/24.0)* 2.74e-3 !! SOC diffusion [cm2/hour]
-      real(r_2)  :: kadsorpx = 0.001  !! adsorption rate coefficient
-      real(r_2)  :: kbax     = 6.0    !! adsorption/desorption ratio
-      real(r_2)  :: fp2ax    = 1.143 * 0.33 !! fraction DOC to POC
-      real(r_2)  :: tvcpoolx = 0.02*(1.0/1.60)*1.0/(365.0*24.0) !! MAOC turnover
-      real(r_2)  :: tvppoolx = 0.10*(1.0/0.44)*1.0/(365.0*24.0) !! POC turnover
-      real(r_2)  :: tvacx = 0.0015/24.0 !! leaching rate [1/hour]
-      real(r_2)  :: rootbeta = 1.0    !! root depth decay coefficient
-      real(r_2)  :: vmaxbeta = 0.5    !! Vmax depth decay coefficient
+      real(dp)  :: sk =0.017       !! Km soil depth coefficient
+      real(dp)  :: skx=0.027       !! Km soil texture coefficient
+      real(dp)  :: ak = 10.0       !! Km baseline
+      real(dp)  :: bk = 3.19       !! Km depth decay
+      real(dp)  :: xk1 =8.0        !! Km param 1
+      real(dp)  :: xk2 =2.0        !! Km param 2
+      real(dp)  :: xk3 =4.0        !! Km param 3
+      real(dp)  :: xj1 =2.0        !! Km param 1 substr1
+      real(dp)  :: xj2 =4.0        !! Km param 2 substr2
+      real(dp)  :: xj3 =6.0        !! Km param 3 substr3
+      real(dp)  :: sv = 0.063      !! Vmax soil depth coefficient
+      real(dp)  :: av = 10.0*8.0e-6 !! Vmax baseline
+      real(dp)  :: bv = 5.47       !! Vmax depth decay
+      real(dp)  :: xv1= 10.0       !! Vmax param 1
+      real(dp)  :: xv2= 2.0        !! Vmax param 2
+      real(dp)  :: xv3= 10.0       !! Vmax param 3
+      real(dp)  :: xw1= 3.0        !! Vmax param 1 substr1
+      real(dp)  :: xw2= 3.0        !! Vmax param 2 substr2
+      real(dp)  :: xw3= 2.0        !! Vmax param 3 substr3
+      real(dp)  :: Q1=4.0          !! temperature sensitivity Q10_1
+      real(dp)  :: Q2=4.0          !! temperature sensitivity Q10_2
+      real(dp)  :: fm=0.1          !! substrate quality modifier 1
+      real(dp)  :: fs=0.1          !! substrate quality modifier 2
+      real(dp)  :: xtv      = 100.0     !! microbial pool turnover base
+      real(dp)  :: betamic  = 2.0      !! microbial turnover beta
+      real(dp)  :: tvmicR   = 0.00052  !! microbial turnover rate R
+      real(dp)  :: tvmicK   = 0.00024  !! microbial turnover rate K
+      real(dp)  :: fmicsom1=0.432  !! necromass partitioning coeff 1
+      real(dp)  :: fmicsom2=0.098  !! necromass partitioning coeff 2
+      real(dp)  :: fmicsom3=10.56  !! necromass partitioning coeff 3
+      real(dp)  :: fmicsom4=29.78  !! necromass partitioning coeff 4
+      real(dp)  :: fmicsom5=2.61   !! necromass partitioning coeff 5
+      real(dp)  :: cuemax    = 0.80  !! max carbon use efficiency
+      real(dp)  :: cue_coef1 = 0.66  !! CUE coefficient 1
+      real(dp)  :: cue_coef2 = 1.23  !! CUE coefficient 2
+      real(dp)  :: epislon1 = 0.5    !! CUE epsilon 1
+      real(dp)  :: epislon2 = 0.25   !! CUE epsilon 2
+      real(dp)  :: epislon3 = 0.7    !! CUE epsilon 3
+      real(dp)  :: epislon4 = 0.35   !! CUE epsilon 4
+      real(dp)  :: phcoeff1 = 0.2429    !! adsorption pH coefficient 1
+      real(dp)  :: phcoeff2 = -0.3632   !! adsorption pH coefficient 2
+      real(dp)  :: smkdesorp = 0.1   !! soil moisture desorption threshold
+      real(dp)  :: smexpns   = 2.0   !! soil moisture exponent NS
+      real(dp)  :: smexpb    = 0.75  !! soil moisture exponent B
+      real(dp)  :: qmaxcoeff = 0.4 * 0.5 !! Qmax-clay+silt coefficient
+      real(dp)  :: diffsoc  =( 5.0/24.0)* 2.74e-3 !! SOC diffusion [cm2/hour]
+      real(dp)  :: kadsorpx = 0.001  !! adsorption rate coefficient
+      real(dp)  :: kbax     = 6.0    !! adsorption/desorption ratio
+      real(dp)  :: fp2ax    = 1.143 * 0.33 !! fraction DOC to POC
+      real(dp)  :: tvcpoolx = 0.02*(1.0/1.60)*1.0/(365.0*24.0) !! MAOC turnover
+      real(dp)  :: tvppoolx = 0.10*(1.0/0.44)*1.0/(365.0*24.0) !! POC turnover
+      real(dp)  :: tvacx = 0.0015/24.0 !! leaching rate [1/hour]
+      real(dp)  :: rootbeta = 1.0    !! root depth decay coefficient
+      real(dp)  :: vmaxbeta = 0.5    !! Vmax depth decay coefficient
       !! Previous values (commented out): rootbeta=2.0, tvcpoolx=0.102*0.02/24.0/2.0,
       !! tvppoolx=4.705*0.019/24./10.00, tvacx=0.1*0.0015/24.0
    end type mic_param_default
@@ -102,92 +102,92 @@ module mic_variable
   !> Km, Vmax, Q10, microbial turnover, necromass partitioning, and
   !> kinetics-3-specific coefficients (adsorption, POC/MAOC turnover, leaching).
   type mic_parameter
-      real(r_2), dimension(:,:), allocatable  :: K1,K2,K3 !! Michaelis constants for substrates 1-3
-      real(r_2), dimension(:,:), allocatable  :: J1,J2,J3  !! Michaelis constants for substrates 1-3
-      real(r_2), dimension(:,:), allocatable  :: V1,V2,V3  !! Vmax for substrates 1-3
-      real(r_2), dimension(:,:), allocatable  :: W1,W2,W3  !! Vmax for substrates 1-3
-      real(r_2), dimension(:,:), allocatable  :: desorp    !! desorption rates
-      real(r_2), dimension(:,:), allocatable  :: Q1,Q2     !! temperature sensitivity Q10
-      real(r_2), dimension(:,:), allocatable  :: fm,fs     !! substrate quality modifiers
-      real(r_2), dimension(:,:), allocatable  :: mgeR1,mgeR2,mgeR3 !! maintenance coeff R 1-3
-      real(r_2), dimension(:,:), allocatable  :: mgeK1,mgeK2,mgeK3 !! maintenance coeff K 1-3
-      real(r_2), dimension(:,:), allocatable  :: tvmicR,tvmicK       !! microbial turnover R/K
-      real(r_2), dimension(:,:), allocatable  :: betamicR,betamicK   !! microbial turnover beta R/K
-      real(r_2), dimension(:,:), allocatable  :: fmetave   !! average metabolic fraction
-      real(r_2), dimension(:,:,:), allocatable :: cn_r      !! C:N ratios per pool
-      real(r_2), dimension(:,:), allocatable  :: fr2p,fk2p !! necromass fractions to POC
-      real(r_2), dimension(:,:), allocatable  :: fr2c,fk2c !! necromass fractions to MAOC
-      real(r_2), dimension(:,:), allocatable  :: fr2a,fk2a !! necromass fractions to mineral-associated
-      real(r_2), dimension(:),  allocatable  :: xcnleaf,xcnroot,xcnwood !! C:N ratios for litter types
-      real(r_2), dimension(:),  allocatable  :: fligleaf,fligroot,fligwood !! lability fractions
-      real(r_2), dimension(:),  allocatable  :: diffsocx  !! SOC diffusion coefficient
-      real(r_2), dimension(:,:), allocatable  :: kdesorp   !! desorption rate [mg C cm-3 hour-1]
-      real(r_2), dimension(:,:), allocatable  :: kadsorp   !! adsorption rate [1/hour]
-      real(r_2), dimension(:,:), allocatable  :: fp2a      !! fraction DOC to POC
-      real(r_2), dimension(:,:), allocatable  :: tvcpool   !! MAOC turnover [1/hour]
-      real(r_2), dimension(:,:), allocatable  :: tvppool   !! POC turnover [1/hour]
-      real(r_2), dimension(:,:), allocatable  :: tvac      !! leaching rate [1/hour]
-      real(r_2), dimension(:,:), allocatable  :: qmaxcoeff !! Qmax-clay+silt coefficient
+      real(dp), dimension(:,:), allocatable  :: K1,K2,K3 !! Michaelis constants for substrates 1-3
+      real(dp), dimension(:,:), allocatable  :: J1,J2,J3  !! Michaelis constants for substrates 1-3
+      real(dp), dimension(:,:), allocatable  :: V1,V2,V3  !! Vmax for substrates 1-3
+      real(dp), dimension(:,:), allocatable  :: W1,W2,W3  !! Vmax for substrates 1-3
+      real(dp), dimension(:,:), allocatable  :: desorp    !! desorption rates
+      real(dp), dimension(:,:), allocatable  :: Q1,Q2     !! temperature sensitivity Q10
+      real(dp), dimension(:,:), allocatable  :: fm,fs     !! substrate quality modifiers
+      real(dp), dimension(:,:), allocatable  :: mgeR1,mgeR2,mgeR3 !! maintenance coeff R 1-3
+      real(dp), dimension(:,:), allocatable  :: mgeK1,mgeK2,mgeK3 !! maintenance coeff K 1-3
+      real(dp), dimension(:,:), allocatable  :: tvmicR,tvmicK       !! microbial turnover R/K
+      real(dp), dimension(:,:), allocatable  :: betamicR,betamicK   !! microbial turnover beta R/K
+      real(dp), dimension(:,:), allocatable  :: fmetave   !! average metabolic fraction
+      real(dp), dimension(:,:,:), allocatable :: cn_r      !! C:N ratios per pool
+      real(dp), dimension(:,:), allocatable  :: fr2p,fk2p !! necromass fractions to POC
+      real(dp), dimension(:,:), allocatable  :: fr2c,fk2c !! necromass fractions to MAOC
+      real(dp), dimension(:,:), allocatable  :: fr2a,fk2a !! necromass fractions to mineral-associated
+      real(dp), dimension(:),  allocatable  :: xcnleaf,xcnroot,xcnwood !! C:N ratios for litter types
+      real(dp), dimension(:),  allocatable  :: fligleaf,fligroot,fligwood !! lability fractions
+      real(dp), dimension(:),  allocatable  :: diffsocx  !! SOC diffusion coefficient
+      real(dp), dimension(:,:), allocatable  :: kdesorp   !! desorption rate [mg C cm-3 hour-1]
+      real(dp), dimension(:,:), allocatable  :: kadsorp   !! adsorption rate [1/hour]
+      real(dp), dimension(:,:), allocatable  :: fp2a      !! fraction DOC to POC
+      real(dp), dimension(:,:), allocatable  :: tvcpool   !! MAOC turnover [1/hour]
+      real(dp), dimension(:,:), allocatable  :: tvppool   !! POC turnover [1/hour]
+      real(dp), dimension(:,:), allocatable  :: tvac      !! leaching rate [1/hour]
+      real(dp), dimension(:,:), allocatable  :: qmaxcoeff !! Qmax-clay+silt coefficient
       integer,   dimension(:), allocatable  :: pft,bgctype,isoil,sorder,region,siteid,dataid !! site metadata
-      real(r_2), dimension(:,:), allocatable  :: sdepth,fracroot  !! soil depth [cm], root fraction
-      real(r_2), dimension(:,:), allocatable  :: csoilobs          !! measured SOC [mg C cm-3]
-      real(r_2), dimension(:,:), allocatable  :: csoilobsp,csoilobsm,fracaoc !! SOC profile components
-      real(r_2), dimension(:),  allocatable  :: c14soilobsp,c14soilobsm !! 14C observations
-      real(r_2), dimension(:,:,:), allocatable :: c14atm       !! atmospheric 14C
+      real(dp), dimension(:,:), allocatable  :: sdepth,fracroot  !! soil depth [cm], root fraction
+      real(dp), dimension(:,:), allocatable  :: csoilobs          !! measured SOC [mg C cm-3]
+      real(dp), dimension(:,:), allocatable  :: csoilobsp,csoilobsm,fracaoc !! SOC profile components
+      real(dp), dimension(:),  allocatable  :: c14soilobsp,c14soilobsm !! 14C observations
+      real(dp), dimension(:,:,:), allocatable :: c14atm       !! atmospheric 14C
       integer,   dimension(:), allocatable  :: nyc14obs  !! year of 14C observation
       integer,   dimension(:), allocatable  :: top,bot   !! depth range indices
   end type mic_parameter
 
   !> Environmental and plant inputs per plot and time step.
   type mic_input
-      real(r_2), dimension(:,:), allocatable  :: tavg,wavg,tair    !! avg temp, avg water content, daily air temp
-      real(r_2), dimension(:,:), allocatable  :: ph                !! soil pH
-      real(r_2), dimension(:,:), allocatable  :: clay,silt         !! soil texture fractions
-      real(r_2), dimension(:,:), allocatable  :: porosity,bulkd    !! porosity, bulk density
-      real(r_2), dimension(:,:), allocatable  :: matpot            !! matric potential
-      real(r_2), dimension(:),  allocatable  :: dleaf,dwood,droot !! litter input depth profiles
-      real(r_2), dimension(:,:), allocatable  :: cinputm           !! monthly C input
-      real(r_2), dimension(:,:), allocatable  :: cinputs           !! summed C input
-      real(r_2), dimension(:),  allocatable  :: fcnpp             !! fine root C:N fraction of NPP
+      real(dp), dimension(:,:), allocatable  :: tavg,wavg,tair    !! avg temp, avg water content, daily air temp
+      real(dp), dimension(:,:), allocatable  :: ph                !! soil pH
+      real(dp), dimension(:,:), allocatable  :: clay,silt         !! soil texture fractions
+      real(dp), dimension(:,:), allocatable  :: porosity,bulkd    !! porosity, bulk density
+      real(dp), dimension(:,:), allocatable  :: matpot            !! matric potential
+      real(dp), dimension(:),  allocatable  :: dleaf,dwood,droot !! litter input depth profiles
+      real(dp), dimension(:,:), allocatable  :: cinputm           !! monthly C input
+      real(dp), dimension(:,:), allocatable  :: cinputs           !! summed C input
+      real(dp), dimension(:),  allocatable  :: fcnpp             !! fine root C:N fraction of NPP
   end type mic_input
 
   !> Global-scale inputs with time series, for large-domain runs.
   type mic_global_input
-      real(r_2), dimension(:), allocatable  :: lon,lat    !! longitude, latitude [deg]
-      real(r_2), dimension(:), allocatable  :: time       !! simulation time [hour]
+      real(dp), dimension(:), allocatable  :: lon,lat    !! longitude, latitude [deg]
+      real(dp), dimension(:), allocatable  :: time       !! simulation time [hour]
       integer,   dimension(:), allocatable  :: pft,bgctype,isoil,sorder,siteid !! site metadata
-      real(r_2), dimension(:), allocatable  :: area       !! grid cell area [km2]
-      real(r_2), dimension(:), allocatable  :: npp        !! net primary production
-      real(r_2), dimension(:), allocatable  :: ph,clay,silt !! soil properties
-      real(r_2), dimension(:), allocatable  :: poros,bulkd !! porosity, bulk density
-      real(r_2), dimension(:), allocatable  :: avgts,avgms !! avg temp, avg soil moisture
-      real(r_2), dimension(:,:), allocatable  :: patchfrac  !! PFT patch fractions
-      real(r_2), dimension(:,:,:), allocatable :: tsoil,moist,matpot !! time-varying soil state
-      real(r_2), dimension(:), allocatable  :: ligleaf,ligwood,ligroot !! litter lability
-      real(r_2), dimension(:,:), allocatable  :: dleaf,dwood,droot !! litter depth [mg C cm-2 time-1]
-      real(r_2), dimension(:,:), allocatable  :: cnleaf,cnwood,cnroot !! leaf/wood/root C:N
+      real(dp), dimension(:), allocatable  :: area       !! grid cell area [km2]
+      real(dp), dimension(:), allocatable  :: npp        !! net primary production
+      real(dp), dimension(:), allocatable  :: ph,clay,silt !! soil properties
+      real(dp), dimension(:), allocatable  :: poros,bulkd !! porosity, bulk density
+      real(dp), dimension(:), allocatable  :: avgts,avgms !! avg temp, avg soil moisture
+      real(dp), dimension(:,:), allocatable  :: patchfrac  !! PFT patch fractions
+      real(dp), dimension(:,:,:), allocatable :: tsoil,moist,matpot !! time-varying soil state
+      real(dp), dimension(:), allocatable  :: ligleaf,ligwood,ligroot !! litter lability
+      real(dp), dimension(:,:), allocatable  :: dleaf,dwood,droot !! litter depth [mg C cm-2 time-1]
+      real(dp), dimension(:,:), allocatable  :: cnleaf,cnwood,cnroot !! leaf/wood/root C:N
   end type mic_global_input
 
   !> Output fluxes for each plot.
   type mic_output
-      real(r_2), dimension(:), allocatable  :: fluxcinput  !! total C input
-      real(r_2), dimension(:), allocatable  :: fluxrsoil  !! soil respiration
-      real(r_2), dimension(:), allocatable  :: fluxcleach  !! dissolved C leaching
+      real(dp), dimension(:), allocatable  :: fluxcinput  !! total C input
+      real(dp), dimension(:), allocatable  :: fluxrsoil  !! soil respiration
+      real(dp), dimension(:), allocatable  :: fluxcleach  !! dissolved C leaching
   end type mic_output
 
   !> Carbon pool state variables.
   type mic_cpool
-      real(r_2), dimension(:,:,:), allocatable :: cpool     !! C pool mass [mg C cm-3]
-      real(r_2), dimension(:,:,:), allocatable :: cpooleq  !! equilibrium C pool
-      real(r_2), dimension(:), allocatable  :: cpooleqp  !! prior equilibrium total
-      real(r_2), dimension(:), allocatable  :: cpooleqm  !! mean equilibrium total
-      real(r_2), dimension(:), allocatable  :: c12pooleqp  !! prior equilibrium C-12
-      real(r_2), dimension(:), allocatable  :: c12pooleqm  !! mean equilibrium C-12
+      real(dp), dimension(:,:,:), allocatable :: cpool     !! C pool mass [mg C cm-3]
+      real(dp), dimension(:,:,:), allocatable :: cpooleq  !! equilibrium C pool
+      real(dp), dimension(:), allocatable  :: cpooleqp  !! prior equilibrium total
+      real(dp), dimension(:), allocatable  :: cpooleqm  !! mean equilibrium total
+      real(dp), dimension(:), allocatable  :: c12pooleqp  !! prior equilibrium C-12
+      real(dp), dimension(:), allocatable  :: c12pooleqm  !! mean equilibrium C-12
   end type mic_cpool
 
   !> Nitrogen pool state variables.
   type mic_npool
-      real(r_2), dimension(:,:), allocatable  :: mineralN  !! mineral N [mg N cm-3]
+      real(dp), dimension(:,:), allocatable  :: mineralN  !! mineral N [mg N cm-3]
   end type mic_npool
 
 

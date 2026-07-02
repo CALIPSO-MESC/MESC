@@ -5,7 +5,7 @@
 !> fractions, HWSD soil carbon profiles, global HWSD data, and Australian
 !> soil carbon measurements.
 module calcost_module
-  use precision_module, only : dp, r_2
+  use precision_module, only : dp
   use mic_constant, only : mcpool, mp, ms
   use mic_variable, only : mic_param_xscale, mic_param_default, mic_parameter, mic_cpool, mic_input, mic_global_input
   implicit none
@@ -28,20 +28,20 @@ module calcost_module
         !! Model carbon pool states.
     TYPE(mic_input),     INTENT(IN)    :: micinput
         !! Environmental forcing inputs.
-    real(r_2), intent(in) :: zse(ms)
+    real(dp), intent(in) :: zse(ms)
         !! Soil layer thicknesses.
     real(dp), intent(out) :: totcost
         !! Summed cost over all sites.
 
     ! cost function
-    real(r_2), dimension(:), allocatable           :: xcost,xobs,xobsp,xobsm
-    real(r_2), dimension(:), allocatable           :: xmod,xmodp,xmodm !! weighted modelled SOC, POC and MAOC
-    real(r_2), dimension(:), allocatable           :: xfracpmod,xfracmmod,xfracpobs,xfracmobs
+    real(dp), dimension(:), allocatable           :: xcost,xobs,xobsp,xobsm
+    real(dp), dimension(:), allocatable           :: xmod,xmodp,xmodm !! weighted modelled SOC, POC and MAOC
+    real(dp), dimension(:), allocatable           :: xfracpmod,xfracmmod,xfracpobs,xfracmobs
     integer   :: np,ns,ip
-    real(r_2)  :: xbdz,small
+    real(dp)  :: xbdz,small
 
-    real(r_2) :: xtop,xbot,x1,x2 !! cm
-    real(r_2) :: weight
+    real(dp) :: xtop,xbot,x1,x2 !! cm
+    real(dp) :: weight
 
 
 
@@ -158,20 +158,20 @@ module calcost_module
         !! Environmental forcing inputs.
     TYPE(mic_global_input), INTENT(IN) :: micglobal
         !! Global-scale input data (area, NPP).
-    real(r_2), intent(in) :: zse(ms)
+    real(dp), intent(in) :: zse(ms)
         !! Soil layer thicknesses.
     real(dp), intent(out) :: totcost
         !! Summed cost over all sites.
 
     ! cost function
-    real(r_2), dimension(:), allocatable        :: xcost,xobs,xobsp,xobsm
-    real(r_2), dimension(:), allocatable        :: xmod,xmodp,xmodm !! weighted modelled SOC, POC and MAOC
+    real(dp), dimension(:), allocatable        :: xcost,xobs,xobsp,xobsm
+    real(dp), dimension(:), allocatable        :: xmod,xmodp,xmodm !! weighted modelled SOC, POC and MAOC
     integer   :: np,ns,ip,ipsite
-    real(r_2)  :: xbdz
+    real(dp)  :: xbdz
 
-    real(r_2) :: xtop,xbot,x1,x2 !! cm
-    real(r_2) :: weight
-    real(r_2),dimension(:), allocatable         :: xmodfracp,xmodfracm,xobsfracp,xobsfracm
+    real(dp) :: xtop,xbot,x1,x2 !! cm
+    real(dp) :: weight
+    real(dp),dimension(:), allocatable         :: xmodfracp,xmodfracm,xobsfracp,xobsfracm
 
 
       allocate(xcost(mp),xobs(mp),xobsp(mp),xobsm(mp))
@@ -287,17 +287,17 @@ module calcost_module
         !! Environmental forcing inputs.
     TYPE(mic_global_input), INTENT(IN)    :: micglobal
         !! Global-scale input data.
-    real(r_2), intent(in) :: zse(ms)
+    real(dp), intent(in) :: zse(ms)
         !! Soil layer thicknesses.
     real(dp), intent(out) :: totcost
         !! Summed cost over all sites.
     ! cost function
-    real(r_2), dimension(:),   allocatable        :: xcost,xtop,xbot
-    real(r_2), dimension(:,:), allocatable        :: xmod
-    real(r_2), dimension(:,:), allocatable        :: xobs7, xmod7
-    real(r_2)                                     :: fracpocm,fracmaocm,fracmicm,fraclabm
+    real(dp), dimension(:),   allocatable        :: xcost,xtop,xbot
+    real(dp), dimension(:,:), allocatable        :: xmod
+    real(dp), dimension(:,:), allocatable        :: xobs7, xmod7
+    real(dp)                                     :: fracpocm,fracmaocm,fracmicm,fraclabm
     integer   :: np,ns,ipsite,v,ip,msobs
-    real(r_2)  :: xbdz
+    real(dp)  :: xbdz
 
     msobs=ms
     allocate(xcost(mp))
@@ -389,15 +389,15 @@ module calcost_module
         !! Environmental forcing inputs.
     TYPE(mic_global_input), INTENT(IN)    :: micglobal
         !! Global-scale input data.
-    real(r_2), intent(in) :: zse(ms)
+    real(dp), intent(in) :: zse(ms)
         !! Soil layer thicknesses (0.2m x 5, then 0.5m x 2).
     real(dp), intent(out) :: totcost
         !! Summed cost over all sites.
     ! cost function
-    real(r_2), dimension(:),   allocatable        :: xcost,xtop,xbot
-    real(r_2), dimension(:,:), allocatable        :: xmod
-    real(r_2), dimension(:,:), allocatable        :: xobs7, xmod7
-    real(r_2)                                     :: fracpocm,fracmaocm,fracmicm,fraclabm
+    real(dp), dimension(:),   allocatable        :: xcost,xtop,xbot
+    real(dp), dimension(:,:), allocatable        :: xmod
+    real(dp), dimension(:,:), allocatable        :: xobs7, xmod7
+    real(dp)                                     :: fracpocm,fracmaocm,fracmicm,fraclabm
     integer   :: np,ns,ipsite,v,ip,msobs
 
     msobs=7
@@ -490,21 +490,21 @@ module calcost_module
         !! Environmental forcing inputs.
     TYPE(mic_global_input), INTENT(IN)    :: micglobal
         !! Global-scale input data.
-    real(r_2), intent(in) :: zse(ms)
+    real(dp), intent(in) :: zse(ms)
         !! Soil layer thicknesses.
     real(dp), intent(out) :: totcost
         !! Summed cost over all sites.
 
     ! cost function
-    real(r_2), dimension(:),   allocatable        :: xcost
+    real(dp), dimension(:),   allocatable        :: xcost
         !! Per-site cost accumulator.
-    real(r_2), dimension(:,:), allocatable        :: xmod,xobs
+    real(dp), dimension(:,:), allocatable        :: xmod,xobs
         !! Modeled and observed SOC (g/kg) per site and layer.
-    real(r_2), dimension(:,:), allocatable        :: xmodpoc,xmodmaoc
+    real(dp), dimension(:,:), allocatable        :: xmodpoc,xmodmaoc
         !! Modeled POC and MAOC per site and layer.
     integer   :: np,ns,ip,msobs
         !! Loop indices: site, layer, pool; msobs = number of observed layers.
-    real(r_2)  :: totpoc,totmaoc,xmodpocavg,xmodmaocavg,fracpocm,fracmaocm,fracmicm,fraclabm
+    real(dp)  :: totpoc,totmaoc,xmodpocavg,xmodmaocavg,fracpocm,fracmaocm,fracmicm,fraclabm
         !! Intermediate POC/MAOC totals and fractions.
 
     msobs=3

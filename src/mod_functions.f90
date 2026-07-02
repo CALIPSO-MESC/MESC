@@ -5,7 +5,7 @@
 !> observations, and returns the scalar cost value.  The dispatcher
 !> [[functn]] selects the active mode based on `case.txt`.
 module function_module
-  use precision_module, only: dp, r_2
+  use precision_module, only: dp
   use mic_constant, only: mp, mpft, mbgc, ntime, nlon, nlat, ms
   use mic_variable, only: mic_param_xscale, mic_param_default, mic_parameter, &
                           mic_input, mic_global_input, mic_cpool, mic_npool, mic_output, &
@@ -91,7 +91,7 @@ module function_module
     integer :: jrestart,nparam
     character(len=140) :: frestart_in,frestart_out,foutput
     character(len=140) :: frac14c,f14c(5),filecluster
-    real(r_2), dimension(:), allocatable :: zse
+    real(dp), dimension(:), allocatable :: zse
 
       jrestart=0;xopt(:)=1.0
       do nparam=1,16
@@ -205,7 +205,7 @@ real(dp) function functn_frc1(nx,xparam16)
     integer :: jrestart,nparam
     character(len=140) :: frestart_in,frestart_out,foutput
     character(len=140) :: cfraction
-    real(r_2), dimension(:), allocatable :: zse
+    real(dp), dimension(:), allocatable :: zse
     integer :: mpx
 
       jrestart=0;xopt(:)=1.0
@@ -306,9 +306,9 @@ END function functn_frc1
     integer :: jrestart,nf,ok,nparam,mpx,timex
     character(len=140)  :: frestart_in,frestart_out,fparam_global,foutput
     character(len=140) :: fhwsdsoc,fmodis,fanoc
-    real(r_2)     :: totcost1
+    real(dp)     :: totcost1
     integer       :: ns
-    real(r_2), dimension(:), allocatable :: zse
+    real(dp), dimension(:), allocatable :: zse
 
 
       isoc14=0;nyeqpool = 500;ok=0;totcost1=0.0
@@ -407,8 +407,8 @@ END function functn_soc_hwsd
     integer    :: jrestart,nf,ok,nparam
     character(len=140) :: frestart_in,frestart_out,fparam_global,foutput
     character(len=140) :: fglobal(10)
-    real(r_2) :: totcost1
-    real(r_2), dimension(:), allocatable :: zse
+    real(dp) :: totcost1
+    real(dp), dimension(:), allocatable :: zse
 
       isoc14=0
       nyeqpool = 500
@@ -519,9 +519,9 @@ END function functn_global4
     integer    :: jrestart,nf,ok,nparam,mpx,timex
     character(len=140) :: frestart_in,frestart_out,foutput
     character(len=140) :: faustsoc
-    real(r_2)     :: totcost1
+    real(dp)     :: totcost1
     integer       :: ns
-    real(r_2), dimension(:), allocatable :: zse
+    real(dp), dimension(:), allocatable :: zse
 
 
       isoc14=0;nyeqpool = 500;ok=0;totcost1=0.0
