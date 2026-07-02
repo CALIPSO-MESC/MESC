@@ -1,30 +1,28 @@
 module mesc_inout_module
-  use mic_constant
-  use mic_variable
+  use precision_module, only : dp, sp, r_2
   use netcdf
+  use mic_constant, only : mp, ms, mcpool, nlat, nlon, ntime, mpft, mbgc
+  use mic_variable, only : mic_input, mic_parameter, mic_cpool, mic_npool, &
+                           mic_global_input, mic_output, mic_param_xscale
   implicit none
 
 contains
 
-!> this part reads restart file that includes all the pool sizes from previous model run
-!! read the C and N pool sizes and assign them to the "miccpool" and "micnpool"
-!! input:  netcdf file frestart_in
-!! output: miccpool and micnppol
-!!
+  !> this part reads restart file that includes all the pool sizes from previous model run
+  !! read the C and N pool sizes and assign them to the "miccpool" and "micnpool"
+  !! input:  netcdf file frestart_in
+  !! output: miccpool and micnppol
+  !!
   subroutine vmic_restart_read(miccpool,micnpool,frestart_in)
   ! read soil carbon pool sizes "miccpool%cpool(mp,ms,mcpool)"
-    use netcdf
-    use mic_constant
-    use mic_variable
-    implicit none
     TYPE(mic_cpool),              INTENT(INOUT)   :: miccpool
     TYPE(mic_npool),              INTENT(INOUT)   :: micnpool
-    character(len=140) :: frestart_in                        ! restart filename
+    character(len=140), intent(in) :: frestart_in    !! restart filename
     ! local variables
-    integer :: mpx,msx,mcpoolx                          ! array dimensions
-    integer :: status,ncid,varid                        ! local variables
-    real(r_2), dimension(mp,ms,mcpool)  :: fcpool    ! carbon pools
-    real(r_2), dimension(mp,ms)         :: fnpool    ! nitrogen pools
+    integer :: mpx,msx,mcpoolx                       !! array dimensions
+    integer :: status,ncid,varid                     !! local variables
+    real(r_2), dimension(mp,ms,mcpool)  :: fcpool    !! carbon pools
+    real(r_2), dimension(mp,ms)         :: fnpool    !! nitrogen pools
 
    ! open restart file
     status = nf90_open(frestart_in,nf90_nowrite,ncid)
@@ -71,19 +69,15 @@ contains
 
   end subroutine vmic_restart_read
 
-!> write out model pool sizes into restart file
-!! input: frestart_out
-!! output: miccpool%cpool, micnpool%npool
-!!
+  !> write out model pool sizes into restart file
+  !! input: frestart_out
+  !! output: miccpool%cpool, micnpool%npool
+  !!
   subroutine vmic_restart_write(frestart_out,miccpool,micnpool)
   ! write out soil carbon pool sizes "miccpool%cpool(mp,ms,mcpool)"
-    use netcdf
-    use mic_constant
-    use mic_variable
-    implicit None
     TYPE(mic_cpool),              INTENT(INOUT)   :: miccpool
     TYPE(mic_npool),              INTENT(INOUT)   :: micnpool
-! local variables for writing netcdf file
+    ! local variables for writing netcdf file
     integer                :: STATUS
     integer                :: FILE_ID, mp_ID, miccarb_ID, soil_ID
     CHARACTER                :: CDATE*10,frestart_out*99
@@ -143,12 +137,11 @@ contains
 
   end subroutine vmic_restart_write
 
-!> abort model run in case when error occurs during reading/writing netcdf file
-!! input integer variable ok
-!! output: character string "message"
-!!
+  !> abort model run in case when error occurs during reading/writing netcdf file
+  !! input integer variable ok
+  !! output: character string "message"
+  !!
   subroutine nc_abort( ok, message )
-    USE netcdf
     ! Input arguments
     CHARACTER(LEN=*), INTENT(IN) :: message
     INTEGER, INTENT(IN) :: ok
@@ -160,17 +153,13 @@ contains
 
   end subroutine nc_abort
 
-!> write out fluxes into a netcdf file
-!> input:  micoutput%cinput,micoutput%rsoil,micoutput%cleach in gc/m2/year for each "mp"
-!! output: netcdf foutput
-!! "micinput" not used yet
-!!
+  !> write out fluxes into a netcdf file
+  !> input:  micoutput%cinput,micoutput%rsoil,micoutput%cleach in gc/m2/year for each "mp"
+  !! output: netcdf foutput
+  !! "micinput" not used yet
+  !!
   subroutine vmic_output_write(foutput,micinput,micoutput)
     ! fNPP is not quite right yet. It shoudl be the sump of "cinputm+cinputs"
-    use netcdf
-    use mic_constant
-    use mic_variable
-    implicit None
     TYPE(mic_input),         INTENT(INout)   :: micinput
     TYPE(mic_output),        INTENT(INout)   :: micoutput
     real(r_2)     :: missreal
@@ -243,15 +232,13 @@ contains
 
   end subroutine vmic_output_write
 
-!> get PFT-dependent model paramater values (up to 20 parameters)
-!! input: hartd-wired parameter filename "parameters_global.csv"
-!! output: write the parameter values to "micpxdef"
-!!
-
+  !> get PFT-dependent model paramater values (up to 20 parameters)
+  !! input: hartd-wired parameter filename "parameters_global.csv"
+  !! output: write the parameter values to "micpxdef"
+  !!
   subroutine getparam_global(fglobalparam,jmodel,micpxdef)
-    use mic_constant
-    use mic_variable
-    implicit none
+    use mic_constant, only : xrootcable, xrootorchidee
+
     TYPE(mic_param_xscale)    :: micpxdef
     character(len=140)  :: fglobalparam
     integer :: jmodel
@@ -294,14 +281,12 @@ contains
 
   end subroutine getparam_global
 
-!> get number of patches
-!! input: hartd-wired parameter filename "fpatch"
-!! output: write the parameter values to "mpx"
-!!
+  !> get number of patches
+  !! input: hartd-wired parameter filename "fpatch"
+  !! output: write the parameter values to "mpx"
+  !!
   subroutine getpatch_global(fpatch,jmodel,mpx)
   ! read in global patch area fraction and calculate the number of land cell using sum(PFTfrac(lon,lat,pft))
-  use netcdf
-  use mic_constant
   character(len=140) :: fpatch
   integer :: jmodel,mpx
   real(dp), dimension(:,:,:),   allocatable :: xfield3
@@ -358,21 +343,19 @@ contains
     mpx = np
   end subroutine getpatch_global
 
-!> get global CABLE forcing for running mes-c
-!! input: hard-wired parameter filename "fglobal_cable"
-!! input: hwsd 0-60cm soil properties and new soil cluster
-!! output: write the parameter values to "micglobal% and micparam%"
-!!
+  !> get global CABLE forcing for running mes-c
+  !! input: hard-wired parameter filename "fglobal_cable"
+  !! input: hwsd 0-60cm soil properties and new soil cluster
+  !! output: write the parameter values to "micglobal% and micparam%"
+  !!
   subroutine getdata_global4_cable(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal,micparam,zse)
   ! read in global forcing from CABLE/ORCHIDEE from time-invarying and time-varying data files
   ! averaging the input files for each land cell using PFTfrac
   ! read in the following data
   ! real(sp), dim(lon,lat) :: Ald,Alo,Fed,Feo
   ! real(dp), dimension(lon,lat): cell_area
-  use netcdf
-  use mic_constant
-  use mic_variable
-  implicit none
+  use mic_constant, only : cnleaf1, cnroot1, cnwood1, ligleaf1, ligroot1, ligwood1
+
   TYPE(mic_global_input), INTENT(INOUT)  :: micglobal
   TYPE(mic_parameter),    INTENT(INOUT)  :: micparam
   real(r_2)  :: zse(ms)
@@ -782,23 +765,21 @@ contains
 
   end subroutine getdata_global4_cable
 
-!> get global ORCHIDEE forcing for running mes-c
-!! input: hard-wired parameter filename "fglobal_cable"
-!! input: harmonsied HWSD soil properties (0-60cm)
-!! output: write the parameter values to "micglobal% and micparam%"
-!!
-subroutine getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal,micparam,zse)
-  ! read in global forcing from ORCHIDEE from time-invarying and time-varying data files
-  ! averaging the input files for each land cell using PFTfrac
-  ! read in the following data
-  ! real(sp), dim(lon,lat) :: Ald,Alo,Fed,Feo
-  ! real(dp), dimension(lon,lat): cell_area
-  ! use soil-grid or deafult values of soil silt, sand and clay fraction, soil pH and bulk density
-  !
-  use netcdf
-  use mic_constant
-  use mic_variable
-  implicit none
+  !> get global ORCHIDEE forcing for running mes-c
+  !! input: hard-wired parameter filename "fglobal_cable"
+  !! input: harmonsied HWSD soil properties (0-60cm)
+  !! output: write the parameter values to "micglobal% and micparam%"
+  !!
+  subroutine getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal,micparam,zse)
+   ! read in global forcing from ORCHIDEE from time-invarying and time-varying data files
+   ! averaging the input files for each land cell using PFTfrac
+   ! read in the following data
+   ! real(sp), dim(lon,lat) :: Ald,Alo,Fed,Feo
+   ! real(dp), dimension(lon,lat): cell_area
+   ! use soil-grid or deafult values of soil silt, sand and clay fraction, soil pH and bulk density
+
+  use mic_constant, only : cnleaf2, cnroot2, cnwood2, ligleaf2, ligroot2, ligwood2
+
   TYPE(mic_global_input), INTENT(INOUT)  :: micglobal
   TYPE(mic_parameter),    INTENT(INOUT)  :: micparam
   real(r_2) :: zse(ms)
@@ -1232,8 +1213,6 @@ end subroutine getdata_global4_orchidee
 !! output: cluster (integer)
 !!
 subroutine cluster_hwsd(jmodel,bgctype,socobs,fclay,fsilt,fph,fald,falo,ffed,ffeo,fcluster)
-  use mic_constant
-  implicit none
   integer :: jmodel
   integer,   dimension(mp)     :: bgctype,fcluster
   real(r_2), dimension(mp,ms)  :: socobs
@@ -1318,8 +1297,6 @@ end subroutine cluster_hwsd
 !!
 subroutine lonlat2mpx2(ilon, jlat, varx2_db, varmp1_db)
     ! map varx2_db(nlon,nlat) to varmp1_db(mp)
-    use mic_constant
-    implicit none
 
     integer,   dimension(mp)              :: ilon,jlat
     real(dp),    dimension(nlon,nlat)       :: varx2_db
@@ -1343,8 +1320,6 @@ end subroutine lonlat2mpx2
 !!
 subroutine lonlat2mpx2int(ilon, jlat, varx2_int, varmp1_int)
     ! map varx2_int(nlon,nlat) to varmp1_int(mp)
-    use mic_constant
-    implicit none
 
     integer,   dimension(mp)              :: ilon,jlat
     integer,   dimension(nlon,nlat)       :: varx2_int
@@ -1367,8 +1342,6 @@ end subroutine lonlat2mpx2int
 !!
 subroutine lonlat2mpx3(ilon, jlat, patchfrac, varx3_db, varmp1_db)
 ! map varx3_db(nlon,nlat,mpft) to varmp1_db(mp)
-    use mic_constant
-    implicit none
 
     integer,   dimension(mp)              :: ilon,jlat
     real(r_2), dimension(nlon,nlat,mpft)  :: patchfrac
@@ -1398,8 +1371,6 @@ end subroutine lonlat2mpx3
 !!
 subroutine lonlat2mpx3a(ilon, jlat, ms3, zse3, bulkd3, varx3_db, varmp1_db)
 ! map varx3_db(nlon,nlat,1:3) to varmp1_db(mp)
-    use mic_constant
-    implicit none
     integer :: ms3
     integer,   dimension(mp)              :: ilon,jlat
     real(dp),    dimension(nlon,nlat,ms3)   :: bulkd3
@@ -1429,8 +1400,6 @@ end subroutine lonlat2mpx3a
 !!
 subroutine lonlat2mpx3time(ilon, jlat, varx3time_db, varmp2_db)
 ! map varx3time_db(nlon,nlat,time) to varmp2_db(mp,time)
-    use mic_constant
-    implicit none
 
     integer,   dimension(mp)              :: ilon,jlat
     real(dp),    dimension(nlon,nlat,ntime) :: varx3time_db
@@ -1462,8 +1431,6 @@ end subroutine lonlat2mpx3time
 !!
 subroutine lonlat2mpx4b(ilon,jlat,xmin,xmax,xdef,varx4_db,varmp3_db)
 ! map varx4_db(nlon,nlat,ms,ntime) to varmp3_db(mp,ms,ntime)
-    use mic_constant
-    implicit none
 
     integer, dimension(mp)                      :: ilon, jlat
     real(dp), dimension(nlon,nlat,ms,ntime)       :: varx4_db
@@ -1497,18 +1464,16 @@ subroutine lonlat2mpx4b(ilon,jlat,xmin,xmax,xdef,varx4_db,varmp3_db)
 end subroutine lonlat2mpx4b
 
 
-!> read in global atmospheric C14 data and input data for model run with 14C
-!! input 1: file 1 "frac14c" with all observed C14, carbon input, soil properties and other site-sepefici
-!!        parameter for model run
-!! input 2: file 2" f14c" with atmospheric 14C in five different zones
-!! output: all data read in here are written into "micparam", "micinpout" and "micnpool"
-!! "fcluster" is not read in yet
-!!
+  !> read in global atmospheric C14 data and input data for model run with 14C
+  !! input 1: file 1 "frac14c" with all observed C14, carbon input, soil properties and other site-sepefici
+  !!        parameter for model run
+  !! input 2: file 2" f14c" with atmospheric 14C in five different zones
+  !! output: all data read in here are written into "micparam", "micinpout" and "micnpool"
+  !! "fcluster" is not read in yet
+  !!
   subroutine getdata_c14(frac14c,f14c,filecluster,micinput,micparam,micnpool,zse)
-    use netcdf
-    use mic_constant
-    use mic_variable
-    implicit none
+    use mic_constant, only : delt
+
     TYPE(mic_parameter), INTENT(INout)   :: micparam
     TYPE(mic_input),     INTENT(INout)   :: micinput
     TYPE(mic_npool),     INTENT(INOUT)   :: micnpool
@@ -1795,17 +1760,13 @@ end subroutine lonlat2mpx4b
 
    end subroutine getdata_c14
 
-!> get dimeions: mp from the c fraction input file
-!!
-   subroutine getdata_frc_dim(cfraction,mpx)
-    use netcdf
-    use mic_constant
-    use mic_variable
-    implicit none
+  !> get dimeions: mp from the c fraction input file
+  !!
+  subroutine getdata_frc_dim(cfraction,mpx)
     character(len=140) :: cfraction
     integer :: mpx
     integer:: ncid,varid,status
-   ! open .nc file
+    ! open .nc file
     status = nf90_open(cfraction,nf90_nowrite,ncid)
     if(status /= nf90_noerr) print*, 'Error opening c_fraction.nc'
 
@@ -1817,15 +1778,12 @@ end subroutine lonlat2mpx4b
 
     ! Close netcdf file
     status = NF90_CLOSE(ncid)
-   end subroutine  getdata_frc_dim
+  end subroutine  getdata_frc_dim
 
-!> read in data for model run to calculate POC and MAOC fractions
-!!
-   subroutine getdata_frc(cfraction,jglobal,bgcopt,micinput,micparam,micnpool,micglobal,zse)
-    use netcdf
-    use mic_constant
-    use mic_variable
-    implicit none
+  !> read in data for model run to calculate POC and MAOC fractions
+  !!
+  subroutine getdata_frc(cfraction,jglobal,bgcopt,micinput,micparam,micnpool,micglobal,zse)
+    use mic_constant, only : delt
     TYPE(mic_parameter), INTENT(INout)   :: micparam
     TYPE(mic_input),     INTENT(INout)   :: micinput
     TYPE(mic_npool),     INTENT(INOUT)   :: micnpool
@@ -2180,9 +2138,6 @@ end subroutine lonlat2mpx4b
 
    subroutine get14catm(nz,f14cz,micparam)
    ! get the atmospheric 14C data 1941-2019 (inclusive, Hua et al. 2020)
-    use mic_constant
-    use mic_variable
-    implicit none
     TYPE(mic_parameter), INTENT(INout)   :: micparam
     integer :: i, nz, ny, nc14atm(100,5)
     real(r_2)  :: year,c14del,sdx1,c14fm,sdx2
@@ -2216,10 +2171,6 @@ end subroutine lonlat2mpx4b
    end subroutine get14catm
 
    subroutine getdata_hwsd_dim(fhwsdsoc,mpx,timex)
-    use netcdf
-    use mic_constant
-    use mic_variable
-    implicit none
     character(len=140) :: fhwsdsoc
     integer :: mpx,timex
     integer:: ncid,varid,status
@@ -2243,13 +2194,12 @@ end subroutine lonlat2mpx4b
     status = NF90_CLOSE(ncid)
    end subroutine  getdata_hwsd_dim
 
-   subroutine getdata_hwsd(fhwsdsoc,fmodis,fanoc,jglobal,bgcopt,jopt,jmodel,micparam,micglobal,zse)
+  subroutine getdata_hwsd(fhwsdsoc,fmodis,fanoc,jglobal,bgcopt,jopt,jmodel,micparam,micglobal,zse)
+    use mic_constant, only : cnleaf1, cnroot1, cnwood1, ligleaf1, ligroot1, ligwood1, &
+                             cnleaf2, cnroot2, cnwood2, ligleaf2, ligroot2, ligwood2
+
     !use micglobal%area (area fraction) as a switch to run for selected sites during parameter optimization (jopt==0)
     !model only runs for those sites with micglobal%area(np) > 0.0
-    use netcdf
-    use mic_constant
-    use mic_variable
-    implicit none
     character(len=140) :: fhwsdsoc,fmodis,fanoc
     integer :: jglobal,bgcopt,jopt,jmodel
     TYPE(mic_parameter),          INTENT(INout) :: micparam
@@ -2618,8 +2568,6 @@ end subroutine getdata_hwsd
 
 
 subroutine screenout(runmodel,jmodel,bgcopt,xopt,cost)
-    use mic_constant
-    implicit none
     character(len=10) :: runmodel
     integer :: jmodel,bgcopt
     real(dp),    dimension(16)           :: xopt
@@ -2632,10 +2580,6 @@ end subroutine screenout
 
 
    subroutine getdata_aust_dim(faustsoc,mpx,timex)
-    use netcdf
-    use mic_constant
-    use mic_variable
-    implicit none
     character(len=140) :: faustsoc
     integer :: mpx,timex
     integer:: ncid,varid,status
@@ -2661,10 +2605,6 @@ end subroutine screenout
    subroutine getdata_aust(faustsoc,jglobal,bgcopt,jopt,jmodel,micparam,micglobal,zse)
     !use micglobal%area (area fraction) as a switch to run for selected sites during parameter optimization (jopt==0)
     !model only runs for those sites with micglobal%area(np) > 0.0
-    use netcdf
-    use mic_constant
-    use mic_variable
-    implicit none
     real, dimension(9)  :: cnleaf,cnwood,cnroot,fracleaf,fracwood,fracroot,ligcleaf,ligcwood,ligcroot
     data cnleaf/41.653,73.565,81.04,66.675,35.33,62.898,64.967,64.0,20.0/
     data cnwood/71.272,106.111,124.84,128.762,59.924,83.557,105.973,105.97,100.0/
