@@ -294,7 +294,7 @@ module calcost_module
                xcost(np) = xcost(np) + (log(xobs7(np,ns))-log(xmod7(np,ns)))**2 
             !   xcost(np) = xcost(np) + (xobs7(np,ns)-xmod7(np,ns))**2 
 
-               write(91,901) micparam%siteid(np),micparam%pft(np),micparam%isoil(np),micparam%sorder(np), &
+               write(91,921) micglobal%lon(np),micglobal%lat(np),micparam%pft(np),micparam%isoil(np),micparam%sorder(np), &
                              micparam%bgctype(np),micglobal%area(np),micglobal%npp(np),ns,                &
                              micparam%fracaoc(np,ns),xobs7(np,ns),xmod7(np,ns)
 
@@ -306,7 +306,7 @@ module calcost_module
             fracmaocm = (miccpool%cpooleq(np,ns,6)+miccpool%cpooleq(np,ns,9))/(sum(miccpool%cpooleq(np,ns,3:mcpool))+1.0e-6)    
             fracmicm  = (miccpool%cpooleq(np,ns,3)+miccpool%cpooleq(np,ns,4))/(sum(miccpool%cpooleq(np,ns,3:mcpool))+1.0e-6)                   
             fraclabm  = miccpool%cpooleq(np,ns,7)/(sum(miccpool%cpooleq(np,ns,3:mcpool))+1.0e-6)  
-            write(92,921) micparam%siteid(np),micparam%pft(np),micparam%isoil(np),micparam%sorder(np), &
+            write(92,921) micglobal%lon(np),micglobal%lat(np),micparam%pft(np),micparam%isoil(np),micparam%sorder(np), &
                           micparam%bgctype(np),micglobal%area(np),micglobal%npp(np), ns,  &
                           (1000.0*miccpool%cpooleq(np,ns,ip)/micinput%bulkd(np,ns),ip=1,mcpool), &
                           micparam%fracaoc(np,ns),fracpocm,fracmaocm,fracmicm,fraclabm
@@ -321,7 +321,7 @@ module calcost_module
     deallocate(xobs7,xmod7,xtop,xbot)
 
 901   format(i6,1x,4(i3,1x),2(f8.3,1x),i2,1x,10(f12.4,1x))
-921   format(i6,1x,4(i3,1x),2(f8.3,1x),i2,1x,20(f12.4,1x))
+921   format(2(f8.3,1x),1x,4(i3,1x),2(f8.3,1x),i2,1x,20(f12.4,1x))
     end subroutine calcost_hwsd3
 
 

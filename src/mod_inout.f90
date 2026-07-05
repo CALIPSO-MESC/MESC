@@ -1273,8 +1273,12 @@ subroutine getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal
     micparam%xcnroot(:) = micglobal%cnroot(:,1)
     micparam%xcnwood(:) = micglobal%cnwood(:,1)
 
-
-    sitemax=2000
+    if(jopt==1) then
+       sitemax=2000   ! parameter optimization
+    else
+       sitemax=1e9    ! global simulation, unlimited sitemax    
+    endif   
+    
     if(msite>2*sitemax) then
 
        intval = msite/sitemax; isite=0
@@ -1283,32 +1287,31 @@ subroutine getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal
              isite = isite +1
              if(int(isite/intval)*intval /= isite.or. isite>sitemax*intval) micglobal%area(np) = -1.0
           endif
-   !       if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
-   !          write(*,103) isite,np, micglobal%bgctype(np), micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
-   !       endif
        enddo
     else 
 
-      isite=0
-      do np=1,mp
-         if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
-            isite=isite+1     
-   !         write(*,103) isite,np,micglobal%bgctype(np),micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
-         endif     
-      enddo
-      if(isite<10) print *, 'too few sites ', isite
+       isite=0
+       do np=1,mp
+          if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
+             isite=isite+1     
+          endif     
+       enddo
+       if(isite<10) print *, 'too few sites ', isite
 
-    endif   
-
+    endif !msite>2*sitemax   
+      
     micglobal%avgts(:) = sum(sum(micglobal%tsoil(:,:,:),dim=3),dim=2)/real(ms*ntime)
     micglobal%avgms(:) = sum(sum(micglobal%moist(:,:,:),dim=3),dim=2)/real(ms*ntime)
+
     micglobal%ilon(:)  = ilon(:)
     micglobal%jlat(:)  = jlat(:)
     micglobal%lon_global(:) = lon(:)
     micglobal%lat_global(:) = lat(:)
-    
+ 
 ! write out time-invariant input data
+
     if(jglobal==1) then
+       print *, 'write out input data to ', fglobal(5)
        open(31,file=fglobal(5))
        do np=1,mp
           write(31,101) micglobal%lon(np),micglobal%lat(np),ilon(np),jlat(np),                 & 

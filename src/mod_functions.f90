@@ -240,7 +240,7 @@ END function functn_frc1
     real(r_2), dimension(:), allocatable :: zse
 
     
-      isoc14=0;nyeqpool = 500;ok=0;totcost1=0.0
+      isoc14=0;nyeqpool = 1000;ok=0;totcost1=0.0
 
       jrestart=0;xopt(:)=1.0
       do nparam=1,16
@@ -337,7 +337,7 @@ END function functn_soc_hwsd
     real(r_2), dimension(:), allocatable :: zse
       
       isoc14=0
-      nyeqpool = 500
+      nyeqpool = 1000
       ok=0
       totcost1=0.0
       jmodel=1;mpft=17;mbgc=10;ntime=365;nlon=192;nlat=112
