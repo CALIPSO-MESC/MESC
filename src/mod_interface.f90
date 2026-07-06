@@ -752,9 +752,9 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
    enddo
 
 !$OMP PARALLEL DEFAULT(NONE) SHARED (micparam,micpxdef,micnpool,micinput,micglobal,miccpool,micoutput,micpdef,&
-!$OMP kinetics,isoc14,nyeqpool,bgcopt,ndelt,zse,mp,ms,ny,i,year,stations_used) &
+!$OMP kinetics,isoc14,nyeqpool,bgcopt,ndelt,zse,mp,ms,stations_used) &
 !$OMP PRIVATE (np,timex,delty,ns,ip,station_index,&
-!$OMP xpool0,xpool1,fluxsoc,diffsocxx,ypooli,ypoole,cpool0,cpool1,totcinput,cfluxa) &
+!$OMP xpool0,xpool1,fluxsoc,diffsocxx,ypooli,ypoole,cpool0,cpool1,totcinput,cfluxa,ny,i,year) &
 !$OMP FIRSTPRIVATE (ntime,station_count)
 !!$OMP REDUCTION (+:data_count,data_used)  &,
 !$OMP DO
