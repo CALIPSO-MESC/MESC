@@ -115,3 +115,28 @@ cd /SEC/test
 chmod +x run_main.sh
 ./run_main.sh
 ```
+
+---
+
+## 6. Generating API Documentation
+
+API documentation is generated with [FORD](https://forddocs.readthedocs.io/), a Fortran documentation generator.
+
+**Install FORD** (using a virtual environment is recommended):
+```bash
+pip install ford
+```
+
+**Generate documentation:**
+```bash
+ford mesc.md
+```
+
+This reads `!>` and `!!` comment blocks from `src/*.f90` and produces static HTML output in `doc/`.
+
+**View documentation:**
+```bash
+open doc/index.html
+```
+
+To regenerate after updating doc comments, simply re-run `ford mesc.md`.

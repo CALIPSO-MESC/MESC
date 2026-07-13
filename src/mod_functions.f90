@@ -1,3 +1,9 @@
+!> Per-mode orchestrator functions for MESC calibration.
+!>
+!> Each function allocates arrays, ingests observed data, runs the soil
+!> carbon model via an appropriate driver, computes a cost against
+!> observations, and returns the scalar cost value.  The dispatcher
+!> [[functn]] selects the active mode based on `case.txt`.
 module function_module
  use mic_constant
  use mic_variable
@@ -12,7 +18,57 @@ module function_module
 
  Contains
 
+ !> Dispatcher that selects the appropriate per-mode orchestrator.
+ !!
+ !! Reads `case.txt` to determine the run mode, then delegates to one
+ !! of the mode-specific functions:
+ !!
+ !! * 0 -> [[functn_soc_aust]]
+ !! * 1 -> [[functn_c14]]
+ !! * 2 -> [[functn_frc1]]
+ !! * 3 -> [[functn_soc_hwsd]]
+ !! * 4 -> [[functn_global4]]
+ real(dp) function functn(nx,xparam16)
+
+     integer, intent(in) :: nx
+         !! Number of optimized parameters.
+     real(dp), dimension(16), intent(in) :: xparam16
+         !! Values of the `nx` optimized parameters.
+
+     integer :: runcase
+
+     open(1,file='case.txt')
+     read(1,*) runcase
+     close(1)
+     SELECT CASE (runcase)
+       CASE(0)
+         functn = functn_soc_aust(nx,xparam16)
+       CASE (1)    ! run model for 14C
+         functn = functn_c14(nx,xparam16)
+       CASE (2)    ! run model for POC/MAOC fractions
+         functn = functn_frc1(nx,xparam16)
+       CASE (3)    ! run model for site HWSD SOC profile
+         functn = functn_soc_hwsd(nx,xparam16)
+       CASE (4)    ! run model globally with CABLE/ORCHIDEE spatial resolution
+         functn = functn_global4(nx,xparam16)
+     !  CASE (5)    ! run model with prescribed forcing (not developed yet for 1% per year offline)
+     !    functn = functn_offline(nx,xparam16)
+     END SELECT
+
+ END function functn
+
  real(dp) function functn_c14(nx,xparam16)
+    !! Orchestrator for 14C calibration mode.
+    !!
+    !! Runs the model twice: once for stable C (12C) and once for
+    !! radiocarbon (14C), then returns the combined cost.  Reads
+    !! configuration and default parameters from `params1.txt`.
+
+    integer, intent(in) :: nx
+        !! Number of optimized parameters.
+    real(dp), dimension(16), intent(in) :: xparam16
+        !! Values of the `nx` optimized parameters.
+
     TYPE(mic_param_xscale)    :: micpxdef
     TYPE(mic_param_default)   :: micpdef
     TYPE(mic_parameter)       :: micparam
@@ -22,9 +78,6 @@ module function_module
     TYPE(mic_npool)           :: micnpool
     TYPE(mic_output)          :: micoutput
 
-    !local variables
-    real(dp),    dimension(16)           :: xparam16
-    integer    :: nx
     integer,   dimension(16)           :: nxopt
     real(dp),    dimension(16)           :: xopt
     real(dp)     :: totcost1,totcost2
@@ -120,20 +173,26 @@ END function functn_c14
 
 
 real(dp) function functn_frc1(nx,xparam16)
-   ! only one layer without bioturbation for SOC fraction data only
-    TYPE(mic_param_xscale)    :: micpxdef
-    TYPE(mic_param_default)   :: micpdef
-    TYPE(mic_parameter)       :: micparam
-    TYPE(mic_input)           :: micinput
-    TYPE(mic_global_input)    :: micglobal
-    TYPE(mic_cpool)           :: miccpool
-    TYPE(mic_npool)           :: micnpool
-    TYPE(mic_output)          :: micoutput
+    !! Orchestrator for POC/MAOC fraction calibration mode.
+    !!
+    !! Fits simulated soil organic carbon fractions to observed
+    !! fractionation data.  Reads configuration from `params1.txt`.
 
-    !local variables
-    integer    :: nx
+    integer, intent(in) :: nx
+        !! Number of optimized parameters.
+    real(dp), dimension(16), intent(in) :: xparam16
+        !! Values of the `nx` optimized parameters.
+
+     TYPE(mic_param_xscale)    :: micpxdef
+     TYPE(mic_param_default)   :: micpdef
+     TYPE(mic_parameter)       :: micparam
+     TYPE(mic_input)           :: micinput
+     TYPE(mic_global_input)    :: micglobal
+     TYPE(mic_cpool)           :: miccpool
+     TYPE(mic_npool)           :: micnpool
+     TYPE(mic_output)          :: micoutput
+
     integer,   dimension(16)           :: nxopt
-    real(dp),    dimension(16)           :: xparam16
     real(dp),    dimension(16)           :: xopt
     real(dp)     :: totcost1
     integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
@@ -216,10 +275,17 @@ END function functn_frc1
 
 
   real(dp) function functn_soc_hwsd(nx,xparam16)
-    !local variables
-    integer    :: nx
+    !! Orchestrator for HWSD SOC profile calibration mode.
+    !!
+    !! Fits simulated soil carbon profiles to Harmonized World Soil
+    !! Database observations.  Reads configuration from `params1.txt`.
+
+    integer, intent(in) :: nx
+        !! Number of optimized parameters.
+    real(dp), dimension(16), intent(in) :: xparam16
+        !! Values of the `nx` optimized parameters.
+
     integer,   dimension(16)           :: nxopt
-    real(dp),    dimension(16)           :: xparam16
     real(dp),    dimension(16)           :: xopt
     TYPE(mic_param_xscale)    :: micpxdef
     TYPE(mic_param_default)   :: micpdef
@@ -230,7 +296,6 @@ END function functn_frc1
     TYPE(mic_npool)           :: micnpool
     TYPE(mic_output)          :: micoutput
 
-    !local variables
     integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer :: jrestart,nf,ok,nparam,mpx,timex
     character(len=140)  :: frestart_in,frestart_out,fparam_global,foutput
@@ -310,14 +375,18 @@ END function functn_frc1
 END function functn_soc_hwsd
 
  real(dp) function functn_global4(nx,xparam16)
-   use mic_constant
-   use mic_variable
-   implicit none
-   ! this function is yet to bet set up for running with SCE_UA optimization
-   !local variables
-    integer    :: nx
+    !! Orchestrator for global-scale calibration with CABLE/ORCHIDEE forcing.
+    !!
+    !! Runs the model at global spatial resolution.  Reads configuration
+    !! and grid patch definitions from `params1.txt`.  Not yet set up for
+    !! SCE_UA optimization.
+
+    integer, intent(in) :: nx
+        !! Number of optimized parameters.
+    real(dp), dimension(16), intent(in) :: xparam16
+        !! Values of the `nx` optimized parameters.
+
     integer,   dimension(16)  :: nxopt
-    real(dp),    dimension(16)  :: xparam16
     real(dp),    dimension(16)  :: xopt
     TYPE(mic_param_xscale)    :: micpxdef
     TYPE(mic_param_default)   :: micpdef
@@ -328,7 +397,6 @@ END function functn_soc_hwsd
     TYPE(mic_npool)           :: micnpool
     TYPE(mic_output)          :: micoutput
 
-    !local variables
     integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer    :: jrestart,nf,ok,nparam
     character(len=140) :: frestart_in,frestart_out,fparam_global,foutput
@@ -420,10 +488,17 @@ END function functn_soc_hwsd
 END function functn_global4
 
   real(dp) function functn_soc_aust(nx,xparam16)
-    !local variables
-    integer    :: nx
+    !! Orchestrator for Australian SOC profile calibration.
+    !!
+    !! Fits simulated soil carbon profiles to Australian soil data.
+    !! Reads configuration from `params1.txt`.
+
+    integer, intent(in) :: nx
+        !! Number of optimized parameters.
+    real(dp), dimension(16), intent(in) :: xparam16
+        !! Values of the `nx` optimized parameters.
+
     integer,   dimension(16)           :: nxopt
-    real(dp),    dimension(16)           :: xparam16
     real(dp),    dimension(16)           :: xopt
     TYPE(mic_param_xscale)    :: micpxdef
     TYPE(mic_param_default)   :: micpdef
@@ -434,7 +509,6 @@ END function functn_global4
     TYPE(mic_npool)           :: micnpool
     TYPE(mic_output)          :: micoutput
 
-    !local variables
     integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer    :: jrestart,nf,ok,nparam,mpx,timex
     character(len=140) :: frestart_in,frestart_out,foutput
@@ -503,31 +577,5 @@ END function functn_global4
 
       deallocate(zse)
 END function functn_soc_aust
-
-
-real(dp) function functn(nx,xparam16)
-   !local variables
-    integer    :: nx,runcase
-    real(dp),    dimension(16)  :: xparam16
-
-    open(1,file='case.txt')
-    read(1,*) runcase
-    close(1)
-    SELECT CASE (runcase)
-      CASE(0)
-        functn = functn_soc_aust(nx,xparam16)
-      CASE (1)    ! run model for 14C
-        functn = functn_c14(nx,xparam16)
-      CASE (2)    ! run model for POC/MAOC fractions
-        functn = functn_frc1(nx,xparam16)
-      CASE (3)    ! run model for site HWSD SOC profile
-        functn = functn_soc_hwsd(nx,xparam16)
-      CASE (4)  ! run model globally with CABLE/ORCHIDEE spatial resolution
-        functn = functn_global4(nx,xparam16)
-    !  CASE (5)  ! run model with prescribed forcing (not developed yet for 1% per year offline)
-    !    functn = functn_offline(nx,xparam16)
-    END SELECT
-
- END function functn
 
 end module function_module
