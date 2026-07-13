@@ -5,16 +5,22 @@
 !> observations, and returns the scalar cost value.  The dispatcher
 !> [[functn]] selects the active mode based on `case.txt`.
 module function_module
- use mic_constant
- use mic_variable
- use mesc_inout_module, only: getdata_c14, getdata_frc_dim, getdata_frc, &
-                              getdata_hwsd_dim, getdata_hwsd, screenout, &
-                              getparam_global,getpatch_global, &
-                              getdata_global4_cable,getdata_global4_orchidee, getdata_aust_dim,getdata_aust
- use mesc_interface_module, only: vmic_param_xscale, vmic_param_time, vmic_param_time_single, vmicsoil_c14, &
-                                  vmicsoil_frc1_cpu, vmicsoil_hwsd_cpu, vmicsoil_hwsd_gpu
- use calcost_module, only: calcost_c14, calcost_frc1, calcost_hwsd3, calcost_global_hwsd, calcost_aust
- implicit none
+  use precision_module, only: dp, r_2
+  use mic_constant, only: mp, mpft, mbgc, ntime, nlon, nlat, ms
+  use mic_variable, only: mic_param_xscale, mic_param_default, mic_parameter, &
+                          mic_input, mic_global_input, mic_cpool, mic_npool, mic_output, &
+                          mic_allocate_parameter, mic_allocate_input, mic_allocate_output, &
+                          mic_allocate_cpool, mic_allocate_npool, &
+                          mic_deallocate_parameter, mic_deallocate_input, mic_deallocate_output, &
+                          mic_deallocate_cpool, mic_deallocate_npool
+  use mesc_inout_module, only: getdata_c14, getdata_frc_dim, getdata_frc, &
+                               getdata_hwsd_dim, getdata_hwsd, screenout, &
+                               getparam_global,getpatch_global, &
+                               getdata_global4_cable,getdata_global4_orchidee, getdata_aust_dim,getdata_aust
+  use mesc_interface_module, only: vmic_param_xscale, vmic_param_time, vmic_param_time_single, vmicsoil_c14, &
+                                   vmicsoil_frc1_cpu, vmicsoil_hwsd_cpu, vmicsoil_hwsd_gpu
+  use calcost_module, only: calcost_c14, calcost_frc1, calcost_hwsd3, calcost_global_hwsd, calcost_aust
+  implicit none
 
  Contains
 

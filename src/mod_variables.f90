@@ -4,7 +4,8 @@
 !> and default parameter values. Provides paired allocation and deallocation
 !> subroutines for each type to manage dynamic array storage.
 module mic_variable
-  use mic_constant
+  use precision_module, only : r_2
+  use mic_constant, only : mcpool
   implicit none
   save
 
@@ -296,6 +297,8 @@ module mic_variable
 
   !> Allocates arrays in `mic_input` and `mic_global_input` derived types.
   subroutine mic_allocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
+      use mic_constant, only : mpft
+
       integer, intent(in) :: mp      !! number of plots
       integer, intent(in) :: ms      !! number of soil layers
       integer, intent(in) :: nlon    !! number of longitude points

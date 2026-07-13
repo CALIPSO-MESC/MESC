@@ -26,10 +26,15 @@
 !!     * (3e) call model for each of mp and integration over time
 
 module mesc_interface_module
-  use mic_constant
-  use mic_variable
-  use mesc_inout_module, only: vmic_restart_read, vmic_restart_write, vmic_output_write
-  use mesc_model_module, only: rk4modelx, tridag, bioturb, bgc_fractions, mget, turnovert, desorpt, vmaxt, kmt, bgc_fractions_single, mget_single, turnovert_single, desorpt_single, vmaxt_single, kmt_single
+  use precision_module, only : dp, r_2
+  use mic_constant, only : diag, delt, mp, ms, mpft, mcpool, outp, tvc14, xrootcable, xrootorchidee
+  use mic_variable, only : mic_param_xscale, mic_param_default, mic_parameter, &
+                           mic_input, mic_npool, mic_cpool, mic_output, mic_global_input
+  use mesc_inout_module, only: vmic_restart_read ! , vmic_restart_write, vmic_output_write
+  use mesc_model_module, only: rk4modelx, tridag, bioturb, bgc_fractions, mget, &
+                               turnovert, desorpt, vmaxt, kmt, bgc_fractions_single, &
+                               mget_single, turnovert_single, desorpt_single, vmaxt_single, &
+                               kmt_single
   implicit none
 
 contains
@@ -38,14 +43,11 @@ contains
 !! Takes lookup-table parameters and default parameters, then populates
 !! the working parameter structure (`micparam`) for all `mbgc` types.
   SUBROUTINE vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
-    use mic_constant
-    use mic_variable
-    implicit none
     integer,                      intent(in)      :: kinetics        !! kinetics model selector (1, 2, or 3)
     TYPE(mic_param_xscale),       intent(in)      :: micpxdef        !! BGC-type scaling factors
     TYPE(mic_param_default),      intent(in)      :: micpdef         !! default parameter values
     TYPE(mic_parameter),          intent(inout)   :: micparam        !! computed model parameters
-    real(r_2),                    intent(in)      :: zse(ms)         !! soil layer thickness 
+    real(r_2),                    intent(in)      :: zse(ms)         !! soil layer thickness
     !local variables
     real(r_2), dimension(:,:), allocatable      :: froot
     real(r_2), dimension(:),   allocatable      :: totroot
@@ -135,9 +137,6 @@ END SUBROUTINE vmic_param_constant
 !>
 !> See [[vmic_param_time_single]]
 subroutine vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool)
-    use mic_constant
-    use mic_variable
-    implicit none
     integer,                      intent(in)      :: kinetics        !! kinetics model selector (1, 2, or 3)
     TYPE(mic_param_xscale),       intent(in)      :: micpxdef        !! BGC-type scaling factors
     TYPE(mic_param_default),      intent(in)      :: micpdef         !! default parameter values
@@ -164,9 +163,6 @@ end subroutine vmic_param_time
 
 !> Single-patch variant of [[vmic_param_time]]
 subroutine vmic_param_time_single(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
-    use mic_constant
-    use mic_variable
-    implicit none
     integer,                      intent(in)      :: kinetics        !! kinetics model selector (1, 2, or 3)
     TYPE(mic_param_xscale),       intent(in)      :: micpxdef        !! BGC-type scaling factors
     TYPE(mic_param_default),      intent(in)      :: micpdef         !! default parameter values
@@ -197,9 +193,6 @@ end subroutine vmic_param_time_single
 !> Sets default initial pool concentrations for all `mcpool` carbon pools,
 !> for all patches (`mp`) and soil layers (`ms`).
 subroutine vmic_init(miccpool,micnpool)
-    use mic_constant
-    use mic_variable
-    implicit none
     TYPE(mic_cpool),              intent(inout)   :: miccpool        !! carbon pool state (-initialized here)
     TYPE(mic_npool),              intent(inout)   :: micnpool        !! nitrogen pool state
     integer :: ip
@@ -247,9 +240,6 @@ end subroutine vmic_init
 !> 14: xvmaxbeta: scaling for depth-dependent of vmax            [1]    (0.5,5.0)     2.0
 !> ```
 subroutine vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
-    use mic_constant
-    use mic_variable
-    implicit none
     real(dp), dimension(16), intent(in)  :: xopt              !! optimized parameter values (16-element vector)
     integer,                 intent(in)  :: bgcopt            !! BGC type index to apply `xopt` to
     integer,                 intent(in)  :: jmodel            !! forcing model selector (1=CABLE, 2=ORCHIDEE)
@@ -320,9 +310,6 @@ end subroutine vmic_param_xscale
 !>
 !> See [[variable_time_single]]
 subroutine variable_time(year,doy,micglobal,micinput,micnpool)
-    use mic_constant
-    use mic_variable
-    implicit none
     integer,                     intent(in)    :: year              !! simulation year
     integer,                     intent(in)    :: doy               !! day of year forcing index
     TYPE(mic_global_input),      intent(inout) :: micglobal         !! global forcing data (CABLE/ORCHIDEE)
@@ -355,9 +342,6 @@ end subroutine variable_time
 
 !> Single-patch variant of [[variable_time]]
 subroutine variable_time_single(year,doy,micglobal,micinput,micnpool,np)
-    use mic_constant
-    use mic_variable
-    implicit none
     integer,                     intent(in)    :: year              !! simulation year
     integer,                     intent(in)    :: doy               !! day of year forcing index
     TYPE(mic_global_input),      intent(in)    :: micglobal         !! global forcing data (CABLE/ORCHIDEE)
@@ -394,10 +378,6 @@ end subroutine variable_time_single
 !> execution with bioturbation inlined to avoid auto-allocation issues.
 subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,ifsoc14,bgcopt,nyeqpool, &
                         zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
-    use mic_constant
-    use mic_variable
-   !  use omp_lib
-    implicit none
     integer,                     intent(in)    :: jrestart            !! restart flag (1=read restart file)
     character(len=140),          intent(in)    :: frestart_in         !! restart input filename
     character(len=140),          intent(in)    :: frestart_out        !! restart output filename
@@ -627,10 +607,6 @@ end subroutine vmicsoil_c14
 !> See [[vmicsoil_c14]]
 SUBROUTINE vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,ifsoc14,bgcopt,nyeqpool, &
                              zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
-    use mic_constant
-    use mic_variable
-   !  use omp_lib
-    implicit none
     integer,                     intent(in)    :: jrestart            !! restart flag (1=read restart file)
     character(len=140),          intent(in)    :: frestart_in         !! restart input filename
     character(len=140),          intent(in)    :: frestart_out        !! restart output filename
@@ -772,10 +748,6 @@ end SUBROUTINE vmicsoil_frc1_cpu
 !> See [[vmicsoil_c14]]
 subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
                              zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
-    use mic_constant
-    use mic_variable
-   !  use omp_lib
-    implicit none
     integer,                     intent(in)    :: jrestart            !! restart flag (1=read restart file)
     character(len=140),          intent(in)    :: frestart_in         !! restart input filename
     character(len=140),          intent(in)    :: frestart_out        !! restart output filename
@@ -964,10 +936,6 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
 !> See [[vmicsoil_c14]]
 subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
                              zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
-    use mic_constant
-    use mic_variable
-
-    implicit none
     integer,                     intent(in)    :: jrestart            !! restart flag (1=read restart file)
     character(len=140),          intent(in)    :: frestart_in         !! restart input filename
     character(len=140),          intent(in)    :: frestart_out        !! restart output filename

@@ -1,6 +1,6 @@
 !> Model constants, PFT-specific parameter tables, and runtime-configurable dimensions
 module mic_constant
-  use precision_module
+  use precision_module, only : dp, r_2
   IMPLICIT NONE
   integer,  parameter  :: diag=0       !! diagnostic flag: 1 for printout, 0 for silent
   integer,  parameter  :: outp=1       !! output site index
