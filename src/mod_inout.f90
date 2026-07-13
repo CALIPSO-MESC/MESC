@@ -1,5 +1,5 @@
 module mesc_inout_module
-  use precision_module, only : dp, sp, r_2
+  use precision_module, only : dp, sp
   use netcdf
   use mic_constant, only : mp, ms, mcpool, nlat, nlon, ntime, mpft, mbgc
   use mic_variable, only : mic_input, mic_parameter, mic_cpool, mic_npool, &
@@ -21,8 +21,8 @@ contains
     ! local variables
     integer :: mpx,msx,mcpoolx                       !! array dimensions
     integer :: status,ncid,varid                     !! local variables
-    real(r_2), dimension(mp,ms,mcpool)  :: fcpool    !! carbon pools
-    real(r_2), dimension(mp,ms)         :: fnpool    !! nitrogen pools
+    real(dp), dimension(mp,ms,mcpool)  :: fcpool    !! carbon pools
+    real(dp), dimension(mp,ms)         :: fnpool    !! nitrogen pools
 
    ! open restart file
     status = nf90_open(frestart_in,nf90_nowrite,ncid)
@@ -83,7 +83,7 @@ contains
     CHARACTER                :: CDATE*10,frestart_out*99
     integer                :: cmic_ID, nmic_ID
     integer :: values(10)
-    real(r_2)  :: missreal
+    real(dp)  :: missreal
 
     missreal=-1.0e10
     call date_and_time(values=values)
@@ -162,7 +162,7 @@ contains
     ! fNPP is not quite right yet. It shoudl be the sump of "cinputm+cinputs"
     TYPE(mic_input),         INTENT(INout)   :: micinput
     TYPE(mic_output),        INTENT(INout)   :: micoutput
-    real(r_2)     :: missreal
+    real(dp)     :: missreal
     integer                :: STATUS
     integer                :: FILE_ID, mp_ID
     CHARACTER                :: CDATE*10,foutput*99
@@ -243,7 +243,7 @@ contains
     character(len=140)  :: fglobalparam
     integer :: jmodel
     integer :: ibgc,ipft,n
-    real(r_2), dimension(14)    :: x
+    real(dp), dimension(14)    :: x
 
     open(100,file=fglobalparam)
     read(100,*)
@@ -358,14 +358,14 @@ contains
 
   TYPE(mic_global_input), INTENT(INOUT)  :: micglobal
   TYPE(mic_parameter),    INTENT(INOUT)  :: micparam
-  real(r_2)  :: zse(ms)
+  real(dp)  :: zse(ms)
   character(len=140) :: fglobal(10)
   integer       :: jglobal,bgcopt,jopt,jmodel
   ! local variables
-  real(r_2), dimension(nlon)            :: lon
-  real(r_2), dimension(nlat)            :: lat
-  real(r_2), dimension(ntime)           :: time
-  real(r_2), dimension(nlon,nlat,mpft)  :: patchfrac
+  real(dp), dimension(nlon)            :: lon
+  real(dp), dimension(nlat)            :: lat
+  real(dp), dimension(ntime)           :: time
+  real(dp), dimension(nlon,nlat,mpft)  :: patchfrac
   integer :: ncid1,ncid3,ok,lonid,latid,timeid,varid,n,np,ns
   !
   integer :: i,j,k,npx,isoilx,sorderx
@@ -377,7 +377,7 @@ contains
   real(dp), dimension(:,:,:),     allocatable  :: varx3time_db,varx3ms_db,varx3ms5_db
   real(dp), dimension(:,:,:),     allocatable  :: varx3_db,varmp3_db,varsoc3_db,varbulk_db,varaoc_db
   real(dp), dimension(:,:,:,:),   allocatable  :: varx4_db
-  real(r_2), dimension(:),      allocatable  :: falo,fald,ffeo,ffed
+  real(dp), dimension(:),      allocatable  :: falo,fald,ffeo,ffed
   integer   :: maxpft,pft, msite,sitemax,intval,isite
   real(dp)    :: bulkd2
 
@@ -415,7 +415,7 @@ contains
 
     ok = NF90_INQ_VARID(ncid3,'PFTfrac',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3_db)
-    patchfrac(:,:,:) = real(varx3_db(:,:,:),kind=r_2)
+    patchfrac(:,:,:) = real(varx3_db(:,:,:),kind=dp)
 
     ok = NF90_INQ_VARID(ncid3,'HWSD_SOC',varid)
     ok = NF90_GET_VAR(ncid3,varid,varsoc3_db)
@@ -436,13 +436,13 @@ contains
              jlat(np) = j
              micglobal%lon(np)         = lon(i)
              micglobal%lat(np)         = lat(j)
-             micparam%csoilobs(np,:)   = real(varsoc3_db(i,j,:),kind=r_2)
+             micparam%csoilobs(np,:)   = real(varsoc3_db(i,j,:),kind=dp)
              bulkd2                    = ( varbulk_db(i,j,1)*dble(zse(1))+varbulk_db(i,j,2)*dble(zse(2))+varbulk_db(i,j,3)*dble(zse(3)) )&
                                          /sum(dble(zse(1:3)))
-             micglobal%bulkd(np)       = max(500.0_r_2,min(1800.0_r_2,real(bulkd2,kind=r_2)))
+             micglobal%bulkd(np)       = max(500.0_dp,min(1800.0_dp,real(bulkd2,kind=dp)))
              micglobal%patchfrac(np,:) = patchfrac(i,j,:)
              micglobal%pft(np)         = maxpft
-             micparam%fracaoc(np,:)    = max(0.0_r_2,min(0.7_r_2,real(varaoc_db(i,j,:),kind=r_2)))
+             micparam%fracaoc(np,:)    = max(0.0_dp,min(0.7_dp,real(varaoc_db(i,j,:),kind=dp)))
           endif
        endif
     enddo
@@ -458,7 +458,7 @@ contains
     ok = NF90_GET_VAR(ncid3,varid,varx2_flt)
     varx2_db = real(varx2_flt,kind=8)
     call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
-    micglobal%area(:)=max(0.0, real(varmp1_db(:),kind=r_2)) *(1.0e-12)
+    micglobal%area(:)=max(0.0, real(varmp1_db(:),kind=dp)) *(1.0e-12)
 
     ok = NF90_INQ_VARID(ncid3,'SoilOrder',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx2_db)
@@ -474,44 +474,44 @@ contains
     ok = NF90_GET_VAR(ncid3,varid,varx3_db)
     varx3_db = max(0.0,varx3_db)
     call lonlat2mpx3(ilon,jlat,patchfrac,varx3_db,varmp1_db)
-    micglobal%npp = real(varmp1_db,kind=r_2)
+    micglobal%npp = real(varmp1_db,kind=dp)
     micglobal%npp = max(100.0,micglobal%npp)
     print *, 'npp', maxval(micglobal%npp), minval(micglobal%npp),sum(micglobal%npp)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,'lignin_CWD',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3_db)
     call lonlat2mpx3(ilon,jlat,patchfrac,varx3_db,varmp1_db)
-    micglobal%ligwood = real(varmp1_db,kind=r_2)
+    micglobal%ligwood = real(varmp1_db,kind=dp)
     print *, 'ligwood', maxval(micglobal%ligwood), minval(micglobal%ligwood),sum(micglobal%ligwood)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,'lignin_leaf',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3_db)
     call lonlat2mpx3(ilon,jlat,patchfrac,varx3_db,varmp1_db)
-    micglobal%ligleaf = real(varmp1_db,kind=r_2)
+    micglobal%ligleaf = real(varmp1_db,kind=dp)
     print *, 'ligleaf', maxval(micglobal%ligleaf), minval(micglobal%ligleaf),sum(micglobal%ligleaf)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,'lignin_root',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3_db)
     call lonlat2mpx3(ilon,jlat,patchfrac,varx3_db,varmp1_db)
-    micglobal%ligroot = real(varmp1_db,kind=r_2)
+    micglobal%ligroot = real(varmp1_db,kind=dp)
     print *, 'ligroot', maxval(micglobal%ligroot), minval(micglobal%ligroot),sum(micglobal%ligroot)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,'CN_ratio_leaf',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3_db)
     call lonlat2mpx3(ilon,jlat,patchfrac,varx3_db,varmp1_db)
-    micglobal%cnleaf = real(spread(varmp1_db,dim=2,ncopies=ntime),kind=r_2)
+    micglobal%cnleaf = real(spread(varmp1_db,dim=2,ncopies=ntime),kind=dp)
     print *, 'cnleaf', maxval(micglobal%cnleaf), minval(micglobal%cnleaf),sum(micglobal%cnleaf)/real(size(micglobal%cnleaf))
 
     ok = NF90_INQ_VARID(ncid3,'CN_ratio_noleaf',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3_db)
     call lonlat2mpx3(ilon,jlat,patchfrac,varx3_db,varmp1_db)
-    micglobal%cnwood = real(spread(varmp1_db,dim=2,ncopies=ntime),kind=r_2)
+    micglobal%cnwood = real(spread(varmp1_db,dim=2,ncopies=ntime),kind=dp)
     print *, 'cnwood', maxval(micglobal%cnwood), minval(micglobal%cnwood),sum(micglobal%cnwood)/real(size(micglobal%cnwood))
 
     ok = NF90_INQ_VARID(ncid3,'CN_ratio_belowground',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3_db)
     call lonlat2mpx3(ilon,jlat,patchfrac,varx3_db,varmp1_db)
-    micglobal%cnroot = real(spread(varmp1_db,dim=2,ncopies=ntime),kind=r_2)
+    micglobal%cnroot = real(spread(varmp1_db,dim=2,ncopies=ntime),kind=dp)
     print *, 'cnroot', maxval(micglobal%cnroot), minval(micglobal%cnroot),sum(micglobal%cnroot)/real(size(micglobal%cnroot))
 
     ok = NF90_close(ncid3)
@@ -527,44 +527,44 @@ contains
     ok = NF90_INQ_VARID(ncid3,'Clay_fraction',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms_db(:,:,1:3), varmp1_db)
-    micglobal%clay(:) = real(varmp1_db(:)*0.01,kind=r_2)
+    micglobal%clay(:) = real(varmp1_db(:)*0.01,kind=dp)
     print *, 'clay', maxval(micglobal%clay), minval(micglobal%clay),sum(micglobal%clay)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,'Silt_fraction',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms_db(:,:,1:3), varmp1_db)
-    micglobal%silt(:) = real(varmp1_db(:)*0.01,kind=r_2)
+    micglobal%silt(:) = real(varmp1_db(:)*0.01,kind=dp)
     print *, 'silt', maxval(micglobal%silt), minval(micglobal%silt),sum(micglobal%silt)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,'ph',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms_db(:,:,1:3), varmp1_db)
-    micglobal%ph = real(varmp1_db,kind=r_2)
+    micglobal%ph = real(varmp1_db,kind=dp)
     micglobal%ph =min(9.5,max(3.5,micglobal%ph))
     print *, 'ph', maxval(micglobal%ph), minval(micglobal%ph),sum(micglobal%ph)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,'Ald',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)
-    fald = real(varmp1_db,kind=r_2)
+    fald = real(varmp1_db,kind=dp)
     print *, 'Ald', maxval(fald), minval(fald),sum(fald)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,'Alo',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)
-    falo = real(varmp1_db,kind=r_2)
+    falo = real(varmp1_db,kind=dp)
     print *, 'Alo', maxval(falo), minval(falo),sum(falo)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,'Fed',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)
-    ffed = real(varmp1_db,kind=r_2)
+    ffed = real(varmp1_db,kind=dp)
     print *, 'fed', maxval(ffed), minval(ffed),sum(ffed)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,'Feo',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)
-    ffeo = real(varmp1_db,kind=r_2)
+    ffeo = real(varmp1_db,kind=dp)
     print *, 'feo', maxval(ffeo), minval(ffeo),sum(ffeo)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,'Cluster',varid)
@@ -593,10 +593,10 @@ contains
           micglobal%cnroot(np,:) = cnroot1(pft)
        endif
        ! replacing negative values of metal oxide with their global means in kg/m2
-     !  if(fald(np)<0.0) fald(np) =0.46_r_2
-     !  if(falo(np)<0.0) falo(np) =0.39_r_2
-     !  if(ffed(np)<0.0) ffed(np) =2.74_r_2
-     !  if(ffeo(np)<0.0) ffeo(np) =3.53_r_2
+     !  if(fald(np)<0.0) fald(np) =0.46_dp
+     !  if(falo(np)<0.0) falo(np) =0.39_dp
+     !  if(ffed(np)<0.0) ffed(np) =2.74_dp
+     !  if(ffeo(np)<0.0) ffeo(np) =3.53_dp
        micparam%siteid(np)       = np
        micglobal%poros(:)  = 1.0 - micglobal%bulkd(:)/2650.0
        ! replace "NaN" with -1 for soil pH and clay and silt fractions
@@ -627,7 +627,7 @@ contains
     ok = NF90_GET_VAR(ncid3,varid,varx3time_db)
     varx3time_db = max(0.0, varx3time_db)
     call lonlat2mpx3time(ilon,jlat,varx3time_db,varmp2_db)
-    micglobal%dleaf = real(varmp2_db,kind=r_2)
+    micglobal%dleaf = real(varmp2_db,kind=dp)
     print *, 'dleaf', minval(micglobal%dleaf),maxval(micglobal%dleaf), &
                       sum(micglobal%dleaf)/real(size(micglobal%dleaf))
 
@@ -635,7 +635,7 @@ contains
     ok = NF90_GET_VAR(ncid3,varid,varx3time_db)
     varx3time_db = max(0.0, varx3time_db)
     call lonlat2mpx3time(ilon,jlat,varx3time_db,varmp2_db)
-    micglobal%dwood = real(varmp2_db,kind=r_2)
+    micglobal%dwood = real(varmp2_db,kind=dp)
     print *, 'dwood', minval(micglobal%dwood),maxval(micglobal%dwood), &
                       sum(micglobal%dwood)/real(size(micglobal%dwood))
 
@@ -643,28 +643,28 @@ contains
     ok = NF90_GET_VAR(ncid3,varid,varx3time_db)
     varx3time_db = max(0.0, varx3time_db)
     call lonlat2mpx3time(ilon,jlat,varx3time_db,varmp2_db)
-    micglobal%droot = real(varmp2_db,kind=r_2)
+    micglobal%droot = real(varmp2_db,kind=dp)
     print *, 'droot', minval(micglobal%droot),maxval(micglobal%droot), &
                       sum(micglobal%droot)/real(size(micglobal%droot))
 
     ok = NF90_INQ_VARID(ncid3,'SoilTemp',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx4_db)
     call lonlat2mpx4b(ilon,jlat,-100.0d0,50.0d0,0.0d0,varx4_db,varmp3_db)
-    micglobal%tsoil = real(varmp3_db,kind=r_2)
+    micglobal%tsoil = real(varmp3_db,kind=dp)
     print *, 'tsoil', minval(micglobal%tsoil),maxval(micglobal%tsoil), &
                       sum(micglobal%tsoil)/real(size(micglobal%tsoil))
 
     ok = NF90_INQ_VARID(ncid3,'SoilMoist',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx4_db)
     call lonlat2mpx4b(ilon,jlat,0.0d0,0.8d0,0.15d0,varx4_db,varmp3_db)
-    micglobal%moist = real(varmp3_db,kind=r_2)
+    micglobal%moist = real(varmp3_db,kind=dp)
     print *, 'moist', minval(micglobal%moist),maxval(micglobal%moist), &
                       sum(micglobal%moist)/real(size(micglobal%moist))
 
     ok = NF90_INQ_VARID(ncid3,'water_potential',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx4_db)
     call lonlat2mpx4b(ilon,jlat,-1000.0d0,0.0d0,-100.0d0,varx4_db,varmp3_db)
-    micglobal%matpot = real(varmp3_db,kind=r_2)
+    micglobal%matpot = real(varmp3_db,kind=dp)
     print *, 'matpot', minval(micglobal%matpot),maxval(micglobal%matpot), &
                        sum(micglobal%matpot)/real(size(micglobal%matpot))
 
@@ -782,16 +782,16 @@ contains
 
   TYPE(mic_global_input), INTENT(INOUT)  :: micglobal
   TYPE(mic_parameter),    INTENT(INOUT)  :: micparam
-  real(r_2) :: zse(ms)
+  real(dp) :: zse(ms)
   character(len=140) :: fglobal(10)
   integer       :: jglobal,bgcopt,jopt,jmodel
   ! local variables
-  real(r_2), dimension(nlon)            :: lon
-  real(r_2), dimension(nlat)            :: lat
+  real(dp), dimension(nlon)            :: lon
+  real(dp), dimension(nlat)            :: lat
   real(sp),    dimension(nlon)            :: lon_flt
   real(sp),    dimension(nlat)            :: lat_flt
-  real(r_2), dimension(ntime)           :: time
-  real(r_2), dimension(nlon,nlat,mpft)  :: patchfrac
+  real(dp), dimension(ntime)           :: time
+  real(dp), dimension(nlon,nlat,mpft)  :: patchfrac
   integer :: ncid1,ncid3,ok,lonid,latid,timeid,varid,n,np,ns
   !
   integer :: i,j,k,npx,isoilx,sorderx,ilonx,jlatx
@@ -804,7 +804,7 @@ contains
   real(dp), dimension(:,:,:),     allocatable  :: varx3time_db,varx3ms_db,varx3ms5_db
   real(dp), dimension(:,:,:),     allocatable  :: varx3_db,varmp3_db,varsoc3_db,varbulk_db,varaoc_db
   real(dp), dimension(:,:,:,:),   allocatable  :: varx4_db
-  real(r_2), dimension(:),      allocatable  :: falo,fald,ffeo,ffed
+  real(dp), dimension(:),      allocatable  :: falo,fald,ffeo,ffed
   real(dp), dimension(:,:),       allocatable  :: modisnpp
   real(dp), dimension(:),         allocatable  :: modisnpp_mp
   integer   :: maxpft,pft, msite,sitemax,intval,isite
@@ -849,15 +849,15 @@ contains
 
     ok = NF90_INQ_VARID(ncid3,'lon',lonid)
     ok = NF90_GET_VAR(ncid3,lonid,lon_flt)
-    lon(:) = real(lon_flt(:),kind=r_2)
+    lon(:) = real(lon_flt(:),kind=dp)
 
     ok = NF90_INQ_VARID(ncid3,'lat',latid)
     ok = NF90_GET_VAR(ncid3,latid,lat_flt)
-    lat(:) = real(lat_flt(:),kind=r_2)
+    lat(:) = real(lat_flt(:),kind=dp)
 
     ok = NF90_INQ_VARID(ncid3,'maxvegetfrac',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx4_flt)
-    patchfrac(:,:,:) = real(varx4_flt(:,:,:,1),kind=r_2)
+    patchfrac(:,:,:) = real(varx4_flt(:,:,:,1),kind=dp)
 
     ok = NF90_INQ_VARID(ncid3,'HWSD_SOC',varid)
     ok = NF90_GET_VAR(ncid3,varid,varsoc3_db)
@@ -878,13 +878,13 @@ contains
              jlat(np) = j
              micglobal%lon(np)         = lon(i)
              micglobal%lat(np)         = lat(j)
-             micparam%csoilobs(np,:)   = real(varsoc3_db(i,j,:),kind=r_2)
+             micparam%csoilobs(np,:)   = real(varsoc3_db(i,j,:),kind=dp)
              bulkd2                    = ( varbulk_db(i,j,1)*dble(zse(1))+varbulk_db(i,j,2)*dble(zse(2))+varbulk_db(i,j,3)*dble(zse(3)) )&
                                          /sum(dble(zse(1:3)))
-             micglobal%bulkd(np)       = max(500.0_r_2,min(1800.0_r_2,real(bulkd2,kind=r_2)))
+             micglobal%bulkd(np)       = max(500.0_dp,min(1800.0_dp,real(bulkd2,kind=dp)))
              micglobal%patchfrac(np,:) = patchfrac(i,j,:)
              micglobal%pft(np)         = maxpft
-             micparam%fracaoc(np,:)    = max(0.0_r_2,min(0.7_r_2,real(varaoc_db(i,j,:),kind=r_2)))
+             micparam%fracaoc(np,:)    = max(0.0_dp,min(0.7_dp,real(varaoc_db(i,j,:),kind=dp)))
           endif
        endif
     enddo
@@ -899,7 +899,7 @@ contains
     ok = NF90_INQ_VARID(ncid3,'cell_area',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx2_db)
     call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
-    micglobal%area(:)=max(0.0, real(varmp1_db(:),kind=r_2)) *(1.0e-12)
+    micglobal%area(:)=max(0.0, real(varmp1_db(:),kind=dp)) *(1.0e-12)
 
     ok = NF90_INQ_VARID(ncid3,'USDA_Soil_texture_class',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx2_db)
@@ -915,7 +915,7 @@ contains
     ok = NF90_INQ_VARID(ncid3,'npp',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx2_db)
     call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
-    micglobal%npp = real(varmp1_db,kind=r_2)
+    micglobal%npp = real(varmp1_db,kind=dp)
     micglobal%npp = max(100.0,micglobal%npp)
     print *, 'npp', maxval(micglobal%npp), minval(micglobal%npp),sum(micglobal%npp)/real(mp)
 
@@ -935,44 +935,44 @@ contains
     ok = NF90_INQ_VARID(ncid3,'Clay_fraction',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms_db(:,:,1:3), varmp1_db)
-    micglobal%clay(:) = real(varmp1_db(:)*0.01,kind=r_2)
+    micglobal%clay(:) = real(varmp1_db(:)*0.01,kind=dp)
     print *, 'clay', maxval(micglobal%clay), minval(micglobal%clay),sum(micglobal%clay)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,'Silt_fraction',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms_db(:,:,1:3), varmp1_db)
-    micglobal%silt(:) = real(varmp1_db(:)*0.01,kind=r_2)
+    micglobal%silt(:) = real(varmp1_db(:)*0.01,kind=dp)
     print *, 'silt', maxval(micglobal%silt), minval(micglobal%silt),sum(micglobal%silt)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,'ph',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms_db(:,:,1:3), varmp1_db)
-    micglobal%ph = real(varmp1_db,kind=r_2)
+    micglobal%ph = real(varmp1_db,kind=dp)
     micglobal%ph =min(9.5,max(3.5,micglobal%ph))
     print *, 'ph', maxval(micglobal%ph), minval(micglobal%ph),sum(micglobal%ph)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,'Ald',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)
-    fald = real(varmp1_db,kind=r_2)
+    fald = real(varmp1_db,kind=dp)
     print *, 'Ald', maxval(fald), minval(fald),sum(fald)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,'Alo',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)
-    falo = real(varmp1_db,kind=r_2)
+    falo = real(varmp1_db,kind=dp)
     print *, 'Alo', maxval(falo), minval(falo),sum(falo)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,'Fed',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)
-    ffed = real(varmp1_db,kind=r_2)
+    ffed = real(varmp1_db,kind=dp)
     print *, 'fed', maxval(ffed), minval(ffed),sum(ffed)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,'Feo',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)
-    ffeo = real(varmp1_db,kind=r_2)
+    ffeo = real(varmp1_db,kind=dp)
     print *, 'feo', maxval(ffeo), minval(ffeo),sum(ffeo)/real(mp)
 
 
@@ -1004,10 +1004,10 @@ contains
        micglobal%cnroot(np,:) = cnroot2(pft)
 
        ! replacing negative values of metal oxide with their global means in kg/m2
-       !if(fald(np)<0.0) fald(np) =0.46_r_2
-       !if(falo(np)<0.0) falo(np) =0.39_r_2
-       !if(ffed(np)<0.0) ffed(np) =2.74_r_2
-       !if(ffeo(np)<0.0) ffeo(np) =3.53_r_2
+       !if(fald(np)<0.0) fald(np) =0.46_dp
+       !if(falo(np)<0.0) falo(np) =0.39_dp
+       !if(ffed(np)<0.0) ffed(np) =2.74_dp
+       !if(ffeo(np)<0.0) ffeo(np) =3.53_dp
        micparam%siteid(np)    = np
        micglobal%poros(:)  = 1.0 - micglobal%bulkd(:)/2650.0
        ! replace "NaN" with -1 for soil pH and clay and silt fractions
@@ -1038,7 +1038,7 @@ contains
     ok = NF90_GET_VAR(ncid3,varid,varx3time_db)
     varx3time_db = max(0.0, varx3time_db)
     call lonlat2mpx3time(ilon,jlat,varx3time_db,varmp2_db)
-    micglobal%dleaf = real(varmp2_db,kind=r_2)
+    micglobal%dleaf = real(varmp2_db,kind=dp)
     print *, 'dleaf', minval(micglobal%dleaf),maxval(micglobal%dleaf), &
                       sum(micglobal%dleaf)/real(size(micglobal%dleaf))
 
@@ -1046,7 +1046,7 @@ contains
     ok = NF90_GET_VAR(ncid3,varid,varx3time_db)
     varx3time_db = max(0.0, varx3time_db)
     call lonlat2mpx3time(ilon,jlat,varx3time_db,varmp2_db)
-    micglobal%dwood = real(varmp2_db,kind=r_2)
+    micglobal%dwood = real(varmp2_db,kind=dp)
     print *, 'dwood', minval(micglobal%dwood),maxval(micglobal%dwood), &
                       sum(micglobal%dwood)/real(size(micglobal%dwood))
 
@@ -1054,28 +1054,28 @@ contains
     ok = NF90_GET_VAR(ncid3,varid,varx3time_db)
     varx3time_db = max(0.0, varx3time_db)
     call lonlat2mpx3time(ilon,jlat,varx3time_db,varmp2_db)
-    micglobal%droot = real(varmp2_db,kind=r_2)
+    micglobal%droot = real(varmp2_db,kind=dp)
     print *, 'droot', minval(micglobal%droot),maxval(micglobal%droot), &
                       sum(micglobal%droot)/real(size(micglobal%droot))
 
     ok = NF90_INQ_VARID(ncid3,'SoilTemp',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx4_db)
     call lonlat2mpx4b(ilon,jlat,-100.0d0,50.0d0,0.0d0,varx4_db,varmp3_db)
-    micglobal%tsoil = real(varmp3_db,kind=r_2)
+    micglobal%tsoil = real(varmp3_db,kind=dp)
     print *, 'tsoil', minval(micglobal%tsoil),maxval(micglobal%tsoil), &
                       sum(micglobal%tsoil)/real(size(micglobal%tsoil))
 
     ok = NF90_INQ_VARID(ncid3,'SoilMoist',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx4_db)
     call lonlat2mpx4b(ilon,jlat,0.0d0,0.8d0,0.15d0,varx4_db,varmp3_db)
-    micglobal%moist = real(varmp3_db,kind=r_2)
+    micglobal%moist = real(varmp3_db,kind=dp)
     print *, 'moist', minval(micglobal%moist),maxval(micglobal%moist), &
                       sum(micglobal%moist)/real(size(micglobal%moist))
 
     ok = NF90_INQ_VARID(ncid3,'water_potential',varid)
     ok = NF90_GET_VAR(ncid3,varid,varx4_db)
     call lonlat2mpx4b(ilon,jlat,-1000.0d0,0.0d0,-100.0d0,varx4_db,varmp3_db)
-    micglobal%matpot = real(varmp3_db,kind=r_2)
+    micglobal%matpot = real(varmp3_db,kind=dp)
     print *, 'matpot', minval(micglobal%matpot),maxval(micglobal%matpot), &
                        sum(micglobal%matpot)/real(size(micglobal%matpot))
 
@@ -1215,51 +1215,51 @@ end subroutine getdata_global4_orchidee
 subroutine cluster_hwsd(jmodel,bgctype,socobs,fclay,fsilt,fph,fald,falo,ffed,ffeo,fcluster)
   integer :: jmodel
   integer,   dimension(mp)     :: bgctype,fcluster
-  real(r_2), dimension(mp,ms)  :: socobs
-  real(r_2), dimension(mp)     :: fclay,fsilt,fph,fald,falo,ffed,ffeo
-  real(r_2), dimension(10,2)   :: claymid,siltmid,phmid,aldmid,alomid,fedmid,feomid
-  real(r_2), dimension(2)      :: clayavg,siltavg,phavg,aldavg,aloavg,fedavg,feoavg
-  real(r_2), dimension(2)      :: claysd,siltsd,phsd,aldsd,alosd,fedsd,feosd
-  real(r_2), dimension(7)      :: z
-  real(r_2), dimension(10,7)   :: xdist
+  real(dp), dimension(mp,ms)  :: socobs
+  real(dp), dimension(mp)     :: fclay,fsilt,fph,fald,falo,ffed,ffeo
+  real(dp), dimension(10,2)   :: claymid,siltmid,phmid,aldmid,alomid,fedmid,feomid
+  real(dp), dimension(2)      :: clayavg,siltavg,phavg,aldavg,aloavg,fedavg,feoavg
+  real(dp), dimension(2)      :: claysd,siltsd,phsd,aldsd,alosd,fedsd,feosd
+  real(dp), dimension(7)      :: z
+  real(dp), dimension(10,7)   :: xdist
   integer :: np,m,j
   ! results from K means cluster analysis  done 20260508 by Lingfei Wang
-  data claymid/-0.9525_r_2,-0.8011_r_2,1.1920_r_2,-0.5146_r_2,0.1999_r_2,-0.2399_r_2,-0.7019_r_2,1.4337_r_2,0.8914_r_2,-1.0750_r_2,  &
-                1.4969_r_2,-1.0316_r_2,-0.8065_r_2,-0.1341_r_2,1.1403_r_2,1.5560_r_2,-1.082_r_2,0.6068_r_2,-0.3449_r_2,0.1033_r_2/
+  data claymid/-0.9525_dp,-0.8011_dp,1.1920_dp,-0.5146_dp,0.1999_dp,-0.2399_dp,-0.7019_dp,1.4337_dp,0.8914_dp,-1.0750_dp,  &
+                1.4969_dp,-1.0316_dp,-0.8065_dp,-0.1341_dp,1.1403_dp,1.5560_dp,-1.082_dp,0.6068_dp,-0.3449_dp,0.1033_dp/
 
-  data siltmid/0.3693_r_2,-0.9586_r_2,-0.5314_r_2,1.3111_r_2,0.2016_r_2,1.2570_r_2,0.3701_r_2,-0.7761_r_2,-0.2799_r_2,-0.4098_r_2,   &
-               -0.0865_r_2,0.2881_r_2,-1.0136_r_2,1.1445_r_2,-0.5746_r_2,-0.8688_r_2,-0.1002_r_2,-0.4546_r_2,1.3359_r_2,0.1012_r_2/
+  data siltmid/0.3693_dp,-0.9586_dp,-0.5314_dp,1.3111_dp,0.2016_dp,1.2570_dp,0.3701_dp,-0.7761_dp,-0.2799_dp,-0.4098_dp,   &
+               -0.0865_dp,0.2881_dp,-1.0136_dp,1.1445_dp,-0.5746_dp,-0.8688_dp,-0.1002_dp,-0.4546_dp,1.3359_dp,0.1012_dp/
 
-  data phmid/-0.8845_r_2,0.5324_r_2,-0.6359_r_2,-0.3306_r_2,1.5959_r_2,-0.0262_r_2,-1.1008_r_2,-0.5988_r_2,-0.0312_r_2,-1.2470_r_2,  &
-              0.7591_r_2,-1.0547_r_2,0.3730_r_2,0.0215_r_2,-0.7063_r_2,-0.6784_r_2,-1.1424_r_2,-0.5016_r_2,-0.2510_r_2,1.5791_r_2/
+  data phmid/-0.8845_dp,0.5324_dp,-0.6359_dp,-0.3306_dp,1.5959_dp,-0.0262_dp,-1.1008_dp,-0.5988_dp,-0.0312_dp,-1.2470_dp,  &
+              0.7591_dp,-1.0547_dp,0.3730_dp,0.0215_dp,-0.7063_dp,-0.6784_dp,-1.1424_dp,-0.5016_dp,-0.2510_dp,1.5791_dp/
 
-  data aldmid/0.5629_r_2,-0.8189_r_2,2.1928_r_2,-0.2735_r_2,-0.8350_r_2,-0.3037_r_2,1.8790_r_2,1.3780_r_2,0.1905_r_2,-0.4836_r_2,   &
-              -0.2553_r_2,1.1344_r_2,-0.7533_r_2,-0.3713_r_2,2.4355_r_2,1.6124_r_2,-0.2846_r_2,0.5503_r_2,-0.1318_r_2,-0.8379_r_2/
+  data aldmid/0.5629_dp,-0.8189_dp,2.1928_dp,-0.2735_dp,-0.8350_dp,-0.3037_dp,1.8790_dp,1.3780_dp,0.1905_dp,-0.4836_dp,   &
+              -0.2553_dp,1.1344_dp,-0.7533_dp,-0.3713_dp,2.4355_dp,1.6124_dp,-0.2846_dp,0.5503_dp,-0.1318_dp,-0.8379_dp/
 
-  data alomid/1.7405_r_2,-0.7472_r_2,1.7091_r_2,-0.0801_r_2,-0.6616_r_2,-0.2281_r_2,3.9982_r_2,0.2820_r_2,-0.0875_r_2,-0.3417_r_2,  &
-              -0.1036_r_2,3.0859_r_2,-0.7085_r_2,-0.3075_r_2,2.0749_r_2,0.4096_r_2,-0.0546_r_2,0.0595_r_2,0.0642_r_2,-0.6969_r_2/
+  data alomid/1.7405_dp,-0.7472_dp,1.7091_dp,-0.0801_dp,-0.6616_dp,-0.2281_dp,3.9982_dp,0.2820_dp,-0.0875_dp,-0.3417_dp,  &
+              -0.1036_dp,3.0859_dp,-0.7085_dp,-0.3075_dp,2.0749_dp,0.4096_dp,-0.0546_dp,0.0595_dp,0.0642_dp,-0.6969_dp/
 
-  data fedmid/-0.2133_r_2,-0.8057_r_2,1.4228_r_2,-0.1518_r_2,-0.7321_r_2,-0.3320_r_2,0.6954_r_2,1.9225_r_2,0.5566_r_2,-0.6816_r_2,  &
-               0.3769_r_2,0.0985_r_2,-0.7497_r_2,-0.4041_r_2,1.5073_r_2,2.1344_r_2,-0.5428_r_2,0.7526_r_2,-0.0019_r_2,-0.8012_r_2/
+  data fedmid/-0.2133_dp,-0.8057_dp,1.4228_dp,-0.1518_dp,-0.7321_dp,-0.3320_dp,0.6954_dp,1.9225_dp,0.5566_dp,-0.6816_dp,  &
+               0.3769_dp,0.0985_dp,-0.7497_dp,-0.4041_dp,1.5073_dp,2.1344_dp,-0.5428_dp,0.7526_dp,-0.0019_dp,-0.8012_dp/
 
-  data feomid/1.0284_r_2,-0.7249_r_2,0.6078_r_2,1.8211_r_2,-0.9538_r_2,0.3540_r_2,2.3080_r_2,-0.3343_r_2,-0.4294_r_2,0.0334_r_2,   &
-             -0.4503_r_2,1.6601_r_2,-0.6227_r_2,0.1070_r_2,0.6945_r_2,-0.3107_r_2,0.2227_r_2,-0.3815_r_2,1.7193_r_2,-0.9859_r_2/
+  data feomid/1.0284_dp,-0.7249_dp,0.6078_dp,1.8211_dp,-0.9538_dp,0.3540_dp,2.3080_dp,-0.3343_dp,-0.4294_dp,0.0334_dp,   &
+             -0.4503_dp,1.6601_dp,-0.6227_dp,0.1070_dp,0.6945_dp,-0.3107_dp,0.2227_dp,-0.3815_dp,1.7193_dp,-0.9859_dp/
 
-  data clayavg/20.3759_r_2,20.5158_r_2/
-  data siltavg/27.8392_r_2,28.6576_r_2/
-  data phavg/5.7890_r_2,5.8697_r_2/
-  data aldavg/0.4653_r_2,0.4491_r_2/
-  data aloavg/0.4091_r_2,0.3955_r_2/
-  data fedavg/2.7099_r_2,2.6748_r_2/
-  data feoavg/0.6246_r_2,0.6269_r_2/
+  data clayavg/20.3759_dp,20.5158_dp/
+  data siltavg/27.8392_dp,28.6576_dp/
+  data phavg/5.7890_dp,5.8697_dp/
+  data aldavg/0.4653_dp,0.4491_dp/
+  data aloavg/0.4091_dp,0.3955_dp/
+  data fedavg/2.7099_dp,2.6748_dp/
+  data feoavg/0.6246_dp,0.6269_dp/
 
-  data claysd/8.6170_r_2,8.9668_r_2/
-  data siltsd/9.0690_r_2,9.7478_r_2/
-  data phsd/0.9142_r_2,0.9715_r_2/
-  data aldsd/0.3838_r_2,0.3856_r_2/
-  data alosd/0.2970_r_2,0.2898_r_2/
-  data fedsd/1.4412_r_2,1.4988_r_2/
-  data feosd/0.4149_r_2,0.4343_r_2/
+  data claysd/8.6170_dp,8.9668_dp/
+  data siltsd/9.0690_dp,9.7478_dp/
+  data phsd/0.9142_dp,0.9715_dp/
+  data aldsd/0.3838_dp,0.3856_dp/
+  data alosd/0.2970_dp,0.2898_dp/
+  data fedsd/1.4412_dp,1.4988_dp/
+  data feosd/0.4149_dp,0.4343_dp/
 
     fcluster(:)=bgctype(:)
     j=jmodel
@@ -1344,7 +1344,7 @@ subroutine lonlat2mpx3(ilon, jlat, patchfrac, varx3_db, varmp1_db)
 ! map varx3_db(nlon,nlat,mpft) to varmp1_db(mp)
 
     integer,   dimension(mp)              :: ilon,jlat
-    real(r_2), dimension(nlon,nlat,mpft)  :: patchfrac
+    real(dp), dimension(nlon,nlat,mpft)  :: patchfrac
     real(dp),    dimension(nlon,nlat,mpft)  :: varx3_db
     real(dp),    dimension(mp)              :: varmp1_db
     integer :: np
@@ -1477,7 +1477,7 @@ end subroutine lonlat2mpx4b
     TYPE(mic_parameter), INTENT(INout)   :: micparam
     TYPE(mic_input),     INTENT(INout)   :: micinput
     TYPE(mic_npool),     INTENT(INOUT)   :: micnpool
-    real(r_2) :: zse(ms)       ! soil layer thickness in m-2
+    real(dp) :: zse(ms)       ! soil layer thickness in m-2
     ! local variables
     integer:: ncid,varid,status
     integer:: np,ns,i,j
@@ -1486,9 +1486,9 @@ end subroutine lonlat2mpx4b
     character(len=140) :: filecluster   ! cluster filename (not used)
 
     character(len = nf90_max_name):: name
-    real(r_2),dimension(:,:),allocatable:: fclay,fsilt,fph,ftemp,fmoist,fporosity,fmatpot
-    real(r_2),dimension(:),  allocatable:: fsoc,fpoc,fmaoc,ffmpoc,ffmmaoc,fbulkd
-    real(r_2),dimension(:),  allocatable:: fnpp,fanpp,fbnpp,flignin,fcna,fcnb
+    real(dp),dimension(:,:),allocatable:: fclay,fsilt,fph,ftemp,fmoist,fporosity,fmatpot
+    real(dp),dimension(:),  allocatable:: fsoc,fpoc,fmaoc,ffmpoc,ffmmaoc,fbulkd
+    real(dp),dimension(:),  allocatable:: fnpp,fanpp,fbnpp,flignin,fcna,fcnb
     integer,  dimension(:),  allocatable:: fid,fpft,ftop,fbot,fyear,fregion,fcluster
     real(dp),   dimension(:),  allocatable:: lat,lon
 
@@ -1788,7 +1788,7 @@ end subroutine lonlat2mpx4b
     TYPE(mic_input),     INTENT(INout)   :: micinput
     TYPE(mic_npool),     INTENT(INOUT)   :: micnpool
     TYPE(mic_global_input),       INTENT(INout) :: micglobal
-    real(r_2)   :: zse(ms)
+    real(dp)   :: zse(ms)
     integer :: jglobal,bgcopt
     integer:: ncid,varid,status
     integer:: np,ns,i,j
@@ -1796,10 +1796,10 @@ end subroutine lonlat2mpx4b
     character(len=140) :: Cfraction
 
     character(len = nf90_max_name):: name
-    real(r_2),dimension(:),         allocatable:: fclay,fsilt,fph,ftemp,fmoist,fporosity,fmatpot
-    real(r_2),dimension(:),         allocatable:: fsoc,fpoc,fmaoc,fbulkd
-    real(r_2),dimension(:),         allocatable:: fnpp,fanpp,fbnpp,flignin,fcna,fcnb
-    real(r_2),dimension(:),         allocatable:: fmg,fca,falo,fald,ffeo,ffed
+    real(dp),dimension(:),         allocatable:: fclay,fsilt,fph,ftemp,fmoist,fporosity,fmatpot
+    real(dp),dimension(:),         allocatable:: fsoc,fpoc,fmaoc,fbulkd
+    real(dp),dimension(:),         allocatable:: fnpp,fanpp,fbnpp,flignin,fcna,fcnb
+    real(dp),dimension(:),         allocatable:: fmg,fca,falo,fald,ffeo,ffed
     integer,dimension(:),           allocatable:: fid,fpft,ftop,fbot,fdataid,fcluster
     real(dp), dimension(:), allocatable:: lat,lon
     ! local variation for clustering
@@ -2140,7 +2140,7 @@ end subroutine lonlat2mpx4b
    ! get the atmospheric 14C data 1941-2019 (inclusive, Hua et al. 2020)
     TYPE(mic_parameter), INTENT(INout)   :: micparam
     integer :: i, nz, ny, nc14atm(100,5)
-    real(r_2)  :: year,c14del,sdx1,c14fm,sdx2
+    real(dp)  :: year,c14del,sdx1,c14fm,sdx2
     character(len=140) :: f14cz
     ! give 14C zones globally
     ! 14C zone        region code
@@ -2204,7 +2204,7 @@ end subroutine lonlat2mpx4b
     integer :: jglobal,bgcopt,jopt,jmodel
     TYPE(mic_parameter),          INTENT(INout) :: micparam
     TYPE(mic_global_input),       INTENT(INout) :: micglobal
-    real(r_2) :: zse(ms)
+    real(dp) :: zse(ms)
     ! local variables
     integer:: ncid,varid,status
     integer:: np,ns,k,ipft,nsocobs,ilonx,jlatx
@@ -2241,13 +2241,13 @@ end subroutine lonlat2mpx4b
     if(status /= nf90_noerr) print*, 'Error inquiring data lat'
     status = nf90_get_var(ncid,varid,varx1db)
     if(status /= nf90_noerr) print*,'Error reading data lat'
-    micglobal%lat = real(varx1db,kind=r_2)
+    micglobal%lat = real(varx1db,kind=dp)
 
     status = nf90_inq_varid(ncid,'lon',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring data lont'
     status = nf90_get_var(ncid,varid,varx1db)
     if(status /= nf90_noerr) print*,'Error reading data lon'
-    micglobal%lon=real(varx1db,kind=r_2)
+    micglobal%lon=real(varx1db,kind=dp)
 
     status = nf90_inq_varid(ncid,'max_PFT',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring data PFT'
@@ -2280,37 +2280,37 @@ end subroutine lonlat2mpx4b
     if(status /= nf90_noerr) print*, 'Error inquiring max_PFTfrac'
     status = nf90_get_var(ncid,varid,varx1float)
     if(status /= nf90_noerr) print*,'Error reading max_PFTfrac'
-    micglobal%area = real(varx1float,kind=r_2)
+    micglobal%area = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,'npp',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring npp'
     status = nf90_get_var(ncid,varid,varx1db)
     if(status /= nf90_noerr) print*,'Error reading npp'
-    micglobal%npp = real(varx1db,kind=r_2)
+    micglobal%npp = real(varx1db,kind=dp)
 
     status = nf90_inq_varid(ncid,'pH',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring ph'
     status = nf90_get_var(ncid,varid,varx1float)
     if(status /= nf90_noerr) print*,'Error reading ph'
-    micglobal%ph = real(varx1float,kind=r_2)
+    micglobal%ph = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,'clay',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring clay'
     status = nf90_get_var(ncid,varid,varx1float)
     if(status /= nf90_noerr) print*,'Error reading clay'
-    micglobal%clay = real(varx1float,kind=r_2)
+    micglobal%clay = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,'silt',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring silt'
     status = nf90_get_var(ncid,varid,varx1float)
     if(status /= nf90_noerr) print*,'Error reading silt'
-    micglobal%silt = real(varx1float,kind=r_2)
+    micglobal%silt = real(varx1float,kind=dp)
 
  !   status = nf90_inq_varid(ncid,'bulk_density',varid)
  !   if(status /= nf90_noerr) print*, 'Error inquiring soil bulk density'
  !   status = nf90_get_var(ncid,varid,varx1float)
  !   if(status /= nf90_noerr) print*,'Error reading bulk density'
- !   micglobal%bulkd= real(varx1float,kind=r_2)
+ !   micglobal%bulkd= real(varx1float,kind=dp)
  !   use HWSD bulk density (vary with soil layer)
      status = nf90_inq_varid(ncid,'HWSD_bulk_density',varid)
      if(status /= nf90_noerr) print*, 'Error inquiring soil bulk density'
@@ -2326,37 +2326,37 @@ end subroutine lonlat2mpx4b
     if(status /= nf90_noerr) print*, 'Error inquiring soil temperature'
     status = nf90_get_var(ncid,varid,tsoil7)
     if(status /= nf90_noerr) print*,'Error reading soil temperature'
-!    micglobal%tsoil=real(varx3db,kind=r_2)
+!    micglobal%tsoil=real(varx3db,kind=dp)
 
     status = nf90_inq_varid(ncid,'SoilMoist',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring soil moisture'
     status = nf90_get_var(ncid,varid,moist7)
     if(status /= nf90_noerr) print*,'Error reading soil moisture'
-!    micglobal%moist=real(varx3db,kind=r_2)
+!    micglobal%moist=real(varx3db,kind=dp)
 
     status = nf90_inq_varid(ncid,'water_potential',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring soil matric potential'
     status = nf90_get_var(ncid,varid,watpot7)
     if(status /= nf90_noerr) print*,'Error reading soil matric potential'
-!    micglobal%matpot=real(varx3db,kind=r_2)
+!    micglobal%matpot=real(varx3db,kind=dp)
 
     status = nf90_inq_varid(ncid,'Leaf_fall',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring Leaf_fall'
     status = nf90_get_var(ncid,varid,varx2db)
     if(status /= nf90_noerr) print*,'Error reading Leaf_fall'
-    micglobal%dleaf=real(varx2db,kind=r_2)
+    micglobal%dleaf=real(varx2db,kind=dp)
 
     status = nf90_inq_varid(ncid,'Belowground_litter_fall',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring Belowground_litter_fall'
     status = nf90_get_var(ncid,varid,varx2db)
     if(status /= nf90_noerr) print*,'Error reading Belowground_litter_fall'
-    micglobal%droot=real(varx2db,kind=r_2)
+    micglobal%droot=real(varx2db,kind=dp)
 
     status = nf90_inq_varid(ncid,'non_leaf_aboveground_litterfall',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring non_leaf_aboveground_litterfall'
     status = nf90_get_var(ncid,varid,varx2db)
     if(status /= nf90_noerr) print*,'Error reading non_leaf_aboveground_litterfall'
-    micglobal%dwood =real(varx2db,kind=r_2)
+    micglobal%dwood =real(varx2db,kind=dp)
 
     status = nf90_inq_varid(ncid,'Cluster',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring data Cluster'
@@ -2391,14 +2391,14 @@ end subroutine lonlat2mpx4b
    ! now calculate soil cluster using parameters for ORCHIDEE (jmodel=2)
     do np=1,mp
        do ns=1,ms
-          micparam%csoilobs(np,ns) = real(fsoc7(np,ns),kind=r_2)
+          micparam%csoilobs(np,ns) = real(fsoc7(np,ns),kind=dp)
        enddo
     enddo
 
     micglobal%bgctype = 0
     micparam%bgctype  = 0
     call cluster_hwsd(2,micglobal%bgctype,micparam%csoilobs,micglobal%clay,micglobal%silt,micglobal%ph,  &
-                      real(fald,kind=r_2),real(falo,kind=r_2),real(ffed,kind=r_2),real(ffeo,kind=r_2),fcluster)
+                      real(fald,kind=dp),real(falo,kind=dp),real(ffed,kind=dp),real(ffeo,kind=dp),fcluster)
 
     micparam%bgctype  = fcluster
     micglobal%bgctype = fcluster
@@ -2435,7 +2435,7 @@ end subroutine lonlat2mpx4b
     endif
 
     do k=1,ntime
-       micglobal%time(k)= real(k*1.0,kind=r_2)
+       micglobal%time(k)= real(k*1.0,kind=dp)
     enddo
 
     ! print *, 'PFT=', micglobal%pft
@@ -2482,11 +2482,11 @@ end subroutine lonlat2mpx4b
 
        do ns=1,ms
 
-          micparam%csoilobs(np,ns) = real(fsoc7(np,ns),kind=r_2)
-          micparam%fracaoc(np,ns)  = real(fracaoc(np,ns),kind=r_2)
-          micglobal%tsoil(np,ns,:) = real(tsoil7(np,ns,:),kind=r_2)
-          micglobal%moist(np,ns,:) = real(moist7(np,ns,:),kind=r_2)
-          micglobal%matpot(np,ns,:)= real(watpot7(np,ns,:),kind=r_2)
+          micparam%csoilobs(np,ns) = real(fsoc7(np,ns),kind=dp)
+          micparam%fracaoc(np,ns)  = real(fracaoc(np,ns),kind=dp)
+          micglobal%tsoil(np,ns,:) = real(tsoil7(np,ns,:),kind=dp)
+          micglobal%moist(np,ns,:) = real(moist7(np,ns,:),kind=dp)
+          micglobal%matpot(np,ns,:)= real(watpot7(np,ns,:),kind=dp)
           ! filter out sites with SOC >120 gc/kg (organic soil: Lourenco et al. 2022)
           if(micparam%csoilobs(np,ns) >=120.0) then
              micglobal%area(np) = -1.0
@@ -2619,7 +2619,7 @@ end subroutine screenout
     integer :: jglobal,bgcopt,jopt,jmodel
     TYPE(mic_parameter),          INTENT(INout) :: micparam
     TYPE(mic_global_input),       INTENT(INout) :: micglobal
-    real(r_2) :: zse(ms)
+    real(dp) :: zse(ms)
     ! local variables
     integer:: ncid,varid,status
     integer:: np,k,ipft,ns
@@ -2648,13 +2648,13 @@ end subroutine screenout
     if(status /= nf90_noerr) print*, 'Error inquiring data lat'
     status = nf90_get_var(ncid,varid,varx1float)
     if(status /= nf90_noerr) print*,'Error reading data lat'
-    micglobal%lat = real(varx1float,kind=r_2)
+    micglobal%lat = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,'lon',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring data lon'
     status = nf90_get_var(ncid,varid,varx1float)
     if(status /= nf90_noerr) print*,'Error reading data lon'
-    micglobal%lon=real(varx1float,kind=r_2)
+    micglobal%lon=real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,'vtype',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring data PFT'
@@ -2672,73 +2672,73 @@ end subroutine screenout
     if(status /= nf90_noerr) print*, 'Error inquiring ph'
     status = nf90_get_var(ncid,varid,varx1float)
     if(status /= nf90_noerr) print*,'Error reading ph'
-    micglobal%ph = real(varx1float,kind=r_2)
+    micglobal%ph = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,'clay',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring clay'
     status = nf90_get_var(ncid,varid,varx1float)
     if(status /= nf90_noerr) print*,'Error reading clay'
-    micglobal%clay = real(varx1float,kind=r_2)
+    micglobal%clay = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,'silt',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring silt'
     status = nf90_get_var(ncid,varid,varx1float)
     if(status /= nf90_noerr) print*,'Error reading silt'
-    micglobal%silt = real(varx1float,kind=r_2)
+    micglobal%silt = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,'bulkd',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring bulkd'
     status = nf90_get_var(ncid,varid,varx1float)
     if(status /= nf90_noerr) print*,'Error reading bulkd'
-    micglobal%bulkd = real(varx1float,kind=r_2)
+    micglobal%bulkd = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,'soc',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring soc'
     status = nf90_get_var(ncid,varid,varx2float)
     if(status /= nf90_noerr) print*,'Error reading soc'
-    soc3 = real(varx2float,kind=r_2)
+    soc3 = real(varx2float,kind=dp)
 
     status = nf90_inq_varid(ncid,'poc',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring poc'
     status = nf90_get_var(ncid,varid,varx1float)
     if(status /= nf90_noerr) print*,'Error reading poc'
-    poc = real(varx1float,kind=r_2)
+    poc = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,'hoc',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring hoc'
     status = nf90_get_var(ncid,varid,varx1float)
     if(status /= nf90_noerr) print*,'Error reading hoc'
-    hoc = real(varx1float,kind=r_2)
+    hoc = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,'roc',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring roc'
     status = nf90_get_var(ncid,varid,varx1float)
     if(status /= nf90_noerr) print*,'Error reading roc'
-    roc = real(varx1float,kind=r_2)
+    roc = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,'npp',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring npp'
     status = nf90_get_var(ncid,varid,varx3float)
     if(status /= nf90_noerr) print*,'Error reading npp'
-    npp10y = sum(real(varx3float,kind=r_2),dim=2)/10.0  !(mp,ntime)
+    npp10y = sum(real(varx3float,kind=dp),dim=2)/10.0  !(mp,ntime)
 
     status = nf90_inq_varid(ncid,'tsoil',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring tsoil'
     status = nf90_get_var(ncid,varid,varx3float)
     if(status /= nf90_noerr) print*,'Error reading tsoil'
-    tsoil10y = sum(real(varx3float,kind=r_2),dim=2)/10.0   !(mp,ntime)
+    tsoil10y = sum(real(varx3float,kind=dp),dim=2)/10.0   !(mp,ntime)
 
     status = nf90_inq_varid(ncid,'moist10',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring moist10'
     status = nf90_get_var(ncid,varid,varx3float)
     if(status /= nf90_noerr) print*,'Error reading moist10'
-    moist10y10 = sum(real(varx3float,kind=r_2),dim=2)/10.0  !(mp,ntime)
+    moist10y10 = sum(real(varx3float,kind=dp),dim=2)/10.0  !(mp,ntime)
 
     status = nf90_inq_varid(ncid,'moist100',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring moist100'
     status = nf90_get_var(ncid,varid,varx3float)
     if(status /= nf90_noerr) print*,'Error reading moist100'
-    moist10y100= sum(real(varx3float,kind=r_2),dim=2)/10.0 !(mp,ntime)
+    moist10y100= sum(real(varx3float,kind=dp),dim=2)/10.0 !(mp,ntime)
 
     ! Close netcdf file
     status = NF90_CLOSE(ncid)
@@ -2788,7 +2788,7 @@ end subroutine screenout
     enddo
 
     do k=1,ntime
-       micglobal%time(k)= real(k*1.0,kind=r_2)
+       micglobal%time(k)= real(k*1.0,kind=dp)
     enddo
 
     if(jglobal==1) then
