@@ -1,81 +1,67 @@
-# FindNetCDFFortran.cmake
+# NetCDFFortran detection module.
 #
 # Exports:
-#   NetCDFFortran_FOUND
-#   NetCDFFortran_INCLUDE_DIRS
-#   NetCDFFortran_LIBRARIES   (may contain raw flags from nf-config)
+#   NETCDF_INCLUDE_DIRS  - include dirs for netcdf.mod, netcdf.h
+#   NETCDF_LINK_FLAGS    - link flags for both Fortran and C libraries
 #
-# Strategy:
-#   1) Use nf-config (best on HPC modules)
-#   2) Fallback to prefix hints (NetCDFFortran_ROOT / NETCDF_FORTRAN / NETCDF)
+# Priority:
+#   (a)  pkg-config (netcdf-fortran + netcdf)
+#   (b)  nf-config  (--includedir / --flibs)
+#   (c)  FindNetCDF.cmake (respects NETCDF_FORTRAN, NETCDF, etc.)
 
-find_program(NF_CONFIG_EXECUTABLE nf-config)
+set(NETCDF_INCLUDE_DIRS "")
+set(NETCDF_LINK_FLAGS "")
 
-# Collect prefix hints
-set(_NETCDF_HINTS "")
-if(DEFINED NetCDFFortran_ROOT)
-  list(APPEND _NETCDF_HINTS "${NetCDFFortran_ROOT}")
-endif()
-if(DEFINED ENV{NETCDF_FORTRAN})
-  list(APPEND _NETCDF_HINTS "$ENV{NETCDF_FORTRAN}")
-endif()
-if(DEFINED ENV{NETCDF})
-  list(APPEND _NETCDF_HINTS "$ENV{NETCDF}")
-endif()
-
-# ------------------------------------------------------------
-# 1) Preferred: nf-config
-# ------------------------------------------------------------
-if(NF_CONFIG_EXECUTABLE)
-  execute_process(COMMAND ${NF_CONFIG_EXECUTABLE} --includedir
-                  OUTPUT_VARIABLE _nf_inc
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-  execute_process(COMMAND ${NF_CONFIG_EXECUTABLE} --flibs
-                  OUTPUT_VARIABLE _nf_flibs
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-  # Basic sanity
-  set(NetCDFFortran_INCLUDE_DIRS "${_nf_inc}")
-  set(NetCDFFortran_LIBRARIES "${_nf_flibs}")
-
-  include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(NetCDFFortran DEFAULT_MSG
-    NetCDFFortran_INCLUDE_DIRS NetCDFFortran_LIBRARIES
-  )
-  return()
+# --- (a) pkg-config ---
+find_package(PkgConfig QUIET)
+if(PkgConfig_FOUND)
+  pkg_search_module(NF netcdf-fortran)
+  pkg_search_module(NC netcdf)
+  if(NF_FOUND)
+    list(APPEND NETCDF_INCLUDE_DIRS "${NF_INCLUDE_DIRS}")
+    list(APPEND NETCDF_LINK_FLAGS ${NF_LDFLAGS})
+  endif()
+  if(NC_FOUND)
+    list(APPEND NETCDF_INCLUDE_DIRS "${NC_INCLUDE_DIRS}")
+    list(APPEND NETCDF_LINK_FLAGS ${NC_LDFLAGS})
+  endif()
 endif()
 
-# ------------------------------------------------------------
-# 2) Fallback: manual search by prefix hints
-# ------------------------------------------------------------
-find_path(NetCDFFortran_INCLUDE_DIRS
-  NAMES netcdf.mod netcdf.inc netcdf.h
-  HINTS ${_NETCDF_HINTS}
-  PATH_SUFFIXES include include/netcdf
-)
-
-find_library(NetCDFFortran_F90_LIB
-  NAMES netcdff
-  HINTS ${_NETCDF_HINTS}
-  PATH_SUFFIXES lib lib64
-)
-
-find_library(NetCDFFortran_C_LIB
-  NAMES netcdf
-  HINTS ${_NETCDF_HINTS}
-  PATH_SUFFIXES lib lib64
-)
-
-set(NetCDFFortran_LIBRARIES "")
-if(NetCDFFortran_F90_LIB)
-  list(APPEND NetCDFFortran_LIBRARIES ${NetCDFFortran_F90_LIB})
+# --- (b) nf-config ---
+if(NOT NETCDF_LINK_FLAGS)
+  find_program(NF_CONFIG nf-config)
+  if(NF_CONFIG)
+    execute_process(COMMAND ${NF_CONFIG} --includedir
+                    OUTPUT_VARIABLE _nf_inc
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(COMMAND ${NF_CONFIG} --flibs
+                    OUTPUT_VARIABLE _nf_flibs
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    list(APPEND NETCDF_INCLUDE_DIRS "${_nf_inc}")
+    separate_arguments(_nf_flibs UNIX_COMMAND)
+    list(APPEND NETCDF_LINK_FLAGS ${_nf_flibs})
+  endif()
 endif()
-if(NetCDFFortran_C_LIB)
-  list(APPEND NetCDFFortran_LIBRARIES ${NetCDFFortran_C_LIB})
+
+# --- (c) FindNetCDF.cmake fallback ---
+#    Checks NETCDF_DIR, NETCDF_FORTRAN, NETCDF, CPATH, FPATH, etc.
+if(NOT NETCDF_LINK_FLAGS)
+  set(NETCDF_F90 "YES")
+  find_package(NetCDF REQUIRED)
+  set(NETCDF_INCLUDE_DIRS "${NETCDF_INCLUDES}")
+  set(NETCDF_LINK_FLAGS "${NETCDF_LIBRARIES}")
 endif()
+
+# --- Final reporting ---
+list(REMOVE_DUPLICATES NETCDF_INCLUDE_DIRS)
+
+if(NOT NETCDF_LINK_FLAGS)
+  message(FATAL_ERROR "NetCDF not found")
+endif()
+
+message(STATUS "NetCDF include: ${NETCDF_INCLUDE_DIRS}")
+message(STATUS "NetCDF link    : ${NETCDF_LINK_FLAGS}")
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(NetCDFFortran DEFAULT_MSG
-  NetCDFFortran_INCLUDE_DIRS NetCDFFortran_LIBRARIES
-)
+find_package_handle_standard_args(NetCDFFortran
+  DEFAULT_MSG NETCDF_INCLUDE_DIRS NETCDF_LINK_FLAGS)
