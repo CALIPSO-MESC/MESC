@@ -11,6 +11,11 @@ module load oneapi23u1 netcdf_intel
 # module load netcdf/4.8.1-intel20
 
 # --------------------------------------------------
+# Set environment variables
+# --------------------------------------------------
+export OMP_NUM_THREADS=8
+
+# --------------------------------------------------
 # remove old files
 # --------------------------------------------------
 rm -f fort.*
@@ -38,7 +43,6 @@ fi
 # --------------------------------------------------
 # run
 # --------------------------------------------------
-export OMP_NUM_THREADS=8
 ./main >output/outval_${case}_${run}.txt
 mv fort.91 output/valsoc_91_${case}_${run}.txt
 mv fort.92 output/valsoc_92_${case}_${run}.txt
@@ -64,7 +68,6 @@ fi
 # --------------------------------------------------
 # run
 # --------------------------------------------------
-export OMP_NUM_THREADS=8
 ./main >output/outval_${case}_${run}.txt
 mv fort.91 output/valsoc_91_${case}_${run}.txt
 mv fort.92 output/valsoc_92_${case}_${run}.txt
