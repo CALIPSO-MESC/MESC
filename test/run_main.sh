@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Shell script for running the MESC test suite.
 
 # --------------------------------------------------
@@ -16,7 +16,7 @@ module load oneapi23u1 netcdf_intel
 export OMP_NUM_THREADS=8
 
 # --------------------------------------------------
-# remove old files
+# Remove old files
 # --------------------------------------------------
 rm -f fort.*
 rm -f val*.txt
@@ -24,54 +24,36 @@ rm -f params1.txt
 rm -f params_val.txt
 rm -f case.txt
 
-#### run 1: frc ###
-case="f3"
-run="frc"
-echo "Running case '${case}', run '${run}'"
+# --------------------------------------------------
+# Configure test cases to be run
+# --------------------------------------------------
+cases=("f3" "cable3")
+runs=("frc" "hwsd")
 
 # --------------------------------------------------
-# copy parameter files
+# Loop over test cases
 # --------------------------------------------------
-cp ./input/case_${run}.txt case.txt
-cp ./input/params1_${run}_${case}.txt params1.txt
-cp ./input/params_val_${run}_${case}.txt params_val.txt
+mkdir -p output
+for i in 0 1; do
+  case="${cases[${i}]}"
+  run="${runs[${i}]}"
+  echo "Running test case '${case}', run '${run}'"
 
-if [ ! -d output ]; then
-  mkdir output
-fi
+  # --------------------------------------------------
+  # Copy parameter files
+  # --------------------------------------------------
+  cp ./input/case_${run}.txt case.txt
+  cp ./input/params1_${run}_${case}.txt params1.txt
+  cp ./input/params_val_${run}_${case}.txt params_val.txt
 
-# --------------------------------------------------
-# run
-# --------------------------------------------------
-./main >output/outval_${case}_${run}.txt
-mv fort.91 output/valsoc_91_${case}_${run}.txt
-mv fort.92 output/valsoc_92_${case}_${run}.txt
-diff benchmark/valsoc_91_${case}_${run}.txt output/valsoc_91_${case}_${run}.txt >output/diff_valsoc_91_${case}_${run}.txt
-diff benchmark/valsoc_92_${case}_${run}.txt output/valsoc_92_${case}_${run}.txt >output/diff_valsoc_92_${case}_${run}.txt
-
-#### run 2: hwsd ######
-case="cable3"
-run="hwsd"
-echo "Running case '${case}', run '${run}'"
-
-# --------------------------------------------------
-# copy parameter files
-# --------------------------------------------------
-cp ./input/case_${run}.txt case.txt
-cp ./input/params1_${run}_${case}.txt params1.txt
-cp ./input/params_val_${run}_${case}.txt params_val.txt
-
-if [ ! -d output ]; then
-  mkdir output
-fi
-
-# --------------------------------------------------
-# run
-# --------------------------------------------------
-./main >output/outval_${case}_${run}.txt
-mv fort.91 output/valsoc_91_${case}_${run}.txt
-mv fort.92 output/valsoc_92_${case}_${run}.txt
-diff benchmark/valsoc_91_${case}_${run}.txt output/valsoc_91_${case}_${run}.txt >output/diff_valsoc_91_${case}_${run}.txt
-diff benchmark/valsoc_92_${case}_${run}.txt output/valsoc_92_${case}_${run}.txt >output/diff_valsoc_92_${case}_${run}.txt
+  # --------------------------------------------------
+  # Run the test case
+  # --------------------------------------------------
+  ./main >output/outval_${case}_${run}.txt
+  mv fort.91 output/valsoc_91_${case}_${run}.txt
+  mv fort.92 output/valsoc_92_${case}_${run}.txt
+  diff benchmark/valsoc_91_${case}_${run}.txt output/valsoc_91_${case}_${run}.txt >output/diff_valsoc_91_${case}_${run}.txt
+  diff benchmark/valsoc_92_${case}_${run}.txt output/valsoc_92_${case}_${run}.txt >output/diff_valsoc_92_${case}_${run}.txt
+done
 
 echo "===== Job finished: $(date) ====="
