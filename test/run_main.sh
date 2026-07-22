@@ -1,3 +1,6 @@
+#!/bin/sh
+# Shell script for running the MESC test suite.
+
 # --------------------------------------------------
 # Load environment (users can edit if needed)
 # --------------------------------------------------
