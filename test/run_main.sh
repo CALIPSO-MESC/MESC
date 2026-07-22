@@ -56,4 +56,24 @@ for i in 0 1; do
   diff benchmark/valsoc_92_${case}_${run}.txt output/valsoc_92_${case}_${run}.txt >output/diff_valsoc_92_${case}_${run}.txt
 done
 
+# --------------------------------------------------
+# Report test statuses
+# --------------------------------------------------
+for i in {0..1}; do
+  case="${cases[${i}]}"
+  run="${runs[${i}]}"
+  pass=1
+  for id in 91 92; do
+    if [ "$(cat output/diff_valsoc_${id}_${case}_${run}.txt)" ]; then
+      pass=0
+      break
+    fi
+  done
+  if [ ${pass} ]; then
+    echo "PASS: test case '${case}', run '${run}'"
+  else
+    echo "FAIL: test case '${case}', run '${run}'"
+  fi
+done
+
 echo "===== Job finished: $(date) ====="
