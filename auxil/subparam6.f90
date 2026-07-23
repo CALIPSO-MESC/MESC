@@ -11,19 +11,19 @@
       nx=1; ny=6
       allocate(varx(nx),vary(ny),y(ny))
 
-      open(1,file='last7.txt')
-      open(2,file='scein.dat')
-      open(3,file='scein_copy.dat')
+      open(1,file="last7.txt")
+      open(2,file="scein.dat")
+      open(3,file="scein_copy.dat")
       read(1,*) varx(1:nx),y(1:ny)
       do n=1,2
          read(2,201) data
          write(3,201) data
-      enddo
+      end do
       do n=1,ny
          read(2,202) data1,data2
          read(data1,*) y0,ymin,ymax
          write(3,301) y(n),ymin,ymax,data2
-      enddo
+      end do
       deallocate(varx,vary)
       close(1)
       close(2)

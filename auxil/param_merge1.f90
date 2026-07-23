@@ -10,10 +10,10 @@
  real(8)   :: cost
  character(len=135) :: chdata
 
-    open(11,file='last_nx_frc.txt')
-    open(12,file='last_xp_frc.txt')
-    open(13,file='params1_hwsd.txt')
-    open(21,file='params1.txt')   ! for optimization
+    open(11,file="last_nx_frc.txt")
+    open(12,file="last_xp_frc.txt")
+    open(13,file="params1_hwsd.txt")
+    open(21,file="params1.txt")   ! for optimization
     ! get the parameter numbers
     read(11,*) (nparam(n),n=1,6)
     read(12,*) cost, (param(n),n=1,6)
@@ -21,13 +21,13 @@
     do n=1,6
        nx=nparam(n)
        xparam(nx) = param(n)
-    enddo
-    print *, 'xparam= ', xparam(:)
+    end do
+    print *, "xparam= ", xparam(:)
     ! write the optimized parameter values into "params1.txt"
     do n=1,5
-       read(13,'(A)') chdata
+       read(13,"(A)") chdata
        write(21,301)  chdata
-    enddo
+    end do
     write(21,302) xparam(1:14)
     write(21,303)
     close(11)
@@ -36,7 +36,7 @@
     close(21)
 301 format(a135)
 302 format(14(f6.4,1x))
-303 format('  1    10    7     3   14    5  ')
+303 format("  1    10    7     3   14    5  ")
   end program pmerge1
 
 

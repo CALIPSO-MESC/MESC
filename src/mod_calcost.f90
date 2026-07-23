@@ -79,7 +79,7 @@ module calcost_module
                   xmodm(np) = xmodm(np) + weight * (miccpool%cpooleq(np,ns,6) + miccpool%cpooleq(np,ns,9))             !! observed maoc = modelled maoc
                end if
                x1=x2
-            enddo
+            end do
            ! this assumes bulk density constant in the vertical
            xmod(np)   = 1000.0 * xmod(np) /((xbot-xtop) * micinput%bulkd(np,1))   !! unit: g C/kg soil
            xmodp(np)  = 1000.0 * xmodp(np)/((xbot-xtop) * micinput%bulkd(np,1))
@@ -97,21 +97,21 @@ module calcost_module
            micparam%c14soilobsm(np)= max(small,micparam%c14soilobsm(np))
 
            if (xmod(np) >= 1000.0 .or. xmodp(np) >= 1000.0 .or. xmodm(np) >= 1000.0) then
-               print *, 'abnormal value of model simulation site=', micparam%siteid(np)
-               print *, 'parameter values = ',  xopt(1:nx)
+               print *, "abnormal value of model simulation site=", micparam%siteid(np)
+               print *, "parameter values = ",  xopt(1:nx)
             !   stop
-           endif
+           end if
 
            if(isoc14 == 0) then
              if((xobsp(np)+xobsm(np))>0.0 .and. (xobsp(np)+xobsm(np))<1000.0) then
         !     xcost(np) = xcost(np) + ((xmodp(np) - xobsp(np))/xobsp(np))**2 +((xmodm(np) - xobsm(np))/xobsm(np))**2
               xcost(np) = xcost(np) + (xfracpmod(np)-xfracpobs(np))** 2 + (xfracmmod(np) - xfracmobs(np))**2
-             endif
+             end if
              write(91,901) micparam%siteid(np),micparam%pft(np),micparam%top(np),micparam%bot(np),xobs(np),xmod(np),xobsp(np),xmodp(np),xobsm(np),xmodm(np)
 
              do ns = 1,ms
                 write(92,*) micparam%siteid(np),micparam%pft(np), ns, (1000.0*miccpool%cpooleq(np,ns,ip)/micinput%bulkd(np,ns),ip=1,mcpool)
-             enddo
+             end do
 
            else
              xcost(np) = xcost(np) +(micparam%c14soilobsp(np) - xmodp(np)/miccpool%c12pooleqp(np))**2  &
@@ -124,11 +124,11 @@ module calcost_module
 
              do ns = 1,ms
                 write(94,*) micparam%siteid(np),micparam%pft(np), ns, (1000.0*miccpool%cpooleq(np,ns,ip)/micinput%bulkd(np,ns),ip=1,mcpool)
-             enddo
-           endif
+             end do
+           end if
 
-        endif  !bgctype(np)=bgcopt
-      enddo  !"np"
+        end if  !bgctype(np)=bgcopt
+      end do  !"np"
       totcost = sum(xcost(1:mp))
 
       deallocate(xcost,xobs,xobsp,xobsm)
@@ -208,7 +208,7 @@ module calcost_module
                   xmodm(np) = xmodm(np) + weight * (miccpool%cpooleq(np,ns,6) + miccpool%cpooleq(np,ns,9))             !! observed maoc = modelled maoc
                end if
                x1=x2
-            enddo
+            end do
 
            xmod(np)   = 1000.0 * xmod(np) /((xbot-xtop)*micinput%bulkd(np,1))   !! unit: g C/kg soil
            xmodp(np)  = 1000.0 * xmodp(np)/((xbot-xtop)*micinput%bulkd(np,1))
@@ -220,11 +220,11 @@ module calcost_module
            xobsfracm(np) = xobsm(np)/(xobsp(np)+xobsm(np)+1.0e-6)
 
            if (xmod(np) >= 1000.0 .or. xmodp(np) >= 1000.0 .or. xmodm(np) >= 1000.0) then
-               print *, 'abnormal value of model simulation site=', micparam%siteid(np)
-               print *, 'parameter values = ',  xopt(1:nx)
+               print *, "abnormal value of model simulation site=", micparam%siteid(np)
+               print *, "parameter values = ",  xopt(1:nx)
                print *, xmodp(np),xmodm(np)
             !   stop
-            endif
+            end if
 
 
             if(xobsp(np) >0.0 .and. xobsm(np)>0.0 .and. xobsfracm(np) >1.0e-10) then  !! POC is not available for some sites
@@ -238,7 +238,7 @@ module calcost_module
                xcost(np) = xcost(np) + 10.0*((xmodfracp(np) - xobsfracp(np))**2 + (xmodfracm(np) - xobsfracm(np))**2) &
                                                 + 0.1 *(log(xmodm(np)+xmodp(np)) - log(xobsm(np)+xobsp(np)))**2
 
-            endif
+            end if
 
             write(91,901) micparam%siteid(np),micparam%pft(np), &
                           micparam%bgctype(np),micglobal%area(np),xtop,xbot, &
@@ -250,11 +250,11 @@ module calcost_module
                              micparam%bgctype(np),micglobal%area(np),ns,xtop,xbot,                        &
                            (1000.0*miccpool%cpooleq(np,ns,ip)/micinput%bulkd(np,ns),ip=1,mcpool)
 
-            enddo
+            end do
 
 
-        endif  !bgctype(np)=bgcopt
-      enddo  !"np"
+        end if  !bgctype(np)=bgcopt
+      end do  !"np"
       totcost = sum(xcost(1:mp))
 
       deallocate(xcost,xobs,xobsp,xobsm)
@@ -311,7 +311,7 @@ module calcost_module
     do ns=1,5
        xtop(ns) =(ns-1) * 0.2
        xbot(ns) = ns    * 0.2
-    enddo
+    end do
     xbot(6)=1.5;     xbot(7)=2.0
     xtop(6)=xbot(5); xtop(7)=xbot(6)
 
@@ -321,18 +321,18 @@ module calcost_module
        if(micparam%bgctype(np)==bgcopt .and. micglobal%area(np) > 0.0) then
          do ns = 1,ms
             xmod(np,ns) = 1000.0 * sum(miccpool%cpooleq(np,ns,3:mcpool))/micinput%bulkd(np,ns)   ! gC/kg soil
-         enddo
+         end do
 
          do ns = 1,msobs
             xobs7(np,ns) = micparam%csoilobs(np,ns) * (1.0- micparam%fracaoc(np,ns))
             xmod7(np,ns) = xmod(np,ns)                                     ! gC/kg soil
             if(xmod7(np,ns) <0.0 .or. xmod7(np,ns) >1.0e3) then
-               print *, 'abnormal value of model simulation site=', micparam%siteid(np)
-               print *, 'parameter values = ',  xopt(1:nx)
+               print *, "abnormal value of model simulation site=", micparam%siteid(np)
+               print *, "parameter values = ",  xopt(1:nx)
                print *,  xobs7(np,ns),xmod7(np,ns),xobs7(np,ns)-xmod7(np,ns)
-               print *, ' modelled pool size= ', ns,1000.0 * miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
+               print *, " modelled pool size= ", ns,1000.0 * miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
                !stop
-            endif
+            end if
 
             if(xobs7(np,ns) > 0.0 .and. xobs7(np,ns) <1.0e3) then
                xcost(np) = xcost(np) + (log(xobs7(np,ns))-log(xmod7(np,ns)))**2
@@ -342,8 +342,8 @@ module calcost_module
                              micparam%bgctype(np),micglobal%area(np),micglobal%npp(np),ns,                &
                              micparam%fracaoc(np,ns),xobs7(np,ns),xmod7(np,ns)
 
-            endif
-         enddo !"ns"
+            end if
+         end do !"ns"
 
          do ns = 1,ms
             fracpocm  = (sum(miccpool%cpooleq(np,ns,3:8))-miccpool%cpooleq(np,ns,6))/(sum(miccpool%cpooleq(np,ns,3:mcpool))+1.0e-6)
@@ -354,10 +354,10 @@ module calcost_module
                           micparam%bgctype(np),micglobal%area(np),micglobal%npp(np), ns,  &
                           (1000.0*miccpool%cpooleq(np,ns,ip)/micinput%bulkd(np,ns),ip=1,mcpool), &
                           micparam%fracaoc(np,ns),fracpocm,fracmaocm,fracmicm,fraclabm
-         enddo
+         end do
 
-      endif !"pft"
-   enddo  !"np"
+      end if !"pft"
+   end do  !"np"
    totcost = sum(xcost(1:mp))
 
     deallocate(xcost)
@@ -412,7 +412,7 @@ module calcost_module
     do ns=1,5
        xtop(ns) =(ns-1) * 0.2
        xbot(ns) = ns    * 0.2
-    enddo
+    end do
     xbot(6)=1.5;     xbot(7)=2.0
     xtop(6)=xbot(5); xtop(7)=xbot(6)
 
@@ -423,19 +423,19 @@ module calcost_module
        if(micparam%bgctype(np)==bgcopt .and. micglobal%area(np) > 0.0) then
          do ns = 1,ms
             xmod(np,ns) = 1000.0 * sum(miccpool%cpooleq(np,ns,1:mcpool))/micinput%bulkd(np,ns)   ! gC/kg soil
-         enddo
+         end do
 
          do ns = 1,msobs
            xobs7(np,ns) = micparam%csoilobs(np,ns) * (1.0- micparam%fracaoc(np,ns))
            xmod7(np,ns) = xmod(np,ns)                                       ! gC/kg soil
 
             if(xmod7(np,ns) <0.0 .or. xmod7(np,ns) >1.0e3) then
-               print *, 'abnormal value of model simulation site=', micparam%siteid(np)
-               print *, 'parameter values = ',  xopt(1:nx)
+               print *, "abnormal value of model simulation site=", micparam%siteid(np)
+               print *, "parameter values = ",  xopt(1:nx)
                print *,  xobs7(np,ns),xmod7(np,ns),xobs7(np,ns)-xmod7(np,ns)
-               print *, ' modelled pool size= ', ns,miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
+               print *, " modelled pool size= ", ns,miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
                !stop
-            endif
+            end if
 
             if(xobs7(np,ns) > 0.0 .and. xobs7(np,ns) <1.0e3) then
                xcost(np) = xcost(np) + (log(xobs7(np,ns))-log(xmod7(np,ns)))**2
@@ -444,8 +444,8 @@ module calcost_module
                write(91,901) micparam%siteid(np),micparam%pft(np),micparam%isoil(np),micparam%sorder(np), &
                              micparam%bgctype(np),micglobal%area(np),micglobal%npp(np),ns,                &
                              micparam%fracaoc(np,ns),xobs7(np,ns),xmod7(np,ns)
-            endif
-         enddo !"ns"
+            end if
+         end do !"ns"
 
          do ns = 1,ms
             fracpocm  = (sum(miccpool%cpooleq(np,ns,1:8))-miccpool%cpooleq(np,ns,6))/(sum(miccpool%cpooleq(np,ns,1:mcpool))+1.0e-6)
@@ -456,10 +456,10 @@ module calcost_module
                           micparam%bgctype(np),micglobal%area(np),micglobal%npp(np), ns,  &
                           (1000.0*miccpool%cpooleq(np,ns,ip)/micinput%bulkd(np,ns),ip=1,mcpool), &
                           micparam%fracaoc(np,ns),fracpocm,fracmaocm,fracmicm,fraclabm
-         enddo
+         end do
 
-      endif !"pft"
-   enddo  !"np"
+      end if !"pft"
+   end do  !"np"
    totcost = sum(xcost(1:mp))
 
     deallocate(xcost)
@@ -527,17 +527,17 @@ module calcost_module
             xmodmaoc(np,ns) = 1000.0 * totmaoc/micinput%bulkd(np,ns)   ! gC/kg soil
             xmod(np,ns)     = xmodpoc(np,ns) + xmodmaoc(np,ns)
             xobs(np,ns)     = micparam%csoilobs(np,ns)
-         enddo
+         end do
 
          do ns = 1,msobs
 
             if(xmod(np,ns) <0.0 .or. xmod(np,ns) >1.0e3) then
-               print *, 'abnormal value of model simulation site=', micparam%siteid(np)
-               print *, 'parameter values = ',  xopt(1:nx)
+               print *, "abnormal value of model simulation site=", micparam%siteid(np)
+               print *, "parameter values = ",  xopt(1:nx)
                print *,  xobs(np,ns),xmod(np,ns),xobs(np,ns)-xmod(np,ns)
-               print *, ' modelled pool size= ', ns,1000.0*miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
+               print *, " modelled pool size= ", ns,1000.0*miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
                !stop
-            endif
+            end if
 
             if(xobs(np,ns) > 0.0 .and. xobs(np,ns) <1.0e3) then
                xcost(np) = xcost(np) + (log(xobs(np,ns))-log(xmod(np,ns)))**2
@@ -547,20 +547,20 @@ module calcost_module
                              micparam%bgctype(np),micglobal%area(np),ns,&
                              xobs(np,ns),xmod(np,ns)
 
-            endif
-         enddo !"ns"
+            end if
+         end do !"ns"
          xmodpocavg  = sum(xmodpoc(np,1:msobs))/real(msobs)
          xmodmaocavg = sum(xmodmaoc(np,1:msobs))/real(msobs)
          if(micparam%csoilobsp(np,1) >0.0 .and. micparam%csoilobsm(np,1) > 0.0) then
             xcost(np) = xcost(np) + (log(xmodpocavg)-log(micparam%csoilobsp(np,1)))** 2 &
                                   + (log(xmodmaocavg)-log(micparam%csoilobsm(np,1)))** 2
-         endif
+         end if
          write(92,921) micparam%siteid(np),micparam%pft(np),micparam%isoil(np),micparam%sorder(np), &
                        micparam%bgctype(np),micglobal%area(np),xmodpocavg,micparam%csoilobsp(np,1), &
                        xmodmaocavg,micparam%csoilobsm(np,1)
 
-      endif !"pft"
-   enddo  !"np"
+      end if !"pft"
+   end do  !"np"
    totcost = sum(xcost(1:mp))
 
     deallocate(xcost)

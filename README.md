@@ -140,3 +140,24 @@ open doc/index.html
 ```
 
 To regenerate after updating doc comments, simply re-run `ford mesc.md`.
+
+---
+
+## Developer setup
+
+We make use of [Fortitude](https://fortitude.readthedocs.io/en/stable/) for
+Fortran linting. To install Fortitude, either create and activate a
+[Python virtual environment](https://www.datasciencebase.com/fundamentals/python/environment-setup/)
+and install via
+```sh
+pip install -r requirements-dev.txt
+```
+or follow the instructions
+[on the Fortitude website](https://fortitude.readthedocs.io/en/stable/installation/).
+
+To apply Fortitude for linting the MESC code base, run
+```sh
+fortitude check
+```
+from the command line. This will report any issues, given the configuration in
+[`fortitude.toml`](fortitude.toml).

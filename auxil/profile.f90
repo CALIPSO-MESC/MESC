@@ -652,13 +652,13 @@ end module mic_variable
       jrestart=0;xopt(:)=1.0
       do nparam=1,16
          nxopt(nparam) = nparam
-      enddo
+      end do
 
-      frestart_in='miccpool_in.nc'
-      frestart_out='miccpool_out.nc'
-      foutput='vmic_output.nc'
+      frestart_in="miccpool_in.nc"
+      frestart_out="miccpool_out.nc"
+      foutput="vmic_output.nc"
 
-      open(1,file='params1.txt')
+      open(1,file="params1.txt")
 !      open(91,file='modobs.txt')
 !      open(92,file='modobs2.txt')
 !      open(93,file='modobs_c14.txt')
@@ -678,8 +678,8 @@ end module mic_variable
          read(1,*) nxopt(1:nx)
          do nparam=1,nx
             xopt(nxopt(nparam)) = xparam16(nparam)
-         enddo
-      endif
+         end do
+      end if
       print*, xopt
 
       mp = 213
@@ -695,32 +695,32 @@ end module mic_variable
       call mic_allocate_npool(mp,ms,micnpool)
 
           isoc14 = 0
-          print *, 'isoc14 =',isoc14,'--getdata_c14'
+          print *, "isoc14 =",isoc14,"--getdata_c14"
           call getdata_c14(frac14c,f14c,micinput,micparam,micnpool)
           call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
-          print *, 'vmicsoil_c14'
+          print *, "vmicsoil_c14"
           call vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,ifsoc14,bgcopt,nyeqpool, &
                         micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
-          print *, 'calcost_c14'
+          print *, "calcost_c14"
           call calcost_c14(nx,isoc14,bgcopt,xopt,micparam,miccpool,micinput,totcost1)
 
           miccpool%c12pooleqp(:) = miccpool%cpooleqp(:)
           miccpool%c12pooleqm(:) = miccpool%cpooleqm(:)
 
           isoc14 = 1
-          print *, 'isoc14 =',isoc14,'--getdata_c14'
+          print *, "isoc14 =",isoc14,"--getdata_c14"
           call getdata_c14(frac14c,f14c,micinput,micparam,micnpool)
           call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
-          print *, 'vmicsoil_c14'
+          print *, "vmicsoil_c14"
           call vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,ifsoc14,bgcopt,nyeqpool+2000, &
                         micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
-          print *, 'calcost_c14'
+          print *, "calcost_c14"
           call calcost_c14(nx,isoc14,bgcopt,xopt,micparam,miccpool,micinput,totcost2)
           functn_c14 = totcost1+totcost2
-          print *,'tot1 = ',totcost1
-          print *,'tot2 = ',totcost2
+          print *,"tot1 = ",totcost1
+          print *,"tot2 = ",totcost2
 
       close(1)
 !      close(91)
@@ -766,13 +766,13 @@ real(8) function functn_frc(nx,xparam16)
       jrestart=0;xopt(:)=1.0
       do nparam=1,16
          nxopt(nparam) = nparam
-      enddo
+      end do
 
-      frestart_in='miccpool_in.nc'
-      frestart_out='miccpool_out.nc'
-      foutput='vmic_output.nc'
+      frestart_in="miccpool_in.nc"
+      frestart_out="miccpool_out.nc"
+      foutput="vmic_output.nc"
 
-      open(1,file='params1.txt')
+      open(1,file="params1.txt")
 !      open(91,file='modobs.txt')
 !      open(92,file='modobs2.txt')
 
@@ -786,8 +786,8 @@ real(8) function functn_frc(nx,xparam16)
          read(1,*) nxopt(1:nx)
          do nparam=1,nx
             xopt(nxopt(nparam)) = xparam16(nparam)
-         enddo
-      endif
+         end do
+      end if
       print*, xopt
 
 
@@ -806,15 +806,15 @@ real(8) function functn_frc(nx,xparam16)
       call mic_allocate_npool(mp,ms,micnpool)
 
 
-          print *, 'isoc14 =',isoc14,'--getdata_frc'
+          print *, "isoc14 =",isoc14,"--getdata_frc"
           call getdata_frc(Cfraction,micinput,micparam,micnpool)
           call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
-          print *, 'vmicsoil_frc'
+          print *, "vmicsoil_frc"
 
           call vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,ifsoc14,bgcopt,nyeqpool, &
                         micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
-          print *, 'calcost_frc'
+          print *, "calcost_frc"
           call calcost_frc(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,totcost1)
 
       close(1)
@@ -860,13 +860,13 @@ real(8) function functn_soc_wosis(nx,xparam16)
       jrestart=0;xopt(:)=1.0
       do nparam=1,16
          nxopt(nparam) = nparam
-      enddo
+      end do
 
-      frestart_in='miccpool_in.nc'
-      frestart_out='miccpool_out.nc'
-      foutput='vmic_output.nc'
+      frestart_in="miccpool_in.nc"
+      frestart_out="miccpool_out.nc"
+      foutput="vmic_output.nc"
 
-      open(1,file='params1.txt')
+      open(1,file="params1.txt")
 !      open(91,file='modobs.txt')
 !      open(92,file='modobs2.txt')
       read(1,*)
@@ -879,8 +879,8 @@ real(8) function functn_soc_wosis(nx,xparam16)
          read(1,*) nxopt(1:nx)
          do nparam=1,nx
             xopt(nxopt(nparam)) = xparam16(nparam)
-         enddo
-      endif
+         end do
+      end if
       print*, xopt
 
       mp = 4058  !wosis
@@ -956,16 +956,16 @@ real(8) function functn(nx,xparam16)
       jrestart=0;xopt(:)=1.0
       do nparam=1,16
          nxopt(nparam) = nparam
-      enddo
+      end do
 
-      frestart_in='miccpool_in.nc'
-      frestart_out='miccpool_out.nc'
-      foutput='vmic_output.nc'
+      frestart_in="miccpool_in.nc"
+      frestart_out="miccpool_out.nc"
+      foutput="vmic_output.nc"
 
     !  open(91,file='modobs.txt')
     !  open(92,file='modobs2.txt')
 
-      open(1,file='params1.txt')
+      open(1,file="params1.txt")
       read(1,*)
       read(1,*) jglobal,ifsoc14,kinetics,bgcopt,jopt,jrestart,jmodel
       read(1,101) fhwsdsoc
@@ -973,7 +973,7 @@ real(8) function functn(nx,xparam16)
       read(1,*) nxopt(1:nx)
       do nparam=1,nx
          xopt(nxopt(nparam)) = xparam16(nparam)
-      enddo
+      end do
       close(1)
       print*, xopt
 101   format(a120)
@@ -1017,7 +1017,7 @@ real(8) function functn(nx,xparam16)
       call mic_deallocate_npool(mp,ms,micnpool)
 
       close(1)
-      print *, 'cost and parameter values',totcost1, xopt(nxopt(1:nx))
+      print *, "cost and parameter values",totcost1, xopt(nxopt(1:nx))
     !  close(91)
     !  close(92)
       functn = totcost1
@@ -1043,44 +1043,44 @@ END function functn
 
    ! open restart file
     status = nf90_open(frestart_in,nf90_nowrite,ncid)
-    if(status /= nf90_noerr) CALL nc_abort(STATUS, 'Error opening '//frestart_in)
+    if(status /= nf90_noerr) CALL nc_abort(STATUS, "Error opening "//frestart_in)
 
     ! get dimensions
-    status = nf90_inq_dimid(ncid,'mp',varid)
-    if(status /= nf90_noerr) CALL nc_abort(STATUS, 'Error inquiring dimensions mp_id')
+    status = nf90_inq_dimid(ncid,"mp",varid)
+    if(status /= nf90_noerr) CALL nc_abort(STATUS, "Error inquiring dimensions mp_id")
     status = nf90_inquire_dimension(ncid,varid,len=mpx)
-    if(status /= nf90_noerr) CALL nc_abort(STATUS, 'Error reading mp')
+    if(status /= nf90_noerr) CALL nc_abort(STATUS, "Error reading mp")
 
-    status = nf90_inq_dimid(ncid,'ms',varid)
-    if(status /= nf90_noerr) CALL nc_abort(STATUS,'Error inquiring dimensions ms_id')
+    status = nf90_inq_dimid(ncid,"ms",varid)
+    if(status /= nf90_noerr) CALL nc_abort(STATUS,"Error inquiring dimensions ms_id")
     status = nf90_inquire_dimension(ncid,varid,len=msx)
-    if(status /= nf90_noerr) CALL nc_abort(STATUS, 'Error reading ms')
+    if(status /= nf90_noerr) CALL nc_abort(STATUS, "Error reading ms")
 
-    status = nf90_inq_dimid(ncid,'mcpool',varid)
-    if(status /= nf90_noerr) CALL nc_abort(STATUS, 'Error inquiring dimensions mccpool_id')
+    status = nf90_inq_dimid(ncid,"mcpool",varid)
+    if(status /= nf90_noerr) CALL nc_abort(STATUS, "Error inquiring dimensions mccpool_id")
     status = nf90_inquire_dimension(ncid,varid,len=mcpoolx)
-    if(status /= nf90_noerr) CALL nc_abort(STATUS,'Error reading mcpool')
+    if(status /= nf90_noerr) CALL nc_abort(STATUS,"Error reading mcpool")
 
     ! get variables
-    status = nf90_inq_varid(ncid,'mic_cpool',varid)
-    if(status /= nf90_noerr) CALL nc_abort(STATUS, 'Error inquiring miccpoolc')
+    status = nf90_inq_varid(ncid,"mic_cpool",varid)
+    if(status /= nf90_noerr) CALL nc_abort(STATUS, "Error inquiring miccpoolc")
     status = nf90_get_var(ncid,varid,fcpool)
-    if(status /= nf90_noerr) CALL nc_abort(STATUS,'Error reading fcpool')
+    if(status /= nf90_noerr) CALL nc_abort(STATUS,"Error reading fcpool")
 
-    status = nf90_inq_varid(ncid,'mic_npool',varid)
-    if(status /= nf90_noerr) CALL nc_abort(STATUS, 'Error inquiring micnpoolc')
+    status = nf90_inq_varid(ncid,"mic_npool",varid)
+    if(status /= nf90_noerr) CALL nc_abort(STATUS, "Error inquiring micnpoolc")
     status = nf90_get_var(ncid,varid,fnpool)
-    if(status /= nf90_noerr) CALL nc_abort(STATUS,'Error reading fnpool')
+    if(status /= nf90_noerr) CALL nc_abort(STATUS,"Error reading fnpool")
 
     ! close the file
     status = NF90_close(ncid)
-    if(status /= nf90_noerr) call nc_abort(status, 'Error in clsoing netCDF input file')
+    if(status /= nf90_noerr) call nc_abort(status, "Error in clsoing netCDF input file")
 
     ! assign the values from the restart file
     if(mpx/=mp .or. msx/=ms .or. mcpoolx/=mcpool) then
-       print *, 'dimensions do not match! ', mp,mpx,ms,msx,mcpool,mcpoolx
+       print *, "dimensions do not match! ", mp,mpx,ms,msx,mcpool,mcpoolx
        STOP
-    endif
+    end if
     miccpool%cpool    = fcpool
     micnpool%mineralN = fnpool
 
@@ -1109,49 +1109,49 @@ END function functn
 
     ! Create NetCDF file:
     STATUS = NF90_create(frestart_out, NF90_CLOBBER, FILE_ID)
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error creating restart file ')
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error creating restart file ")
 
-    WRITE(*,*) 'writing mic restart', frestart_out
+    WRITE(*,*) "writing mic restart", frestart_out
     ! Put the file in define mode:
     STATUS = NF90_redef(FILE_ID)
 
-    STATUS = NF90_PUT_ATT( FILE_ID, NF90_GLOBAL, 'Valid restart date', CDATE )
+    STATUS = NF90_PUT_ATT( FILE_ID, NF90_GLOBAL, "Valid restart date", CDATE )
 
     ! Define dimensions:
     ! mp (number of patches)
-    STATUS = NF90_def_dim(FILE_ID, 'mp'   , mp     , mp_ID)
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining mp dimension ')
+    STATUS = NF90_def_dim(FILE_ID, "mp"   , mp     , mp_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error defining mp dimension ")
 
     ! ms: number of soil layers
-    STATUS = NF90_DEF_DIM(FILE_ID, 'ms', ms, soil_ID)
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining soil dimension ' )
+    STATUS = NF90_DEF_DIM(FILE_ID, "ms", ms, soil_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error defining soil dimension " )
 
     ! mcpool: number of soil carbon pools
-    STATUS = NF90_def_dim(FILE_ID, 'mcpool', mcpool, miccarb_ID)
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining mic_carbon_pools dimension ' )
+    STATUS = NF90_def_dim(FILE_ID, "mcpool", mcpool, miccarb_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error defining mic_carbon_pools dimension " )
 
-    STATUS = NF90_def_var(FILE_ID,'mic_cpool',NF90_FLOAT,[mp_ID,soil_ID,miccarb_ID],cmic_ID)
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining mic_cpool variable ' )
+    STATUS = NF90_def_var(FILE_ID,"mic_cpool",NF90_FLOAT,[mp_ID,soil_ID,miccarb_ID],cmic_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error defining mic_cpool variable " )
 
-    STATUS = NF90_def_var(FILE_ID,'mic_npool',NF90_FLOAT,[mp_ID,soil_ID],nmic_ID)
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining mic_npool variable ' )
+    STATUS = NF90_def_var(FILE_ID,"mic_npool",NF90_FLOAT,[mp_ID,soil_ID],nmic_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error defining mic_npool variable " )
 
     ! End define mode:
     STATUS = NF90_enddef(FILE_ID)
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error ending define mode ' )
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error ending define mode " )
 
     ! PUT VARS
     STATUS = NF90_PUT_VAR(FILE_ID, cmic_ID, REAL(miccpool%cpool, 4) )
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing mic_cpool variable ' )
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error writing mic_cpool variable " )
 
     STATUS = NF90_PUT_VAR(FILE_ID, nmic_ID, REAL(micnpool%mineralN, 4) )
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing mic_npool variable ')
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error writing mic_npool variable ")
 
     ! Close NetCDF file:
     STATUS = NF90_close(FILE_ID)
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error closing restart file '  )
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error closing restart file "  )
 
-    write(*, *) 'restart file written to ', frestart_out
+    write(*, *) "restart file written to ", frestart_out
 
   end subroutine vmic_restart_write
 
@@ -1189,61 +1189,61 @@ END function functn
     WRITE(CDATE, '(I4.4,"-",I2.2,"-",I2.2)') values(1),values(2),values(3)
     ! Create NetCDF file:
     STATUS = NF90_create(foutput, NF90_CLOBBER, FILE_ID)
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error creating output file ')
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error creating output file ")
 
-    WRITE(*,*) 'writing output file', foutput
+    WRITE(*,*) "writing output file", foutput
     print *, CDATE
 
     ! Put the file in define mode:
     STATUS = NF90_redef(FILE_ID)
 
-    STATUS = NF90_PUT_ATT( FILE_ID, NF90_GLOBAL, 'Valid output date', CDATE  )
+    STATUS = NF90_PUT_ATT( FILE_ID, NF90_GLOBAL, "Valid output date", CDATE  )
 
     ! Define dimensions:
     ! mp (number of patches)
-    STATUS = NF90_def_dim(FILE_ID, 'mp'   , mp     , mp_ID)
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining mp dimension ')
+    STATUS = NF90_def_dim(FILE_ID, "mp"   , mp     , mp_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error defining mp dimension ")
 
-    STATUS = NF90_def_var(FILE_ID,'Cinput',NF90_FLOAT,[mp_ID],cinput_ID)
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining NPP ' )
-
-
-    STATUS = NF90_def_var(FILE_ID,'rsoil',NF90_FLOAT,[mp_ID],rsoil_ID)
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining rsoil ' )
+    STATUS = NF90_def_var(FILE_ID,"Cinput",NF90_FLOAT,[mp_ID],cinput_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error defining NPP " )
 
 
-    STATUS = NF90_def_var(FILE_ID,'Cleach',NF90_FLOAT,[mp_ID],cleach_ID)
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error defining cleach ' )
+    STATUS = NF90_def_var(FILE_ID,"rsoil",NF90_FLOAT,[mp_ID],rsoil_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error defining rsoil " )
+
+
+    STATUS = NF90_def_var(FILE_ID,"Cleach",NF90_FLOAT,[mp_ID],cleach_ID)
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error defining cleach " )
 
     ! End define mode:
     STATUS = NF90_enddef(FILE_ID)
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error ending define mode ' )
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error ending define mode " )
 
     ! put attributes
-    STATUS = NF90_PUT_ATT(FILE_ID,cinput_ID,'unit','g C m-2 year-1')
-    STATUS = NF90_PUT_ATT(FILE_ID,cinput_ID,'missing_value', real(missreal,4))
+    STATUS = NF90_PUT_ATT(FILE_ID,cinput_ID,"unit","g C m-2 year-1")
+    STATUS = NF90_PUT_ATT(FILE_ID,cinput_ID,"missing_value", real(missreal,4))
 
-    STATUS = NF90_PUT_ATT(FILE_ID,rsoil_ID,'unit','g C m-2 year-1')
-    STATUS = NF90_PUT_ATT(FILE_ID,rsoil_ID,'missing_value', real(missreal,4))
+    STATUS = NF90_PUT_ATT(FILE_ID,rsoil_ID,"unit","g C m-2 year-1")
+    STATUS = NF90_PUT_ATT(FILE_ID,rsoil_ID,"missing_value", real(missreal,4))
 
-    STATUS = NF90_PUT_ATT(FILE_ID,cleach_ID,'unit','g C m-2 year-1')
-    STATUS = NF90_PUT_ATT(FILE_ID,cleach_ID,'missing_value', real(missreal,4))
+    STATUS = NF90_PUT_ATT(FILE_ID,cleach_ID,"unit","g C m-2 year-1")
+    STATUS = NF90_PUT_ATT(FILE_ID,cleach_ID,"missing_value", real(missreal,4))
 
     ! PUT VARS
     STATUS = NF90_PUT_VAR(FILE_ID, cinput_ID, REAL(micoutput%fluxcinput,4) )
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing NPP ' )
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error writing NPP " )
 
     STATUS = NF90_PUT_VAR(FILE_ID, rsoil_ID, REAL(micoutput%fluxrsoil,4) )
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing Rsoil ')
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error writing Rsoil ")
 
     STATUS = NF90_PUT_VAR(FILE_ID, cleach_ID, REAL(micoutput%fluxcleach,4) )
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error writing Cleach ')
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error writing Cleach ")
 
     ! Close NetCDF file:
     STATUS = NF90_close(FILE_ID)
-    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, 'Error closing restart file '  )
+    IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error closing restart file "  )
 
-    write(*, *) 'output written to ', foutput
+    write(*, *) "output written to ", foutput
 
   end subroutine vmic_output_write
 
@@ -1255,7 +1255,7 @@ END function functn
     integer :: npft,ipft,n
     real(r_2), dimension(20)    :: x
 
-    open(100,file='parameters_global.csv')
+    open(100,file="parameters_global.csv")
     read(100,*)
     do npft=1,mpft
        read(100,*) ipft, (x(n),n=1,17)
@@ -1279,7 +1279,7 @@ END function functn
        micpxdef%xfp2ax(npft)     = x(15)
        micpxdef%xbeta(npft)      = x(16)
        micpxdef%xdesorp(npft)    = x(17)
-    enddo
+    end do
     close(100)
 
 !    print *, 'xdesorp=', micpxdef%xdesorp(:)
@@ -1339,134 +1339,134 @@ END function functn
 
    ! open .nc file
     status = nf90_open(frac14c,nf90_nowrite,ncid)
-    if(status /= nf90_noerr) print*, 'Error opening frc_c14.nc'
+    if(status /= nf90_noerr) print*, "Error opening frc_c14.nc"
 
     ! get dimensions/profile_id
-    status = nf90_inq_varid(ncid,'nsite',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring dimensions/profile_id'
+    status = nf90_inq_varid(ncid,"nsite",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring dimensions/profile_id"
     status = nf90_get_var(ncid,varid,fid)
-    if(status /= nf90_noerr) print*,'Error reading profile_id'
+    if(status /= nf90_noerr) print*,"Error reading profile_id"
 
     ! get variables
-    status = nf90_inq_varid(ncid,'SOC',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soc'
+    status = nf90_inq_varid(ncid,"SOC",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soc"
     status = nf90_get_var(ncid,varid,fsoc)
-    if(status /= nf90_noerr) print*,'Error reading soc'
+    if(status /= nf90_noerr) print*,"Error reading soc"
 
-    status = nf90_inq_varid(ncid,'bulkd',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring bulk density'
+    status = nf90_inq_varid(ncid,"bulkd",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring bulk density"
     status = nf90_get_var(ncid,varid,fbulkd)
-    if(status /= nf90_noerr) print*,'Error reading bulk density'
+    if(status /= nf90_noerr) print*,"Error reading bulk density"
 
-    status = nf90_inq_varid(ncid,'clay',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring clay'
+    status = nf90_inq_varid(ncid,"clay",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring clay"
     status = nf90_get_var(ncid,varid,fclay)
-    if(status /= nf90_noerr) print*,'Error reading clay'
+    if(status /= nf90_noerr) print*,"Error reading clay"
 
-    status = nf90_inq_varid(ncid,'silt',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring silt'
+    status = nf90_inq_varid(ncid,"silt",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring silt"
     status = nf90_get_var(ncid,varid,fsilt)
-    if(status /= nf90_noerr) print*,'Error reading silt'
+    if(status /= nf90_noerr) print*,"Error reading silt"
 
-    status = nf90_inq_varid(ncid,'ph',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring ph'
+    status = nf90_inq_varid(ncid,"ph",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring ph"
     status = nf90_get_var(ncid,varid,fph)
-    if(status /= nf90_noerr) print*,'Error reading ph'
+    if(status /= nf90_noerr) print*,"Error reading ph"
 
-    status = nf90_inq_varid(ncid,'temp',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soil temperature'
+    status = nf90_inq_varid(ncid,"temp",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soil temperature"
     status = nf90_get_var(ncid,varid,ftemp)
-    if(status /= nf90_noerr) print*,'Error reading soil temperature'
+    if(status /= nf90_noerr) print*,"Error reading soil temperature"
 
-    status = nf90_inq_varid(ncid,'moist',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soil moisture'
+    status = nf90_inq_varid(ncid,"moist",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soil moisture"
     status = nf90_get_var(ncid,varid,fmoist)
-    if(status /= nf90_noerr) print*,'Error reading soil moisture'
+    if(status /= nf90_noerr) print*,"Error reading soil moisture"
 
-    status = nf90_inq_varid(ncid,'porosity',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soil porosity'
+    status = nf90_inq_varid(ncid,"porosity",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soil porosity"
     status = nf90_get_var(ncid,varid,fporosity)
-    if(status /= nf90_noerr) print*,'Error reading soil porosity'
+    if(status /= nf90_noerr) print*,"Error reading soil porosity"
 
-    status = nf90_inq_varid(ncid,'matpot',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soil matric potential'
+    status = nf90_inq_varid(ncid,"matpot",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soil matric potential"
     status = nf90_get_var(ncid,varid,fmatpot)
-    if(status /= nf90_noerr) print*,'Error reading soil matric potential'
+    if(status /= nf90_noerr) print*,"Error reading soil matric potential"
 
-    status = nf90_inq_varid(ncid,'npp',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring npp'
+    status = nf90_inq_varid(ncid,"npp",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring npp"
     status = nf90_get_var(ncid,varid,fnpp)
-    if(status /= nf90_noerr) print*,'Error reading npp'
+    if(status /= nf90_noerr) print*,"Error reading npp"
 
-    status = nf90_inq_varid(ncid,'anpp',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring anpp'
+    status = nf90_inq_varid(ncid,"anpp",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring anpp"
     status = nf90_get_var(ncid,varid,fanpp)
-    if(status /= nf90_noerr) print*,'Error reading anpp'
+    if(status /= nf90_noerr) print*,"Error reading anpp"
 
-    status = nf90_inq_varid(ncid,'bnpp',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring bnpp'
+    status = nf90_inq_varid(ncid,"bnpp",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring bnpp"
     status = nf90_get_var(ncid,varid,fbnpp)
-    if(status /= nf90_noerr) print*,'Error reading bnpp'
+    if(status /= nf90_noerr) print*,"Error reading bnpp"
 
-    status = nf90_inq_varid(ncid,'lignin_C',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring lignin/C'
+    status = nf90_inq_varid(ncid,"lignin_C",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring lignin/C"
     status = nf90_get_var(ncid,varid,flignin)
-    if(status /= nf90_noerr) print*,'Error reading lignin/C'
+    if(status /= nf90_noerr) print*,"Error reading lignin/C"
 
-    status = nf90_inq_varid(ncid,'cna',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring C/N aboveground'
+    status = nf90_inq_varid(ncid,"cna",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring C/N aboveground"
     status = nf90_get_var(ncid,varid,fcna)
-    if(status /= nf90_noerr) print*,'Error reading C/N aboveground'
+    if(status /= nf90_noerr) print*,"Error reading C/N aboveground"
 
-    status = nf90_inq_varid(ncid,'cnb',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring C/N belowground'
+    status = nf90_inq_varid(ncid,"cnb",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring C/N belowground"
     status = nf90_get_var(ncid,varid,fcnb)
-    if(status /= nf90_noerr) print*,'Error reading C/N belowground'
+    if(status /= nf90_noerr) print*,"Error reading C/N belowground"
 
-    status = nf90_inq_varid(ncid,'pft',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring plant functional type'
+    status = nf90_inq_varid(ncid,"pft",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring plant functional type"
     status = nf90_get_var(ncid,varid,fpft)
-    if(status /= nf90_noerr) print*,'Error reading plant functional type'
+    if(status /= nf90_noerr) print*,"Error reading plant functional type"
 
-      status = nf90_inq_varid(ncid,'POC',varid)
-      if(status /= nf90_noerr) print*, 'Error inquiring POC'
+      status = nf90_inq_varid(ncid,"POC",varid)
+      if(status /= nf90_noerr) print*, "Error inquiring POC"
       status = nf90_get_var(ncid,varid,fpoc)
-      if(status /= nf90_noerr) print*,'Error reading POC'
+      if(status /= nf90_noerr) print*,"Error reading POC"
 
-      status = nf90_inq_varid(ncid,'MAOC',varid)
-      if(status /= nf90_noerr) print*, 'Error inquiring MAOC'
+      status = nf90_inq_varid(ncid,"MAOC",varid)
+      if(status /= nf90_noerr) print*, "Error inquiring MAOC"
       status = nf90_get_var(ncid,varid,fmaoc)
-      if(status /= nf90_noerr) print*,'Error reading MAOC'
+      if(status /= nf90_noerr) print*,"Error reading MAOC"
 
-      status = nf90_inq_varid(ncid,'fm_poc',varid)
-      if(status /= nf90_noerr) print*, 'Error inquiring fm_poc'
+      status = nf90_inq_varid(ncid,"fm_poc",varid)
+      if(status /= nf90_noerr) print*, "Error inquiring fm_poc"
       status = nf90_get_var(ncid,varid,ffmpoc)
-      if(status /= nf90_noerr) print*,'Error reading fm_poc'
+      if(status /= nf90_noerr) print*,"Error reading fm_poc"
 
-      status = nf90_inq_varid(ncid,'fm_maoc',varid)
-      if(status /= nf90_noerr) print*, 'Error inquiring fm_maoc'
+      status = nf90_inq_varid(ncid,"fm_maoc",varid)
+      if(status /= nf90_noerr) print*, "Error inquiring fm_maoc"
       status = nf90_get_var(ncid,varid,ffmmaoc)
-      if(status /= nf90_noerr) print*,'Error reading fm_maoc'
+      if(status /= nf90_noerr) print*,"Error reading fm_maoc"
 
-      status = nf90_inq_varid(ncid,'top_depth',varid)
-      if(status /= nf90_noerr) print*, 'Error inquiring top depth'
+      status = nf90_inq_varid(ncid,"top_depth",varid)
+      if(status /= nf90_noerr) print*, "Error inquiring top depth"
       status = nf90_get_var(ncid,varid,ftop)
-      if(status /= nf90_noerr) print*,'Error reading top depth'
+      if(status /= nf90_noerr) print*,"Error reading top depth"
 
-      status = nf90_inq_varid(ncid,'bot_depth',varid)
-      if(status /= nf90_noerr) print*, 'Error inquiring bottom depth'
+      status = nf90_inq_varid(ncid,"bot_depth",varid)
+      if(status /= nf90_noerr) print*, "Error inquiring bottom depth"
       status = nf90_get_var(ncid,varid,fbot)
-      if(status /= nf90_noerr) print*,'Error reading bottom depth'
+      if(status /= nf90_noerr) print*,"Error reading bottom depth"
 
-      status = nf90_inq_varid(ncid,'c14_year',varid)
-      if(status /= nf90_noerr) print*, 'Error inquiring c14 year'
+      status = nf90_inq_varid(ncid,"c14_year",varid)
+      if(status /= nf90_noerr) print*, "Error inquiring c14 year"
       status = nf90_get_var(ncid,varid,fyear)
-      if(status /= nf90_noerr) print*,'Error reading c14 year'
+      if(status /= nf90_noerr) print*,"Error reading c14 year"
 
-      status = nf90_inq_varid(ncid,'c14_region',varid)
-      if(status /= nf90_noerr) print*, 'Error inquiring c14 region'
+      status = nf90_inq_varid(ncid,"c14_region",varid)
+      if(status /= nf90_noerr) print*, "Error inquiring c14 region"
       status = nf90_get_var(ncid,varid,fregion)
-      if(status /= nf90_noerr) print*,'Error reading c14 region'
+      if(status /= nf90_noerr) print*,"Error reading c14 region"
 
     ! Close netcdf file
     status = NF90_CLOSE(ncid)
@@ -1515,8 +1515,8 @@ END function functn
             micparam%csoilobsm(np,ns)   = fmaoc(np)
 
             !micnpool%mineralN(np,ns) = forcdata(np,7)*0.001 ! mineral N: "0.001" mg N /kg soil --> g N /kg soil
-         enddo !"ns"
-      enddo    ! "np=1,mp"
+         end do !"ns"
+      end do    ! "np=1,mp"
 
          ! read in the standard 14C atmospheric data for five zones
 !         f14c(1) ='/g/data/w97/lw9370/combined-model/c14/code-structure/data/NH1-C14.csv'
@@ -1526,7 +1526,7 @@ END function functn
 !         f14c(5) ='/g/data/w97/lw9370/combined-model/c14/code-structure/data/SH3-C14.csv'
          do nz=1,5
              call get14catm(nz,f14c(nz),micparam)
-         enddo
+         end do
 
     deallocate(fsoc)
     deallocate(fbulkd)
@@ -1607,119 +1607,119 @@ END function functn
 
    ! open .nc file
     status = nf90_open(Cfraction,nf90_nowrite,ncid)
-    if(status /= nf90_noerr) print*, 'Error opening c_fraction.nc'
+    if(status /= nf90_noerr) print*, "Error opening c_fraction.nc"
 
     ! get dimensions/profile_id
-    status = nf90_inq_varid(ncid,'nsite',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring dimensions/profile_id'
+    status = nf90_inq_varid(ncid,"nsite",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring dimensions/profile_id"
     status = nf90_get_var(ncid,varid,fid)
-    if(status /= nf90_noerr) print*,'Error reading profile_id'
+    if(status /= nf90_noerr) print*,"Error reading profile_id"
 
     ! get variables
-    status = nf90_inq_varid(ncid,'dataid',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring data ID'
+    status = nf90_inq_varid(ncid,"dataid",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring data ID"
     status = nf90_get_var(ncid,varid,fdataid)
-    if(status /= nf90_noerr) print*,'Error reading data ID'
+    if(status /= nf90_noerr) print*,"Error reading data ID"
 
-    status = nf90_inq_varid(ncid,'SOC',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soc'
+    status = nf90_inq_varid(ncid,"SOC",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soc"
     status = nf90_get_var(ncid,varid,fsoc)
-    if(status /= nf90_noerr) print*,'Error reading soc'
+    if(status /= nf90_noerr) print*,"Error reading soc"
 
-    status = nf90_inq_varid(ncid,'bulkd',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring bulk density'
+    status = nf90_inq_varid(ncid,"bulkd",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring bulk density"
     status = nf90_get_var(ncid,varid,fbulkd)
-    if(status /= nf90_noerr) print*,'Error reading bulk density'
+    if(status /= nf90_noerr) print*,"Error reading bulk density"
 
-    status = nf90_inq_varid(ncid,'clay',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring clay'
+    status = nf90_inq_varid(ncid,"clay",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring clay"
     status = nf90_get_var(ncid,varid,fclay)
-    if(status /= nf90_noerr) print*,'Error reading clay'
+    if(status /= nf90_noerr) print*,"Error reading clay"
 
-    status = nf90_inq_varid(ncid,'silt',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring silt'
+    status = nf90_inq_varid(ncid,"silt",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring silt"
     status = nf90_get_var(ncid,varid,fsilt)
-    if(status /= nf90_noerr) print*,'Error reading silt'
+    if(status /= nf90_noerr) print*,"Error reading silt"
 
-    status = nf90_inq_varid(ncid,'ph',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring ph'
+    status = nf90_inq_varid(ncid,"ph",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring ph"
     status = nf90_get_var(ncid,varid,fph)
-    if(status /= nf90_noerr) print*,'Error reading ph'
+    if(status /= nf90_noerr) print*,"Error reading ph"
 
-    status = nf90_inq_varid(ncid,'temp',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soil temperature'
+    status = nf90_inq_varid(ncid,"temp",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soil temperature"
     status = nf90_get_var(ncid,varid,ftemp)
-    if(status /= nf90_noerr) print*,'Error reading soil temperature'
+    if(status /= nf90_noerr) print*,"Error reading soil temperature"
 
-    status = nf90_inq_varid(ncid,'moist',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soil moisture'
+    status = nf90_inq_varid(ncid,"moist",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soil moisture"
     status = nf90_get_var(ncid,varid,fmoist)
-    if(status /= nf90_noerr) print*,'Error reading soil moisture'
+    if(status /= nf90_noerr) print*,"Error reading soil moisture"
 
-    status = nf90_inq_varid(ncid,'porosity',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soil porosity'
+    status = nf90_inq_varid(ncid,"porosity",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soil porosity"
     status = nf90_get_var(ncid,varid,fporosity)
-    if(status /= nf90_noerr) print*,'Error reading soil porosity'
+    if(status /= nf90_noerr) print*,"Error reading soil porosity"
 
-    status = nf90_inq_varid(ncid,'matpot',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soil matric potential'
+    status = nf90_inq_varid(ncid,"matpot",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soil matric potential"
     status = nf90_get_var(ncid,varid,fmatpot)
-    if(status /= nf90_noerr) print*,'Error reading soil matric potential'
+    if(status /= nf90_noerr) print*,"Error reading soil matric potential"
 
-    status = nf90_inq_varid(ncid,'npp',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring npp'
+    status = nf90_inq_varid(ncid,"npp",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring npp"
     status = nf90_get_var(ncid,varid,fnpp)
-    if(status /= nf90_noerr) print*,'Error reading npp'
+    if(status /= nf90_noerr) print*,"Error reading npp"
 
-    status = nf90_inq_varid(ncid,'anpp',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring anpp'
+    status = nf90_inq_varid(ncid,"anpp",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring anpp"
     status = nf90_get_var(ncid,varid,fanpp)
-    if(status /= nf90_noerr) print*,'Error reading anpp'
+    if(status /= nf90_noerr) print*,"Error reading anpp"
 
-    status = nf90_inq_varid(ncid,'bnpp',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring bnpp'
+    status = nf90_inq_varid(ncid,"bnpp",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring bnpp"
     status = nf90_get_var(ncid,varid,fbnpp)
-    if(status /= nf90_noerr) print*,'Error reading bnpp'
+    if(status /= nf90_noerr) print*,"Error reading bnpp"
 
-    status = nf90_inq_varid(ncid,'lignin_C',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring lignin/C'
+    status = nf90_inq_varid(ncid,"lignin_C",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring lignin/C"
     status = nf90_get_var(ncid,varid,flignin)
-    if(status /= nf90_noerr) print*,'Error reading lignin/C'
+    if(status /= nf90_noerr) print*,"Error reading lignin/C"
 
-    status = nf90_inq_varid(ncid,'cna',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring C/N aboveground'
+    status = nf90_inq_varid(ncid,"cna",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring C/N aboveground"
     status = nf90_get_var(ncid,varid,fcna)
-    if(status /= nf90_noerr) print*,'Error reading C/N aboveground'
+    if(status /= nf90_noerr) print*,"Error reading C/N aboveground"
 
-    status = nf90_inq_varid(ncid,'cnb',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring C/N belowground'
+    status = nf90_inq_varid(ncid,"cnb",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring C/N belowground"
     status = nf90_get_var(ncid,varid,fcnb)
-    if(status /= nf90_noerr) print*,'Error reading C/N belowground'
+    if(status /= nf90_noerr) print*,"Error reading C/N belowground"
 
-    status = nf90_inq_varid(ncid,'pft',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring plant functional type'
+    status = nf90_inq_varid(ncid,"pft",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring plant functional type"
     status = nf90_get_var(ncid,varid,fpft)
-    if(status /= nf90_noerr) print*,'Error reading plant functional type'
+    if(status /= nf90_noerr) print*,"Error reading plant functional type"
 
-    status = nf90_inq_varid(ncid,'POC',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring POC'
+    status = nf90_inq_varid(ncid,"POC",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring POC"
     status = nf90_get_var(ncid,varid,fpoc)
-    if(status /= nf90_noerr) print*,'Error reading POC'
+    if(status /= nf90_noerr) print*,"Error reading POC"
 
-    status = nf90_inq_varid(ncid,'MAOC',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring MAOC'
+    status = nf90_inq_varid(ncid,"MAOC",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring MAOC"
     status = nf90_get_var(ncid,varid,fmaoc)
-    if(status /= nf90_noerr) print*,'Error reading MAOC'
+    if(status /= nf90_noerr) print*,"Error reading MAOC"
 
-    status = nf90_inq_varid(ncid,'top_depth',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring top depth'
+    status = nf90_inq_varid(ncid,"top_depth",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring top depth"
     status = nf90_get_var(ncid,varid,ftop)
-    if(status /= nf90_noerr) print*,'Error reading top depth'
+    if(status /= nf90_noerr) print*,"Error reading top depth"
 
-    status = nf90_inq_varid(ncid,'bot_depth',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring bottom depth'
+    status = nf90_inq_varid(ncid,"bot_depth",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring bottom depth"
     status = nf90_get_var(ncid,varid,fbot)
-    if(status /= nf90_noerr) print*,'Error reading bottom depth'
+    if(status /= nf90_noerr) print*,"Error reading bottom depth"
 
     ! Close netcdf file
     status = NF90_CLOSE(ncid)
@@ -1764,8 +1764,8 @@ END function functn
             micparam%csoilobsm(np,ns)   = fmaoc(np)
 
             !micnpool%mineralN(np,ns) = forcdata(np,7)*0.001 ! mineral N: "0.001" mg N /kg soil --> g N /kg soil
-         enddo !"ns"
-      enddo    ! "np=1,mp"
+         end do !"ns"
+      end do    ! "np=1,mp"
 
     deallocate(fsoc)
     deallocate(fbulkd)
@@ -1834,99 +1834,99 @@ END function functn
 
     ! open .nc file
     status = nf90_open(finputsoc,nf90_nowrite,ncid)
-    if(status /= nf90_noerr) print*, 'Error opening wosis_input.nc'
+    if(status /= nf90_noerr) print*, "Error opening wosis_input.nc"
 
     ! get dimensions/profile_id
-    status = nf90_inq_varid(ncid,'nsite',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring dimensions/profile_id'
+    status = nf90_inq_varid(ncid,"nsite",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring dimensions/profile_id"
     status = nf90_get_var(ncid,varid,fid)
-    if(status /= nf90_noerr) print*,'Error reading profile_id'
+    if(status /= nf90_noerr) print*,"Error reading profile_id"
 
     ! get variables
-    status = nf90_inq_varid(ncid,'soc',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soc'
+    status = nf90_inq_varid(ncid,"soc",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soc"
     status = nf90_get_var(ncid,varid,fsoc)
-    if(status /= nf90_noerr) print*,'Error reading soc'
+    if(status /= nf90_noerr) print*,"Error reading soc"
 
-    status = nf90_inq_varid(ncid,'bulkd',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring bulk density'
+    status = nf90_inq_varid(ncid,"bulkd",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring bulk density"
     status = nf90_get_var(ncid,varid,fbulkd)
-    if(status /= nf90_noerr) print*,'Error reading bulk density'
+    if(status /= nf90_noerr) print*,"Error reading bulk density"
 
-    status = nf90_inq_varid(ncid,'clay',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring clay'
+    status = nf90_inq_varid(ncid,"clay",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring clay"
     status = nf90_get_var(ncid,varid,fclay)
-    if(status /= nf90_noerr) print*,'Error reading clay'
+    if(status /= nf90_noerr) print*,"Error reading clay"
 
-    status = nf90_inq_varid(ncid,'silt',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring silt'
+    status = nf90_inq_varid(ncid,"silt",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring silt"
     status = nf90_get_var(ncid,varid,fsilt)
-    if(status /= nf90_noerr) print*,'Error reading silt'
+    if(status /= nf90_noerr) print*,"Error reading silt"
 
-    status = nf90_inq_varid(ncid,'ph',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring ph'
+    status = nf90_inq_varid(ncid,"ph",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring ph"
     status = nf90_get_var(ncid,varid,fph)
-    if(status /= nf90_noerr) print*,'Error reading ph'
+    if(status /= nf90_noerr) print*,"Error reading ph"
 
-    status = nf90_inq_varid(ncid,'temp',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soil temperature'
+    status = nf90_inq_varid(ncid,"temp",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soil temperature"
     status = nf90_get_var(ncid,varid,ftemp)
-    if(status /= nf90_noerr) print*,'Error reading soil temperature'
+    if(status /= nf90_noerr) print*,"Error reading soil temperature"
 
-    status = nf90_inq_varid(ncid,'moist',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soil moisture'
+    status = nf90_inq_varid(ncid,"moist",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soil moisture"
     status = nf90_get_var(ncid,varid,fmoist)
-    if(status /= nf90_noerr) print*,'Error reading soil moisture'
+    if(status /= nf90_noerr) print*,"Error reading soil moisture"
 
-    status = nf90_inq_varid(ncid,'matpot',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soil matric potential'
+    status = nf90_inq_varid(ncid,"matpot",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soil matric potential"
     status = nf90_get_var(ncid,varid,fmatpot)
-    if(status /= nf90_noerr) print*,'Error reading soil matric potential'
+    if(status /= nf90_noerr) print*,"Error reading soil matric potential"
 
-    status = nf90_inq_varid(ncid,'porosity',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soil porosity'
+    status = nf90_inq_varid(ncid,"porosity",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soil porosity"
     status = nf90_get_var(ncid,varid,fporosity)
-    if(status /= nf90_noerr) print*,'Error reading soil porosity'
+    if(status /= nf90_noerr) print*,"Error reading soil porosity"
 
-    status = nf90_inq_varid(ncid,'npp',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring npp'
+    status = nf90_inq_varid(ncid,"npp",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring npp"
     status = nf90_get_var(ncid,varid,fnpp)
-    if(status /= nf90_noerr) print*,'Error reading npp'
+    if(status /= nf90_noerr) print*,"Error reading npp"
 
-    status = nf90_inq_varid(ncid,'anpp',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring anpp'
+    status = nf90_inq_varid(ncid,"anpp",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring anpp"
     status = nf90_get_var(ncid,varid,fanpp)
-    if(status /= nf90_noerr) print*,'Error reading anpp'
+    if(status /= nf90_noerr) print*,"Error reading anpp"
 
-    status = nf90_inq_varid(ncid,'bnpp',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring bnpp'
+    status = nf90_inq_varid(ncid,"bnpp",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring bnpp"
     status = nf90_get_var(ncid,varid,fbnpp)
-    if(status /= nf90_noerr) print*,'Error reading bnpp'
+    if(status /= nf90_noerr) print*,"Error reading bnpp"
 
-    status = nf90_inq_varid(ncid,'lignin_C',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring lignin/C'
+    status = nf90_inq_varid(ncid,"lignin_C",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring lignin/C"
     status = nf90_get_var(ncid,varid,flignin)
-    if(status /= nf90_noerr) print*,'Error reading lignin/C'
+    if(status /= nf90_noerr) print*,"Error reading lignin/C"
 
-    status = nf90_inq_varid(ncid,'cna',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring C/N aboveground'
+    status = nf90_inq_varid(ncid,"cna",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring C/N aboveground"
     status = nf90_get_var(ncid,varid,fcna)
-    if(status /= nf90_noerr) print*,'Error reading C/N aboveground'
+    if(status /= nf90_noerr) print*,"Error reading C/N aboveground"
 
-    status = nf90_inq_varid(ncid,'cnb',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring C/N belowground'
+    status = nf90_inq_varid(ncid,"cnb",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring C/N belowground"
     status = nf90_get_var(ncid,varid,fcnb)
-    if(status /= nf90_noerr) print*,'Error reading C/N belowground'
+    if(status /= nf90_noerr) print*,"Error reading C/N belowground"
 
-    status = nf90_inq_varid(ncid,'pft',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring plant functional type'
+    status = nf90_inq_varid(ncid,"pft",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring plant functional type"
     status = nf90_get_var(ncid,varid,fpft)
-    if(status /= nf90_noerr) print*,'Error reading plant functional type'
+    if(status /= nf90_noerr) print*,"Error reading plant functional type"
 
-    status = nf90_inq_varid(ncid,'cluster',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring environmental cluster'
+    status = nf90_inq_varid(ncid,"cluster",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring environmental cluster"
     status = nf90_get_var(ncid,varid,fcluster)
-    if(status /= nf90_noerr) print*,'Error reading environmental cluster'
+    if(status /= nf90_noerr) print*,"Error reading environmental cluster"
 
    !  print*,'matpot = ',fmatpot(1:4,1)
    !  print*,'siteid = ',fid(1:4)
@@ -1973,8 +1973,8 @@ END function functn
             micparam%csoilobs(np,ns) = fsoc(np,ns)
 
             !micnpool%mineralN(np,ns) = forcdata(np,7)*0.001 ! mineral N: "0.001" mg N /kg soil --> g N /kg soil
-         enddo !"ns"
-      enddo    ! "np=1,mp"
+         end do !"ns"
+      end do    ! "np=1,mp"
 
     deallocate(fsoc)
     deallocate(fbulkd)
@@ -2018,19 +2018,19 @@ END function functn
       open(13,file=f14cz)
       do i=1,4
           read(13,*)
-      enddo
+      end do
 
       do i=1,79 !! 1941-2019
         read(13,*,end=91) year,c14del,sdx1,c14fm,sdx2
         ny = year - 1940
          if(ny<1 .or. ny>79) then
-            print *, 'year', year, 'outside the range'
+            print *, "year", year, "outside the range"
             stop
          else
             micparam%c14atm(ny,nz,1) = c14del !!! delta c14
             micparam%c14atm(ny,nz,2) = c14fm
-         endif
-      enddo
+         end if
+      end do
 91    close(13)
    end subroutine get14catm
 
@@ -2044,19 +2044,19 @@ END function functn
     integer:: ncid,varid,status
    ! open .nc file
     status = nf90_open(fhwsdsoc,nf90_nowrite,ncid)
-    if(status /= nf90_noerr) print*, 'Error opening c_fraction.nc'
+    if(status /= nf90_noerr) print*, "Error opening c_fraction.nc"
 
     ! get dimensions/profile_id
-    status = nf90_inq_dimid(ncid,'nsite',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring dimensions/nsite'
+    status = nf90_inq_dimid(ncid,"nsite",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring dimensions/nsite"
     status = nf90_inquire_dimension(ncid,varid,len=mpx)
-    if(status /= nf90_noerr) print*,'Error reading profile_id'
+    if(status /= nf90_noerr) print*,"Error reading profile_id"
 
     !
-    status = nf90_inq_dimid(ncid,'time',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring dimensions/ntime'
+    status = nf90_inq_dimid(ncid,"time",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring dimensions/ntime"
     status = nf90_inquire_dimension(ncid,varid,len=timex)
-    if(status /= nf90_noerr) print*,'Error reading profile_id'
+    if(status /= nf90_noerr) print*,"Error reading profile_id"
 
     ! Close netcdf file
     status = NF90_CLOSE(ncid)
@@ -2110,128 +2110,128 @@ END function functn
 
 
    ! open .nc file
-    print *, ' calling getdata_hwsd'
-    print *,'input file', fhwsdsoc
-    print *,'mp ms bgcopt=',    mp,ms,bgcopt
+    print *, " calling getdata_hwsd"
+    print *,"input file", fhwsdsoc
+    print *,"mp ms bgcopt=",    mp,ms,bgcopt
 
     status = nf90_open(fhwsdsoc,nf90_nowrite,ncid)
-    if(status /= nf90_noerr) print*, 'Error opening c_fraction.nc'
+    if(status /= nf90_noerr) print*, "Error opening c_fraction.nc"
 
     ! get variables
-    status = nf90_inq_varid(ncid,'lat',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring data lat'
+    status = nf90_inq_varid(ncid,"lat",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring data lat"
     status = nf90_get_var(ncid,varid,varx1db)
-    if(status /= nf90_noerr) print*,'Error reading data lat'
+    if(status /= nf90_noerr) print*,"Error reading data lat"
     micglobal%lat = real(varx1db,kind=r_2)
 
-    status = nf90_inq_varid(ncid,'lon',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring data lont'
+    status = nf90_inq_varid(ncid,"lon",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring data lont"
     status = nf90_get_var(ncid,varid,varx1db)
-    if(status /= nf90_noerr) print*,'Error reading data lon'
+    if(status /= nf90_noerr) print*,"Error reading data lon"
     micglobal%lon=real(varx1db,kind=r_2)
 
-    status = nf90_inq_varid(ncid,'max_PFT',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring data PFT'
+    status = nf90_inq_varid(ncid,"max_PFT",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring data PFT"
     status = nf90_get_var(ncid,varid,ivarx1)
-    if(status /= nf90_noerr) print*,'Error reading data PFT'
+    if(status /= nf90_noerr) print*,"Error reading data PFT"
     micglobal%pft = ivarx1
 
-    status = nf90_inq_varid(ncid,'USDA_SoilSuborder',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soil order'
+    status = nf90_inq_varid(ncid,"USDA_SoilSuborder",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soil order"
     status = nf90_get_var(ncid,varid,ivarx1)
-    if(status /= nf90_noerr) print*,'Error reading soil order'
+    if(status /= nf90_noerr) print*,"Error reading soil order"
     micglobal%sorder = ivarx1
 
     if(jmodel==1) then
-       status = nf90_inq_varid(ncid,'isoil',varid)
-       if(status /= nf90_noerr) print*, 'Error inquiring soil texturep'
+       status = nf90_inq_varid(ncid,"isoil",varid)
+       if(status /= nf90_noerr) print*, "Error inquiring soil texturep"
        status = nf90_get_var(ncid,varid,ivarx1)
-       if(status /= nf90_noerr) print*,'Error reading soil texure'
+       if(status /= nf90_noerr) print*,"Error reading soil texure"
        micglobal%isoil = ivarx1
-    endif
+    end if
     if(jmodel==2) then
-       status = nf90_inq_varid(ncid,'USDA_Soil_texture_class',varid)
-       if(status /= nf90_noerr) print*, 'Error inquiring soil texturep'
+       status = nf90_inq_varid(ncid,"USDA_Soil_texture_class",varid)
+       if(status /= nf90_noerr) print*, "Error inquiring soil texturep"
        status = nf90_get_var(ncid,varid,ivarx1)
-       if(status /= nf90_noerr) print*,'Error reading soil texure'
+       if(status /= nf90_noerr) print*,"Error reading soil texure"
        micglobal%isoil = ivarx1
-    endif
+    end if
 
-    status = nf90_inq_varid(ncid,'max_PFTfrac',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring max_PFTfrac'
+    status = nf90_inq_varid(ncid,"max_PFTfrac",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring max_PFTfrac"
     status = nf90_get_var(ncid,varid,varx1float)
-    if(status /= nf90_noerr) print*,'Error reading max_PFTfrac'
+    if(status /= nf90_noerr) print*,"Error reading max_PFTfrac"
     micglobal%area = real(varx1float,kind=r_2)
 
-    status = nf90_inq_varid(ncid,'npp',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring npp'
+    status = nf90_inq_varid(ncid,"npp",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring npp"
     status = nf90_get_var(ncid,varid,varx1db)
-    if(status /= nf90_noerr) print*,'Error reading npp'
+    if(status /= nf90_noerr) print*,"Error reading npp"
     micglobal%npp = real(varx1db,kind=r_2)
 
-    status = nf90_inq_varid(ncid,'pH',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring ph'
+    status = nf90_inq_varid(ncid,"pH",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring ph"
     status = nf90_get_var(ncid,varid,varx1float)
-    if(status /= nf90_noerr) print*,'Error reading ph'
+    if(status /= nf90_noerr) print*,"Error reading ph"
     micglobal%ph = real(varx1float,kind=r_2)
 
-    status = nf90_inq_varid(ncid,'clay',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring clay'
+    status = nf90_inq_varid(ncid,"clay",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring clay"
     status = nf90_get_var(ncid,varid,varx1float)
-    if(status /= nf90_noerr) print*,'Error reading clay'
+    if(status /= nf90_noerr) print*,"Error reading clay"
     micglobal%clay = real(varx1float,kind=r_2)
 
-    status = nf90_inq_varid(ncid,'silt',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring silt'
+    status = nf90_inq_varid(ncid,"silt",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring silt"
     status = nf90_get_var(ncid,varid,varx1float)
-    if(status /= nf90_noerr) print*,'Error reading silt'
+    if(status /= nf90_noerr) print*,"Error reading silt"
     micglobal%silt = real(varx1float,kind=r_2)
 
-    status = nf90_inq_varid(ncid,'bulk_density',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soil bulk density'
+    status = nf90_inq_varid(ncid,"bulk_density",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soil bulk density"
     status = nf90_get_var(ncid,varid,varx1float)
-    if(status /= nf90_noerr) print*,'Error reading bulk density'
+    if(status /= nf90_noerr) print*,"Error reading bulk density"
     micglobal%bulkd= real(varx1float,kind=r_2)
 
-    status = nf90_inq_varid(ncid,'HWSD_SOC',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soil carbon'
+    status = nf90_inq_varid(ncid,"HWSD_SOC",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soil carbon"
     status = nf90_get_var(ncid,varid,fsoc)
-    if(status /= nf90_noerr) print*,'Error reading soil carbon'
+    if(status /= nf90_noerr) print*,"Error reading soil carbon"
 
-    status = nf90_inq_varid(ncid,'SoilTemp',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soil temperature'
+    status = nf90_inq_varid(ncid,"SoilTemp",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soil temperature"
     status = nf90_get_var(ncid,varid,varx3db)
-    if(status /= nf90_noerr) print*,'Error reading soil temperature'
+    if(status /= nf90_noerr) print*,"Error reading soil temperature"
     micglobal%tsoil=real(varx3db,kind=r_2)
 
-    status = nf90_inq_varid(ncid,'SoilMoist',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soil moisture'
+    status = nf90_inq_varid(ncid,"SoilMoist",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soil moisture"
     status = nf90_get_var(ncid,varid,varx3db)
-    if(status /= nf90_noerr) print*,'Error reading soil moisture'
+    if(status /= nf90_noerr) print*,"Error reading soil moisture"
     micglobal%moist=real(varx3db,kind=r_2)
 
-    status = nf90_inq_varid(ncid,'water_potential',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring soil matric potential'
+    status = nf90_inq_varid(ncid,"water_potential",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring soil matric potential"
     status = nf90_get_var(ncid,varid,varx3db)
-    if(status /= nf90_noerr) print*,'Error reading soil matric potential'
+    if(status /= nf90_noerr) print*,"Error reading soil matric potential"
     micglobal%matpot=real(varx3db,kind=r_2)
 
-    status = nf90_inq_varid(ncid,'Leaf_fall',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring Leaf_fall'
+    status = nf90_inq_varid(ncid,"Leaf_fall",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring Leaf_fall"
     status = nf90_get_var(ncid,varid,varx2db)
-    if(status /= nf90_noerr) print*,'Error reading Leaf_fall'
+    if(status /= nf90_noerr) print*,"Error reading Leaf_fall"
     micglobal%dleaf=real(varx2db,kind=r_2)
 
-    status = nf90_inq_varid(ncid,'Belowground_litter_fall',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring Belowground_litter_fall'
+    status = nf90_inq_varid(ncid,"Belowground_litter_fall",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring Belowground_litter_fall"
     status = nf90_get_var(ncid,varid,varx2db)
-    if(status /= nf90_noerr) print*,'Error reading Belowground_litter_fall'
+    if(status /= nf90_noerr) print*,"Error reading Belowground_litter_fall"
     micglobal%droot=real(varx2db,kind=r_2)
 
-    status = nf90_inq_varid(ncid,'non_leaf_aboveground_litterfall',varid)
-    if(status /= nf90_noerr) print*, 'Error inquiring non_leaf_aboveground_litterfall'
+    status = nf90_inq_varid(ncid,"non_leaf_aboveground_litterfall",varid)
+    if(status /= nf90_noerr) print*, "Error inquiring non_leaf_aboveground_litterfall"
     status = nf90_get_var(ncid,varid,varx2db)
-    if(status /= nf90_noerr) print*,'Error reading non_leaf_aboveground_litterfall'
+    if(status /= nf90_noerr) print*,"Error reading non_leaf_aboveground_litterfall"
     micglobal%dwood =real(varx2db,kind=r_2)
 
     ! Close netcdf file
@@ -2239,7 +2239,7 @@ END function functn
 
     do k=1,ntime
        micglobal%time(k)= real(k*1.0,kind=r_2)
-    enddo
+    end do
 
     ! print *, 'PFT=', micglobal%pft
     msite = 0
@@ -2260,7 +2260,7 @@ END function functn
           micparam%fligleaf(np) = ligleaf1(ipft)
           micparam%fligroot(np) = ligroot1(ipft)
           micparam%fligwood(np) = ligwood1(ipft)
-       endif
+       end if
        if(jmodel==2) then      !ORCHIDEE
           ipft =  micglobal%pft(np)
           micparam%xcnleaf(np)  = cnleaf2(ipft)
@@ -2269,20 +2269,20 @@ END function functn
           micparam%fligleaf(np) = ligleaf2(ipft)
           micparam%fligroot(np) = ligroot2(ipft)
           micparam%fligwood(np) = ligwood2(ipft)
-       endif
+       end if
 
        nsocobs=0
        do ns=1,ms
           micparam%csoilobs(np,ns)=real(fsoc(np,ns),kind=r_2)
           if(micparam%csoilobs(np,ns) >0.0 .and. micparam%csoilobs(np,ns) < 1000.0) nsocobs = nsocobs + 1
-       enddo
+       end do
 
        ! using "micglobal%area" to filter out some sites
        micglobal%npp(np) = sum(micglobal%dleaf(np,:) + micglobal%dwood(np,:) + micglobal%droot(np,:))
        if(micglobal%npp(np)<100.0 .or. micglobal%ph(np)<3.0 .or. nsocobs==0) micglobal%area(np) = -1.0
 
        if(micglobal%bgctype(np) ==bgcopt .and. micglobal%area(np) >0) msite = msite + 1
-    enddo    ! "np=1,mp"
+    end do    ! "np=1,mp"
 
     if(msite>50) then
 
@@ -2291,11 +2291,11 @@ END function functn
           if(micglobal%bgctype(np) == bgcopt .and.micglobal%area(np) > 0.0) then
              isite = isite +1
              if(int(isite/intval)*intval /= isite.or. isite/intval >50) micglobal%area(np) = -1.0
-          endif
+          end if
           if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
              write(*,103) isite,np, micglobal%bgctype(np), micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
-          endif
-       enddo
+          end if
+       end do
     else
 
       isite=0
@@ -2303,24 +2303,24 @@ END function functn
          if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
             isite=isite+1
             write(*,103) isite,np,micglobal%bgctype(np),micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
-         endif
-      enddo
-      if(isite<10) print *, 'too few sites ', isite
+         end if
+      end do
+      if(isite<10) print *, "too few sites ", isite
 
-    endif
+    end if
 
     micglobal%avgts(:) = sum(sum(micglobal%tsoil(:,:,:),dim=3),dim=2)/real(ms*ntime)
     micglobal%avgms(:) = sum(sum(micglobal%moist(:,:,:),dim=3),dim=2)/real(ms*ntime)
 
-       open(100,file='inputdata.txt')
+       open(100,file="inputdata.txt")
        do np=1,mp
           write(100,101) micparam%siteid(np),micglobal%area(np),micparam%pft(np),micparam%isoil(np),micparam%sorder(np),micparam%bgctype(np),   &
           micglobal%npp(np),micglobal%ph(np),micglobal%clay(np)+micglobal%silt(np),micglobal%bulkd(np), &
           micglobal%avgts(np),micglobal%avgms(np),micparam%csoilobs(np,:)
-       enddo
+       end do
        close(100)
 101 format(i5,1x,f8.4,1x,4(i3,1x),30(f10.4,1x))
-103 format(' run site', 2(i6,1x),10(f10.3,1x))
+103 format(" run site", 2(i6,1x),10(f10.3,1x))
 
     deallocate(ivarx1)
     deallocate(varx1float,varx1db)
@@ -2348,7 +2348,7 @@ SUBROUTINE profile_hwsd(jmodel,micparam)
     integer,   dimension(mpft):: nslope
     integer :: ns,p,np
 
-        open(21,file='profile_hwsd.txt')
+        open(21,file="profile_hwsd.txt")
         sdepth1=0.0; sdepth2=0.0
         y0(:)=0.0;slope(:)=0.0;corr(:)=0.0
         avgslope(:) =0.0; sdslope(:) = 0.0; nslope(:) =0
@@ -2356,37 +2356,37 @@ SUBROUTINE profile_hwsd(jmodel,micparam)
            sdepth2    = sdepth2 + zse(ns)
            if(ns>1)   sdepth(ns) = 0.5 * (sdepth1+sdepth2)
            sdepth1    = sdepth2
-        enddo
+        end do
         do np=1,mp
            do ns=2,ms
               y(ns-1) = log(micparam%csoilobs(np,ns))
-          enddo
+          end do
           call linreg(ms-1,sdepth,y,y0(np),slope(np),corr(np))
           write(21,201) micparam%siteid(np),micparam%pft(np),micparam%isoil(np), &
                         micparam%sorder(np),jmodel,y0(np),slope(np),corr(np)
-        enddo
+        end do
 
         do p=1,mpft
            do np=1,mp
               if(slope(np) /= slope(np) .or. slope(np) > 0.0) then
-                 print *, 'invalid profile', np, micparam%csoilobs(np,:)
+                 print *, "invalid profile", np, micparam%csoilobs(np,:)
               else
                  if(micparam%pft(np)==p) then
                     avgslope(p)= avgslope(p) + slope(np)
                     sdslope(p) = sdslope(p)  + slope(np)*slope(np)
                     nslope(p)  = nslope(p)   + 1
-                 endif
-              endif
-           enddo
+                 end if
+              end if
+           end do
            if(nslope(p) >1) then
               avgslope(p)= avgslope(p)/real(nslope(p))
               sdslope(p) = (sdslope(p) - nslope(p) *avgslope(p)*avgslope(p))/real(nslope(p))
               sdslope(p) = sqrt(sdslope(p))
            else
               sdslope(p) = 0.0
-           endif
+           end if
            write(21,202) jmodel,p,avgslope(p),sdslope(p),nslope(p)
-        enddo
+        end do
        close(21)
 201 format(5(i4,1xs),3(f10.4,1x))
 202 format(2(i4,2x),2(f10.4,2x),i4)
@@ -2420,7 +2420,7 @@ subroutine linreg(ndata,x,y,a,b,r)
    r = (sumxy - sumx * sumy /real(ndata)) /                 &
        sqrt((sumx2 - sumx**2/real(ndata)) * (sumy2 - sumy**2/real(ndata)))  ! compute correlation coefficient
 
-   print *, 'a b r', a,b,r
+   print *, "a b r", a,b,r
 end subroutine linreg
 
 SUBROUTINE vmic_param_constant(kinetics,micpxdef,micpdef,micparam)
@@ -2448,8 +2448,8 @@ SUBROUTINE vmic_param_constant(kinetics,micpxdef,micpdef,micparam)
             micparam%Q2(np,ns)=micpdef%Q2
             micparam%fm(np,ns)=micpdef%fm * micpxdef%xfm(nopt)
             micparam%fs(np,ns)=micpdef%fs * micpxdef%xfs(nopt)
-         enddo  !ns
-      enddo     ! np
+         end do  !ns
+      end do     ! np
 
       depths1=0.0;depths2=0.0
       do ns=1,ms
@@ -2457,21 +2457,21 @@ SUBROUTINE vmic_param_constant(kinetics,micpxdef,micpdef,micparam)
           do npft=1,mpft
               krootx = micpdef%rootbeta * micpxdef%xrootbeta(npft)
               froot(npft,ns) = (1.0/krootx) *( exp(-krootx*depths1)-exp(-krootx*depths2))
-          enddo  !npft
+          end do  !npft
           depths1=depths2
-      enddo   !ns
+      end do   !ns
 
 
       do npft=1,mpft
          totroot(npft) =sum(froot(npft,1:ms))
-      enddo
+      end do
 
       ! !normalizing
       do ns=1,ms
          do npft=1,mpft
             froot(npft,ns) = froot(npft,ns)/totroot(npft)
-         enddo
-      enddo
+         end do
+      end do
 
       ! calculate mp by ms all parameter values
       do np=1, mp
@@ -2480,15 +2480,15 @@ SUBROUTINE vmic_param_constant(kinetics,micpxdef,micpdef,micparam)
          do ns=1,ms
             micparam%sdepth(np,ns)   = zse(ns)
             micparam%fracroot(np,ns) = froot(npft,ns)
-         enddo !"ns"
+         end do !"ns"
           micparam%diffsocx(np) = micpxdef%xdiffsoc(nopt) * micpdef%diffsoc  !"diffsoc" from mic_constant
-      enddo    ! "np=1,mp"
+      end do    ! "np=1,mp"
 
       if(diag==1) then
          print *, micparam%fracroot(outp,:)
          print *, micparam%sdepth(outp,:)
          print *, micparam%diffsocx(outp)
-      endif
+      end if
 
       ! the following parameters are specific to kinetics3
       if(kinetics==3) then
@@ -2502,9 +2502,9 @@ SUBROUTINE vmic_param_constant(kinetics,micpxdef,micpdef,micparam)
                micparam%tvppool(np,ns)  = micpdef%tvppoolx  * micpxdef%xtvp(nopt)
                micparam%tvac(np,ns)     = micpdef%tvacx     * micpxdef%xtvac(nopt)
                micparam%qmaxcoeff(np,ns)= micpdef%qmaxcoeff * micpxdef%xqmaxcoeff(nopt)
-            enddo  !ns
-         enddo  !np
-      endif ! kinetics
+            end do  !ns
+         end do  !np
+      end if ! kinetics
 
 
     deallocate(froot)
@@ -2556,7 +2556,7 @@ subroutine vmic_init(miccpool,micnpool)
 
       do ip=1,mcpool
          miccpool%cpool(:,:,ip) = cpooldef(ip)
-      enddo
+      end do
 !    print *, 'at np=1 ns=1 cpool', miccpool%cpool(1,1,1:mcpool)
     deallocate(cpooldef)
 end subroutine vmic_init
@@ -2616,11 +2616,11 @@ subroutine vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
       do i=1,mpft
          if(jmodel==1) then
             micpxdef%xrootbeta(i) = xrootcable(i)
-         endif
+         end if
          if(jmodel==2) then
             micpxdef%xrootbeta(i) = xrootorchidee(i)
-         endif
-      enddo
+         end if
+      end do
 
       ! assign the values to the optimized parameters
 
@@ -2670,8 +2670,8 @@ subroutine variable_time(year,doy,micglobal,micinput,micnpool)
            micinput%porosity(np,ns) = micglobal%poros(np)    ! porosity mm3/mm3
            micinput%bulkd(np,ns)    = micglobal%bulkd(np)
            micnpool%mineralN(np,ns) = 0.1                    ! g N /kg soil
-        enddo !"ns"
-     enddo !"np"
+        end do !"ns"
+     end do !"np"
 
 end subroutine variable_time
 
@@ -2752,7 +2752,7 @@ end subroutine variable_time
              nyrun = micparam%nyc14obs(np) - 1940 + nyeqpool !! how many years to run to get equilibrium
          else
              nyrun = nyeqpool
-         endif
+         end if
 
     !     print *,'np pft npp anpp bnpp = ',np,micparam%pft(np),micinput%fcnpp(np), micinput%dleaf(np)*365.0*24.0, micinput%droot(np)*365.0*24.0
 
@@ -2773,7 +2773,7 @@ end subroutine variable_time
                   do ip=1,mcpool
                      xpool0(ip) = miccpool%cpool(np,ns,ip)
                      cpool0     = cpool0  + xpool0(ip) * zse(ns) * 1000.0  ! 1000 for mg C/cm3 to g C/m2/zse
-                  enddo
+                  end do
 
                  ! here the integration step is "delty" in rk4 and "ndelt" is number of "delt (hour) per year
                   timex=real(i*delt)
@@ -2783,24 +2783,24 @@ end subroutine variable_time
                   do ip=1,mcpool
                      miccpool%cpool(np,ns,ip) = max(xpool1(ip),1.0e-8)
                      cpool1 = cpool1 + miccpool%cpool(np,ns,ip) * zse(ns) * 1000.0  ! 1000 for mg C/cm3 to g C/m2/zse
-                  enddo
+                  end do
 
-               enddo    ! "ns"
+               end do    ! "ns"
 
                micoutput%fluxcinput(np)= micoutput%fluxcinput(np) + totcinput * real(delty)
                micoutput%fluxrsoil(np) = micoutput%fluxrsoil(np)  + totcinput * real(delty) + (cpool1 - cpool0)
 
                 if(diag==1) then
-                   print *, 'year day site np1', year, i, outp,micparam%diffsocx(outp)
+                   print *, "year day site np1", year, i, outp,micparam%diffsocx(outp)
                     do ns=1,ms
                        print *, ns, miccpool%cpool(outp,ns,:)
-                    enddo
-                endif
+                    end do
+                end if
 
                do ip=1,mcpool
                   do ns=1,ms
                      ypooli(ns) = miccpool%cpool(np,ns,ip)      ! in mg c/cm3
-                  enddo  !"ns"
+                  end do  !"ns"
 
                   fluxsoc(:) = 0.0  ! This flux is added in "modelx"
                   diffsocxx= micparam%diffsocx(np)
@@ -2814,11 +2814,11 @@ end subroutine variable_time
                   do j=2,ms+1
                      sdepthx(j) = sdepthx(j-1) + zse(j-1)*100.0     ! depth of the bottom of each layer (eg x_j+0.5)
                                                                     !*100 to convert from m to cm
-                  enddo
+                  end do
 
                   do j=1,ms
                      xzse(j) = 0.5 * (sdepthx(j) + sdepthx(j+1))    ! depth of midpoint of a layer j  (x_j)
-                  enddo
+                  end do
 
                   deltD = diffsocxx * delty
                   xpool = ypooli
@@ -2834,7 +2834,7 @@ end subroutine variable_time
                            ct(1) =     - 0.5 * coeffA
                            rt(1) = (1.0-0.5*coeffA) * xpool(1) + 0.5 * coeffA * xpool(2) &
                                  +  fluxsoc(1) * delt
-                        endif
+                        end if
                         if(j>1.and.j<ms) then
                           coeffA = deltD/((xzse(j+1)-xzse(j))*(sdepthx(j+1)-sdepthx(j)))
                           coeffB = (xzse(j+1)-xzse(j))/(xzse(j)-xzse(j-1))
@@ -2846,7 +2846,7 @@ end subroutine variable_time
                                   +(1.0-0.5* coeffA*(1.0+coeffB))*xpool(j)  &
                                   + 0.5* coeffA * xpool(j+1)                &
                                   + fluxsoc(j) *delt
-                        endif
+                        end if
                         if(j==ms) then
                             coeffA = deltD/((xzse(ms)-xzse(ms-1))*(sdepthx(ms+1) - sdepthx(ms)))
                           ! Crank-Nicholson
@@ -2855,8 +2855,8 @@ end subroutine variable_time
                             ct(ms) = 0.0
                             rt(ms) = 0.5* coeffA  * xpool(ms-1) + (1.0-0.5 * coeffA) * xpool(ms) &
                                    + fluxsoc(ms) * delt
-                        endif
-                     enddo
+                        end if
+                     end do
                      call tridag(at,bt,ct,rt,xpool,ms)
                   !enddo
                   ypoole = xpool
@@ -2865,8 +2865,8 @@ end subroutine variable_time
 
                   do ns=1,ms
                      miccpool%cpool(np,ns,ip) = ypoole(ns)
-                  enddo
-               enddo ! "ip=1,mcpool"
+                  end do
+               end do ! "ip=1,mcpool"
 
                ! computing daily leaching loss from bottom-layer LWMC
                cleachloss = micparam%tvac(np,ms) * sqrt(micinput%wavg(np,ms)/micinput%porosity(np,ms)) *  miccpool%cpool(np,ms,7)  * 24.0
@@ -2874,12 +2874,12 @@ end subroutine variable_time
                micoutput%fluxcleach(np) = micoutput%fluxcleach(np) + cleachloss
                miccpool%cpool(np,ms,7)  = miccpool%cpool(np,ms,7)  - cleachloss
 
-            enddo   ! "day"
+            end do   ! "day"
 
-         enddo !"year"
+         end do !"year"
 
-      endif   !bgctype(np)=bgcopt
-   enddo !"mp"
+      end if   !bgctype(np)=bgcopt
+   end do !"mp"
 
 !$ACC END PARALLEL
 !$ACC END DATA
@@ -2990,7 +2990,7 @@ end subroutine variable_time
                   do ip=1,mcpool
                      xpool0(ip) = miccpool%cpool(np,ns,ip)
                      cpool0     = cpool0  + xpool0(ip) * zse(ns) * 1000.0  ! 1000 for mg C/cm3 to g C/m2/zse
-                  enddo
+                  end do
 
                  ! here the integration step is "delty" in rk4 and "ndelt" is number of "delt (hour) per year
                   timex=real(i*delt)
@@ -3001,9 +3001,9 @@ end subroutine variable_time
                   do ip=1,mcpool
                      miccpool%cpool(np,ns,ip) = max(xpool1(ip),1.0e-8)
                      cpool1 = cpool1 + miccpool%cpool(np,ns,ip) * zse(ns) * 1000.0  ! 1000 for mg C/cm3 to g C/m2/zse
-                  enddo
+                  end do
 
-               enddo    ! "ns"
+               end do    ! "ns"
 
                micoutput%fluxcinput(np)= micoutput%fluxcinput(np) + totcinput * real(delty)
                micoutput%fluxrsoil(np) = micoutput%fluxrsoil(np)  + totcinput * real(delty) + (cpool1 - cpool0)
@@ -3025,16 +3025,16 @@ end subroutine variable_time
             !  endif
 
                 if(diag==1) then
-                   print *, 'year day site np1', year, i, outp,micparam%diffsocx(outp)
+                   print *, "year day site np1", year, i, outp,micparam%diffsocx(outp)
                     do ns=1,ms
                        print *, ns, miccpool%cpool(outp,ns,:)
-                    enddo
-                endif
+                    end do
+                end if
 
                do ip=1,mcpool
                   do ns=1,ms
                      ypooli(ns) = miccpool%cpool(np,ns,ip)      ! in mg c/cm3
-                  enddo  !"ns"
+                  end do  !"ns"
 
                   fluxsoc(:) = 0.0  ! This flux is added in "modelx"
                   diffsocxx= micparam%diffsocx(np)
@@ -3047,11 +3047,11 @@ end subroutine variable_time
                   do j=2,ms+1
                      sdepthx(j) = sdepthx(j-1) + zse(j-1)*100.0     ! depth of the bottom of each layer (eg x_j+0.5)
                                                                     !*100 to convert from m to cm
-                  enddo
+                  end do
 
                   do j=1,ms
                      xzse(j) = 0.5 * (sdepthx(j) + sdepthx(j+1))    ! depth of midpoint of a layer j  (x_j)
-                  enddo
+                  end do
 
                   deltD = diffsocxx * delty
                   xpool = ypooli
@@ -3067,7 +3067,7 @@ end subroutine variable_time
                            ct(1) =     - 0.5 * coeffA
                            rt(1) = (1.0-0.5*coeffA) * xpool(1) + 0.5 * coeffA * xpool(2) &
                                  +  fluxsoc(1) * delt
-                        endif
+                        end if
                         if(j>1.and.j<ms) then
                           coeffA = deltD/((xzse(j+1)-xzse(j))*(sdepthx(j+1)-sdepthx(j)))
                           coeffB = (xzse(j+1)-xzse(j))/(xzse(j)-xzse(j-1))
@@ -3079,7 +3079,7 @@ end subroutine variable_time
                                   +(1.0-0.5* coeffA*(1.0+coeffB))*xpool(j)  &
                                   + 0.5* coeffA * xpool(j+1)                &
                                   + fluxsoc(j) *delt
-                        endif
+                        end if
                         if(j==ms) then
                             coeffA = deltD/((xzse(ms)-xzse(ms-1))*(sdepthx(ms+1) - sdepthx(ms)))
                           ! Crank-Nicholson
@@ -3088,8 +3088,8 @@ end subroutine variable_time
                             ct(ms) = 0.0
                             rt(ms) = 0.5* coeffA  * xpool(ms-1) + (1.0-0.5 * coeffA) * xpool(ms) &
                                    + fluxsoc(ms) * delt
-                        endif
-                     enddo
+                        end if
+                     end do
                      call tridag(at,bt,ct,rt,xpool,ms)
                   !enddo
                   ypoole = xpool
@@ -3098,8 +3098,8 @@ end subroutine variable_time
 
                   do ns=1,ms
                      miccpool%cpool(np,ns,ip) = ypoole(ns)
-                  enddo
-               enddo ! "ip=1,mcpool"
+                  end do
+               end do ! "ip=1,mcpool"
 
                ! computing daily leaching loss from bottom-layer LWMC
                cleachloss = micparam%tvac(np,ms) * sqrt(micinput%wavg(np,ms)/micinput%porosity(np,ms)) *  miccpool%cpool(np,ms,7)  * 24.0
@@ -3107,10 +3107,10 @@ end subroutine variable_time
                micoutput%fluxcleach(np) = micoutput%fluxcleach(np) + cleachloss
                miccpool%cpool(np,ms,7)  = miccpool%cpool(np,ms,7)  - cleachloss
 
-            enddo   ! "day"
-         enddo !"year"
-      endif   !bgctype(np)=bgcopt
-   enddo !"mp"
+            end do   ! "day"
+         end do !"year"
+      end if   !bgctype(np)=bgcopt
+   end do !"mp"
 !$ACC END PARALLEL
 !$ACC END DATA
 
@@ -3198,7 +3198,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                   do ip=1,mcpool
                      xpool0(ip) = miccpool%cpool(np,ns,ip)
                      cpool0     = cpool0  + xpool0(ip) * zse(ns) * 1000.0  ! 1000 for mg C/cm3 to g C/m2/zse
-                  enddo
+                  end do
 
                  ! here the integration step is "delty" in rk4 and "ndelt" is number of "delt (hour) per year
                   timex=real(i*delt)
@@ -3208,14 +3208,14 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                   do ip=1,mcpool
                      miccpool%cpool(np,ns,ip) = max(xpool1(ip),1.0e-8)
                      cpool1 = cpool1 + miccpool%cpool(np,ns,ip) * zse(ns) * 1000.0  ! 1000 for mg C/cm3 to g C/m2/zse
-                  enddo
+                  end do
 
                 ! for checking mass balance
         !          write(*,101) np,ns, micinput%cinputm(np,ns)+micinput%cinputs(np,ns),sum(xpool1(1:7)-xpool0(1:7))/real(delty), &
         !                              micinput%cinputm(np,ns)+micinput%cinputs(np,ns)-sum(xpool1(1:7)-xpool0(1:7))/real(delty)
-101 format('vmicsoil input sumdelC rsoil',2(i3,1x),3(f10.6,1x))
+101 format("vmicsoil input sumdelC rsoil",2(i3,1x),3(f10.6,1x))
 
-               enddo    ! "ns"
+               end do    ! "ns"
 
                micoutput%fluxcinput(np)= micoutput%fluxcinput(np) + totcinput * real(delty)
                micoutput%fluxrsoil(np) = micoutput%fluxrsoil(np)  + totcinput * real(delty) + (cpool1 - cpool0)
@@ -3239,16 +3239,16 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
             !   endif
 
                 if(diag==1) then
-                   print *, 'year day site np1', year, i, outp,micparam%diffsocx(outp)
+                   print *, "year day site np1", year, i, outp,micparam%diffsocx(outp)
                     do ns=1,ms
                        print *, ns, miccpool%cpool(outp,ns,:)
-                    enddo
-                endif
+                    end do
+                end if
 
                do ip=1,mcpool
                   do ns=1,ms
                      ypooli(ns) = miccpool%cpool(np,ns,ip)      ! in mg c/cm3
-                  enddo  !"ns"
+                  end do  !"ns"
 
                   fluxsoc(:) = 0.0  ! This flux is added in "modelx"
                   diffsocxx= micparam%diffsocx(np)
@@ -3257,21 +3257,21 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
 
                   do ns=1,ms
                      miccpool%cpool(np,ns,ip) = ypoole(ns)
-                  enddo
-               enddo ! "ip=1,mcpool"
+                  end do
+               end do ! "ip=1,mcpool"
 
             ! print out the time series of pool sizes
             ! if(micglobal%bgctype(np)==bgcopt) then
             !   write(*,201) year, np, miccpool%cpool(np,1,:),miccpool%cpool(np,ms,:)
-201             format('vmicsoil:cpool',2(i5,1x),30(f7.4,1x))
+201             format("vmicsoil:cpool",2(i5,1x),30(f7.4,1x))
             ! endif
 
-            endif   !bgctype(np) = bgcopt
-          enddo !"mp"
+            end if   !bgctype(np) = bgcopt
+          end do !"mp"
 !$OMP END DO
 !$OMP END PARALLEL
-         enddo   !"i: day of year"
-      enddo !"year"
+         end do   !"i: day of year"
+      end do !"year"
 
      miccpool%cpooleq(:,:,:) = miccpool%cpool(:,:,:)
 
@@ -3383,7 +3383,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                   do ip=1,mcpool
                      xpool0(ip) = miccpool%cpool(np,ns,ip)
                      cpool0     = cpool0  + xpool0(ip) * zse(ns) * 1000.0  ! 1000 for mg C/cm3 to g C/m2/zse
-                  enddo
+                  end do
 
                  ! here the integration step is "delty" in rk4 and "ndelt" is number of "delt (hour) per year
                   timex=real(i*delt)
@@ -3394,9 +3394,9 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                   do ip=1,mcpool
                      miccpool%cpool(np,ns,ip) = max(xpool1(ip),1.0e-8)
                      cpool1 = cpool1 + miccpool%cpool(np,ns,ip) * zse(ns) * 1000.0  ! 1000 for mg C/cm3 to g C/m2/zse
-                  enddo
+                  end do
 
-               enddo    ! "ns"
+               end do    ! "ns"
 
                micoutput%fluxcinput(np)= micoutput%fluxcinput(np) + totcinput * real(delty)
                micoutput%fluxrsoil(np) = micoutput%fluxrsoil(np)  + totcinput * real(delty) + (cpool1 - cpool0)
@@ -3418,16 +3418,16 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
             !  endif
 
                 if(diag==1) then
-                   print *, 'year day site np1', year, i, outp,micparam%diffsocx(outp)
+                   print *, "year day site np1", year, i, outp,micparam%diffsocx(outp)
                     do ns=1,ms
                        print *, ns, miccpool%cpool(outp,ns,:)
-                    enddo
-                endif
+                    end do
+                end if
 
                do ip=1,mcpool
                   do ns=1,ms
                      ypooli(ns) = miccpool%cpool(np,ns,ip)      ! in mg c/cm3
-                  enddo  !"ns"
+                  end do  !"ns"
 
                   fluxsoc(:) = 0.0  ! This flux is added in "modelx"
                   diffsocxx= micparam%diffsocx(np)
@@ -3440,11 +3440,11 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                   do j=2,ms+1
                      sdepthx(j) = sdepthx(j-1) + zse(j-1)*100.0     ! depth of the bottom of each layer (eg x_j+0.5)
                                                                     !*100 to convert from m to cm
-                  enddo
+                  end do
 
                   do j=1,ms
                      xzse(j) = 0.5 * (sdepthx(j) + sdepthx(j+1))    ! depth of midpoint of a layer j  (x_j)
-                  enddo
+                  end do
 
                   deltD = diffsocxx * delty
                   xpool = ypooli
@@ -3460,7 +3460,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                            ct(1) =     - 0.5 * coeffA
                            rt(1) = (1.0-0.5*coeffA) * xpool(1) + 0.5 * coeffA * xpool(2) &
                                  +  fluxsoc(1) * delt
-                        endif
+                        end if
                         if(j>1.and.j<ms) then
                           coeffA = deltD/((xzse(j+1)-xzse(j))*(sdepthx(j+1)-sdepthx(j)))
                           coeffB = (xzse(j+1)-xzse(j))/(xzse(j)-xzse(j-1))
@@ -3472,7 +3472,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                                   +(1.0-0.5* coeffA*(1.0+coeffB))*xpool(j)  &
                                   + 0.5* coeffA * xpool(j+1)                &
                                   + fluxsoc(j) *delt
-                        endif
+                        end if
                         if(j==ms) then
                             coeffA = deltD/((xzse(ms)-xzse(ms-1))*(sdepthx(ms+1) - sdepthx(ms)))
                           ! Crank-Nicholson
@@ -3481,8 +3481,8 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                             ct(ms) = 0.0
                             rt(ms) = 0.5* coeffA  * xpool(ms-1) + (1.0-0.5 * coeffA) * xpool(ms) &
                                    + fluxsoc(ms) * delt
-                        endif
-                     enddo
+                        end if
+                     end do
                      call tridag(at,bt,ct,rt,xpool,ms)
                   !enddo
                   ypoole = xpool
@@ -3491,8 +3491,8 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
 
                   do ns=1,ms
                      miccpool%cpool(np,ns,ip) = ypoole(ns)
-                  enddo
-               enddo ! "ip=1,mcpool"
+                  end do
+               end do ! "ip=1,mcpool"
 
                ! computing daily leaching loss from bottom-layer LWMC
                cleachloss = micparam%tvac(np,ms) * sqrt(micinput%wavg(np,ms)/micinput%porosity(np,ms)) *  miccpool%cpool(np,ms,7)  * 24.0
@@ -3500,10 +3500,10 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                micoutput%fluxcleach(np) = micoutput%fluxcleach(np) + cleachloss
                miccpool%cpool(np,ms,7)  = miccpool%cpool(np,ms,7)  - cleachloss
 
-            enddo   ! "day"
-         enddo !"year"
-      endif   !bgctype(np)=bgcopt
-   enddo !"mp"
+            end do   ! "day"
+         end do !"year"
+      end if   !bgctype(np)=bgcopt
+   end do !"mp"
 !$ACC END PARALLEL
 !$ACC END DATA
 
@@ -3575,7 +3575,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                   xmodm(np) = xmodm(np) + weight * (miccpool%cpooleq(np,ns,6) + miccpool%cpooleq(np,ns,9))             !! observed maoc = modelled maoc
                end if
                x1=x2
-            enddo
+            end do
            ! this assumes bulk density constant in the vertical
            xmod(np)   = 1000.0 * xmod(np) /((xbot-xtop) * micinput%bulkd(np,1))   !! unit: g C/kg soil
            xmodp(np)  = 1000.0 * xmodp(np)/((xbot-xtop) * micinput%bulkd(np,1))
@@ -3593,21 +3593,21 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
            micparam%c14soilobsm(np)= max(small,micparam%c14soilobsm(np))
 
            if (xmod(np) >= 1000.0 .or. xmodp(np) >= 1000.0 .or. xmodm(np) >= 1000.0) then
-               print *, 'abnormal value of model simulation site=', micparam%siteid(np)
-               print *, 'parameter values = ',  xopt(1:nx)
+               print *, "abnormal value of model simulation site=", micparam%siteid(np)
+               print *, "parameter values = ",  xopt(1:nx)
             !   stop
-           endif
+           end if
 
            if(isoc14 == 0) then
              if((xobsp(np)+xobsm(np))>0.0 .and. (xobsp(np)+xobsm(np))<1000.0) then
         !     xcost(np) = xcost(np) + ((xmodp(np) - xobsp(np))/xobsp(np))**2 +((xmodm(np) - xobsm(np))/xobsm(np))**2
               xcost(np) = xcost(np) + (xfracpmod(np)-xfracpobs(np))** 2 + (xfracmmod(np) - xfracmobs(np))**2
-             endif
+             end if
              write(91,901) micparam%siteid(np),micparam%pft(np),micparam%top(np),micparam%bot(np),xobs(np),xmod(np),xobsp(np),xmodp(np),xobsm(np),xmodm(np)
 
              do ns = 1,ms
                 write(92,*) micparam%siteid(np),micparam%pft(np), ns, (1000.0*miccpool%cpooleq(np,ns,ip)/micinput%bulkd(np,ns),ip=1,mcpool)
-             enddo
+             end do
 
            else
              xcost(np) = xcost(np) +(micparam%c14soilobsp(np) - xmodp(np)/miccpool%c12pooleqp(np))**2  &
@@ -3620,11 +3620,11 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
 
              do ns = 1,ms
                 write(94,*) micparam%siteid(np),micparam%pft(np), ns, (1000.0*miccpool%cpooleq(np,ns,ip)/micinput%bulkd(np,ns),ip=1,mcpool)
-             enddo
-           endif
+             end do
+           end if
 
-        endif  !bgctype(np)=bgcopt
-      enddo  !"np"
+        end if  !bgctype(np)=bgcopt
+      end do  !"np"
       totcost = sum(xcost(1:mp))
 
       deallocate(xcost,xobs,xobsp,xobsm)
@@ -3690,7 +3690,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                   xmodm(np) = xmodm(np) + weight * (miccpool%cpooleq(np,ns,6) + miccpool%cpooleq(np,ns,9))             !! observed maoc = modelled maoc
                end if
                x1=x2
-            enddo
+            end do
 
            xmod(np)   = 1000.0 * xmod(np) /((xbot-xtop)*micinput%bulkd(np,1))   !! unit: g C/kg soil
            xmodp(np)  = 1000.0 * xmodp(np)/((xbot-xtop)*micinput%bulkd(np,1))
@@ -3702,17 +3702,17 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
            xobsfracm(np) = xobsm(np)/(xobsp(np)+xobsm(np)+1.0e-6)
 
            if (xmod(np) >= 1000.0 .or. xmodp(np) >= 1000.0 .or. xmodm(np) >= 1000.0) then
-               print *, 'abnormal value of model simulation site=', micparam%siteid(np)
-               print *, 'parameter values = ',  xopt(1:nx)
+               print *, "abnormal value of model simulation site=", micparam%siteid(np)
+               print *, "parameter values = ",  xopt(1:nx)
                print *, xmodp(np),xmodm(np)
             !   stop
-            endif
+            end if
 
 
             if(xobsp(np) >0.0 .and. xobsm(np)>0.0) then  !! POC is not available for some sites
                xcost(np) = xcost(np) + 200.0*((xmodfracp(np) - xobsfracp(np))**2 + (xmodfracm(np) - xobsfracm(np))**2) &
                                      + 0.01 *(xmodm(np)+xmodp(np) - xobsm(np)-xobsp(np))**2
-            endif
+            end if
 
             write(91,901) micparam%dataid(np),micparam%siteid(np),micparam%pft(np),micparam%top(np),micparam%bot(np), &
                           xobsp(np),xmodp(np),xobsm(np),xmodm(np),xobsfracp(np),xmodfracp(np),xobsfracm(np),xmodfracm(np)
@@ -3720,11 +3720,11 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
             do ns = 1,ms
                write(92,*) micparam%dataid(np),micparam%siteid(np),micparam%pft(np), ns, &
                            (1000.0*miccpool%cpooleq(np,ns,ip)/micinput%bulkd(np,ns),ip=1,mcpool)
-            enddo
+            end do
 
 
-        endif  !bgctype(np)=bgcopt
-      enddo  !"np"
+        end if  !bgctype(np)=bgcopt
+      end do  !"np"
       totcost = sum(xcost(1:mp))
 
 
@@ -3778,13 +3778,13 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
             xmod(np,ns) = 1000.0 * sum(miccpool%cpooleq(np,ns,3:mcpool))/micinput%bulkd(np,ns)
 
                if(xmod(np,ns) <0.0.or.xmod(np,ns) >1.0e3) then
-                  print *, 'abnormal value of model simulation site=', micparam%siteid(np)
-                  print *, 'parameter values = ',  xopt(1:nx)
+                  print *, "abnormal value of model simulation site=", micparam%siteid(np)
+                  print *, "parameter values = ",  xopt(1:nx)
                   print *,  xobs(np,ns),xmod(np,ns),xobs(np,ns)-xmod(np,ns)
-                  print *, ' modelled pool size= ', ns,miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
+                  print *, " modelled pool size= ", ns,miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
                   !stop
-               endif
-         enddo !"ns"
+               end if
+         end do !"ns"
 
          xobsv(1) = sum(xobs(np,1:3))/3.0
          xobsv(2) = sum(xobs(np,4:6))/3.0
@@ -3804,15 +3804,15 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
              else
                 if(xmodv(v) >1.0e3)  xcost(np) = xcost(np) + 9.0e9
                 if(xobsv(v)==-999.0) xcost(np) = xcost(np)
-             endif
+             end if
              write(91,901) micparam%siteid(np),micparam%pft(np),v,xobsv(v),xmodv(v),xmodv(v)-xobsv(v),xcost(np)
-         enddo
+         end do
 
          do ns = 1,ms
             write(92,921) micparam%siteid(np),micparam%pft(np), ns, (1000.0*miccpool%cpooleq(np,ns,ip)/micinput%bulkd(np,ns),ip=1,mcpool)
-         enddo
-      endif !"pft"
-   enddo  !"np"
+         end do
+      end if !"pft"
+   end do  !"np"
    totcost = sum(xcost(1:mp))
 
       write(93,911) bgcopt,ipsite,  &
@@ -3867,12 +3867,12 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
             xmod(np,ns) = 1000.0 * sum(miccpool%cpooleq(np,ns,3:mcpool))/micinput%bulkd(np,ns)   ! gC/kg soil
 
             if(xmod(np,ns) <0.0.or.xmod(np,ns) >1.0e3) then
-               print *, 'abnormal value of model simulation site=', micparam%siteid(np)
-               print *, 'parameter values = ',  xopt(1:nx)
+               print *, "abnormal value of model simulation site=", micparam%siteid(np)
+               print *, "parameter values = ",  xopt(1:nx)
                print *,  xobs(np,ns),xmod(np,ns),xobs(np,ns)-xmod(np,ns)
-               print *, ' modelled pool size= ', ns,miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
+               print *, " modelled pool size= ", ns,miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
                !stop
-            endif
+            end if
 
             if(xobs(np,ns) > 0.0 .and. xobs(np,ns) <1.0e3) then
                xcost(np) = xcost(np) + (xobs(np,ns)-xmod(np,ns))**2
@@ -3883,15 +3883,15 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
 
                write(91,901) micparam%siteid(np),micparam%pft(np),micparam%isoil(np),micparam%sorder(np),ns, &
                              xobs(np,ns),xmod(np,ns),fracpocm,fracmaocm,fracmicm,fraclabm
-            endif
-         enddo !"ns"
+            end if
+         end do !"ns"
 
          do ns = 1,ms
             write(92,921) micparam%siteid(np),micparam%sorder(np), ns, (1000.0*miccpool%cpooleq(np,ns,ip)/micinput%bulkd(np,ns),ip=1,mcpool)
-         enddo
+         end do
 
-      endif !"pft"
-   enddo  !"np"
+      end if !"pft"
+   end do  !"np"
    totcost = sum(xcost(1:mp))
 
     deallocate(xcost)
@@ -3932,7 +3932,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
 
 !    write(*,101) np,ns,delty,micinput%cinputm(np,ns)+micinput%cinputs(np,ns),sum(dy1dt(1:7)), &
 !                 micinput%cinputm(np,ns)+micinput%cinputs(np,ns)-sum(dy1dt(1:7))
-101 format('rk4: input, sumdelc rsoil',2(i3,1x),f6.2,1x,3(f10.6,1x))
+101 format("rk4: input, sumdelc rsoil",2(i3,1x),f6.2,1x,3(f10.6,1x))
 
     end subroutine rk4modelx
 
@@ -3965,18 +3965,18 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
          kmx(np,ns) =  micpxdef%xak(nopt) * micpdef%ak * exp(micpdef%skx * micinput%tavg(np,ns) + micpdef%bk)
          micparam%K2(np,ns) =  kmx(np,ns)/micpdef%xk2
          micparam%J2(np,ns) =  kmx(np,ns)/micpdef%xj2
-       enddo
-      enddo
+       end do
+      end do
 
        if(diag==1.and.np==outp) then
-          print *, 'Kmt',micinput%clay(outp,1),micinput%tavg(outp,1),km(outp,1),kmx(outp,1)
-          print *, 'K1=',micparam%K1(outp,1)
-          print *, 'K2=',micparam%K2(outp,1)
-          print *, 'K3=',micparam%K3(outp,1)
-          print *, 'J1=',micparam%J1(outp,1)
-          print *, 'J2=',micparam%J2(outp,1)
-          print *, 'J3=',micparam%J3(outp,1)
-       endif
+          print *, "Kmt",micinput%clay(outp,1),micinput%tavg(outp,1),km(outp,1),kmx(outp,1)
+          print *, "K1=",micparam%K1(outp,1)
+          print *, "K2=",micparam%K2(outp,1)
+          print *, "K3=",micparam%K3(outp,1)
+          print *, "J1=",micparam%J1(outp,1)
+          print *, "J2=",micparam%J2(outp,1)
+          print *, "J3=",micparam%J3(outp,1)
+       end if
       deallocate(xkclay,km,kmx)
 
     end subroutine Kmt
@@ -4010,7 +4010,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                sdepthz(ns) = 0.5 * micparam%sdepth(np,ns)
             else
                 sdepthz(ns) = sdepthz(ns-1) + micparam%sdepth(np,ns)
-            endif
+            end if
         !   vmax(np,ns) =  micpxdef%xav * micpdef%av * exp(micpdef%sv*micinput%tavg(np,ns) + micpdef%bv) * delt
         !   vmax(np,ns) =  exp(-2.0* sdepthz(ns)) * micpxdef%xav(npft) * micpdef%av * exp(micpdef%sv*micinput%tavg(np,ns) + micpdef%bv) * delt
            vmax(np,ns) =  exp(-micpdef%vmaxbeta * micpxdef%xvmaxbeta(nopt) * sdepthz(ns))     &
@@ -4023,18 +4023,18 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
            micparam%W1(np,ns)   =  micpdef%xw1 * vmax(np,ns)
            micparam%W2(np,ns)   =  micpdef%xw2 * vmax(np,ns)
            micparam%W3(np,ns)   =  micpdef%xw3 * vmax(np,ns)
-          enddo
-       enddo
+          end do
+       end do
 
         if(diag==1.and.np==outp) then
-           print *, 'Vmaxt',micinput%tavg(outp,1),vmax(outp,1)
-           print *, 'V1=',micparam%V1(outp,1)
-           print *, 'V2=',micparam%V2(outp,1)
-           print *, 'V3=',micparam%V3(outp,1)
-           print *, 'W1=',micparam%W1(outp,1)
-           print *, 'W2=',micparam%W2(outp,1)
-           print *, 'W3=',micparam%W3(outp,1)
-        endif
+           print *, "Vmaxt",micinput%tavg(outp,1),vmax(outp,1)
+           print *, "V1=",micparam%V1(outp,1)
+           print *, "V2=",micparam%V2(outp,1)
+           print *, "V3=",micparam%V3(outp,1)
+           print *, "W1=",micparam%W1(outp,1)
+           print *, "W2=",micparam%W2(outp,1)
+           print *, "W3=",micparam%W3(outp,1)
+        end if
 
       deallocate(vmax)
       deallocate(sdepthz)
@@ -4056,13 +4056,13 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
       do ns=1,ms
          nopt=micparam%bgctype(np)
          micparam%desorp(np,ns) = micpxdef%xdesorp(nopt) * (1.5e-5) * exp(-1.5*micinput%clay(np,ns))
-      enddo
-     enddo
+      end do
+     end do
 
       if(diag==1.and. np==outp) then
-         print *, 'Desorpt'
-         print *, 'desorpt=',micparam%desorp(outp,:)
-      endif
+         print *, "Desorpt"
+         print *, "desorpt=",micparam%desorp(outp,:)
+      end if
 
     end subroutine Desorpt
 
@@ -4106,13 +4106,13 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
           micparam%mgeK1(np,ns) = micpdef%epislon3 * exp(-0.015 *micinput%tavg(np,ns))
           micparam%mgeK2(np,ns) = micpdef%epislon4 * exp(-0.015 *micinput%tavg(np,ns))
           micparam%mgeK3(np,ns) = micpdef%epislon3 * exp(-0.015 *micinput%tavg(np,ns))
-       enddo
-      enddo
+       end do
+      end do
 
        if(diag==1.and.np==outp) then
-          print *, 'mget'
-          print *, 'epislon1-4=',micpdef%epislon1,micpdef%epislon2,micpdef%epislon3,micpdef%epislon4
-       endif
+          print *, "mget"
+          print *, "epislon1-4=",micpdef%epislon1,micpdef%epislon2,micpdef%epislon3,micpdef%epislon4
+       end if
 
   end subroutine mget
 
@@ -4148,14 +4148,14 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
               micparam%tvmicK(np,ns)   = micpxdef%xtvmic(nopt) * micpdef%tvmicK * tvref(np) * exp(0.1 * micparam%fmetave(np,ns)) * delt
               micparam%betamicR(np,ns) = micpdef%betamic * micpxdef%xbeta(nopt)
               micparam%betamicK(np,ns) = micpdef%betamic * micpxdef%xbeta(nopt)
-           enddo
-       enddo
+           end do
+       end do
 
         if(diag==1.and.np==outp) then
-          print *, 'turnovert'
-          print *, 'tvmicR=',micparam%tvmicR(outp,:)
-          print *, 'tvmicR=',micparam%tvmicR(outp,:)
-        endif
+          print *, "turnovert"
+          print *, "tvmicR=",micparam%tvmicR(outp,:)
+          print *, "tvmicR=",micparam%tvmicR(outp,:)
+        end if
       deallocate(tvref)
   end subroutine turnovert
 
@@ -4209,7 +4209,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                 dleafx(np,ns) = 0.0
                 drootx(np,ns) = micpxdef%xNPP(npft) * 0.001 * micparam%fracroot(np,ns) * micinput%droot(np)/micparam%sdepth(np,ns)  ! mgc/cm3/delt
                 dwoodx(np,ns) = 0.0
-             endif
+             end if
 
           !! calculate soil texture and litter quaility dependent parameter values
           ! C input to metabolic litter
@@ -4266,25 +4266,25 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
              micparam%fk2p(np,ns) =  0.0
              micparam%fr2a(np,ns) = max(0.0,1.00 - micparam%fr2c(np,ns))
              micparam%fk2a(np,ns) = max(0.0,1.00 - micparam%fk2c(np,ns))
-          enddo   !"ns"
-     enddo       !"np"
+          end do   !"ns"
+     end do       !"np"
 
       if(diag==1.and.np ==outp) then
-         print *,'bgc_fraction parameters'
-         print *, 'empirical params1-4=', micpdef%fmicsom1,micpdef%fmicsom2,micpdef%fmicsom3,micpdef%fmicsom4
-         print *, 'clay=', micinput%clay(np,:)
-         print *, 'cinputm=', micinput%cinputm(outp,:)
-         print *, 'cinputs=',micinput%cinputs(outp,:)
-         print *, 'fmetave=',micparam%fmetave(outp,:)
-         print *, 'cn_r1=',micparam%cn_r(outp,:,1)
-         print *, 'cn_r2=',micparam%cn_r(outp,:,2)
-         print *, 'fr2p=',micparam%fr2p(outp,:)
-         print *, 'fk2p=',micparam%fk2p(outp,:)
-         print *, 'fr2c=',micparam%fr2c(outp,:)
-         print *, 'fk2c=',micparam%fk2c(outp,:)
-         print *, 'fr2a=',micparam%fr2a(outp,:)
-         print *, 'fk2a=',micparam%fk2a(outp,:)
-      endif
+         print *,"bgc_fraction parameters"
+         print *, "empirical params1-4=", micpdef%fmicsom1,micpdef%fmicsom2,micpdef%fmicsom3,micpdef%fmicsom4
+         print *, "clay=", micinput%clay(np,:)
+         print *, "cinputm=", micinput%cinputm(outp,:)
+         print *, "cinputs=",micinput%cinputs(outp,:)
+         print *, "fmetave=",micparam%fmetave(outp,:)
+         print *, "cn_r1=",micparam%cn_r(outp,:,1)
+         print *, "cn_r2=",micparam%cn_r(outp,:,2)
+         print *, "fr2p=",micparam%fr2p(outp,:)
+         print *, "fk2p=",micparam%fk2p(outp,:)
+         print *, "fr2c=",micparam%fr2c(outp,:)
+         print *, "fk2c=",micparam%fk2c(outp,:)
+         print *, "fr2a=",micparam%fr2a(outp,:)
+         print *, "fk2a=",micparam%fk2a(outp,:)
+      end if
      deallocate(fmetleaf,fmetroot,fmetwood)
      deallocate(dleafx,drootx,dwoodx)
      deallocate(cinputm,cinputs)
@@ -4324,11 +4324,11 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
      do j=2,ms+1
         sdepthx(j) = sdepthx(j-1) + zse(j-1)*100.0     ! depth of the bottom of each layer (eg x_j+0.5)
                                                        !*100 to convert from m to cm
-     enddo
+     end do
 
      do j=1,ms
         xzse(j) = 0.5 * (sdepthx(j) + sdepthx(j+1))    ! depth of midpoint of a layer j  (x_j)
-     enddo
+     end do
 
      deltD = diffsocxx * delt
 
@@ -4336,7 +4336,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
       tot0 = 0.0
      do j=1,ms
         tot0 = tot0 + xpool(j) * zse(j)*100.0         !*100 convert m to cm
-     enddo
+     end do
 
      do i=1,ndelt
         do j=1,ms
@@ -4349,7 +4349,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
               ct(1) =     - 0.5 * coeffA
               rt(1) = (1.0-0.5*coeffA) * xpool(1) + 0.5 * coeffA * xpool(2) &
                     +  fluxsoc(1) * delt
-           endif
+           end if
            if(j>1.and.j<ms) then
              coeffA = deltD/((xzse(j+1)-xzse(j))*(sdepthx(j+1)-sdepthx(j)))
              coeffB = (xzse(j+1)-xzse(j))/(xzse(j)-xzse(j-1))
@@ -4361,7 +4361,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                      +(1.0-0.5* coeffA*(1.0+coeffB))*xpool(j)  &
                      + 0.5* coeffA * xpool(j+1)                &
                      + fluxsoc(j) *delt
-           endif
+           end if
            if(j==ms) then
                coeffA = deltD/((xzse(ms)-xzse(ms-1))*(sdepthx(ms+1) - sdepthx(ms)))
              ! Crank-Nicholson
@@ -4370,11 +4370,11 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                ct(ms) = 0.0
                rt(ms) = 0.5* coeffA  * xpool(ms-1) + (1.0-0.5 * coeffA) * xpool(ms) &
                     + fluxsoc(ms) * delt
-            endif
-        enddo
+            end if
+        end do
 
         call tridag(at,bt,ct,rt,xpool,ms)
-     enddo
+     end do
      xpoole = xpool
 
      tot1 = 0.0
@@ -4382,7 +4382,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
      do j=1,ms
         tot1 = tot1 + xpool(j) * zse(j) *100.0
         totflux = totflux + fluxsoc(j) * zse(j) *100.0
-     enddo
+     end do
 
 end subroutine bioturb
 
@@ -4406,14 +4406,14 @@ end subroutine bioturb
          gam(j) = ct(j-1)/bet
          bet = bt(j)-at(j)* gam(j)
          if(bet ==0) then
-            print *, 'triag failed'
+            print *, "triag failed"
             stop
-         endif
+         end if
          u(j) = (rt(j) - at(j) * u(j-1))/bet
-      enddo
+      end do
       do j=ms-1,1,-1
          u(j) = u(j) -gam(j+1) * u(j+1)
-      enddo
+      end do
     end subroutine tridag
 
 
@@ -4437,19 +4437,19 @@ end subroutine bioturb
         else
            dypool(ns) = (fluxsoilwx(ns-1)*ypool1(ns-1)/vsoilwx(ns-1) &
                         -fluxsoilwx(ns)  *ypool1(ns)/vsoilwx(ns))       *deltx*0.01/zse(ns)
-        endif
+        end if
         if(ns==ms) then
            fluxdocbot = fluxdocbot + fluxsoilwx(ns)  *ypool1(ns)/vsoilwx(ns) *deltx* 0.01
-        endif
-      enddo
+        end if
+      end do
       ypool1 = max(0.0,ypool1+dypool)
-     enddo
+     end do
      ! check mass conservation
      totdoc0=0.0; totdoc1=0.0
      do ns=1,ms
         totdoc0 = totdoc0 + ypool(ns)  *zse(ns)
         totdoc1 = totdoc1 + ypool1(ns) *zse(ns)
-     enddo
+     end do
     ! print *, 'mass cons DOC', totdoc0,totdoc1,(totdoc1-totdoc0)-(fluxdocsx - fluxdocbot)*deltx
 
      ypool = ypool1
@@ -4521,11 +4521,11 @@ end subroutine bioturb
          else
             cinputmx = micinput%cinputm(np,ns) *  micparam%c14atm(ny,micparam%region(np),2)       ! using fraction modern after 1941
             cinputsx = micinput%cinputs(np,ns) *  micparam%c14atm(ny,micparam%region(np),2)
-         endif
+         end if
       else
          cinputmx = micinput%cinputm(np,ns)
          cinputsx = micinput%cinputs(np,ns)
-      endif
+      end if
 
       tavgx    = micinput%tavg(np,ns);      clayx    = micinput%clay(np,ns);    siltx    = micinput%silt(np,ns)
 
@@ -4575,7 +4575,7 @@ end subroutine bioturb
             smexpa=2.8* clayx-0.046
          else
             smexpa=1.0
-         endif
+         end if
 
          smopt     = 0.65 * porex
 
@@ -4585,7 +4585,7 @@ end subroutine bioturb
 
          else
             xwater = ((porex - moistx)/(porex-smopt)) **micpdef%smexpb
-         endif
+         end if
 
 
          ! soil water limitation from Abramoff et al. (2022) eqn (4) and eqn (15)
@@ -4603,7 +4603,7 @@ end subroutine bioturb
          !    xwmic    = xwdecomp * exp(lambda * (-micinput%matpot(np,ns)) * (swmin + (1.0-swmin(np,ns)) * &
          !               ((micinput%poros(np) - micinput%moist(np,ns))/micinput%poros(np,ns)) **0.5)    !eqn(15) Abramoff2022
 
-      endif
+      end if
       ! carbon fluxes
       if(kinetics==1) then
         ! forward Michaelis-Menten
@@ -4629,7 +4629,7 @@ end subroutine bioturb
         cfluxk2a = fk2ax   * cfluxk
         cfluxc2a = xpool(3)* V2x * xpool(6)/(Q1x*K2x + xpool(6))   &
                  + xpool(4)* W2x * xpool(6)/(Q2x*J2x + xpool(6))
-      endif
+      end if
       if(kinetics ==2 )then
         !=======================================================
         ! reverse Michaelis-Menten
@@ -4656,7 +4656,7 @@ end subroutine bioturb
         cfluxk2a = fk2ax * cfluxk
         cfluxc2a = xpool(6) * V2x * xpool(3)/(Q1x*K2x + xpool(3))   &
                  + xpool(6) * W2x * xpool(4)/(Q2x*J2x + xpool(4))
-      endif
+      end if
 
       !===================================================
       !
@@ -4693,7 +4693,7 @@ end subroutine bioturb
          y(9) = 0.0
          y(10)= 0.0
 
-      endif
+      end if
 
       ! the new soil carbon model combining MIMICS and MILLENNIAL2
       ! we use two litter pools (m,s) and two microbial pool (r,k) and LWC (pool a), aggregate C (pool p) amd MAOC (pool C)
@@ -4787,8 +4787,8 @@ end subroutine bioturb
               + (1.0-mgeRx2) * cfluxs2r            + (1.0-mgeKx2)* cfluxs2k  - cfluxa
 
 !       write(*,101) np,ns, cinputmx+cinputsx,sum(y(1:7)),rsoil, cinputmx+cinputsx-sum(y(1:7))-rsoil
-101 format('vmic_c: input, sumdelc rsoil',2(i3,1x),10(f10.6,1x))
-      endif
+101 format("vmic_c: input, sumdelc rsoil",2(i3,1x),10(f10.6,1x))
+      end if
 
 !      print *, ' @ vmic_c xpool =', xpool(:)
 !      print *, ' @ vmic_c y =', y(:)
@@ -4797,8 +4797,8 @@ end subroutine bioturb
 
          do ip=1,mcpool
             y(ip) = y(ip) - tvc14 * max(0.0,xpool(ip))
-         enddo
-      endif
+         end do
+      end if
 
    end subroutine vmic_c
 
