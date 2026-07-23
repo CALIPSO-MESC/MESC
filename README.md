@@ -8,7 +8,7 @@
 The **SEC model** is a process-oriented soil carbon model that explicitly represents microbial decomposition processes (using Michaelis-Menten kinetics) implemented in **Fortran**, designed to simulate soil and ecosystem carbon dynamics and their controlling mechanisms.
 
 The model adopts a **modular architecture**, clearly separating core process representation, input/output handling, and model control logic.  
-It is compiled using **inetl compiler(`ifort`)** and linked against **netCDF (C + Fortran)**, enabling efficient handling of structured scientific data and deployment on **high-performance computing (HPC) systems**.
+It makes use of **netCDF (C + Fortran)**, enabling efficient handling of structured scientific data and deployment on **high-performance computing (HPC) systems**.
 
 ---
 
@@ -62,11 +62,13 @@ SEC/
 
 ## 3. Software Requirements
 
-The SEC model has been developed and tested in the following software environment:
+The SEC model has been developed and tested in the following software environments:
 
-- **Fortran compiler**: Intel (`ifort`) version **2021.9.0**
-- **netCDF-Fortran**: version **4.6.1**
-- **netCDF-C**: version **4.9.2**
+- **Fortran compiler**:
+   - Legacy Intel compiler (`ifort`) version **2021.9.0**
+   - Intel compiler (`ifx`) version **2025.3.0**
+- **netCDF-Fortran**: versions **4.6.1**, **4.6.2**
+- **netCDF-C**: versions **4.9.2**, **4.9.3**
 
 On HPC systems, the required environment is typically provided via modules, for example:
 
@@ -74,6 +76,8 @@ On HPC systems, the required environment is typically provided via modules, for 
 module load oneapi23u1
 module load netcdf_intel
 ```
+
+The exact modules used will be specific to the HPC system.
 
 ---
 
