@@ -71,7 +71,7 @@ contains
     if(mpx/=mp .or. msx/=ms .or. mcpoolx/=mcpool) then
        print *, 'dimensions do not match! ', mp,mpx,ms,msx,mcpool,mcpoolx
        STOP
-    endif
+    end if
     miccpool%cpool    = fcpool
     micnpool%mineralN = fnpool
 
@@ -277,17 +277,17 @@ contains
        micpxdef%xfp2ax(ibgc)     = 1.0
        micpxdef%xbeta(ibgc)      = 1.0
        micpxdef%xdesorp(ibgc)    = 1.0
-    enddo
+    end do
     close(100)
 
     do ipft=1,mpft
        if(jmodel==1) then
           micpxdef%xrootbeta(ipft) = xrootcable(ipft)
-       endif
+       end if
        if(jmodel==2 .or. jmodel==3) then
           micpxdef%xrootbeta(ipft) = xrootorchidee(ipft)
-       endif
-    enddo
+       end if
+    end do
 
   end subroutine getparam_global
 
@@ -323,9 +323,9 @@ contains
          if(sum(xfield3(i,j,:))>0.9) then
             maxpft= maxloc(xfield3(i,j,:),dim=1)
             if(maxpft >0 .and. maxpft <14) np=np+1
-         endif
-      enddo
-      enddo
+         end if
+      end do
+      end do
 
       deallocate(xfield3)
 
@@ -344,9 +344,9 @@ contains
           if(sum(xfield4(i,j,:,1))>0.9) then
              maxpft= maxloc(xfield4(i,j,:,1),dim=1)
              if(maxpft >0 .and. maxpft <=mpft) np=np+1
-          endif
-       enddo
-       enddo
+          end if
+       end do
+       end do
      deallocate(xfield4)
 
      case default
@@ -458,15 +458,15 @@ contains
              micglobal%patchfrac(np,:) = patchfrac(i,j,:)
              micglobal%pft(np)         = maxpft
              micparam%fracaoc(np,:)    = max(0.0_dp,min(0.7_dp,real(varaoc_db(i,j,:),kind=dp)))
-          endif
-       endif
-    enddo
-    enddo
+          end if
+       end if
+    end do
+    end do
 
     if(np/=mp) then
       print *, 'np is not equal to mp', np,mp
       STOP
-    endif
+    end if
 
 
     ok = NF90_INQ_VARID(ncid3,'area',varid)
@@ -599,14 +599,14 @@ contains
           micglobal%ligleaf(np) = ligleaf1(pft)
           micglobal%ligwood(np) = ligwood1(pft)
           micglobal%ligroot(np) = ligroot1(pft)
-       endif
+       end if
 
        if(min(micglobal%cnleaf(np,1),micglobal%cnwood(np,1),micglobal%cnroot(np,1))<10.0 .or. &
           max(micglobal%cnleaf(np,1),micglobal%cnwood(np,1),micglobal%cnroot(np,1))>1000.0) then
           micglobal%cnleaf(np,:) = cnleaf1(pft)
           micglobal%cnwood(np,:) = cnwood1(pft)
           micglobal%cnroot(np,:) = cnroot1(pft)
-       endif
+       end if
        ! replacing negative values of metal oxide with their global means in kg/m2
      !  if(fald(np)<0.0) fald(np) =0.46_dp
      !  if(falo(np)<0.0) falo(np) =0.39_dp
@@ -618,7 +618,7 @@ contains
        if(micglobal%ph(np) /= micglobal%ph(np)) micglobal%ph(np)=-1
        if(micglobal%silt(np) /= micglobal%silt(np)) micglobal%silt(np)=-1.0
        if(micglobal%clay(np) /= micglobal%clay(np)) micglobal%clay(np)=-1.0
-    enddo
+    end do
     ! call "cluster_hwsd" to use ORCHIDEE centroid
     micglobal%bgctype = -1
     micparam%bgctype  = -1
@@ -630,7 +630,7 @@ contains
     ! temporary solution
     do n=1,ntime
        micglobal%time(n) = n
-    enddo
+    end do
 
     print *, 'reading time-varying data', fglobal(2)
 
@@ -698,14 +698,14 @@ contains
   !                 micglobal%sorder(np),micglobal%bgctype(np), micglobal%npp(np)
           micparam%bgctype(np)= mbgc
           micglobal%area(np)  = -1.0
-       endif
+       end if
        ! replacing NPP in the time-invariant input file using the mean of time-varying input
        micglobal%npp(np) = 365.0 * sum(micglobal%dleaf(np,:) + micglobal%dwood(np,:) + micglobal%droot(np,:)) &
                          /real(size(micglobal%dleaf(np,:)))
        if(micglobal%isoil(np) <0  .or. micglobal%isoil(np) >12)   micglobal%isoil(np)=12
        if(micglobal%sorder(np) <0 .or. micglobal%sorder(np) >12)  micglobal%sorder(np)=12
        if(micglobal%bgctype(np) ==bgcopt .and. micglobal%area(np) >0) msite = msite + 1
-    enddo
+    end do
 
     ! assign time-invariance properties from "micglobal" to "micparam"
     micparam%pft        = micglobal%pft
@@ -726,11 +726,11 @@ contains
           if(micglobal%bgctype(np) == bgcopt .and.micglobal%area(np) > 0.0) then
              isite = isite +1
              if(int(isite/intval)*intval /= isite.or. isite>sitemax*intval) micglobal%area(np) = -1.0
-          endif
+          end if
  !         if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
  !            write(*,103) isite,np, micglobal%bgctype(np), micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
  !         endif
-       enddo
+       end do
     else
 
       isite=0
@@ -738,11 +738,11 @@ contains
          if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
             isite=isite+1
  !           write(*,103) isite,np,micglobal%bgctype(np),micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
-         endif
-      enddo
+         end if
+      end do
       if(isite<10) print *, 'too few sites ', isite
 
-    endif
+    end if
 
     micglobal%avgts(:) = sum(sum(micglobal%tsoil(:,:,:),dim=3),dim=2)/real(ms*ntime)
     micglobal%avgms(:) = sum(sum(micglobal%moist(:,:,:),dim=3),dim=2)/real(ms*ntime)
@@ -761,9 +761,9 @@ contains
           micglobal%avgts(np),micglobal%avgms(np), max(-1.0,micparam%csoilobs(np,:)),          &
           micparam%fracaoc(np,1),micparam%fracaoc(np,3), micparam%fracaoc(np,ms)
 
-       enddo
+       end do
        close(31)
-    endif
+    end if
 101 format(2(f8.3,1x),2(i6,1x),i10,1x,es16.8,1x,5(i5,1x),*(es16.8,1x))
 103 format(3(i5,1x),3(f10.4,1x))
 
@@ -900,15 +900,15 @@ contains
              micglobal%patchfrac(np,:) = patchfrac(i,j,:)
              micglobal%pft(np)         = maxpft
              micparam%fracaoc(np,:)    = max(0.0_dp,min(0.7_dp,real(varaoc_db(i,j,:),kind=dp)))
-          endif
-       endif
-    enddo
-    enddo
+          end if
+       end if
+    end do
+    end do
 
     if(np/=mp) then
       print *, 'np is not equal to mp', np,mp
       STOP
-    endif
+    end if
 
 
     ok = NF90_INQ_VARID(ncid3,'cell_area',varid)
@@ -1009,7 +1009,7 @@ contains
        IF(pft <0 .or. pft >mpft .or. ns <1 .or. ns >12) then
           micglobal%area(np) = -1.0
           pft= 1; ns =1
-       endif
+       end if
 
        micglobal%ligleaf(np)  = ligleaf2(pft)
        micglobal%ligwood(np)  = ligwood2(pft)
@@ -1029,7 +1029,7 @@ contains
        if(micglobal%ph(np) /= micglobal%ph(np)) micglobal%ph(np)=-1
        if(micglobal%silt(np) /= micglobal%silt(np)) micglobal%silt(np)=-1.0
        if(micglobal%clay(np) /= micglobal%clay(np)) micglobal%clay(np)=-1.0
-    enddo
+    end do
 
    ! use the cluster centres to estimate bgctype
    ! micglobal%bgctype=-1
@@ -1041,7 +1041,7 @@ contains
     ! temporary solution
     do n=1,ntime
        micglobal%time(n) = n
-    enddo
+    end do
 
     print *, 'reading time-varying data', fglobal(2)
 
@@ -1120,8 +1120,8 @@ contains
           micglobal%dwood(np,:) = micglobal%dwood(np,:) * modisnpp_mp(np)/micglobal%npp(np)
           micglobal%droot(np,:) = micglobal%droot(np,:) * modisnpp_mp(np)/micglobal%npp(np)
           micglobal%npp(np) = sum(micglobal%dleaf(np,:) + micglobal%dwood(np,:) + micglobal%droot(np,:))
-       enddo
-    endif
+       end do
+    end if
 
     ! filter out land cells with "bgctype<0"
   !  print *, 'calculations are not done for the following cells'
@@ -1134,14 +1134,14 @@ contains
     !               micglobal%sorder(np),micglobal%bgctype(np), micglobal%npp(np)
           micparam%bgctype(np)= mbgc
           micglobal%area(np)  = -1.0
-       endif
+       end if
        ! replacing NPP in the time-invariant input file using the mean of time-varying input
        micglobal%npp(np) = 365.0 * sum(micglobal%dleaf(np,:) + micglobal%dwood(np,:) + micglobal%droot(np,:)) &
                          /real(size(micglobal%dleaf(np,:)))
        if(micglobal%isoil(np) <0  .or. micglobal%isoil(np) >12)   micglobal%isoil(np)=12
        if(micglobal%sorder(np) <0 .or. micglobal%sorder(np) >12)  micglobal%sorder(np)=12
        if(micglobal%bgctype(np) ==bgcopt .and. micglobal%area(np) >0) msite = msite + 1
-    enddo
+    end do
 
     ! assign time-invariance properties from "micglobal" to "micparam"
     micparam%pft        = micglobal%pft
@@ -1164,11 +1164,11 @@ contains
           if(micglobal%bgctype(np) == bgcopt .and.micglobal%area(np) > 0.0) then
              isite = isite +1
              if(int(isite/intval)*intval /= isite.or. isite>sitemax*intval) micglobal%area(np) = -1.0
-          endif
+          end if
    !       if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
    !          write(*,103) isite,np, micglobal%bgctype(np), micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
    !       endif
-       enddo
+       end do
     else
 
       isite=0
@@ -1176,11 +1176,11 @@ contains
          if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
             isite=isite+1
    !         write(*,103) isite,np,micglobal%bgctype(np),micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
-         endif
-      enddo
+         end if
+      end do
       if(isite<10) print *, 'too few sites ', isite
 
-    endif
+    end if
 
     micglobal%avgts(:) = sum(sum(micglobal%tsoil(:,:,:),dim=3),dim=2)/real(ms*ntime)
     micglobal%avgms(:) = sum(sum(micglobal%moist(:,:,:),dim=3),dim=2)/real(ms*ntime)
@@ -1199,9 +1199,9 @@ contains
           micglobal%avgts(np),micglobal%avgms(np), max(-1.0,micparam%csoilobs(np,:)),          &
           micparam%fracaoc(np,1),micparam%fracaoc(np,3), micparam%fracaoc(np,ms)
 
-       enddo
+       end do
        close(31)
-    endif
+    end if
 101 format(2(f8.3,1x),2(i6,1x),i10,1x,es16.8,1x,5(i5,1x),*(es16.8,1x))
 103 format(3(i5,1x),3(f10.4,1x))
 
@@ -1300,11 +1300,11 @@ subroutine cluster_hwsd(jmodel,bgctype,socobs,fclay,fsilt,fph,fald,falo,ffed,ffe
                xdist(m,5) = (z(5) - alomid(m,j))**2
                xdist(m,6) = (z(6) - fedmid(m,j))**2
                xdist(m,7) = (z(7) - feomid(m,j))**2
-            enddo
+            end do
             fcluster(np) = MINLOC(sum(xdist,dim=2),dim=1)
-         endif
-       endif
-    enddo
+         end if
+       end if
+    end do
 end subroutine cluster_hwsd
 
 !> map 2d variable into 1d
@@ -1404,7 +1404,7 @@ subroutine lonlat2mpx3a(ilon, jlat, ms3, zse3, bulkd3, varx3_db, varmp1_db)
         do ns=1,ms3
            varx_slice(ns) =  varx3_db(ilon(np), jlat(np), ns) * bulkd3(ilon(np), jlat(np), ns) * zse3(ns)
            weights(ns)    =  bulkd3(ilon(np), jlat(np), ns) * zse3(ns)
-        enddo
+        end do
         varmp1_db(np) = sum(varx_slice ) / sum(weights)
     end do
 
@@ -1434,10 +1434,10 @@ subroutine lonlat2mpx3time(ilon, jlat, varx3time_db, varmp2_db)
            write(*,*) 'ilon=', ilon(np), ' valid range 1:', nlon
            write(*,*) 'jlat=', jlat(np), ' valid range 1:', nlat
            stop
-       endif
+       end if
 
        varmp2_db(np,:) = varx3time_db(ilon(np), jlat(np), :)
-    enddo
+    end do
 
 end subroutine lonlat2mpx3time
 
@@ -1465,16 +1465,16 @@ subroutine lonlat2mpx4b(ilon,jlat,xmin,xmax,xdef,varx4_db,varmp3_db)
            write(*,*) 'ilon=', ilon(np), ' valid 1:', nlon
            write(*,*) 'jlat=', jlat(np), ' valid 1:', nlat
            stop
-       endif
+       end if
        varmp3_db(np,:,:) = varx4_db(ilon(np),jlat(np),:,:)
 
        do ns=1,ms
        do nt =1,ntime
           if(varmp3_db(np,ns,nt) <xmin .or. varmp3_db(np,ns,nt) >xmax) then
              varmp3_db(np,:,:)=xdef
-          endif
-       enddo
-       enddo
+          end if
+       end do
+       end do
     end do
 
 end subroutine lonlat2mpx4b
@@ -1730,8 +1730,8 @@ end subroutine lonlat2mpx4b
             micparam%csoilobsm(np,ns)   = fmaoc(np)
 
             !micnpool%mineralN(np,ns) = forcdata(np,7)*0.001 ! mineral N: "0.001" mg N /kg soil --> g N /kg soil
-         enddo !"ns"
-      enddo    ! "np=1,mp"
+         end do !"ns"
+      end do    ! "np=1,mp"
 
       ! read in the standard 14C atmospheric data for five zones
 !         f14c(1) ='/g/data/w97/lw9370/combined-model/c14/code-structure/data/NH1-C14.csv'
@@ -1741,7 +1741,7 @@ end subroutine lonlat2mpx4b
 !         f14c(5) ='/g/data/w97/lw9370/combined-model/c14/code-structure/data/SH3-C14.csv'
          do nz=1,5
              call get14catm(nz,f14c(nz),micparam)
-         enddo
+         end do
 
     ! dealoocate variables
     deallocate(fsoc)
@@ -2030,8 +2030,8 @@ end subroutine lonlat2mpx4b
        ffeo(np) = ffeo(np) * (fbot(np)-ftop(np))*0.01 * fbulkd(np) * 0.05585 /100.0
        do ns=1,ms
            micparam%csoilobs(np,ns)    = fsoc(np)
-       enddo
-    enddo
+       end do
+    end do
 
     micparam%bgctype = 0
     call cluster_hwsd(2,micparam%bgctype,micparam%csoilobs,fclay,fsilt,fph,fald,falo,ffed,ffeo,fcluster)
@@ -2088,14 +2088,14 @@ end subroutine lonlat2mpx4b
             micglobal%tsoil(np,ns,:) = ftemp(np)    ! average temperature in deg C
             micglobal%moist(np,ns,:) = fmoist(np)   ! average soil water content mm3/mm3
             micglobal%matpot(np,ns,:)= fmatpot(np)  ! soil matric potential -kPa
-         enddo !"ns"
+         end do !"ns"
          ! for merging
          micglobal%clay(np)       = fclay(np)       ! clay content (fraction)
          micglobal%silt(np)       = fsilt(np)       ! silt content (fraction)
          micglobal%ph(np)         = fph(np)
          micglobal%poros(np)      = fporosity(np)   ! porosity mm3/mm3
          micglobal%bulkd(np)      = fbulkd(np)
-      enddo  ! np=1,mp
+      end do  ! np=1,mp
 
       micglobal%avgts(:) = sum(sum(micglobal%tsoil(:,:,:),dim=3),dim=2)/real(ms*ntime)
       micglobal%avgms(:) = sum(sum(micglobal%moist(:,:,:),dim=3),dim=2)/real(ms*ntime)
@@ -2104,14 +2104,14 @@ end subroutine lonlat2mpx4b
 
          if(micparam%bgctype(np) ==bgcopt) then
             msite=msite + 1
-         endif
+         end if
          if(jglobal==1) then
             write(100,901) micparam%siteid(np),micparam%dataid(np),micparam%pft(np),micparam%bgctype(np),micparam%top(np),micparam%bot(np) , &
                          fnpp(np),fanpp(np),fbnpp(np),fcna(np),fcnb(np),flignin(np),ftemp(np),fmoist(np),fclay(np),fsilt(np),fph(np), &
                          fporosity(np),fmatpot(np),fbulkd(np),fald(np),falo(np),ffed(np),ffeo(np),fsoc(np),fpoc(np),fmaoc(np)
-         endif
+         end if
 
-      enddo    ! "np=1,mp"
+      end do    ! "np=1,mp"
 
     print *, 'total sites = ', msite, 'for bgcopt= ',bgcopt
     if(jglobal==1) close(100)
@@ -2171,7 +2171,7 @@ end subroutine lonlat2mpx4b
       open(13,file=f14cz)
       do i=1,4
           read(13,*)
-      enddo
+      end do
 
       do i=1,79 !! 1941-2019
         read(13,*,end=91) year,c14del,sdx1,c14fm,sdx2
@@ -2182,8 +2182,8 @@ end subroutine lonlat2mpx4b
          else
             micparam%c14atm(ny,nz,1) = c14del !!! delta c14
             micparam%c14atm(ny,nz,2) = c14fm
-         endif
-      enddo
+         end if
+      end do
 91    close(13)
    end subroutine get14catm
 
@@ -2284,14 +2284,14 @@ end subroutine lonlat2mpx4b
        status = nf90_get_var(ncid,varid,ivarx1)
        if(status /= nf90_noerr) print*,'Error reading soil texure'
        micglobal%isoil = ivarx1
-    endif
+    end if
     if(jmodel==2 .or.jmodel==3) then
        status = nf90_inq_varid(ncid,'USDA_Soil_texture_class',varid)
        if(status /= nf90_noerr) print*, 'Error inquiring soil texturep'
        status = nf90_get_var(ncid,varid,ivarx1)
        if(status /= nf90_noerr) print*,'Error reading soil texure'
        micglobal%isoil = ivarx1
-    endif
+    end if
 
     status = nf90_inq_varid(ncid,'max_PFTfrac',varid)
     if(status /= nf90_noerr) print*, 'Error inquiring max_PFTfrac'
@@ -2409,8 +2409,8 @@ end subroutine lonlat2mpx4b
     do np=1,mp
        do ns=1,ms
           micparam%csoilobs(np,ns) = real(fsoc7(np,ns),kind=dp)
-       enddo
-    enddo
+       end do
+    end do
 
     micglobal%bgctype = 0
     micparam%bgctype  = 0
@@ -2448,12 +2448,12 @@ end subroutine lonlat2mpx4b
           ilonx=(micglobal%lon(np) + 179.75)/0.5 + 1
           jlatx=(89.75-micglobal%lat(np))/0.5    + 1
           modisnpp_mp(np) = max(100.0,modisnpp(ilonx,jlatx))
-       enddo
-    endif
+       end do
+    end if
 
     do k=1,ntime
        micglobal%time(k)= real(k*1.0,kind=dp)
-    enddo
+    end do
 
     ! print *, 'PFT=', micglobal%pft
     msite = 0
@@ -2473,27 +2473,27 @@ end subroutine lonlat2mpx4b
           if(ipft<1 .or. ipft >17) then
              print *, 'PFT error at  np', jmodel,ipft,np
              stop
-          endif
+          end if
           micparam%xcnleaf(np)  = cnleaf1(ipft)
           micparam%xcnroot(np)  = cnroot1(ipft)
           micparam%xcnwood(np)  = cnwood1(ipft)
           micparam%fligleaf(np) = ligleaf1(ipft)
           micparam%fligroot(np) = ligroot1(ipft)
           micparam%fligwood(np) = ligwood1(ipft)
-       endif
+       end if
        if(jmodel==2 .or.jmodel==3) then      !ORCHIDEE
           ipft =  micglobal%pft(np)
           if(ipft<1 .or. ipft >19) then
              print *, 'PFT error at  np', jmodel,ipft,np
              stop
-          endif
+          end if
           micparam%xcnleaf(np)  = cnleaf2(ipft)
           micparam%xcnroot(np)  = cnroot2(ipft)
           micparam%xcnwood(np)  = cnwood2(ipft)
           micparam%fligleaf(np) = ligleaf2(ipft)
           micparam%fligroot(np) = ligroot2(ipft)
           micparam%fligwood(np) = ligwood2(ipft)
-       endif
+       end if
 
        nsocobs=0
 
@@ -2507,11 +2507,11 @@ end subroutine lonlat2mpx4b
           ! filter out sites with SOC >120 gc/kg (organic soil: Lourenco et al. 2022)
           if(micparam%csoilobs(np,ns) >=120.0) then
              micglobal%area(np) = -1.0
-          endif
+          end if
 
           if(micparam%csoilobs(np,ns) >0.0 .and. micparam%csoilobs(np,ns) < 1000.0) nsocobs = nsocobs + 1
 
-       enddo
+       end do
 
        ! using "micglobal%area" to filter out some sites
        micglobal%npp(np) = sum(micglobal%dleaf(np,:) + micglobal%dwood(np,:) + micglobal%droot(np,:))
@@ -2520,12 +2520,12 @@ end subroutine lonlat2mpx4b
           micglobal%dwood(np,:) = micglobal%dwood(np,:) * modisnpp_mp(np)/micglobal%npp(np)
           micglobal%droot(np,:) = micglobal%droot(np,:) * modisnpp_mp(np)/micglobal%npp(np)
           micglobal%npp(np) = sum(micglobal%dleaf(np,:) + micglobal%dwood(np,:) + micglobal%droot(np,:))
-       endif
+       end if
 
        if(micglobal%npp(np)<100.0 .or. micglobal%ph(np)<3.0 .or. nsocobs==0) micglobal%area(np) = -1.0
 
        if(micglobal%bgctype(np) ==bgcopt .and. micglobal%area(np) >0) msite = msite + 1
-    enddo    ! "np=1,mp"
+    end do    ! "np=1,mp"
 
     sitemax=300
     if(msite>2*sitemax) then
@@ -2535,11 +2535,11 @@ end subroutine lonlat2mpx4b
           if(micglobal%bgctype(np) == bgcopt .and.micglobal%area(np) > 0.0) then
              isite = isite +1
              if(int(isite/intval)*intval /= isite.or. isite>sitemax*intval) micglobal%area(np) = -1.0
-          endif
+          end if
           if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
              write(*,103) isite,np, micglobal%bgctype(np), micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
-          endif
-       enddo
+          end if
+       end do
     else
 
       isite=0
@@ -2547,11 +2547,11 @@ end subroutine lonlat2mpx4b
          if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
             isite=isite+1
             write(*,103) isite,np,micglobal%bgctype(np),micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
-         endif
-      enddo
+         end if
+      end do
       if(isite<10) print *, 'too few sites ', isite
 
-    endif
+    end if
 
     micglobal%avgts(:) = sum(sum(micglobal%tsoil(:,:,:),dim=3),dim=2)/real(ms*ntime)
     micglobal%avgms(:) = sum(sum(micglobal%moist(:,:,:),dim=3),dim=2)/real(ms*ntime)
@@ -2567,9 +2567,9 @@ end subroutine lonlat2mpx4b
           micglobal%ph(np),micglobal%clay(np)+micglobal%silt(np),micglobal%bulkd(np), &
           micglobal%avgts(np),micglobal%avgms(np),sum(micparam%csoilobs(np,:)*zse(:))/sum(zse(:)), &
           micparam%fracaoc(np,1),micparam%fracaoc(np,3), micparam%fracaoc(np,ms)
-       enddo
+       end do
        close(100)
-    endif
+    end if
 101 format(i5,1x,f8.4,1x,4(i3,1x),30(f10.4,1x))
 103 format(' run site', 3(i6,1x),10(f10.3,1x))
 
@@ -2789,24 +2789,24 @@ end subroutine screenout
              micparam%csoilobs(np,ns) = soc3(np,ns)
           else
              micparam%csoilobs(np,ns) = soc3(np,3)
-          endif
+          end if
           if(ns==1) then
              micglobal%moist(np,ns,:)    = moist10y10(np,:)
           else
              micglobal%moist(np,ns,:) = moist10y100(np,:)
-          endif
+          end if
           micglobal%tsoil(np,ns,:)  = tsoil10y(np,:)
           micparam%csoilobsp(np,ns) = poc(np)   ! assign layer POC conc to all layers
           micparam%csoilobsm(np,ns) = hoc(np)   ! assign layer POC conc to all layers
-       enddo
+       end do
        micglobal%avgts(np)   = sum(micglobal%tsoil(np,1,:))/real(ntime)
        micglobal%avgms(np)   = sum(micglobal%moist(np,2,:))/real(ntime)
        micglobal%npp(np)     = sum(npp10y(np,:))
-    enddo
+    end do
 
     do k=1,ntime
        micglobal%time(k)= real(k*1.0,kind=dp)
-    enddo
+    end do
 
     if(jglobal==1) then
        open(100,file='inputdata.txt')
@@ -2816,9 +2816,9 @@ end subroutine screenout
           micglobal%npp(np),sum(micglobal%dleaf(np,:))+sum(micglobal%dwood(np,:))+sum(micglobal%droot(np,:)), &
           micglobal%ph(np),micglobal%clay(np)+micglobal%silt(np),micglobal%bulkd(np), &
           micglobal%avgts(np),micglobal%avgms(np),sum(micparam%csoilobs(np,:)*zse(:))/sum(zse(:))
-       enddo
+       end do
        close(100)
-    endif
+    end if
 101 format(i5,1x,f8.4,1x,4(i3,1x),20(f10.4,1x))
 103 format(' run site', 3(i6,1x),10(f10.3,1x))
 

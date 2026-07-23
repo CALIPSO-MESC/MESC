@@ -21,13 +21,13 @@
     do n=1,6
        nx=nparam(n)
        xparam(nx) = param(n)
-    enddo
+    end do
     print *, 'xparam= ', xparam(:)
     ! write the optimized parameter values into "params1.txt"
     do n=1,5
        read(13,'(A)') chdata
        write(21,301)  chdata
-    enddo
+    end do
     write(21,302) xparam(1:14)
     write(21,303)
     close(11)

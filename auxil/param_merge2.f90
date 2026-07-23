@@ -31,13 +31,13 @@
     do n=1,6
        nx=nparam(n)
        xparam(nx) = param(n)
-    enddo
+    end do
     print *, 'xparam= ', xparam(:)
     ! write the optimized parameter values into "params1.txt"
     do n=1,9
        read(13,'(A)') chdata
        write(21,301)  chdata
-    enddo
+    end do
     write(21,302) xparam(1:14)
     write(21,303)
 
@@ -53,17 +53,17 @@
       y(1) =y1
       y(2) =y2
       y(3) =y3
-    endif
+    end if
 
     do n=1,2
        read(2,21) data
        write(3,21) data
-    enddo
+    end do
     do n=1,ny
        read(2,22) data1,data2
        read(data1,*) y0,ymin,ymax
        write(3,31) y(n),ymin,ymax,data2
-    enddo
+    end do
 
     close(11)
     close(12)

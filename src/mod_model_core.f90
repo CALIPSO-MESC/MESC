@@ -74,8 +74,8 @@ contains
          kmx(np,ns) =  micpxdef%xak(nopt) * micpdef%ak * exp(micpdef%skx * micinput%tavg(np,ns) + micpdef%bk)
          micparam%K2(np,ns) =  kmx(np,ns)/micpdef%xk2
          micparam%J2(np,ns) =  kmx(np,ns)/micpdef%xj2
-       enddo
-      enddo
+       end do
+      end do
 
        if(diag==1.and.np==outp) then
           print *, 'Kmt',micinput%clay(outp,1),micinput%tavg(outp,1),km(outp,1),kmx(outp,1)
@@ -85,7 +85,7 @@ contains
           print *, 'J1=',micparam%J1(outp,1)
           print *, 'J2=',micparam%J2(outp,1)
           print *, 'J3=',micparam%J3(outp,1)
-       endif
+       end if
       deallocate(xkclay,km,kmx)
 
     end subroutine Kmt
@@ -114,7 +114,7 @@ contains
          kmx(np,ns) =  micpxdef%xak(nopt) * micpdef%ak * exp(micpdef%skx * micinput%tavg(np,ns) + micpdef%bk)
          micparam%K2(np,ns) =  kmx(np,ns)/micpdef%xk2
          micparam%J2(np,ns) =  kmx(np,ns)/micpdef%xj2
-      enddo
+      end do
 
       if(diag==1.and.np==outp) then
          print *, 'Kmt',micinput%clay(outp,1),micinput%tavg(outp,1),km(outp,1),kmx(outp,1)
@@ -124,7 +124,7 @@ contains
          print *, 'J1=',micparam%J1(outp,1)
          print *, 'J2=',micparam%J2(outp,1)
          print *, 'J3=',micparam%J3(outp,1)
-      endif
+      end if
       deallocate(xkclay,km,kmx)
 
     end subroutine Kmt_single
@@ -154,7 +154,7 @@ contains
                sdepthz(ns) = 0.5 * micparam%sdepth(np,ns)
             else
                 sdepthz(ns) = sdepthz(ns-1) + micparam%sdepth(np,ns)
-            endif
+            end if
         !   vmax(np,ns) =  micpxdef%xav * micpdef%av * exp(micpdef%sv*micinput%tavg(np,ns) + micpdef%bv) * delt
         !   vmax(np,ns) =  exp(-2.0* sdepthz(ns)) * micpxdef%xav(npft) * micpdef%av * exp(micpdef%sv*micinput%tavg(np,ns) + micpdef%bv) * delt
            vmax(np,ns) =  exp(-micpdef%vmaxbeta * micpxdef%xvmaxbeta(nopt) * sdepthz(ns))     &
@@ -167,8 +167,8 @@ contains
            micparam%W1(np,ns)   =  micpdef%xw1 * vmax(np,ns)
            micparam%W2(np,ns)   =  micpdef%xw2 * vmax(np,ns)
            micparam%W3(np,ns)   =  micpdef%xw3 * vmax(np,ns)
-          enddo
-       enddo
+          end do
+       end do
 
         if(diag==1.and.np==outp) then
            print *, 'Vmaxt',micinput%tavg(outp,1),vmax(outp,1)
@@ -178,7 +178,7 @@ contains
            print *, 'W1=',micparam%W1(outp,1)
            print *, 'W2=',micparam%W2(outp,1)
            print *, 'W3=',micparam%W3(outp,1)
-        endif
+        end if
 
       deallocate(vmax)
       deallocate(sdepthz)
@@ -210,7 +210,7 @@ contains
             sdepthz(ns) = 0.5 * micparam%sdepth(np,ns)
          else
             sdepthz(ns) = sdepthz(ns-1) + micparam%sdepth(np,ns)
-         endif
+         end if
       !   vmax(np,ns) =  micpxdef%xav * micpdef%av * exp(micpdef%sv*micinput%tavg(np,ns) + micpdef%bv) * delt
       !   vmax(np,ns) =  exp(-2.0* sdepthz(ns)) * micpxdef%xav(npft) * micpdef%av * exp(micpdef%sv*micinput%tavg(np,ns) + micpdef%bv) * delt
          vmax(np,ns) =  exp(-micpdef%vmaxbeta * micpxdef%xvmaxbeta(nopt) * sdepthz(ns))     &
@@ -223,7 +223,7 @@ contains
          micparam%W1(np,ns)   =  micpdef%xw1 * vmax(np,ns)
          micparam%W2(np,ns)   =  micpdef%xw2 * vmax(np,ns)
          micparam%W3(np,ns)   =  micpdef%xw3 * vmax(np,ns)
-      enddo
+      end do
 
 
       if(diag==1.and.np==outp) then
@@ -234,7 +234,7 @@ contains
          print *, 'W1=',micparam%W1(outp,1)
          print *, 'W2=',micparam%W2(outp,1)
          print *, 'W3=',micparam%W3(outp,1)
-      endif
+      end if
 
       deallocate(vmax)
       deallocate(sdepthz)
@@ -254,13 +254,13 @@ contains
       do ns=1,ms
          nopt=micparam%bgctype(np)
          micparam%desorp(np,ns) = micpxdef%xdesorp(nopt) * (1.5e-5) * exp(-1.5*micinput%clay(np,ns))
-      enddo
-     enddo
+      end do
+     end do
 
       if(diag==1.and. np==outp) then
          print *, 'Desorpt'
          print *, 'desorpt=',micparam%desorp(outp,:)
-      endif
+      end if
 
     end subroutine Desorpt
 
@@ -277,13 +277,13 @@ contains
       do ns=1,ms
          nopt=micparam%bgctype(np)
          micparam%desorp(np,ns) = micpxdef%xdesorp(nopt) * (1.5e-5) * exp(-1.5*micinput%clay(np,ns))
-      enddo
+      end do
 
 
       if(diag==1.and. np==outp) then
          print *, 'Desorpt'
          print *, 'desorpt=',micparam%desorp(outp,:)
-      endif
+      end if
 
     end subroutine Desorpt_single
 
@@ -326,13 +326,13 @@ contains
           micparam%mgeK1(np,ns) = micpdef%epislon3 * exp(-0.015 *micinput%tavg(np,ns))
           micparam%mgeK2(np,ns) = micpdef%epislon4 * exp(-0.015 *micinput%tavg(np,ns))
           micparam%mgeK3(np,ns) = micpdef%epislon3 * exp(-0.015 *micinput%tavg(np,ns))
-       enddo
-      enddo
+       end do
+      end do
 
        if(diag==1.and.np==outp) then
           print *, 'mget'
           print *, 'epislon1-4=',micpdef%epislon1,micpdef%epislon2,micpdef%epislon3,micpdef%epislon4
-       endif
+       end if
 
   end subroutine mget
 
@@ -376,12 +376,12 @@ contains
          micparam%mgeK1(np,ns) = micpdef%epislon3 * exp(-0.015 *micinput%tavg(np,ns))
          micparam%mgeK2(np,ns) = micpdef%epislon4 * exp(-0.015 *micinput%tavg(np,ns))
          micparam%mgeK3(np,ns) = micpdef%epislon3 * exp(-0.015 *micinput%tavg(np,ns))
-      enddo
+      end do
 
       if(diag==1.and.np==outp) then
          print *, 'mget'
          print *, 'epislon1-4=',micpdef%epislon1,micpdef%epislon2,micpdef%epislon3,micpdef%epislon4
-      endif
+      end if
 
   end subroutine mget_single
 
@@ -415,14 +415,14 @@ contains
               micparam%tvmicK(np,ns)   = micpxdef%xtvmic(nopt) * micpdef%tvmicK * tvref(np) * exp(0.1 * micparam%fmetave(np,ns)) * delt
               micparam%betamicR(np,ns) = micpdef%betamic * micpxdef%xbeta(nopt)
               micparam%betamicK(np,ns) = micpdef%betamic * micpxdef%xbeta(nopt)
-           enddo
-       enddo
+           end do
+       end do
 
         if(diag==1.and.np==outp) then
           print *, 'turnovert'
           print *, 'tvmicR=',micparam%tvmicR(outp,:)
           print *, 'tvmicR=',micparam%tvmicR(outp,:)
-        endif
+        end if
       deallocate(tvref)
   end subroutine turnovert
 
@@ -455,7 +455,7 @@ contains
          micparam%tvmicK(np,ns)   = micpxdef%xtvmic(nopt) * micpdef%tvmicK * tvref(np) * exp(0.1 * micparam%fmetave(np,ns)) * delt
          micparam%betamicR(np,ns) = micpdef%betamic * micpxdef%xbeta(nopt)
          micparam%betamicK(np,ns) = micpdef%betamic * micpxdef%xbeta(nopt)
-      enddo
+      end do
 
 
       if(diag==1.and.np==outp) then
@@ -464,7 +464,7 @@ contains
          print *, 'xtvmic xbeta = ', micpxdef%xtvmic(micparam%bgctype(np)),micpxdef%xbeta(micparam%bgctype(np))
          print *, 'tvmicR=',micparam%tvmicR(outp,:)
          print *, 'tvmicR=',micparam%tvmicR(outp,:)
-      endif
+      end if
       deallocate(tvref)
   end subroutine turnovert_single
 
@@ -519,7 +519,7 @@ contains
                 dleafx(np,ns) = 0.0
                 drootx(np,ns) = micpxdef%xNPP(npft) * 0.001 * micparam%fracroot(np,ns) * micinput%droot(np)/micparam%sdepth(np,ns)  ! mgc/cm3/delt
                 dwoodx(np,ns) = 0.0
-             endif
+             end if
 
            !! calculate soil texture and litter quality dependent parameter values
            ! C input to metabolic litter
@@ -576,8 +576,8 @@ contains
              micparam%fk2p(np,ns) =  0.0
              micparam%fr2a(np,ns) = max(0.0,1.00 - micparam%fr2c(np,ns))
              micparam%fk2a(np,ns) = max(0.0,1.00 - micparam%fk2c(np,ns))
-          enddo   !"ns"
-     enddo       !"np"
+          end do   !"ns"
+     end do       !"np"
 
       if(diag==1.and.np ==outp) then
          print *,'bgc_fraction parameters'
@@ -594,7 +594,7 @@ contains
          print *, 'fk2c=',micparam%fk2c(outp,:)
          print *, 'fr2a=',micparam%fr2a(outp,:)
          print *, 'fk2a=',micparam%fk2a(outp,:)
-      endif
+      end if
      deallocate(fmetleaf,fmetroot,fmetwood)
      deallocate(dleafx,drootx,dwoodx)
      deallocate(cinputm,cinputs)
@@ -651,7 +651,7 @@ contains
             dleafx(np,ns) = 0.0
             drootx(np,ns) = micpxdef%xNPP(npft) * 0.001 * micparam%fracroot(np,ns) * micinput%droot(np)/micparam%sdepth(np,ns)  ! mgc/cm3/delt
             dwoodx(np,ns) = 0.0
-         endif
+         end if
 
           ! calculate soil texture and litter quality dependent parameter values
           ! C input to metabolic litter
@@ -708,7 +708,7 @@ contains
          micparam%fk2p(np,ns) =  0.0
          micparam%fr2a(np,ns) = max(0.0,1.00 - micparam%fr2c(np,ns))
          micparam%fk2a(np,ns) = max(0.0,1.00 - micparam%fk2c(np,ns))
-      enddo   !"ns"
+      end do   !"ns"
 
 
       if(diag==1.and.np ==outp) then
@@ -727,7 +727,7 @@ contains
          print *, 'fk2c=',micparam%fk2c(outp,:)
          print *, 'fr2a=',micparam%fr2a(outp,:)
          print *, 'fk2a=',micparam%fk2a(outp,:)
-      endif
+      end if
 
       deallocate(fmetleaf,fmetroot,fmetwood)
       deallocate(dleafx,drootx,dwoodx)
@@ -762,11 +762,11 @@ contains
      do j=2,ms+1
         sdepthx(j) = sdepthx(j-1) + zse(j-1)*100.0     ! depth of the bottom of each layer (eg x_j+0.5)
                                                         ! *100 to convert from m to cm
-     enddo
+     end do
 
      do j=1,ms
         xzse(j) = 0.5 * (sdepthx(j) + sdepthx(j+1))    ! depth of midpoint of a layer j  (x_j)
-     enddo
+     end do
 
      deltD = diffsocxx * delt
 
@@ -774,7 +774,7 @@ contains
       tot0 = 0.0
      do j=1,ms
          tot0 = tot0 + xpool(j) * zse(j)*100.0         ! *100 convert m to cm
-     enddo
+     end do
 
      do i=1,ndelt
         do j=1,ms
@@ -787,7 +787,7 @@ contains
               ct(1) =     - 0.5 * coeffA
               rt(1) = (1.0-0.5*coeffA) * xpool(1) + 0.5 * coeffA * xpool(2) &
                     +  fluxsoc(1) * delt
-           endif
+           end if
            if(j>1.and.j<ms) then
              coeffA = deltD/((xzse(j+1)-xzse(j))*(sdepthx(j+1)-sdepthx(j)))
              coeffB = (xzse(j+1)-xzse(j))/(xzse(j)-xzse(j-1))
@@ -799,7 +799,7 @@ contains
                      +(1.0-0.5* coeffA*(1.0+coeffB))*xpool(j)  &
                      + 0.5* coeffA * xpool(j+1)                &
                      + fluxsoc(j) *delt
-           endif
+           end if
            if(j==ms) then
                coeffA = deltD/((xzse(ms)-xzse(ms-1))*(sdepthx(ms+1) - sdepthx(ms)))
              ! Crank-Nicholson
@@ -808,11 +808,11 @@ contains
                ct(ms) = 0.0
                rt(ms) = 0.5* coeffA  * xpool(ms-1) + (1.0-0.5 * coeffA) * xpool(ms) &
                     + fluxsoc(ms) * delt
-            endif
-        enddo
+            end if
+        end do
 
         call tridag(at,bt,ct,rt,xpool,ms)
-     enddo
+     end do
      xpoole = xpool
 
      tot1 = 0.0
@@ -820,7 +820,7 @@ contains
      do j=1,ms
         tot1 = tot1 + xpool(j) * zse(j) *100.0
         totflux = totflux + fluxsoc(j) * zse(j) *100.0
-     enddo
+     end do
 
 end subroutine bioturb
 
@@ -847,12 +847,12 @@ end subroutine bioturb
          if(bet ==0) then
             print *, 'triag failed'
             stop
-         endif
+         end if
          u(j) = (rt(j) - at(j) * u(j-1))/bet
-      enddo
+      end do
       do j=ms-1,1,-1
          u(j) = u(j) -gam(j+1) * u(j+1)
-      enddo
+      end do
     end subroutine tridag
 
 
@@ -879,19 +879,19 @@ end subroutine bioturb
         else
            dypool(ns) = (fluxsoilwx(ns-1)*ypool1(ns-1)/vsoilwx(ns-1) &
                         -fluxsoilwx(ns)  *ypool1(ns)/vsoilwx(ns))       *deltx*0.01/zse(ns)
-        endif
+        end if
         if(ns==ms) then
            fluxdocbot = fluxdocbot + fluxsoilwx(ns)  *ypool1(ns)/vsoilwx(ns) *deltx* 0.01
-        endif
-      enddo
+        end if
+      end do
       ypool1 = max(0.0,ypool1+dypool)
-     enddo
+     end do
      ! check mass conservation
      totdoc0=0.0; totdoc1=0.0
      do ns=1,ms
         totdoc0 = totdoc0 + ypool(ns)  *zse(ns)
         totdoc1 = totdoc1 + ypool1(ns) *zse(ns)
-     enddo
+     end do
     ! print *, 'mass cons DOC', totdoc0,totdoc1,(totdoc1-totdoc0)-(fluxdocsx - fluxdocbot)*deltx
 
      ypool = ypool1
@@ -957,11 +957,11 @@ end subroutine bioturb
          else
             cinputmx = micinput%cinputm(np,ns) *  micparam%c14atm(ny,micparam%region(np),2)       ! using fraction modern after 1941
             cinputsx = micinput%cinputs(np,ns) *  micparam%c14atm(ny,micparam%region(np),2)
-         endif
+         end if
       else
          cinputmx = micinput%cinputm(np,ns)
          cinputsx = micinput%cinputs(np,ns)
-      endif
+      end if
 
       tavgx    = micinput%tavg(np,ns);      clayx    = micinput%clay(np,ns);    siltx    = micinput%silt(np,ns)
 
@@ -1011,7 +1011,7 @@ end subroutine bioturb
             smexpa=2.8* clayx-0.046
          else
             smexpa=1.0
-         endif
+         end if
 
          smopt     = 0.65 * porex
 
@@ -1021,7 +1021,7 @@ end subroutine bioturb
 
          else
             xwater = ((porex - moistx)/(porex-smopt)) **micpdef%smexpb
-         endif
+         end if
 
 
          ! soil water limitation from Abramoff et al. (2022) eqn (4) and eqn (15)
@@ -1039,7 +1039,7 @@ end subroutine bioturb
          !    xwmic    = xwdecomp * exp(lambda * (-micinput%matpot(np,ns)) * (swmin + (1.0-swmin(np,ns)) * &
          !               ((micinput%poros(np) - micinput%moist(np,ns))/micinput%poros(np,ns)) **0.5)    !eqn(15) Abramoff2022
 
-      endif
+      end if
       ! carbon fluxes
       if(kinetics==1) then
         ! forward Michaelis-Menten
@@ -1065,7 +1065,7 @@ end subroutine bioturb
         cfluxk2a = fk2ax   * cfluxk
         cfluxc2a = xpool(3)* V2x * xpool(6)/(Q1x*K2x + xpool(6))   &
                  + xpool(4)* W2x * xpool(6)/(Q2x*J2x + xpool(6))
-      endif
+      end if
       if(kinetics ==2 )then
         !=======================================================
         ! reverse Michaelis-Menten
@@ -1092,7 +1092,7 @@ end subroutine bioturb
         cfluxk2a = fk2ax * cfluxk
         cfluxc2a = xpool(6) * V2x * xpool(3)/(Q1x*K2x + xpool(3))   &
                  + xpool(6) * W2x * xpool(4)/(Q2x*J2x + xpool(4))
-      endif
+      end if
 
       !===================================================
       !
@@ -1129,7 +1129,7 @@ end subroutine bioturb
          y(9) = 0.0
          y(10)= 0.0
 
-      endif
+      end if
 
       ! the new soil carbon model combining MIMICS and MILLENNIAL2
       ! we use two litter pools (m,s) and two microbial pool (r,k) and LWC (pool a), aggregate C (pool p) amd MAOC (pool C)
@@ -1224,7 +1224,7 @@ end subroutine bioturb
 
 !       write(*,101) np,ns, cinputmx+cinputsx,sum(y(1:7)),rsoil, cinputmx+cinputsx-sum(y(1:7))-rsoil
 101 format('vmic_c: input, sumdelc rsoil',2(i3,1x),10(f10.6,1x))
-      endif
+      end if
 
 !      print *, ' @ vmic_c xpool =', xpool(:)
 !      print *, ' @ vmic_c y =', y(:)

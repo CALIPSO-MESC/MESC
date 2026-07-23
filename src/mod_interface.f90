@@ -69,8 +69,8 @@ contains
             micparam%Q2(np,ns)=micpdef%Q2
             micparam%fm(np,ns)=micpdef%fm * micpxdef%xfm(nopt)
             micparam%fs(np,ns)=micpdef%fs * micpxdef%xfs(nopt)
-         enddo  !ns
-      enddo     ! np
+         end do  !ns
+      end do     ! np
 
       depths1=0.0;depths2=0.0
       do ns=1,ms
@@ -78,21 +78,21 @@ contains
           do npft=1,mpft
               krootx = micpdef%rootbeta * micpxdef%xrootbeta(npft)
               froot(npft,ns) = (1.0/krootx) *( exp(-krootx*depths1)-exp(-krootx*depths2))
-          enddo  !npft
+          end do  !npft
           depths1=depths2
-      enddo   !ns
+      end do   !ns
 
 
       do npft=1,mpft
          totroot(npft) =sum(froot(npft,1:ms))
-      enddo
+      end do
 
       ! !normalizing
       do ns=1,ms
          do npft=1,mpft
             froot(npft,ns) = froot(npft,ns)/totroot(npft)
-         enddo
-      enddo
+         end do
+      end do
 
       ! calculate mp by ms all parameter values
       do np=1, mp
@@ -101,15 +101,15 @@ contains
          do ns=1,ms
             micparam%sdepth(np,ns)   = zse(ns)
             micparam%fracroot(np,ns) = froot(npft,ns)
-         enddo !"ns"
+         end do !"ns"
           micparam%diffsocx(np) = micpxdef%xdiffsoc(nopt) * micpdef%diffsoc  !"diffsoc" from mic_constant
-      enddo    ! "np=1,mp"
+      end do    ! "np=1,mp"
 
       if(diag==1) then
          print *, micparam%fracroot(outp,:)
          print *, micparam%sdepth(outp,:)
          print *, micparam%diffsocx(outp)
-      endif
+      end if
 
       ! the following parameters are specific to kinetics3
       if(kinetics==3) then
@@ -123,9 +123,9 @@ contains
                micparam%tvppool(np,ns)  = micpdef%tvppoolx  * micpxdef%xtvp(nopt)
                micparam%tvac(np,ns)     = micpdef%tvacx     * micpxdef%xtvac(nopt)
                micparam%qmaxcoeff(np,ns)= micpdef%qmaxcoeff * micpxdef%xqmaxcoeff(nopt)
-            enddo  !ns
-         enddo  !np
-      endif ! kinetics
+            end do  !ns
+         end do  !np
+      end if ! kinetics
 
 
     deallocate(froot)
@@ -211,7 +211,7 @@ subroutine vmic_init(miccpool,micnpool)
 
       do ip=1,mcpool
          miccpool%cpool(:,:,ip) = cpooldef(ip)
-      enddo
+      end do
 !    print *, 'at np=1 ns=1 cpool', miccpool%cpool(1,1,1:mcpool)
     deallocate(cpooldef)
 end subroutine vmic_init
@@ -277,11 +277,11 @@ subroutine vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
       do i=1,mpft
          if(jmodel==1) then
             micpxdef%xrootbeta(i) = xrootcable(i)
-         endif
+         end if
          if(jmodel==2) then
             micpxdef%xrootbeta(i) = xrootorchidee(i)
-         endif
-      enddo
+         end if
+      end do
 
       ! assign the values to the optimized parameters
 
@@ -338,8 +338,8 @@ subroutine variable_time(year,doy,micglobal,micinput,micnpool)
            micinput%porosity(np,ns) = micglobal%poros(np)    ! porosity mm3/mm3
            micinput%bulkd(np,ns)    = micglobal%bulkd(np)
            micnpool%mineralN(np,ns) = 0.1                    ! g N /kg soil
-        enddo !"ns"
-     enddo !"np"
+        end do !"ns"
+     end do !"np"
 
 end subroutine variable_time
 
@@ -370,7 +370,7 @@ subroutine variable_time_single(year,doy,micglobal,micinput,micnpool,np)
       micinput%porosity(np,ns) = micglobal%poros(np)         ! porosity mm3/mm3
       micinput%bulkd(np,ns)    = micglobal%bulkd(np)
       micnpool%mineralN(np,ns) = 0.1                         ! g N /kg soil
-   enddo !"ns"
+   end do !"ns"
 
 end subroutine variable_time_single
 
@@ -457,7 +457,7 @@ subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc1
              nyrun = micparam%nyc14obs(np) - 1940 + nyeqpool !! how many years to run to get equilibrium
          else
              nyrun = nyeqpool
-         endif
+         end if
 
     !     print *,'np pft npp anpp bnpp = ',np,micparam%pft(np),micinput%fcnpp(np), micinput%dleaf(np)*365.0*24.0, micinput%droot(np)*365.0*24.0
 
@@ -478,7 +478,7 @@ subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc1
                   do ip=1,mcpool
                      xpool0(ip) = miccpool%cpool(np,ns,ip)
                      cpool0     = cpool0  + xpool0(ip) * zse(ns) * 1000.0  ! 1000 for mg C/cm3 to g C/m2/zse
-                  enddo
+                  end do
 
                  ! here the integration step is "delty" in rk4 and "ndelt" is number of "delt (hour) per year
                   timex=real(i*delt)
@@ -488,9 +488,9 @@ subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc1
                   do ip=1,mcpool
                      miccpool%cpool(np,ns,ip) = max(xpool1(ip),1.0e-8)
                      cpool1 = cpool1 + miccpool%cpool(np,ns,ip) * zse(ns) * 1000.0  ! 1000 for mg C/cm3 to g C/m2/zse
-                  enddo
+                  end do
 
-               enddo    ! "ns"
+               end do    ! "ns"
 
                micoutput%fluxcinput(np)= micoutput%fluxcinput(np) + totcinput * real(delty)
                micoutput%fluxrsoil(np) = micoutput%fluxrsoil(np)  + totcinput * real(delty) + (cpool1 - cpool0)
@@ -499,13 +499,13 @@ subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc1
                    print *, 'year day site np1', year, i, outp,micparam%diffsocx(outp)
                     do ns=1,ms
                        print *, ns, miccpool%cpool(outp,ns,:)
-                    enddo
-                endif
+                    end do
+                end if
 
                do ip=1,mcpool
                   do ns=1,ms
                      ypooli(ns) = miccpool%cpool(np,ns,ip)      ! in mg c/cm3
-                  enddo  !"ns"
+                  end do  !"ns"
 
                   fluxsoc(:) = 0.0  ! This flux is added in "modelx"
                   diffsocxx= micparam%diffsocx(np)
@@ -519,11 +519,11 @@ subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc1
                   do j=2,ms+1
                      sdepthx(j) = sdepthx(j-1) + zse(j-1)*100.0     ! depth of the bottom of each layer (eg x_j+0.5)
                                                                     !*100 to convert from m to cm
-                  enddo
+                  end do
 
                   do j=1,ms
                      xzse(j) = 0.5 * (sdepthx(j) + sdepthx(j+1))    ! depth of midpoint of a layer j  (x_j)
-                  enddo
+                  end do
 
                   deltD = diffsocxx * delty
                   xpool = ypooli
@@ -539,7 +539,7 @@ subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc1
                            ct(1) =     - 0.5 * coeffA
                            rt(1) = (1.0-0.5*coeffA) * xpool(1) + 0.5 * coeffA * xpool(2) &
                                  +  fluxsoc(1) * delt
-                        endif
+                        end if
                         if(j>1.and.j<ms) then
                           coeffA = deltD/((xzse(j+1)-xzse(j))*(sdepthx(j+1)-sdepthx(j)))
                           coeffB = (xzse(j+1)-xzse(j))/(xzse(j)-xzse(j-1))
@@ -551,7 +551,7 @@ subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc1
                                   +(1.0-0.5* coeffA*(1.0+coeffB))*xpool(j)  &
                                   + 0.5* coeffA * xpool(j+1)                &
                                   + fluxsoc(j) *delt
-                        endif
+                        end if
                         if(j==ms) then
                             coeffA = deltD/((xzse(ms)-xzse(ms-1))*(sdepthx(ms+1) - sdepthx(ms)))
                           ! Crank-Nicholson
@@ -560,8 +560,8 @@ subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc1
                             ct(ms) = 0.0
                             rt(ms) = 0.5* coeffA  * xpool(ms-1) + (1.0-0.5 * coeffA) * xpool(ms) &
                                    + fluxsoc(ms) * delt
-                        endif
-                     enddo
+                        end if
+                     end do
                      call tridag(at,bt,ct,rt,xpool,ms)
                   !enddo
                   ypoole = xpool
@@ -570,8 +570,8 @@ subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc1
 
                   do ns=1,ms
                      miccpool%cpool(np,ns,ip) = ypoole(ns)
-                  enddo
-               enddo ! "ip=1,mcpool"
+                  end do
+               end do ! "ip=1,mcpool"
 
                ! computing daily leaching loss from bottom-layer LWMC
                cleachloss = micparam%tvac(np,ms) * sqrt(micinput%wavg(np,ms)/micinput%porosity(np,ms)) *  miccpool%cpool(np,ms,7)  * 24.0
@@ -579,12 +579,12 @@ subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc1
                micoutput%fluxcleach(np) = micoutput%fluxcleach(np) + cleachloss
                miccpool%cpool(np,ms,7)  = miccpool%cpool(np,ms,7)  - cleachloss
 
-            enddo   ! "day"
+            end do   ! "day"
 
-         enddo !"year"
+         end do !"year"
 
-      endif   !bgctype(np)=bgcopt
-   enddo !"mp"
+      end if   !bgctype(np)=bgcopt
+   end do !"mp"
 
 !$ACC END PARALLEL
 !$ACC END DATA
@@ -674,7 +674,7 @@ SUBROUTINE vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
              nyrun = micparam%nyc14obs(np) - 1940 + nyeqpool !! how many years to run to get equilibrium
          else
              nyrun = nyeqpool
-         endif
+         end if
 
     !     print *,'np pft npp anpp bnpp = ',np,micparam%pft(np),micinput%fcnpp(np), micinput%dleaf(np)*365.0*24.0, micinput%droot(np)*365.0*24.0
 
@@ -698,7 +698,7 @@ SUBROUTINE vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                      do ip=1,mcpool
                         xpool0(ip) = miccpool%cpool(np,ns,ip)
                         cpool0     = cpool0  + xpool0(ip) * zse(ns) * 1000.0  ! 1000 for mg C/cm3 to g C/m2/zse
-                     enddo
+                     end do
 
                      ! here the integration step is "delty" in rk4 and "ndelt" is number of "delt (hour) per year
                      timex=real(i*delt)
@@ -708,10 +708,10 @@ SUBROUTINE vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                      do ip=1,mcpool
                         miccpool%cpool(np,ns,ip) = max(xpool1(ip),1.0e-8)
                         cpool1 = cpool1 + miccpool%cpool(np,ns,ip) * zse(ns) * 1000.0  ! 1000 for mg C/cm3 to g C/m2/zse
-                     enddo
+                     end do
                 !  endif
                   depthx1=depthx2
-               enddo    ! "ns"
+               end do    ! "ns"
 
                micoutput%fluxcinput(np)= micoutput%fluxcinput(np) + totcinput * real(delty)
                micoutput%fluxrsoil(np) = micoutput%fluxrsoil(np)  + totcinput * real(delty) + (cpool1 - cpool0)
@@ -720,15 +720,15 @@ SUBROUTINE vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                   print *, 'year day site np1', year, i, outp,micparam%diffsocx(outp)
                   do ns=1,ms
                      print *, ns, miccpool%cpool(outp,ns,:)
-                  enddo
-               endif
+                  end do
+               end if
 
-            enddo   ! "day"
+            end do   ! "day"
 
-         enddo !"year"
+         end do !"year"
 
-      endif   !pft(np) = pftopt
-   enddo !"mp"
+      end if   !pft(np) = pftopt
+   end do !"mp"
 
 !$OMP END DO
 !$OMP END PARALLEL
@@ -803,8 +803,8 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
       if (micparam%bgctype(station_index)==bgcopt .and. micglobal%area(station_index)>0.0) then
          stations_used(station_count+1) = station_index
          station_count = station_count + 1
-      endif   !bgctype(np) = bgcopt
-   enddo
+      end if   !bgctype(np) = bgcopt
+   end do
 
 !$OMP PARALLEL DEFAULT(NONE) SHARED (micparam,micpxdef,micnpool,micinput,micglobal,miccpool,micoutput,micpdef,&
 !$OMP kinetics,isoc14,nyeqpool,bgcopt,ndelt,zse,mp,ms,stations_used) &
@@ -839,7 +839,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                   do ip=1,mcpool
                      xpool0(ip) = miccpool%cpool(np,ns,ip)
                      cpool0     = cpool0  + xpool0(ip) * zse(ns) * 1000.0  ! 1000 for mg C/cm3 to g C/m2/zse
-                  enddo
+                  end do
 
                  ! here the integration step is "delty" in rk4 and "ndelt" is number of "delt (hour) per year
                   timex=real(i*delt)
@@ -849,14 +849,14 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                   do ip=1,mcpool
                      miccpool%cpool(np,ns,ip) = max(xpool1(ip),1.0e-8)
                      cpool1 = cpool1 + miccpool%cpool(np,ns,ip) * zse(ns) * 1000.0  ! 1000 for mg C/cm3 to g C/m2/zse
-                  enddo
+                  end do
 
                 ! for checking mass balance
         !          write(*,101) np,ns, micinput%cinputm(np,ns)+micinput%cinputs(np,ns),sum(xpool1(1:7)-xpool0(1:7))/real(delty), &
         !                              micinput%cinputm(np,ns)+micinput%cinputs(np,ns)-sum(xpool1(1:7)-xpool0(1:7))/real(delty)
 101 format('vmicsoil input sumdelC rsoil',2(i3,1x),3(f10.6,1x))
 
-               enddo    ! "ns"
+               end do    ! "ns"
 
                micoutput%fluxcinput(np)= micoutput%fluxcinput(np) + totcinput * real(delty)
                micoutput%fluxrsoil(np) = micoutput%fluxrsoil(np)  + totcinput * real(delty) + (cpool1 - cpool0)
@@ -892,13 +892,13 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                    print *, 'year day site np1', year, i, outp,micparam%diffsocx(outp)
                     do ns=1,ms
                        print *, ns, miccpool%cpool(outp,ns,:)
-                    enddo
-                endif
+                    end do
+                end if
 
                do ip=1,mcpool
                   do ns=1,ms
                      ypooli(ns) = miccpool%cpool(np,ns,ip)      ! in mg c/cm3
-                  enddo  !"ns"
+                  end do  !"ns"
 
                   fluxsoc(:) = 0.0  ! This flux is added in "modelx"
                   diffsocxx= micparam%diffsocx(np)
@@ -907,18 +907,18 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
 
                   do ns=1,ms
                      miccpool%cpool(np,ns,ip) = ypoole(ns)
-                  enddo
-               enddo ! "ip=1,mcpool"
+                  end do
+               end do ! "ip=1,mcpool"
 
             ! print out the time series of pool sizes
             ! if(micglobal%bgctype(np)==bgcopt) then
             !   write(*,201) year, np, miccpool%cpool(np,1,:),miccpool%cpool(np,ms,:)
 201             format('vmicsoil:cpool',2(i5,1x),30(f7.4,1x))
             ! endif
-         enddo   !"i: day of year (ntime)"
-      enddo !"year (nyeqpool)"
+         end do   !"i: day of year (ntime)"
+      end do !"year (nyeqpool)"
 
-   enddo !" station_index(station_count)"
+   end do !" station_index(station_count)"
 !$OMP END DO
 !$OMP END PARALLEL
 
@@ -1039,7 +1039,7 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                   do ip=1,mcpool
                      xpool0(ip) = miccpool%cpool(np,ns,ip)
                      cpool0     = cpool0  + xpool0(ip) * zse(ns) * 1000.0  ! 1000 for mg C/cm3 to g C/m2/zse
-                  enddo
+                  end do
 
                  ! here the integration step is "delty" in rk4 and "ndelt" is number of "delt (hour) per year
                   timex=real(i*delt)
@@ -1050,9 +1050,9 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                   do ip=1,mcpool
                      miccpool%cpool(np,ns,ip) = max(xpool1(ip),1.0e-8)
                      cpool1 = cpool1 + miccpool%cpool(np,ns,ip) * zse(ns) * 1000.0  ! 1000 for mg C/cm3 to g C/m2/zse
-                  enddo
+                  end do
 
-               enddo    ! "ns"
+               end do    ! "ns"
 
                micoutput%fluxcinput(np)= micoutput%fluxcinput(np) + totcinput * real(delty)
                micoutput%fluxrsoil(np) = micoutput%fluxrsoil(np)  + totcinput * real(delty) + (cpool1 - cpool0)
@@ -1077,13 +1077,13 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                    print *, 'year day site np1', year, i, outp,micparam%diffsocx(outp)
                     do ns=1,ms
                        print *, ns, miccpool%cpool(outp,ns,:)
-                    enddo
-                endif
+                    end do
+                end if
 
                do ip=1,mcpool
                   do ns=1,ms
                      ypooli(ns) = miccpool%cpool(np,ns,ip)      ! in mg c/cm3
-                  enddo  !"ns"
+                  end do  !"ns"
 
                   fluxsoc(:) = 0.0  ! This flux is added in "modelx"
                   diffsocxx= micparam%diffsocx(np)
@@ -1096,11 +1096,11 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                   do j=2,ms+1
                      sdepthx(j) = sdepthx(j-1) + zse(j-1)*100.0     ! depth of the bottom of each layer (eg x_j+0.5)
                                                                     !*100 to convert from m to cm
-                  enddo
+                  end do
 
                   do j=1,ms
                      xzse(j) = 0.5 * (sdepthx(j) + sdepthx(j+1))    ! depth of midpoint of a layer j  (x_j)
-                  enddo
+                  end do
 
                   deltD = diffsocxx * delty
                   xpool = ypooli
@@ -1116,7 +1116,7 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                            ct(1) =     - 0.5 * coeffA
                            rt(1) = (1.0-0.5*coeffA) * xpool(1) + 0.5 * coeffA * xpool(2) &
                                  +  fluxsoc(1) * delt
-                        endif
+                        end if
                         if(j>1.and.j<ms) then
                           coeffA = deltD/((xzse(j+1)-xzse(j))*(sdepthx(j+1)-sdepthx(j)))
                           coeffB = (xzse(j+1)-xzse(j))/(xzse(j)-xzse(j-1))
@@ -1128,7 +1128,7 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                                   +(1.0-0.5* coeffA*(1.0+coeffB))*xpool(j)  &
                                   + 0.5* coeffA * xpool(j+1)                &
                                   + fluxsoc(j) *delt
-                        endif
+                        end if
                         if(j==ms) then
                             coeffA = deltD/((xzse(ms)-xzse(ms-1))*(sdepthx(ms+1) - sdepthx(ms)))
                           ! Crank-Nicholson
@@ -1137,8 +1137,8 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                             ct(ms) = 0.0
                             rt(ms) = 0.5* coeffA  * xpool(ms-1) + (1.0-0.5 * coeffA) * xpool(ms) &
                                    + fluxsoc(ms) * delt
-                        endif
-                     enddo
+                        end if
+                     end do
                      call tridag(at,bt,ct,rt,xpool,ms)
                   !enddo
                   ypoole = xpool
@@ -1147,8 +1147,8 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
 
                   do ns=1,ms
                      miccpool%cpool(np,ns,ip) = ypoole(ns)
-                  enddo
-               enddo ! "ip=1,mcpool"
+                  end do
+               end do ! "ip=1,mcpool"
 
                ! computing daily leaching loss from bottom-layer LWMC
                cleachloss = micparam%tvac(np,ms) * sqrt(micinput%wavg(np,ms)/micinput%porosity(np,ms)) *  miccpool%cpool(np,ms,7)  * 24.0
@@ -1156,10 +1156,10 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                micoutput%fluxcleach(np) = micoutput%fluxcleach(np) + cleachloss
                miccpool%cpool(np,ms,7)  = miccpool%cpool(np,ms,7)  - cleachloss
 
-            enddo   ! "day"
-         enddo !"year"
-      endif   !bgctype(np)=bgcopt
-   enddo !"mp"
+            end do   ! "day"
+         end do !"year"
+      end if   !bgctype(np)=bgcopt
+   end do !"mp"
 !$ACC END PARALLEL
 !$ACC END DATA
 

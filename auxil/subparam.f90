@@ -18,12 +18,12 @@
       do n=1,2
          read(2,201) data
          write(3,201) data
-      enddo
+      end do
       do n=1,ny
          read(2,202) data1,data2
          read(data1,*) y0,ymin,ymax
          write(3,301) y(n),ymin,ymax,data2
-      enddo
+      end do
       deallocate(varx,vary)
       close(1)
       close(2)

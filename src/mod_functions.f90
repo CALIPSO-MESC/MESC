@@ -102,7 +102,7 @@ module function_module
       jrestart=0;xopt(:)=1.0
       do nparam=1,16
          nxopt(nparam) = nparam
-      enddo
+      end do
 
       frestart_in='miccpool_in.nc'
       frestart_out='miccpool_out.nc'
@@ -125,8 +125,8 @@ module function_module
          read(1,*) nxopt(1:nx)
          do nparam=1,nx
             xopt(nxopt(nparam)) = xparam16(nparam)
-         enddo
-      endif
+         end do
+      end if
     !  print*, xopt
 
       mp = 213
@@ -217,7 +217,7 @@ real(dp) function functn_frc1(nx,xparam16)
       jrestart=0;xopt(:)=1.0
       do nparam=1,16
          nxopt(nparam) = nparam
-      enddo
+      end do
 
       frestart_in='miccpool_in.nc'
       frestart_out='miccpool_out.nc'
@@ -234,8 +234,8 @@ real(dp) function functn_frc1(nx,xparam16)
          read(1,*) nxopt(1:nx)
          do nparam=1,nx
             xopt(nxopt(nparam)) = xparam16(nparam)
-         enddo
-      endif
+         end do
+      end if
     !  print *, xopt
 
       close(1)
@@ -322,7 +322,7 @@ END function functn_frc1
       jrestart=0;xopt(:)=1.0
       do nparam=1,16
          nxopt(nparam) = nparam
-      enddo
+      end do
 
       frestart_in='miccpool_in.nc'
       frestart_out='miccpool_out.nc'
@@ -338,7 +338,7 @@ END function functn_frc1
       read(1,*) nxopt(1:nx)
       do nparam=1,nx
          xopt(nxopt(nparam)) = xparam16(nparam)
-      enddo
+      end do
       close(1)
 
 !      print *, 'nx xparam16 =', nx, nxopt(1:nx),xparam16(1:nx)
@@ -432,7 +432,7 @@ END function functn_soc_hwsd
       jrestart=0;xopt(:)=1.0
       do nparam=1,16
          nxopt(nparam) = nparam
-      enddo
+      end do
       xopt = 1.0
 
 !      open(91,file='modobs.txt')
@@ -443,12 +443,12 @@ END function functn_soc_hwsd
       read(1,*) jglobal,ifsoc14,kinetics,bgcopt,jopt,jrestart,jmodel
       do nf=1,7
          read(1,101) fglobal(nf)
-      enddo
+      end do
       read(1,*)   xopt(1:14)
       read(1,*)   nxopt(1:nx)
       do nparam=1,nx
          xopt(nxopt(nparam)) = xparam16(nparam)
-      enddo
+      end do
       close(1)
 
       close(1)
@@ -457,7 +457,7 @@ END function functn_soc_hwsd
 
       if(jmodel==2 .or. jmodel==3) then
          mpft=19; nlon=720; nlat=360
-      endif
+      end if
 
       ! reading global parameter values here      xopt =xparam16(1:nx)
       call getpatch_global(fglobal(1),jmodel,mp)
@@ -535,7 +535,7 @@ END function functn_global4
       jrestart=0;xopt(:)=1.0
       do nparam=1,16
          nxopt(nparam) = nparam
-      enddo
+      end do
 
       frestart_in='miccpool_in.nc'
       frestart_out='miccpool_out.nc'
@@ -549,7 +549,7 @@ END function functn_global4
       read(1,*) nxopt(1:nx)
       do nparam=1,nx
          xopt(nxopt(nparam)) = xparam16(nparam)
-      enddo
+      end do
       close(1)
 
 101   format(a140)

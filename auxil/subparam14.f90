@@ -11,7 +11,7 @@
       read(1,*) cost,(xp(i),i=1,6)
       do i=1,6
          x(nx(i)) =xp(i)
-      enddo
+      end do
       x(12)=1.0
       write(2,21) x(1:14)
 
