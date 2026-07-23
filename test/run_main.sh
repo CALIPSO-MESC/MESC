@@ -1,3 +1,4 @@
+#!/bin/bash
 # --------------------------------------------------
 # Load environment (users can edit if needed)
 # --------------------------------------------------
@@ -7,10 +8,10 @@ module load oneapi23u1 netcdf_intel
 # module unload netcdf
 # module load netcdf/4.8.1-intel20
 # --------------------------------------------------
-# remove old files 
+# remove old files
 # --------------------------------------------------
 rm -rf fort.*
-rm -rf val*.txt 
+rm -rf val*.txt
 rm -rf params1.txt
 rm -rf params_val.txt
 rm -rf case.txt
@@ -20,7 +21,7 @@ case="f3"
 run="frc"
 echo ${case} ${run}
 # --------------------------------------------------
-# copy parameter files 
+# copy parameter files
 # --------------------------------------------------
 cp ./input/case_${run}.txt case.txt
 cp ./input/params1_${run}_${case}.txt params1.txt
@@ -31,23 +32,22 @@ if [ ! -d output ]; then
 fi
 
 # --------------------------------------------------
-# run 
+# run
 # --------------------------------------------------
 export OMP_NUM_THREADS=8
-./main > output/outval_${case}_${run}.txt
+./main >output/outval_${case}_${run}.txt
 mv fort.91 output/valsoc_91_${case}_${run}.txt
 mv fort.92 output/valsoc_92_${case}_${run}.txt
 
-diff benchmark/valsoc_91_${case}_${run}.txt output/valsoc_91_${case}_${run}.txt> output/diff_valsoc_91_${case}_${run}.txt
-diff benchmark/valsoc_92_${case}_${run}.txt output/valsoc_92_${case}_${run}.txt> output/diff_valsoc_92_${case}_${run}.txt
-
+diff benchmark/valsoc_91_${case}_${run}.txt output/valsoc_91_${case}_${run}.txt >output/diff_valsoc_91_${case}_${run}.txt
+diff benchmark/valsoc_92_${case}_${run}.txt output/valsoc_92_${case}_${run}.txt >output/diff_valsoc_92_${case}_${run}.txt
 
 #### run 2: hwsd ######
 case="cable3"
 run="hwsd"
 echo ${case} ${run}
 # --------------------------------------------------
-# copy parameter files 
+# copy parameter files
 # --------------------------------------------------
 cp ./input/case_${run}.txt case.txt
 cp ./input/params1_${run}_${case}.txt params1.txt
@@ -58,14 +58,14 @@ if [ ! -d output ]; then
 fi
 
 # --------------------------------------------------
-# run 
+# run
 # --------------------------------------------------
 export OMP_NUM_THREADS=8
-./main > output/outval_${case}_${run}.txt
+./main >output/outval_${case}_${run}.txt
 mv fort.91 output/valsoc_91_${case}_${run}.txt
 mv fort.92 output/valsoc_92_${case}_${run}.txt
 
-diff benchmark/valsoc_91_${case}_${run}.txt output/valsoc_91_${case}_${run}.txt> output/diff_valsoc_91_${case}_${run}.txt
-diff benchmark/valsoc_92_${case}_${run}.txt output/valsoc_92_${case}_${run}.txt> output/diff_valsoc_92_${case}_${run}.txt
+diff benchmark/valsoc_91_${case}_${run}.txt output/valsoc_91_${case}_${run}.txt >output/diff_valsoc_91_${case}_${run}.txt
+diff benchmark/valsoc_92_${case}_${run}.txt output/valsoc_92_${case}_${run}.txt >output/diff_valsoc_92_${case}_${run}.txt
 
 echo "===== Job finished: $(date) ====="
