@@ -154,3 +154,10 @@ pip install -r requirements-dev.txt
 ```
 or follow the instructions
 [on the Fortitude website](https://fortitude.readthedocs.io/en/stable/installation/).
+
+To apply Fortitude for linting the MESC code base, run
+```sh
+fortitude check
+```
+from the command line. This will report any issues, given the configuration in
+[`fortitude.toml`](fortitude.toml).
