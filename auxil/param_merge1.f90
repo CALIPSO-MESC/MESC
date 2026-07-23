@@ -3,11 +3,11 @@
  ! read the parameter numbers from the "params1_frc2_f*.txt', and parameter values from "f${i}/scein_${opt}.txt
  ! and write out the values of parameters into the parameter files for optimization or initial values
  implicit none
- real*8,  dimension(14)   :: xparam
- real*8,  dimension(6)    :: param
+ real(8),  dimension(14)   :: xparam
+ real(8),  dimension(6)    :: param
  integer, dimension(6)    :: nparam
  integer :: n,nx
- real*8   :: cost
+ real(8)   :: cost
  character(len=135) :: chdata
 
     open(11,file='last_nx_frc.txt')

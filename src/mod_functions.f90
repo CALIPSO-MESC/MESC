@@ -22,6 +22,9 @@ module function_module
   use calcost_module, only: calcost_c14, calcost_frc1, calcost_hwsd3, calcost_global_hwsd, calcost_aust
   implicit none
 
+  ! All module members are public by default
+  public
+
  Contains
 
  !> Dispatcher that selects the appropriate per-mode orchestrator.
@@ -47,7 +50,7 @@ module function_module
      read(1,*) runcase
      close(1)
      SELECT CASE (runcase)
-       CASE(0)
+       CASE (0)
          functn = functn_soc_aust(nx,xparam16)
        CASE (1)    ! run model for 14C
          functn = functn_c14(nx,xparam16)
@@ -59,6 +62,9 @@ module function_module
          functn = functn_global4(nx,xparam16)
      !  CASE (5)    ! run model with prescribed forcing (not developed yet for 1% per year offline)
      !    functn = functn_offline(nx,xparam16)
+       CASE DEFAULT
+         write(6,"(a,i0,a)") "ERROR functn: Invalid run case '", runcase, "'"
+         stop 999
      END SELECT
 
  END function functn
