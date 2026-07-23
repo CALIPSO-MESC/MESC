@@ -1,5 +1,5 @@
-# SEC 
-*A Fortran-based pmicrobial-explicit soil carbon cycle model.*
+# SEC
+*A Fortran-based microbial-explicit soil carbon cycle model.*
 
 ---
 
