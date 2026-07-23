@@ -97,8 +97,8 @@ module calcost_module
            micparam%c14soilobsm(np)= max(small,micparam%c14soilobsm(np))
 
            if (xmod(np) >= 1000.0 .or. xmodp(np) >= 1000.0 .or. xmodm(np) >= 1000.0) then
-               print *, 'abnormal value of model simulation site=', micparam%siteid(np)
-               print *, 'parameter values = ',  xopt(1:nx)
+               print *, "abnormal value of model simulation site=", micparam%siteid(np)
+               print *, "parameter values = ",  xopt(1:nx)
             !   stop
            end if
 
@@ -220,8 +220,8 @@ module calcost_module
            xobsfracm(np) = xobsm(np)/(xobsp(np)+xobsm(np)+1.0e-6)
 
            if (xmod(np) >= 1000.0 .or. xmodp(np) >= 1000.0 .or. xmodm(np) >= 1000.0) then
-               print *, 'abnormal value of model simulation site=', micparam%siteid(np)
-               print *, 'parameter values = ',  xopt(1:nx)
+               print *, "abnormal value of model simulation site=", micparam%siteid(np)
+               print *, "parameter values = ",  xopt(1:nx)
                print *, xmodp(np),xmodm(np)
             !   stop
             end if
@@ -327,10 +327,10 @@ module calcost_module
             xobs7(np,ns) = micparam%csoilobs(np,ns) * (1.0- micparam%fracaoc(np,ns))
             xmod7(np,ns) = xmod(np,ns)                                     ! gC/kg soil
             if(xmod7(np,ns) <0.0 .or. xmod7(np,ns) >1.0e3) then
-               print *, 'abnormal value of model simulation site=', micparam%siteid(np)
-               print *, 'parameter values = ',  xopt(1:nx)
+               print *, "abnormal value of model simulation site=", micparam%siteid(np)
+               print *, "parameter values = ",  xopt(1:nx)
                print *,  xobs7(np,ns),xmod7(np,ns),xobs7(np,ns)-xmod7(np,ns)
-               print *, ' modelled pool size= ', ns,1000.0 * miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
+               print *, " modelled pool size= ", ns,1000.0 * miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
                !stop
             end if
 
@@ -430,10 +430,10 @@ module calcost_module
            xmod7(np,ns) = xmod(np,ns)                                       ! gC/kg soil
 
             if(xmod7(np,ns) <0.0 .or. xmod7(np,ns) >1.0e3) then
-               print *, 'abnormal value of model simulation site=', micparam%siteid(np)
-               print *, 'parameter values = ',  xopt(1:nx)
+               print *, "abnormal value of model simulation site=", micparam%siteid(np)
+               print *, "parameter values = ",  xopt(1:nx)
                print *,  xobs7(np,ns),xmod7(np,ns),xobs7(np,ns)-xmod7(np,ns)
-               print *, ' modelled pool size= ', ns,miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
+               print *, " modelled pool size= ", ns,miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
                !stop
             end if
 
@@ -532,10 +532,10 @@ module calcost_module
          do ns = 1,msobs
 
             if(xmod(np,ns) <0.0 .or. xmod(np,ns) >1.0e3) then
-               print *, 'abnormal value of model simulation site=', micparam%siteid(np)
-               print *, 'parameter values = ',  xopt(1:nx)
+               print *, "abnormal value of model simulation site=", micparam%siteid(np)
+               print *, "parameter values = ",  xopt(1:nx)
                print *,  xobs(np,ns),xmod(np,ns),xobs(np,ns)-xmod(np,ns)
-               print *, ' modelled pool size= ', ns,1000.0*miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
+               print *, " modelled pool size= ", ns,1000.0*miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
                !stop
             end if
 

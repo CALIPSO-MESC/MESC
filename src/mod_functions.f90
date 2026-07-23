@@ -46,7 +46,7 @@ module function_module
 
      integer :: runcase
 
-     open(1,file='case.txt')
+     open(1,file="case.txt")
      read(1,*) runcase
      close(1)
      SELECT CASE (runcase)
@@ -104,11 +104,11 @@ module function_module
          nxopt(nparam) = nparam
       end do
 
-      frestart_in='miccpool_in.nc'
-      frestart_out='miccpool_out.nc'
-      foutput='vmic_output.nc'
+      frestart_in="miccpool_in.nc"
+      frestart_out="miccpool_out.nc"
+      foutput="vmic_output.nc"
 
-      open(1,file='params1.txt')
+      open(1,file="params1.txt")
       read(1,*)
       read(1,*) jglobal,ifsoc14,kinetics,bgcopt,jopt,jrestart
       read(1,11) frac14c
@@ -170,7 +170,7 @@ module function_module
           functn_c14 = totcost1+totcost2
         !  print *,"tot1 = ",totcost1
         !  print *,"tot2 = ",totcost2
-           call screenout('c14run    ',jmodel,bgcopt,xopt,functn_c14)
+           call screenout("c14run    ",jmodel,bgcopt,xopt,functn_c14)
       close(1)
 
 !      functn = totcost
@@ -219,11 +219,11 @@ real(dp) function functn_frc1(nx,xparam16)
          nxopt(nparam) = nparam
       end do
 
-      frestart_in='miccpool_in.nc'
-      frestart_out='miccpool_out.nc'
-      foutput='vmic_output.nc'
+      frestart_in="miccpool_in.nc"
+      frestart_out="miccpool_out.nc"
+      foutput="vmic_output.nc"
 
-      open(1,file='params1.txt')
+      open(1,file="params1.txt")
       read(1,*)
       read(1,*) jglobal,ifsoc14,kinetics,bgcopt,jopt,jrestart
       read(1,11) cfraction
@@ -276,7 +276,7 @@ real(dp) function functn_frc1(nx,xparam16)
       close(1)
 
       functn_frc1    = totcost1
-      call screenout('fraction  ',jmodel,bgcopt,xopt,functn_frc1)
+      call screenout("fraction  ",jmodel,bgcopt,xopt,functn_frc1)
       call mic_deallocate_parameter(mpft,mbgc,mp,ms,micpxdef,micparam)
       call mic_deallocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
       call mic_deallocate_output(mp,micoutput)
@@ -324,11 +324,11 @@ END function functn_frc1
          nxopt(nparam) = nparam
       end do
 
-      frestart_in='miccpool_in.nc'
-      frestart_out='miccpool_out.nc'
-      foutput='vmic_output.nc'
+      frestart_in="miccpool_in.nc"
+      frestart_out="miccpool_out.nc"
+      foutput="vmic_output.nc"
 
-      open(1,file='params1.txt')
+      open(1,file="params1.txt")
       read(1,*)
       read(1,*) jglobal,ifsoc14,kinetics,bgcopt,jopt,jrestart,jmodel
       read(1,101) fhwsdsoc
@@ -378,7 +378,7 @@ END function functn_frc1
       call mic_deallocate_cpool(mp,ms,miccpool)
       call mic_deallocate_npool(mp,ms,micnpool)
 
-      call screenout('hwsd_soc  ',jmodel,bgcopt,xopt,totcost1)
+      call screenout("hwsd_soc  ",jmodel,bgcopt,xopt,totcost1)
 
 
       functn_soc_hwsd = totcost1
@@ -425,9 +425,9 @@ END function functn_soc_hwsd
       allocate(zse(ms))
       zse(1:5)=0.2;zse(6:7)=0.5
 
-      frestart_in='miccpool_in.nc'
-      frestart_out='miccpool_out.nc'
-      foutput='vmic_output.nc'
+      frestart_in="miccpool_in.nc"
+      frestart_out="miccpool_out.nc"
+      foutput="vmic_output.nc"
 
       jrestart=0;xopt(:)=1.0
       do nparam=1,16
@@ -438,7 +438,7 @@ END function functn_soc_hwsd
 !      open(91,file='modobs.txt')
 !      open(92,file='modobs2.txt')
 
-      open(1,file='params1.txt')
+      open(1,file="params1.txt")
       read(1,*)
       read(1,*) jglobal,ifsoc14,kinetics,bgcopt,jopt,jrestart,jmodel
       do nf=1,7
@@ -461,7 +461,7 @@ END function functn_soc_hwsd
 
       ! reading global parameter values here      xopt =xparam16(1:nx)
       call getpatch_global(fglobal(1),jmodel,mp)
-      print *, 'total number of patches= ', mp
+      print *, "total number of patches= ", mp
 
       call mic_allocate_parameter(mpft,mbgc,mp,ms,micpxdef,micparam)
       call mic_allocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
@@ -469,16 +469,16 @@ END function functn_soc_hwsd
       call mic_allocate_cpool(mp,ms,miccpool)
       call mic_allocate_npool(mp,ms,micnpool)
 
-      print *, ' all  arrays are allocated!'
+      print *, " all  arrays are allocated!"
 
       if(jmodel==1)                call getdata_global4_cable(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal,micparam,zse)
       if(jmodel==2 .or. jmodel==3) call getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal,micparam,zse)
-      print *, 'global input data are read in'
+      print *, "global input data are read in"
 
       if(jopt==0) call getparam_global(fglobal(4),jmodel,micpxdef)     ! reading global parameter lookup table
       if(jopt==1) call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)  ! parameter optimization
 
-      print *, 'vmicsoil_global'
+      print *, "vmicsoil_global"
       call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
                          zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
@@ -494,7 +494,7 @@ END function functn_soc_hwsd
 !      close(92)
 
       functn_global4=totcost1
-      print *, 'total cost =', totcost1
+      print *, "total cost =", totcost1
       deallocate(zse)
 
 END function functn_global4
@@ -537,11 +537,11 @@ END function functn_global4
          nxopt(nparam) = nparam
       end do
 
-      frestart_in='miccpool_in.nc'
-      frestart_out='miccpool_out.nc'
-      foutput='vmic_output.nc'
+      frestart_in="miccpool_in.nc"
+      frestart_out="miccpool_out.nc"
+      foutput="vmic_output.nc"
 
-      open(1,file='params1.txt')
+      open(1,file="params1.txt")
       read(1,*)
       read(1,*) jglobal,ifsoc14,kinetics,bgcopt,jopt,jrestart,jmodel
       read(1,101) faustsoc

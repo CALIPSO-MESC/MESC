@@ -11,9 +11,9 @@
       nx=1; ny=3
       allocate(varx(nx),vary(ny),y(ny))
 
-      open(1,file='last7.txt')
-      open(2,file='scein.dat')
-      open(3,file='scein_copy.dat')
+      open(1,file="last7.txt")
+      open(2,file="scein.dat")
+      open(3,file="scein_copy.dat")
       read(1,*) varx(1:nx),y(1:ny)
       do n=1,2
          read(2,201) data

@@ -12,11 +12,11 @@ program lreg
   real, dimension(7)  :: zsoil,profobs,profmod
   character(len=20) :: dataset(4)
 
-    open(1,file='input.txt')
-    open(2,file='output.txt')
-    open(3,file='linefit.txt')
+    open(1,file="input.txt")
+    open(2,file="output.txt")
+    open(3,file="linefit.txt")
 
-    open(10,file='param_lreg.txt')
+    open(10,file="param_lreg.txt")
     read(10,*) idata
     close(10)
     if(idata==2) ndataset=4
@@ -30,21 +30,21 @@ program lreg
        zsoil(5) = 0.9
        zsoil(6) = 1.25
        zsoil(7) = 1.75
-       open(20,file='profobs.txt')
-       open(21,file='profmod.txt')
+       open(20,file="profobs.txt")
+       open(21,file="profmod.txt")
     end if
     ndata=0
     ! for idata==2
-    dataset(1) ='total POC'
-    dataset(2) ='total MAOC'
-    dataset(3) ='POC fraction'
-    dataset(4) ='MAOC fraction'
+    dataset(1) ="total POC"
+    dataset(2) ="total MAOC"
+    dataset(3) ="POC fraction"
+    dataset(4) ="MAOC fraction"
     ! for idata==3
-    dataset(1) ='total SOC'
+    dataset(1) ="total SOC"
 
     do n=1,10000
        if(idata==1) then   ! 14C data
-        print *, 'yet to be done'
+        print *, "yet to be done"
         stop
        end if !idata=1
 
@@ -100,7 +100,7 @@ program lreg
         end if  !idata=3
 
     end do   !enddo
-15  print *, 'total number datapoints = ', ndata
+15  print *, "total number datapoints = ", ndata
 
     do n=1,ndataset
        x(:)=varx(:,n)
@@ -118,8 +118,8 @@ program lreg
 11  format(5(i6,1x),10(f10.5,1x))
 21  format(a20,1x,2(i6,1x),3(f10.4,1x))
 31  format(5(i6,1x),f7.3,1x,i3,1x,8(f10.5,1x))
-201 format('obs: ',4(i4,1x),20(f9.4,1x))
-211 format('mod: ',4(i4,1x),20(f9.4,1x))
+201 format("obs: ",4(i4,1x),20(f9.4,1x))
+211 format("mod: ",4(i4,1x),20(f9.4,1x))
     end program lreg
 
 

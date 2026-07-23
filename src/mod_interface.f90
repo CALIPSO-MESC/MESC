@@ -496,7 +496,7 @@ subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc1
                micoutput%fluxrsoil(np) = micoutput%fluxrsoil(np)  + totcinput * real(delty) + (cpool1 - cpool0)
 
                 if(diag==1) then
-                   print *, 'year day site np1', year, i, outp,micparam%diffsocx(outp)
+                   print *, "year day site np1", year, i, outp,micparam%diffsocx(outp)
                     do ns=1,ms
                        print *, ns, miccpool%cpool(outp,ns,:)
                     end do
@@ -654,8 +654,8 @@ SUBROUTINE vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
       call vmic_init(miccpool,micnpool)
       call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool)
 
-      print *, 'initial pool size np=1 ns=1', miccpool%cpool(1,1,:)
-      print *, 'xav=', bgcopt,micpxdef%xav(:)
+      print *, "initial pool size np=1 ns=1", miccpool%cpool(1,1,:)
+      print *, "xav=", bgcopt,micpxdef%xav(:)
 
       if(jrestart==1) call vmic_restart_read(miccpool,micnpool,frestart_in)
 
@@ -717,7 +717,7 @@ SUBROUTINE vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                micoutput%fluxrsoil(np) = micoutput%fluxrsoil(np)  + totcinput * real(delty) + (cpool1 - cpool0)
 
                if(diag==1) then
-                  print *, 'year day site np1', year, i, outp,micparam%diffsocx(outp)
+                  print *, "year day site np1", year, i, outp,micparam%diffsocx(outp)
                   do ns=1,ms
                      print *, ns, miccpool%cpool(outp,ns,:)
                   end do
@@ -854,7 +854,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                 ! for checking mass balance
         !          write(*,101) np,ns, micinput%cinputm(np,ns)+micinput%cinputs(np,ns),sum(xpool1(1:7)-xpool0(1:7))/real(delty), &
         !                              micinput%cinputm(np,ns)+micinput%cinputs(np,ns)-sum(xpool1(1:7)-xpool0(1:7))/real(delty)
-101 format('vmicsoil input sumdelC rsoil',2(i3,1x),3(f10.6,1x))
+101 format("vmicsoil input sumdelC rsoil",2(i3,1x),3(f10.6,1x))
 
                end do    ! "ns"
 
@@ -889,7 +889,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                miccpool%cpool(np,ms,7)  = miccpool%cpool(np,ms,7)  - cfluxa(ms)
 
                 if(diag==1) then
-                   print *, 'year day site np1', year, i, outp,micparam%diffsocx(outp)
+                   print *, "year day site np1", year, i, outp,micparam%diffsocx(outp)
                     do ns=1,ms
                        print *, ns, miccpool%cpool(outp,ns,:)
                     end do
@@ -913,7 +913,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
             ! print out the time series of pool sizes
             ! if(micglobal%bgctype(np)==bgcopt) then
             !   write(*,201) year, np, miccpool%cpool(np,1,:),miccpool%cpool(np,ms,:)
-201             format('vmicsoil:cpool',2(i5,1x),30(f7.4,1x))
+201             format("vmicsoil:cpool",2(i5,1x),30(f7.4,1x))
             ! endif
          end do   !"i: day of year (ntime)"
       end do !"year (nyeqpool)"
@@ -1074,7 +1074,7 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
             !  endif
 
                 if(diag==1) then
-                   print *, 'year day site np1', year, i, outp,micparam%diffsocx(outp)
+                   print *, "year day site np1", year, i, outp,micparam%diffsocx(outp)
                     do ns=1,ms
                        print *, ns, miccpool%cpool(outp,ns,:)
                     end do

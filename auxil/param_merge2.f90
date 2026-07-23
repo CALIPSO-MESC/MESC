@@ -13,15 +13,15 @@
  real :: y0,ymin,ymax,y1,y2,y3
  character :: data*30, data1*30,data2*20
     ! input files
-    open(11,file='last2_hwsd_param.txt')       ! last two lines in the hwsd_soc parameter file
-    open(12,file='last1_hwsd_sceout.txt')      ! last line of sceout from hwsd_soc optimization
-    open(13,file='params1_global.txt')         ! the global parameter file to be updated
-    open(14,file='last1_global_sceout.txt')    ! last estiamets of global parameter optimization
-    open(2,file='scein.dat')                   ! optimization setting
+    open(11,file="last2_hwsd_param.txt")       ! last two lines in the hwsd_soc parameter file
+    open(12,file="last1_hwsd_sceout.txt")      ! last line of sceout from hwsd_soc optimization
+    open(13,file="params1_global.txt")         ! the global parameter file to be updated
+    open(14,file="last1_global_sceout.txt")    ! last estiamets of global parameter optimization
+    open(2,file="scein.dat")                   ! optimization setting
 
     ! output files
-    open(21,file='params1.txt')                ! for optimization setting to be updated
-    open(3,file='scein_copy.dat')              ! optimization setting with updated priors
+    open(21,file="params1.txt")                ! for optimization setting to be updated
+    open(3,file="scein_copy.dat")              ! optimization setting with updated priors
 
     ! get the parameter numbers
     read(11,*) (xparam(n),n=1,14)
@@ -32,10 +32,10 @@
        nx=nparam(n)
        xparam(nx) = param(n)
     end do
-    print *, 'xparam= ', xparam(:)
+    print *, "xparam= ", xparam(:)
     ! write the optimized parameter values into "params1.txt"
     do n=1,9
-       read(13,'(A)') chdata
+       read(13,"(A)") chdata
        write(21,301)  chdata
     end do
     write(21,302) xparam(1:14)
@@ -75,7 +75,7 @@
 
 301 format(a135)
 302 format(14(f8.4,1x))
-303 format('  1    10    7    ')
+303 format("  1    10    7    ")
 
 21  format(a30)
 22  format(a30,a20)

@@ -46,7 +46,7 @@ contains
 
 !    write(*,101) np,ns,delty,micinput%cinputm(np,ns)+micinput%cinputs(np,ns),sum(dy1dt(1:7)), &
 !                 micinput%cinputm(np,ns)+micinput%cinputs(np,ns)-sum(dy1dt(1:7))
-101 format('rk4: input, sumdelc rsoil',2(i3,1x),f6.2,1x,3(f10.6,1x))
+101 format("rk4: input, sumdelc rsoil",2(i3,1x),f6.2,1x,3(f10.6,1x))
 
     end subroutine rk4modelx
 
@@ -78,13 +78,13 @@ contains
       end do
 
        if(diag==1.and.np==outp) then
-          print *, 'Kmt',micinput%clay(outp,1),micinput%tavg(outp,1),km(outp,1),kmx(outp,1)
-          print *, 'K1=',micparam%K1(outp,1)
-          print *, 'K2=',micparam%K2(outp,1)
-          print *, 'K3=',micparam%K3(outp,1)
-          print *, 'J1=',micparam%J1(outp,1)
-          print *, 'J2=',micparam%J2(outp,1)
-          print *, 'J3=',micparam%J3(outp,1)
+          print *, "Kmt",micinput%clay(outp,1),micinput%tavg(outp,1),km(outp,1),kmx(outp,1)
+          print *, "K1=",micparam%K1(outp,1)
+          print *, "K2=",micparam%K2(outp,1)
+          print *, "K3=",micparam%K3(outp,1)
+          print *, "J1=",micparam%J1(outp,1)
+          print *, "J2=",micparam%J2(outp,1)
+          print *, "J3=",micparam%J3(outp,1)
        end if
       deallocate(xkclay,km,kmx)
 
@@ -117,13 +117,13 @@ contains
       end do
 
       if(diag==1.and.np==outp) then
-         print *, 'Kmt',micinput%clay(outp,1),micinput%tavg(outp,1),km(outp,1),kmx(outp,1)
-         print *, 'K1=',micparam%K1(outp,1)
-         print *, 'K2=',micparam%K2(outp,1)
-         print *, 'K3=',micparam%K3(outp,1)
-         print *, 'J1=',micparam%J1(outp,1)
-         print *, 'J2=',micparam%J2(outp,1)
-         print *, 'J3=',micparam%J3(outp,1)
+         print *, "Kmt",micinput%clay(outp,1),micinput%tavg(outp,1),km(outp,1),kmx(outp,1)
+         print *, "K1=",micparam%K1(outp,1)
+         print *, "K2=",micparam%K2(outp,1)
+         print *, "K3=",micparam%K3(outp,1)
+         print *, "J1=",micparam%J1(outp,1)
+         print *, "J2=",micparam%J2(outp,1)
+         print *, "J3=",micparam%J3(outp,1)
       end if
       deallocate(xkclay,km,kmx)
 
@@ -171,13 +171,13 @@ contains
        end do
 
         if(diag==1.and.np==outp) then
-           print *, 'Vmaxt',micinput%tavg(outp,1),vmax(outp,1)
-           print *, 'V1=',micparam%V1(outp,1)
-           print *, 'V2=',micparam%V2(outp,1)
-           print *, 'V3=',micparam%V3(outp,1)
-           print *, 'W1=',micparam%W1(outp,1)
-           print *, 'W2=',micparam%W2(outp,1)
-           print *, 'W3=',micparam%W3(outp,1)
+           print *, "Vmaxt",micinput%tavg(outp,1),vmax(outp,1)
+           print *, "V1=",micparam%V1(outp,1)
+           print *, "V2=",micparam%V2(outp,1)
+           print *, "V3=",micparam%V3(outp,1)
+           print *, "W1=",micparam%W1(outp,1)
+           print *, "W2=",micparam%W2(outp,1)
+           print *, "W3=",micparam%W3(outp,1)
         end if
 
       deallocate(vmax)
@@ -227,13 +227,13 @@ contains
 
 
       if(diag==1.and.np==outp) then
-         print *, 'Vmaxt',micinput%tavg(outp,1),vmax(outp,1)
-         print *, 'V1=',micparam%V1(outp,1)
-         print *, 'V2=',micparam%V2(outp,1)
-         print *, 'V3=',micparam%V3(outp,1)
-         print *, 'W1=',micparam%W1(outp,1)
-         print *, 'W2=',micparam%W2(outp,1)
-         print *, 'W3=',micparam%W3(outp,1)
+         print *, "Vmaxt",micinput%tavg(outp,1),vmax(outp,1)
+         print *, "V1=",micparam%V1(outp,1)
+         print *, "V2=",micparam%V2(outp,1)
+         print *, "V3=",micparam%V3(outp,1)
+         print *, "W1=",micparam%W1(outp,1)
+         print *, "W2=",micparam%W2(outp,1)
+         print *, "W3=",micparam%W3(outp,1)
       end if
 
       deallocate(vmax)
@@ -258,8 +258,8 @@ contains
      end do
 
       if(diag==1.and. np==outp) then
-         print *, 'Desorpt'
-         print *, 'desorpt=',micparam%desorp(outp,:)
+         print *, "Desorpt"
+         print *, "desorpt=",micparam%desorp(outp,:)
       end if
 
     end subroutine Desorpt
@@ -281,8 +281,8 @@ contains
 
 
       if(diag==1.and. np==outp) then
-         print *, 'Desorpt'
-         print *, 'desorpt=',micparam%desorp(outp,:)
+         print *, "Desorpt"
+         print *, "desorpt=",micparam%desorp(outp,:)
       end if
 
     end subroutine Desorpt_single
@@ -330,8 +330,8 @@ contains
       end do
 
        if(diag==1.and.np==outp) then
-          print *, 'mget'
-          print *, 'epislon1-4=',micpdef%epislon1,micpdef%epislon2,micpdef%epislon3,micpdef%epislon4
+          print *, "mget"
+          print *, "epislon1-4=",micpdef%epislon1,micpdef%epislon2,micpdef%epislon3,micpdef%epislon4
        end if
 
   end subroutine mget
@@ -379,8 +379,8 @@ contains
       end do
 
       if(diag==1.and.np==outp) then
-         print *, 'mget'
-         print *, 'epislon1-4=',micpdef%epislon1,micpdef%epislon2,micpdef%epislon3,micpdef%epislon4
+         print *, "mget"
+         print *, "epislon1-4=",micpdef%epislon1,micpdef%epislon2,micpdef%epislon3,micpdef%epislon4
       end if
 
   end subroutine mget_single
@@ -419,9 +419,9 @@ contains
        end do
 
         if(diag==1.and.np==outp) then
-          print *, 'turnovert'
-          print *, 'tvmicR=',micparam%tvmicR(outp,:)
-          print *, 'tvmicR=',micparam%tvmicR(outp,:)
+          print *, "turnovert"
+          print *, "tvmicR=",micparam%tvmicR(outp,:)
+          print *, "tvmicR=",micparam%tvmicR(outp,:)
         end if
       deallocate(tvref)
   end subroutine turnovert
@@ -459,11 +459,11 @@ contains
 
 
       if(diag==1.and.np==outp) then
-         print *, 'turnovert'
-         print *, 'tvref fmetave =', tvref(np),micparam%fmetave(np,:)
-         print *, 'xtvmic xbeta = ', micpxdef%xtvmic(micparam%bgctype(np)),micpxdef%xbeta(micparam%bgctype(np))
-         print *, 'tvmicR=',micparam%tvmicR(outp,:)
-         print *, 'tvmicR=',micparam%tvmicR(outp,:)
+         print *, "turnovert"
+         print *, "tvref fmetave =", tvref(np),micparam%fmetave(np,:)
+         print *, "xtvmic xbeta = ", micpxdef%xtvmic(micparam%bgctype(np)),micpxdef%xbeta(micparam%bgctype(np))
+         print *, "tvmicR=",micparam%tvmicR(outp,:)
+         print *, "tvmicR=",micparam%tvmicR(outp,:)
       end if
       deallocate(tvref)
   end subroutine turnovert_single
@@ -580,20 +580,20 @@ contains
      end do       !"np"
 
       if(diag==1.and.np ==outp) then
-         print *,'bgc_fraction parameters'
-         print *, 'empirical params1-4=', micpdef%fmicsom1,micpdef%fmicsom2,micpdef%fmicsom3,micpdef%fmicsom4
-         print *, 'clay=', micinput%clay(np,:)
-         print *, 'cinputm=', micinput%cinputm(outp,:)
-         print *, 'cinputs=',micinput%cinputs(outp,:)
-         print *, 'fmetave=',micparam%fmetave(outp,:)
-         print *, 'cn_r1=',micparam%cn_r(outp,:,1)
-         print *, 'cn_r2=',micparam%cn_r(outp,:,2)
-         print *, 'fr2p=',micparam%fr2p(outp,:)
-         print *, 'fk2p=',micparam%fk2p(outp,:)
-         print *, 'fr2c=',micparam%fr2c(outp,:)
-         print *, 'fk2c=',micparam%fk2c(outp,:)
-         print *, 'fr2a=',micparam%fr2a(outp,:)
-         print *, 'fk2a=',micparam%fk2a(outp,:)
+         print *,"bgc_fraction parameters"
+         print *, "empirical params1-4=", micpdef%fmicsom1,micpdef%fmicsom2,micpdef%fmicsom3,micpdef%fmicsom4
+         print *, "clay=", micinput%clay(np,:)
+         print *, "cinputm=", micinput%cinputm(outp,:)
+         print *, "cinputs=",micinput%cinputs(outp,:)
+         print *, "fmetave=",micparam%fmetave(outp,:)
+         print *, "cn_r1=",micparam%cn_r(outp,:,1)
+         print *, "cn_r2=",micparam%cn_r(outp,:,2)
+         print *, "fr2p=",micparam%fr2p(outp,:)
+         print *, "fk2p=",micparam%fk2p(outp,:)
+         print *, "fr2c=",micparam%fr2c(outp,:)
+         print *, "fk2c=",micparam%fk2c(outp,:)
+         print *, "fr2a=",micparam%fr2a(outp,:)
+         print *, "fk2a=",micparam%fk2a(outp,:)
       end if
      deallocate(fmetleaf,fmetroot,fmetwood)
      deallocate(dleafx,drootx,dwoodx)
@@ -712,21 +712,21 @@ contains
 
 
       if(diag==1.and.np ==outp) then
-         print *,'bgc_fraction parameters and pft',micparam%pft(np)
-         print *, 'empirical params1-4=', micpdef%fmicsom1,micpdef%fmicsom2,micpdef%fmicsom3,micpdef%fmicsom4
-         print *, 'fligleaf,xcnleaf=', micparam%fligleaf(np),micparam%xcnleaf(np)
-         print *, 'fracroot sdepth', micparam%fracroot(np,:),micparam%sdepth(np,:)
-         print *, 'cinputm=', micinput%cinputm(outp,:)
-         print *, 'cinputs=',micinput%cinputs(outp,:)
-         print *, 'fmetave=',micparam%fmetave(outp,:)
-         print *, 'cn_r1=',micparam%cn_r(outp,:,1)
-         print *, 'cn_r2=',micparam%cn_r(outp,:,2)
-         print *, 'fr2p=',micparam%fr2p(outp,:)
-         print *, 'fk2p=',micparam%fk2p(outp,:)
-         print *, 'fr2c=',micparam%fr2c(outp,:)
-         print *, 'fk2c=',micparam%fk2c(outp,:)
-         print *, 'fr2a=',micparam%fr2a(outp,:)
-         print *, 'fk2a=',micparam%fk2a(outp,:)
+         print *,"bgc_fraction parameters and pft",micparam%pft(np)
+         print *, "empirical params1-4=", micpdef%fmicsom1,micpdef%fmicsom2,micpdef%fmicsom3,micpdef%fmicsom4
+         print *, "fligleaf,xcnleaf=", micparam%fligleaf(np),micparam%xcnleaf(np)
+         print *, "fracroot sdepth", micparam%fracroot(np,:),micparam%sdepth(np,:)
+         print *, "cinputm=", micinput%cinputm(outp,:)
+         print *, "cinputs=",micinput%cinputs(outp,:)
+         print *, "fmetave=",micparam%fmetave(outp,:)
+         print *, "cn_r1=",micparam%cn_r(outp,:,1)
+         print *, "cn_r2=",micparam%cn_r(outp,:,2)
+         print *, "fr2p=",micparam%fr2p(outp,:)
+         print *, "fk2p=",micparam%fk2p(outp,:)
+         print *, "fr2c=",micparam%fr2c(outp,:)
+         print *, "fk2c=",micparam%fk2c(outp,:)
+         print *, "fr2a=",micparam%fr2a(outp,:)
+         print *, "fk2a=",micparam%fk2a(outp,:)
       end if
 
       deallocate(fmetleaf,fmetroot,fmetwood)
@@ -845,7 +845,7 @@ end subroutine bioturb
          gam(j) = ct(j-1)/bet
          bet = bt(j)-at(j)* gam(j)
          if(bet ==0) then
-            print *, 'triag failed'
+            print *, "triag failed"
             stop
          end if
          u(j) = (rt(j) - at(j) * u(j-1))/bet
@@ -1223,7 +1223,7 @@ end subroutine bioturb
               + (1.0-mgeRx2) * cfluxs2r            + (1.0-mgeKx2)* cfluxs2k  - cfluxa
 
 !       write(*,101) np,ns, cinputmx+cinputsx,sum(y(1:7)),rsoil, cinputmx+cinputsx-sum(y(1:7))-rsoil
-101 format('vmic_c: input, sumdelc rsoil',2(i3,1x),10(f10.6,1x))
+101 format("vmic_c: input, sumdelc rsoil",2(i3,1x),10(f10.6,1x))
       end if
 
 !      print *, ' @ vmic_c xpool =', xpool(:)
