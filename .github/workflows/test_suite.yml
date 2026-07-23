@@ -70,6 +70,10 @@ jobs:
           source /opt/intel/oneapi/setvars.sh
           printenv >> ${GITHUB_ENV}
 
+      - name: Install NetCDF
+        run: |
+          sudo apt install netcdf-bin libnetcdff-dev
+
       - name: Build MESC
         env:
           FORTRAN_STANDARD: ${{ matrix.std }}
