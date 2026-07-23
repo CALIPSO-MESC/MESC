@@ -83,14 +83,15 @@ contains
   !!
   subroutine vmic_restart_write(frestart_out,miccpool,micnpool)
   ! write out soil carbon pool sizes "miccpool%cpool(mp,ms,mcpool)"
-    TYPE(mic_cpool),              INTENT(INOUT)   :: miccpool
-    TYPE(mic_npool),              INTENT(INOUT)   :: micnpool
+    CHARACTER,       INTENT(IN)    :: frestart_out*99
+    TYPE(mic_cpool), INTENT(INOUT) :: miccpool
+    TYPE(mic_npool), INTENT(INOUT) :: micnpool
     ! local variables for writing netcdf file
-    integer                :: STATUS
-    integer                :: FILE_ID, mp_ID, miccarb_ID, soil_ID
-    CHARACTER                :: CDATE*10,frestart_out*99
-    integer                :: cmic_ID, nmic_ID
-    integer :: values(10)
+    integer   :: STATUS
+    integer   :: FILE_ID, mp_ID, miccarb_ID, soil_ID
+    CHARACTER :: CDATE*10
+    integer   :: cmic_ID, nmic_ID
+    integer   :: values(10)
     real(dp)  :: missreal
 
     missreal=-1.0e10
@@ -168,14 +169,15 @@ contains
   !!
   subroutine vmic_output_write(foutput,micinput,micoutput)
     ! fNPP is not quite right yet. It shoudl be the sump of "cinputm+cinputs"
-    TYPE(mic_input),         INTENT(INout)   :: micinput
-    TYPE(mic_output),        INTENT(INout)   :: micoutput
-    real(dp)     :: missreal
-    integer                :: STATUS
-    integer                :: FILE_ID, mp_ID
-    CHARACTER                :: CDATE*10,foutput*99
-    integer                :: cinput_ID, rsoil_ID, cleach_ID
-    integer :: values(10)
+    CHARACTER,        INTENT(IN)    :: foutput*99
+    TYPE(mic_input),  INTENT(INout) :: micinput
+    TYPE(mic_output), INTENT(INout) :: micoutput
+    real(dp)  :: missreal
+    integer   :: STATUS
+    integer   :: FILE_ID, mp_ID
+    CHARACTER :: CDATE*10
+    integer   :: cinput_ID, rsoil_ID, cleach_ID
+    integer   :: values(10)
 
     missreal=-1.0e10
     call date_and_time(values=values)
@@ -247,9 +249,9 @@ contains
   subroutine getparam_global(fglobalparam,jmodel,micpxdef)
     use mic_constant, only : xrootcable, xrootorchidee
 
-    TYPE(mic_param_xscale)    :: micpxdef
-    character(len=140)  :: fglobalparam
-    integer :: jmodel
+    character(len=140),     intent(in)    :: fglobalparam
+    integer,                intent(in)    :: jmodel
+    TYPE(mic_param_xscale), intent(inout) :: micpxdef
     integer :: ibgc,ipft,n
     real(dp), dimension(14)    :: x
 
@@ -295,8 +297,9 @@ contains
   !!
   subroutine getpatch_global(fpatch,jmodel,mpx)
   ! read in global patch area fraction and calculate the number of land cell using sum(PFTfrac(lon,lat,pft))
-  character(len=140) :: fpatch
-  integer :: jmodel,mpx
+  character(len=140), intent(in)    :: fpatch
+  integer,            intent(in)    :: jmodel
+  integer,            intent(inout) :: mpx
   real(dp), dimension(:,:,:),   allocatable :: xfield3
   real(sp), dimension(:,:,:,:), allocatable :: xfield4
   integer :: i,j,np,ncid1,ok,varid,maxpft
@@ -368,11 +371,11 @@ contains
   ! real(dp), dimension(lon,lat): cell_area
   use mic_constant, only : cnleaf1, cnroot1, cnwood1, ligleaf1, ligroot1, ligwood1
 
-  TYPE(mic_global_input), INTENT(INOUT)  :: micglobal
-  TYPE(mic_parameter),    INTENT(INOUT)  :: micparam
-  real(dp)  :: zse(ms)
-  character(len=140) :: fglobal(10)
-  integer       :: jglobal,bgcopt,jopt,jmodel
+  character(len=140),     INTENT(IN)    :: fglobal(10)
+  TYPE(mic_global_input), INTENT(INOUT) :: micglobal
+  TYPE(mic_parameter),    INTENT(INOUT) :: micparam
+  integer,                INTENT(IN)    :: jglobal,bgcopt,jopt,jmodel
+  real(dp),               INTENT(IN)    :: zse(ms)
   ! local variables
   real(dp), dimension(nlon)            :: lon
   real(dp), dimension(nlat)            :: lat
@@ -792,11 +795,11 @@ contains
 
   use mic_constant, only : cnleaf2, cnroot2, cnwood2, ligleaf2, ligroot2, ligwood2
 
-  TYPE(mic_global_input), INTENT(INOUT)  :: micglobal
-  TYPE(mic_parameter),    INTENT(INOUT)  :: micparam
-  real(dp) :: zse(ms)
-  character(len=140) :: fglobal(10)
-  integer       :: jglobal,bgcopt,jopt,jmodel
+  character(len=140),     INTENT(IN)    :: fglobal(10)
+  TYPE(mic_global_input), INTENT(INOUT) :: micglobal
+  TYPE(mic_parameter),    INTENT(INOUT) :: micparam
+  integer,                INTENT(IN)    :: jglobal,bgcopt,jopt,jmodel
+  real(dp),               INTENT(IN)    :: zse(ms)
   ! local variables
   real(dp), dimension(nlon)            :: lon
   real(dp), dimension(nlat)            :: lat
@@ -1225,10 +1228,11 @@ end subroutine getdata_global4_orchidee
 !! output: cluster (integer)
 !!
 subroutine cluster_hwsd(jmodel,bgctype,socobs,fclay,fsilt,fph,fald,falo,ffed,ffeo,fcluster)
-  integer :: jmodel
-  integer,   dimension(mp)     :: bgctype,fcluster
-  real(dp), dimension(mp,ms)  :: socobs
-  real(dp), dimension(mp)     :: fclay,fsilt,fph,fald,falo,ffed,ffeo
+  integer,                    intent(in)    :: jmodel
+  integer,  dimension(mp),    intent(in)    :: bgctype
+  real(dp), dimension(mp,ms), intent(in)    :: socobs
+  real(dp), dimension(mp),    intent(in)    :: fclay,fsilt,fph,fald,falo,ffed,ffeo
+  integer,  dimension(mp),    intent(inout) :: fcluster
   real(dp), dimension(10,2)   :: claymid,siltmid,phmid,aldmid,alomid,fedmid,feomid
   real(dp), dimension(2)      :: clayavg,siltavg,phavg,aldavg,aloavg,fedavg,feoavg
   real(dp), dimension(2)      :: claysd,siltsd,phsd,aldsd,alosd,fedsd,feosd
@@ -1310,9 +1314,9 @@ end subroutine cluster_hwsd
 subroutine lonlat2mpx2(ilon, jlat, varx2_db, varmp1_db)
     ! map varx2_db(nlon,nlat) to varmp1_db(mp)
 
-    integer,   dimension(mp)              :: ilon,jlat
-    real(dp),    dimension(nlon,nlat)       :: varx2_db
-    real(dp),    dimension(mp)              :: varmp1_db
+    integer,  dimension(mp),        intent(in)    :: ilon,jlat
+    real(dp), dimension(nlon,nlat), intent(in)    :: varx2_db
+    real(dp), dimension(mp),        intent(inout) :: varmp1_db
     integer :: np
 
     ! Initialize output (optional)
@@ -1333,9 +1337,9 @@ end subroutine lonlat2mpx2
 subroutine lonlat2mpx2int(ilon, jlat, varx2_int, varmp1_int)
     ! map varx2_int(nlon,nlat) to varmp1_int(mp)
 
-    integer,   dimension(mp)              :: ilon,jlat
-    integer,   dimension(nlon,nlat)       :: varx2_int
-    integer,   dimension(mp)              :: varmp1_int
+    integer, dimension(mp),        intent(in)    :: ilon,jlat
+    integer, dimension(nlon,nlat), intent(in)    :: varx2_int
+    integer, dimension(mp),        intent(inout) :: varmp1_int
     integer :: np
 
     ! Initialize output (optional)
@@ -1355,10 +1359,10 @@ end subroutine lonlat2mpx2int
 subroutine lonlat2mpx3(ilon, jlat, patchfrac, varx3_db, varmp1_db)
 ! map varx3_db(nlon,nlat,mpft) to varmp1_db(mp)
 
-    integer,   dimension(mp)              :: ilon,jlat
-    real(dp), dimension(nlon,nlat,mpft)  :: patchfrac
-    real(dp),    dimension(nlon,nlat,mpft)  :: varx3_db
-    real(dp),    dimension(mp)              :: varmp1_db
+    integer,  dimension(mp),             intent(in)    :: ilon,jlat
+    real(dp), dimension(nlon,nlat,mpft), intent(in)    :: patchfrac
+    real(dp), dimension(nlon,nlat,mpft), intent(in)    :: varx3_db
+    real(dp), dimension(mp),             intent(inout) :: varmp1_db
     integer :: np
     real(dp), dimension(mpft)               :: varx_slice, weights
     real(dp) :: areatot
@@ -1383,12 +1387,12 @@ end subroutine lonlat2mpx3
 !!
 subroutine lonlat2mpx3a(ilon, jlat, ms3, zse3, bulkd3, varx3_db, varmp1_db)
 ! map varx3_db(nlon,nlat,1:3) to varmp1_db(mp)
-    integer :: ms3
-    integer,   dimension(mp)              :: ilon,jlat
-    real(dp),    dimension(nlon,nlat,ms3)   :: bulkd3
-    real(dp),    dimension(ms3)             :: zse3
-    real(dp),    dimension(nlon,nlat,ms3)   :: varx3_db
-    real(dp),    dimension(mp)              :: varmp1_db
+    integer,                            intent(in)    :: ms3
+    integer,  dimension(mp),            intent(in)    :: ilon,jlat
+    real(dp), dimension(nlon,nlat,ms3), intent(in)    :: bulkd3
+    real(dp), dimension(ms3),           intent(in)    :: zse3
+    real(dp), dimension(nlon,nlat,ms3), intent(in)    :: varx3_db
+    real(dp), dimension(mp),            intent(inout) :: varmp1_db
     integer :: np,ns
     real(dp), dimension(ms3)                :: varx_slice, weights
 
@@ -1413,9 +1417,9 @@ end subroutine lonlat2mpx3a
 subroutine lonlat2mpx3time(ilon, jlat, varx3time_db, varmp2_db)
 ! map varx3time_db(nlon,nlat,time) to varmp2_db(mp,time)
 
-    integer,   dimension(mp)              :: ilon,jlat
-    real(dp),    dimension(nlon,nlat,ntime) :: varx3time_db
-    real(dp),    dimension(mp,ntime)        :: varmp2_db
+    integer,  dimension(mp),              intent(in)    :: ilon,jlat
+    real(dp), dimension(mp,ntime),        intent(inout) :: varmp2_db
+    real(dp), dimension(nlon,nlat,ntime), intent(inout) :: varx3time_db
     integer :: np
 
     ! Initialize output
@@ -1444,10 +1448,10 @@ end subroutine lonlat2mpx3time
 subroutine lonlat2mpx4b(ilon,jlat,xmin,xmax,xdef,varx4_db,varmp3_db)
 ! map varx4_db(nlon,nlat,ms,ntime) to varmp3_db(mp,ms,ntime)
 
-    integer, dimension(mp)                      :: ilon, jlat
-    real(dp), dimension(nlon,nlat,ms,ntime)       :: varx4_db
-    real(dp), dimension(mp,ms,ntime)              :: varmp3_db
-    real(dp) :: xmin, xmax,xdef
+    integer,  dimension(mp),                 intent(in)    :: ilon, jlat
+    real(dp), dimension(nlon,nlat,ms,ntime), intent(in)    :: varx4_db
+    real(dp),                                intent(in)    :: xmin, xmax,xdef
+    real(dp), dimension(mp,ms,ntime),        intent(inout) :: varmp3_db
     integer :: np,ns,nt
 
     ! Initialize output
@@ -1486,16 +1490,16 @@ end subroutine lonlat2mpx4b
   subroutine getdata_c14(frac14c,f14c,filecluster,micinput,micparam,micnpool,zse)
     use mic_constant, only : delt
 
-    TYPE(mic_parameter), INTENT(INout)   :: micparam
-    TYPE(mic_input),     INTENT(INout)   :: micinput
-    TYPE(mic_npool),     INTENT(INOUT)   :: micnpool
-    real(dp) :: zse(ms)       ! soil layer thickness in m-2
+    character(len=140),  INTENT(IN)    :: frac14c,f14c(5)
+    character(len=140),  INTENT(IN)    :: filecluster ! cluster filename (not used)
+    TYPE(mic_parameter), INTENT(INout) :: micparam
+    TYPE(mic_input),     INTENT(INout) :: micinput
+    TYPE(mic_npool),     INTENT(INOUT) :: micnpool
+    real(dp),            INTENT(IN)    :: zse(ms)       ! soil layer thickness in m-2
     ! local variables
     integer:: ncid,varid,status
     integer:: np,ns,i,j
     integer:: nz
-    character(len=140) :: frac14c,f14c(5)
-    character(len=140) :: filecluster   ! cluster filename (not used)
 
     character(len = nf90_max_name):: name
     real(dp),dimension(:,:),allocatable:: fclay,fsilt,fph,ftemp,fmoist,fporosity,fmatpot
@@ -1775,9 +1779,9 @@ end subroutine lonlat2mpx4b
   !> get dimeions: mp from the c fraction input file
   !!
   subroutine getdata_frc_dim(cfraction,mpx)
-    character(len=140) :: cfraction
-    integer :: mpx
-    integer:: ncid,varid,status
+    character(len=140), intent(in)    :: cfraction
+    integer,            intent(inout) :: mpx
+    integer :: ncid,varid,status
     ! open .nc file
     status = nf90_open(cfraction,nf90_nowrite,ncid)
     if(status /= nf90_noerr) print*, 'Error opening c_fraction.nc'
@@ -1796,16 +1800,16 @@ end subroutine lonlat2mpx4b
   !!
   subroutine getdata_frc(cfraction,jglobal,bgcopt,micinput,micparam,micnpool,micglobal,zse)
     use mic_constant, only : delt
-    TYPE(mic_parameter), INTENT(INout)   :: micparam
-    TYPE(mic_input),     INTENT(INout)   :: micinput
-    TYPE(mic_npool),     INTENT(INOUT)   :: micnpool
-    TYPE(mic_global_input),       INTENT(INout) :: micglobal
-    real(dp)   :: zse(ms)
-    integer :: jglobal,bgcopt
+    character(len=140),     INTENT(IN)    :: Cfraction
+    integer,                INTENT(IN)    :: jglobal,bgcopt
+    TYPE(mic_parameter),    INTENT(INout) :: micparam
+    TYPE(mic_input),        INTENT(INout) :: micinput
+    TYPE(mic_npool),        INTENT(INOUT) :: micnpool
+    TYPE(mic_global_input), INTENT(INout) :: micglobal
+    real(dp),               INTENT(IN)    :: zse(ms)
     integer:: ncid,varid,status
     integer:: np,ns,i,j
     integer:: nz
-    character(len=140) :: Cfraction
 
     character(len = nf90_max_name):: name
     real(dp),dimension(:),         allocatable:: fclay,fsilt,fph,ftemp,fmoist,fporosity,fmatpot
@@ -2150,10 +2154,11 @@ end subroutine lonlat2mpx4b
 
    subroutine get14catm(nz,f14cz,micparam)
    ! get the atmospheric 14C data 1941-2019 (inclusive, Hua et al. 2020)
+    integer,             INTENT(IN) :: nz
+    character(len=140),  INTENT(IN) :: f14cz
     TYPE(mic_parameter), INTENT(INout)   :: micparam
-    integer :: i, nz, ny, nc14atm(100,5)
+    integer :: i, ny, nc14atm(100,5)
     real(dp)  :: year,c14del,sdx1,c14fm,sdx2
-    character(len=140) :: f14cz
     ! give 14C zones globally
     ! 14C zone        region code
     ! NH zone 1       11
@@ -2183,9 +2188,9 @@ end subroutine lonlat2mpx4b
    end subroutine get14catm
 
    subroutine getdata_hwsd_dim(fhwsdsoc,mpx,timex)
-    character(len=140) :: fhwsdsoc
-    integer :: mpx,timex
-    integer:: ncid,varid,status
+    character(len=140), intent(in)    :: fhwsdsoc
+    integer,            intent(inout) :: mpx,timex
+    integer :: ncid,varid,status
    ! open .nc file
     status = nf90_open(fhwsdsoc,nf90_nowrite,ncid)
     if(status /= nf90_noerr) print*, 'Error opening c_fraction.nc'
@@ -2212,11 +2217,11 @@ end subroutine lonlat2mpx4b
 
     !use micglobal%area (area fraction) as a switch to run for selected sites during parameter optimization (jopt==0)
     !model only runs for those sites with micglobal%area(np) > 0.0
-    character(len=140) :: fhwsdsoc,fmodis,fanoc
-    integer :: jglobal,bgcopt,jopt,jmodel
+    character(len=140),           INTENT(IN) :: fhwsdsoc,fmodis,fanoc
+    integer,                      INTENT(IN) :: jglobal,bgcopt,jopt,jmodel
     TYPE(mic_parameter),          INTENT(INout) :: micparam
     TYPE(mic_global_input),       INTENT(INout) :: micglobal
-    real(dp) :: zse(ms)
+    real(dp),                     INTENT(IN) :: zse(ms)
     ! local variables
     integer:: ncid,varid,status
     integer:: np,ns,k,ipft,nsocobs,ilonx,jlatx
@@ -2580,10 +2585,10 @@ end subroutine getdata_hwsd
 
 
 subroutine screenout(runmodel,jmodel,bgcopt,xopt,cost)
-    character(len=10) :: runmodel
-    integer :: jmodel,bgcopt
-    real(dp),    dimension(16)           :: xopt
-    real(dp)     :: cost
+    character(len=10),       intent(in) :: runmodel
+    integer,                 intent(in) :: jmodel,bgcopt
+    real(dp), dimension(16), intent(in) :: xopt
+    real(dp),                intent(in) :: cost
     write(*,901) runmodel,jmodel,bgcopt,cost,xopt(1:14)
 901 format(a10,2(i3,1x),f12.3,1x,14(f7.3,1x))
 
@@ -2592,8 +2597,8 @@ end subroutine screenout
 
 
    subroutine getdata_aust_dim(faustsoc,mpx,timex)
-    character(len=140) :: faustsoc
-    integer :: mpx,timex
+    character(len=140), intent(in)    :: faustsoc
+    integer,            intent(inout) :: mpx,timex
     integer:: ncid,varid,status
    ! open .nc file
     status = nf90_open(faustsoc,nf90_nowrite,ncid)
@@ -2627,11 +2632,11 @@ end subroutine screenout
     data ligcleaf/0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28/
     data ligcwood/0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4/
     data ligcroot/0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28/
-    character(len=140) :: faustsoc
-    integer :: jglobal,bgcopt,jopt,jmodel
+    character(len=140),           INTENT(IN) :: faustsoc
+    integer,                      INTENT(IN) :: jglobal,bgcopt,jopt,jmodel
     TYPE(mic_parameter),          INTENT(INout) :: micparam
     TYPE(mic_global_input),       INTENT(INout) :: micglobal
-    real(dp) :: zse(ms)
+    real(dp),                     INTENT(IN) :: zse(ms)
     ! local variables
     integer:: ncid,varid,status
     integer:: np,k,ipft,ns
