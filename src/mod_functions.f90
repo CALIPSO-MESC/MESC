@@ -22,6 +22,9 @@ module function_module
   use calcost_module, only: calcost_c14, calcost_frc1, calcost_hwsd3, calcost_global_hwsd, calcost_aust
   implicit none
 
+  ! All module members are public by default
+  public
+
  Contains
 
  !> Dispatcher that selects the appropriate per-mode orchestrator.

@@ -6,6 +6,9 @@ module mesc_model_module
   use mic_variable, only : mic_param_xscale, mic_param_default, mic_parameter, mic_input, mic_npool
   implicit none
 
+  ! All module members are public by default
+  public
+
 contains
 
  !> Fourth-order Runge-Kutta integrator for the soil C ODE system.

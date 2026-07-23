@@ -10,6 +10,9 @@ module calcost_module
   use mic_variable, only : mic_param_xscale, mic_param_default, mic_parameter, mic_cpool, mic_input, mic_global_input
   implicit none
 
+  ! All module members are public by default
+  public
+
   Contains
 
     !> Compute cost for 14C calibration against observed SOC, POC, MAOC and (optionally) 14C ages.

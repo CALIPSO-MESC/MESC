@@ -6,6 +6,9 @@ module mesc_inout_module
                            mic_global_input, mic_output, mic_param_xscale
   implicit none
 
+  ! All module members are public by default
+  public
+
 contains
 
   !> this part reads restart file that includes all the pool sizes from previous model run

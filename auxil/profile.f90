@@ -38,6 +38,10 @@
 ! 17: xbeta:     beta parameter                                 [1]            (0.55,1.0)                             ! fixed to 2
 module mic_constant
   IMPLICIT NONE
+
+  ! All module members are public by default
+  public
+
   integer,  parameter  :: r_2 = SELECTED_REAL_KIND(12, 60)
   integer,  parameter  :: diag=0       ! =1 for printout 0 no prinout
   integer,  parameter  :: outp=1       ! output site
@@ -66,6 +70,10 @@ end module mic_constant
 module mic_variable
   use mic_constant
   IMPLICIT NONE
+
+  ! All module members are public by default
+  public
+
   SAVE
 
   TYPE mic_param_xscale

@@ -2,6 +2,10 @@
 module mic_constant
   use precision_module, only : dp
   IMPLICIT NONE
+
+  ! All module members are public by default
+  public
+
   integer,  parameter  :: diag=0       !! diagnostic flag: 1 for printout, 0 for silent
   integer,  parameter  :: outp=1       !! output site index
   integer                 :: mp           !! number of sites the model runs for

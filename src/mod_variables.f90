@@ -7,6 +7,10 @@ module mic_variable
   use precision_module, only : dp
   use mic_constant, only : mcpool
   implicit none
+
+  ! All module members are public by default
+  public
+
   save
 
   !> Scaling factors for model parameters, per BGC type.

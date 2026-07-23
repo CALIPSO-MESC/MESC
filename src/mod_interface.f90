@@ -37,6 +37,9 @@ module mesc_interface_module
                                kmt_single
   implicit none
 
+  ! All module members are public by default
+  public
+
 contains
 
 !> Assign parameter values from defaults across all BGC types.
