@@ -78,6 +78,9 @@ jobs:
           cmake --build build -j
 
       # TODO: Download test data so we can run the tests
+      # See perhaps
+      # * https://unix.stackexchange.com/questions/136371/how-to-download-a-folder-from-google-drive-using-terminal
+      # * https://stackoverflow.com/questions/20665881/direct-download-from-google-drive-using-google-drive-api/32742700
       - name: Download test data
         run: |
           cd test
