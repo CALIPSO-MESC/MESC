@@ -1,6 +1,11 @@
 module mesc_inout_module
   use precision_module, only : dp, sp
-  use netcdf
+  use netcdf, only : nf90_clobber, nf90_close, nf90_create, nf90_def_dim, &
+                     nf90_def_var, nf90_enddef, nf90_float, nf90_get_var, &
+                     nf90_global, nf90_inq_dimid, nf90_inq_varid, &
+                     nf90_inquire_dimension, nf90_max_name, nf90_noerr, &
+                     nf90_nowrite, nf90_open, nf90_put_att, nf90_put_var, &
+                     nf90_redef, nf90_strerror
   use mic_constant, only : mp, ms, mcpool, nlat, nlon, ntime, mpft, mbgc
   use mic_variable, only : mic_input, mic_parameter, mic_cpool, mic_npool, &
                            mic_global_input, mic_output, mic_param_xscale
