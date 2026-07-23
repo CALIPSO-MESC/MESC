@@ -625,7 +625,7 @@ module mic_variable
 
 end module mic_variable
 
- real*8 function functn_c14(nx,xparam16)
+ real(8) function functn_c14(nx,xparam16)
    use mic_constant
    use mic_variable
    implicit none
@@ -639,11 +639,11 @@ end module mic_variable
     TYPE(mic_output)          :: micoutput
 
     !local variables
-    real*8,    dimension(16)           :: xparam16
+    real(8),    dimension(16)           :: xparam16
     integer    :: nx
     integer,   dimension(16)           :: nxopt
-    real*8,    dimension(16)           :: xopt
-    real*8     :: totcost1,totcost2
+    real(8),    dimension(16)           :: xopt
+    real(8)     :: totcost1,totcost2
     integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer :: jrestart,nparam
     character(len=99) :: frestart_in,frestart_out,foutput
@@ -738,7 +738,7 @@ end module mic_variable
 
 END function functn_c14
 
-real*8 function functn_frc(nx,xparam16)
+real(8) function functn_frc(nx,xparam16)
    use mic_constant
    use mic_variable
    implicit none
@@ -754,9 +754,9 @@ real*8 function functn_frc(nx,xparam16)
     !local variables
     integer    :: nx
     integer,   dimension(16)           :: nxopt
-    real*8,    dimension(16)           :: xparam16
-    real*8,    dimension(16)           :: xopt
-    real*8     :: totcost1
+    real(8),    dimension(16)           :: xparam16
+    real(8),    dimension(16)           :: xopt
+    real(8)     :: totcost1
     integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer :: jrestart,nparam
     character(len=99) :: frestart_in,frestart_out,foutput
@@ -832,7 +832,7 @@ real*8 function functn_frc(nx,xparam16)
 
 END function functn_frc
 
-real*8 function functn_soc_wosis(nx,xparam16)
+real(8) function functn_soc_wosis(nx,xparam16)
    use mic_constant
    use mic_variable
    implicit none
@@ -848,9 +848,9 @@ real*8 function functn_soc_wosis(nx,xparam16)
     !local variables
     integer    :: nx
     integer,   dimension(16)           :: nxopt
-    real*8,    dimension(16)           :: xparam16
-    real*8,    dimension(16)           :: xopt
-    real*8     :: totcost1
+    real(8),    dimension(16)           :: xparam16
+    real(8),    dimension(16)           :: xopt
+    real(8)     :: totcost1
     integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer :: jrestart,nparam
     character(len=99) :: frestart_in,frestart_out,foutput
@@ -924,7 +924,7 @@ real*8 function functn_soc_wosis(nx,xparam16)
 END function functn_soc_wosis
 
 
-real*8 function functn(nx,xparam16)
+real(8) function functn(nx,xparam16)
  ! real*8 function functn_soc_hwsd(nx,xparam16)
  ! this function is yet to bet set up for running with SCE_UA optimization
    use mic_constant
@@ -933,8 +933,8 @@ real*8 function functn(nx,xparam16)
     !local variables
     integer    :: nx
     integer,   dimension(16)           :: nxopt
-    real*8,    dimension(16)           :: xparam16
-    real*8,    dimension(16)           :: xopt
+    real(8),    dimension(16)           :: xparam16
+    real(8),    dimension(16)           :: xopt
     TYPE(mic_param_xscale)    :: micpxdef
     TYPE(mic_param_default)   :: micpdef
     TYPE(mic_parameter)       :: micparam
@@ -1096,10 +1096,10 @@ END function functn
     implicit None
     TYPE(mic_cpool),              INTENT(INOUT)   :: miccpool
     TYPE(mic_npool),              INTENT(INOUT)   :: micnpool
-    INTEGER*4                :: STATUS
-    INTEGER*4                :: FILE_ID, mp_ID, miccarb_ID, soil_ID
+    integer(4)                :: STATUS
+    integer(4)                :: FILE_ID, mp_ID, miccarb_ID, soil_ID
     CHARACTER                :: CDATE*10,frestart_out*99
-    INTEGER*4                :: cmic_ID, nmic_ID
+    integer(4)                :: cmic_ID, nmic_ID
     integer :: values(10)
     real(r_2)  :: missreal
 
@@ -1178,10 +1178,10 @@ END function functn
     TYPE(mic_input),         INTENT(INout)   :: micinput
     TYPE(mic_output),        INTENT(INout)   :: micoutput
     real(r_2)     :: missreal
-    INTEGER*4                :: STATUS
-    INTEGER*4                :: FILE_ID, mp_ID
+    integer(4)                :: STATUS
+    integer(4)                :: FILE_ID, mp_ID
     CHARACTER                :: CDATE*10,foutput*99
-    INTEGER*4                :: cinput_ID, rsoil_ID, cleach_ID
+    integer(4)                :: cinput_ID, rsoil_ID, cleach_ID
     integer :: values(10)
 
     missreal=-1.0e10
@@ -2568,7 +2568,7 @@ subroutine vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
     implicit none
     TYPE(mic_param_xscale),  INTENT(INOUT)   :: micpxdef
     integer :: bgcopt,jmodel
-    real*8, dimension(16)                    :: xopt
+    real(8), dimension(16)                    :: xopt
     real(r_2), dimension(17)                 :: xrootcable
     real(r_2), dimension(18)                 :: xrootorchidee
     data xrootcable/1.43,0.94,1.43,1.04,0.77,0.85,0.62,1.77,0.94,0.94,1.43,0.94,1.04,0.53,1.00,1.00,1.00/
@@ -3529,8 +3529,8 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     TYPE(mic_cpool),     INTENT(INOUT) :: miccpool
     TYPE(mic_input),     INTENT(IN)    :: micinput
     integer :: nx,isoc14,bgcopt
-    real*8  :: totcost
-    real*8, dimension(16)              :: xopt
+    real(8)  :: totcost
+    real(8), dimension(16)              :: xopt
 
     ! cost function
     real(r_2), dimension(:), allocatable           :: xcost,xobs,xobsp,xobsm
@@ -3646,8 +3646,8 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     TYPE(mic_cpool),     INTENT(INOUT) :: miccpool
     TYPE(mic_input),     INTENT(IN)    :: micinput
     integer :: nx,bgcopt
-    real*8  :: totcost
-    real*8, dimension(16)              :: xopt
+    real(8)  :: totcost
+    real(8), dimension(16)              :: xopt
 
     ! cost function
     real(r_2), dimension(:), allocatable        :: xcost,xobs,xobsp,xobsm
@@ -3753,8 +3753,8 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     TYPE(mic_cpool),     INTENT(INOUT) :: miccpool
     TYPE(mic_input),     INTENT(IN)    :: micinput
     integer :: nx,isoc14,bgcopt
-    real*8  :: totcost
-    real*8, dimension(16)              :: xopt
+    real(8)  :: totcost
+    real(8), dimension(16)              :: xopt
     ! cost function
     real(r_2), dimension(:),   allocatable        :: xcost
     real(r_2), dimension(:,:), allocatable        :: xobs, xmod
@@ -3843,8 +3843,8 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     TYPE(mic_global_input), INTENT(IN)    :: micglobal
 
     integer :: nx,bgcopt
-    real*8  :: totcost
-    real*8, dimension(16)              :: xopt
+    real(8)  :: totcost
+    real(8), dimension(16)              :: xopt
     ! cost function
     real(r_2), dimension(:),   allocatable        :: xcost
     real(r_2), dimension(:,:), allocatable        :: xobs, xmod

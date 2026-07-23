@@ -3,12 +3,12 @@
  ! read the parameter numbers from the "params1_hwsd2_${case}.txt', and parameter values from "${case}/scein_${opt}.txt
  ! and write out the values of parameters into the parameter files for optimization or initial values
  implicit none
- real*8,  dimension(14)   :: xparam
- real*8,  dimension(6)    :: param
- real*8,  dimension(3)    :: y
+ real(8),  dimension(14)   :: xparam
+ real(8),  dimension(6)    :: param
+ real(8),  dimension(3)    :: y
  integer, dimension(6)    :: nparam
  integer :: n,nx,ny
- real*8   :: cost
+ real(8)   :: cost
  character(len=135) :: chdata
  real :: y0,ymin,ymax,y1,y2,y3
  character :: data*30, data1*30,data2*20
