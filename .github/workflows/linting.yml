@@ -60,6 +60,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m venv ../lint_venv
           . ../lint_venv/bin/activate
+          pip install -r requirements-dev.txt
           sudo apt install shellcheck
 
       # Apply Shell linter, shellcheck
