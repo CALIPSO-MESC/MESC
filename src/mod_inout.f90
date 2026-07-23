@@ -296,7 +296,7 @@ contains
     print *, 'patch filename', fpatch
     select case (jmodel)
 
-      case(1)
+    case (1)
       allocate(xfield3(nlon,nlat,17))
 
       ok = NF90_OPEN(fpatch,0,ncid1)
@@ -318,7 +318,7 @@ contains
 
       deallocate(xfield3)
 
-     case(2)
+    case (2)
        allocate(xfield4(nlon,nlat,19,1))
        ok = NF90_OPEN(fpatch,0,ncid1)
        IF (ok /= NF90_NOERR) CALL nc_abort(ok,'Error opening file'//fpatch)
@@ -337,6 +337,10 @@ contains
        enddo
        enddo
      deallocate(xfield4)
+
+     case default
+     write(6,"(a,i0,a)") "ERROR getpatch_global: Invalid model '", jmodel, "'"
+     stop 999
 
     end select
 
