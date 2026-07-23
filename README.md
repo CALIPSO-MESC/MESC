@@ -94,9 +94,9 @@ This script automatically:
 	1.	Loads the required compiler and libraries
 	2.	Creates an out-of-source build directory
 	3.	Configures and builds the model
-	4.	Copies the executable to **SEC/build/** or **SEC/test/**
+	4.	Copies the executable to **build/** or **test/**
 
-The final executable is located at: **SEC/build/main** or **SEC/test/main**
+The final executable is located at: **build/main** or **test/main**
 
 Manual build (for development)
 ```bash
