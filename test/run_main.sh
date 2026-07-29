@@ -10,6 +10,8 @@ module load oneapi23u1 netcdf_intel
 # module unload netcdf
 # module load netcdf/4.8.1-intel20
 
+set -e
+
 # --------------------------------------------------
 # Set environment variables
 # --------------------------------------------------
