@@ -42,18 +42,18 @@ for i in 0 1; do
   # --------------------------------------------------
   # Copy parameter files
   # --------------------------------------------------
-  cp ./input/case_${run}.txt case.txt
-  cp ./input/params1_${run}_${case}.txt params1.txt
-  cp ./input/params_val_${run}_${case}.txt params_val.txt
+  cp "./input/case_${run}.txt" case.txt
+  cp "./input/params1_${run}_${case}.txt" params1.txt
+  cp "./input/params_val_${run}_${case}.txt" params_val.txt
 
   # --------------------------------------------------
   # Run the test case
   # --------------------------------------------------
-  ./main >output/outval_${case}_${run}.txt
-  mv fort.91 output/valsoc_91_${case}_${run}.txt
-  mv fort.92 output/valsoc_92_${case}_${run}.txt
-  diff benchmark/valsoc_91_${case}_${run}.txt output/valsoc_91_${case}_${run}.txt >output/diff_valsoc_91_${case}_${run}.txt
-  diff benchmark/valsoc_92_${case}_${run}.txt output/valsoc_92_${case}_${run}.txt >output/diff_valsoc_92_${case}_${run}.txt
+  ./main >"output/outval_${case}_${run}.txt"
+  mv fort.91 "output/valsoc_91_${case}_${run}.txt"
+  mv fort.92 "output/valsoc_92_${case}_${run}.txt"
+  diff "benchmark/valsoc_91_${case}_${run}.txt" "output/valsoc_91_${case}_${run}.txt" >"output/diff_valsoc_91_${case}_${run}.txt"
+  diff "benchmark/valsoc_92_${case}_${run}.txt" "output/valsoc_92_${case}_${run}.txt" >"output/diff_valsoc_92_${case}_${run}.txt"
 done
 
 # --------------------------------------------------
@@ -64,7 +64,7 @@ for i in {0..1}; do
   run="${runs[${i}]}"
   pass=1
   for id in 91 92; do
-    if [ "$(cat output/diff_valsoc_${id}_${case}_${run}.txt)" ]; then
+    if [ "$(cat "output/diff_valsoc_${id}_${case}_${run}.txt")" ]; then
       pass=0
       break
     fi
