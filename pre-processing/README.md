@@ -1,8 +1,8 @@
-# Pre-processing for SEC
+# Pre-processing for MESC
 Provider: Xinyu Zou (zouxinyu@igsnrr.ac.cn)
 Date: 2026.05
 
-These scripts are primarily used for processing input data for the SEC model. The SEC model input data include output data from cable and ORCHIDEE, SOC data from HWSD v2, pH data from soilgrids, and iron and aluminum oxide data from ren-gcb2024. These data are eventually reorganized into time-varying and time-invariant datasets. The main processing steps include data format conversion (tif to netcdf), spatial resolution resampling, multi-year averaging, soil depth-weighted conversion based on HWSD soil depth, variable unit conversion, water potential calculation, data integration (merging multiple variables from different sources into a single netcdf file), and value filtering (e.g., PFT frac > 0.5).
+These scripts are primarily used for processing input data for the MESC model. The MESC model input data include output data from cable and ORCHIDEE, SOC data from HWSD v2, pH data from soilgrids, and iron and aluminum oxide data from ren-gcb2024. These data are eventually reorganized into time-varying and time-invariant datasets. The main processing steps include data format conversion (tif to netcdf), spatial resolution resampling, multi-year averaging, soil depth-weighted conversion based on HWSD soil depth, variable unit conversion, water potential calculation, data integration (merging multiple variables from different sources into a single netcdf file), and value filtering (e.g., PFT frac > 0.5).
 
 Most of the processing is performed using Python scripts, while data format conversion and spatial resolution resampling are performed using GDAL commands. Some variable merging tasks are completed using CDO and NCO commands.
 The two folders, cable and ORCHIDEE, correspond to the data processing for each respective model.

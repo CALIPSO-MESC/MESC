@@ -26,4 +26,4 @@ cmake .. -DCMAKE_Fortran_COMPILER=ifort
 cmake --build . -j
 
 echo "Build finished."
-echo "Executable is available in: SEC/test/main or SEC/build"
+echo "Executable is available in: test/ or build/"
