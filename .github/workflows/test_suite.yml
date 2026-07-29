@@ -70,9 +70,24 @@ jobs:
           source /opt/intel/oneapi/setvars.sh
           printenv >> ${GITHUB_ENV}
 
-      - name: Install NetCDF
+      - name: Install NetCDF C library
         run: |
-          sudo apt install netcdf-bin libnetcdff-dev
+          sudo apt-get install -y libnetcdf-dev netcdf-bin
+
+      - name: Build NetCDF Fortran with Intel compiler
+        run: |
+          NFVERSION=4.6.1
+          wget -q "https://github.com/Unidata/netcdf-fortran/archive/refs/tags/v${NFVERSION}.tar.gz" \
+            -O /tmp/netcdf-fortran.tar.gz
+          tar xf /tmp/netcdf-fortran.tar.gz -C /tmp
+          cmake -S /tmp/netcdf-fortran-${NFVERSION} \
+                -B /tmp/netcdf-fortran-build \
+                -DCMAKE_Fortran_COMPILER="${{ matrix.FC }}" \
+                -DCMAKE_C_COMPILER=gcc \
+                -DCMAKE_INSTALL_PREFIX=/opt/netcdf-fortran
+          cmake --build /tmp/netcdf-fortran-build -j$(nproc)
+          sudo cmake --install /tmp/netcdf-fortran-build
+          echo "/opt/netcdf-fortran/bin" >> "${GITHUB_PATH}"
 
       - name: Build MESC
         env:
