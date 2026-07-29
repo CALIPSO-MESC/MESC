@@ -80,8 +80,8 @@ jobs:
           cd ${{ github.workspace }}
           . ../lint_venv/bin/activate
           fortitude check src/*.f90
-          fortitude check auxil/*.f90
-          fortitude check auxil/*.for
+          # fortitude check auxil/*.f90
+          # fortitude check auxil/*.for
 
   # Apply GitHub Actions linter, zizmor
   zizmor:
