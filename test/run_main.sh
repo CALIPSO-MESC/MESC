@@ -51,7 +51,7 @@ for i in 0 1; do
   # --------------------------------------------------
   cp ./input/mesc_${run}_${case}.nml mesc.nml
   cp ./input/parameters_${run}_${case}.txt parameters.txt
-  cp ./input/params_val_${run}_${case}.txt params_val.txt
+  cp ./input/params_val_${run}_${case}.nml params_val.nml
 
   # --------------------------------------------------
   # Run the test case
@@ -100,4 +100,5 @@ for i in {0..1}; do
   fi
 done
 rm -f output/diff_*.txt
+rm -f *.nml
 echo "===== Job finished: $(date) ====="
