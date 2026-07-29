@@ -84,7 +84,8 @@ jobs:
                 -B /tmp/netcdf-fortran-build \
                 -DCMAKE_Fortran_COMPILER="${{ matrix.FC }}" \
                 -DCMAKE_C_COMPILER=gcc \
-                -DCMAKE_INSTALL_PREFIX=/opt/netcdf-fortran
+                -DCMAKE_INSTALL_PREFIX=/opt/netcdf-fortran \
+                -DBUILD_SHARED_LIBS=OFF
           cmake --build /tmp/netcdf-fortran-build -j$(nproc)
           sudo cmake --install /tmp/netcdf-fortran-build
           echo "/opt/netcdf-fortran/bin" >> "${GITHUB_PATH}"
