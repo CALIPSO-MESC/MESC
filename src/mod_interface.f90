@@ -807,7 +807,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
 !$OMP kinetics,isoc14,nyeqpool,bgcopt,ndelt,zse,mp,ms,stations_used) &
 !$OMP PRIVATE (np,timex,delty,ns,ip,station_index,&
 !$OMP xpool0,xpool1,fluxsoc,diffsocxx,ypooli,ypoole,cpool0,cpool1,totcinput,cfluxa,ny,i,year) &
-!$OMP FIRSTPRIVATE (ntime,station_count)
+!$OMP FIRSTPRIVATE (station_count)
 !!$OMP REDUCTION (+:data_count,data_used)  &,
 !$OMP DO
 

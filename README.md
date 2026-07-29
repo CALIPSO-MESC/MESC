@@ -86,7 +86,6 @@ The exact modules used will be specific to the HPC system.
 Recommended: One-command build
 
 ```bash
-chmod +x build.sh
 ./build.sh
 ```
 
@@ -116,7 +115,6 @@ Input files (e.g., parameter files or netCDF datasets) should be placed in the s
 
 ```bash
 cd test
-chmod +x run_main.sh
 ./run_main.sh
 ```
 
