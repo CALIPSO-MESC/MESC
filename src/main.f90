@@ -14,11 +14,11 @@ program testvmic
     integer :: nx                    !! number of optimization parameters
 
     nx=6
-    open(20,file='params_val.txt')
+    open(20,file="params_val.txt")
     read(20,*) xcost,xparam(1:nx)
     close(20)
 
     fa = functn(nx,xparam)
-    print *, 'cost12', xcost,xparam(1:nx),fa
+    print *, "cost12", xcost,xparam(1:nx),fa
 
 end program testvmic
