@@ -97,7 +97,7 @@ jobs:
           cmake -B build -DCMAKE_Fortran_COMPILER="${{ matrix.FC }}"
           cmake --build build -j
 
-      - name: Run Fortran unit tests
+      - name: Run test suite
         run: |
           cd test
           ./run_main.sh

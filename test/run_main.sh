@@ -10,6 +10,7 @@ module load oneapi23u1 netcdf_intel
 # module unload netcdf
 # module load netcdf/4.8.1-intel20
 
+# Ensure test suite fails on hitting an error
 set -e
 
 # --------------------------------------------------
