@@ -82,7 +82,6 @@ module load netcdf_intel
 Recommended: One-command build
 
 ```bash
-chmod +x build.sh
 ./build.sh
 ```
 
@@ -111,8 +110,7 @@ cmake --build . -j
 Input files (e.g., parameter files or netCDF datasets) should be placed in the same directory to ensure consistent input–output management.
 
 ```bash
-cd /SEC/test
-chmod +x run_main.sh
+cd test
 ./run_main.sh
 ```
 
