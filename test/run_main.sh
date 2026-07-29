@@ -25,7 +25,7 @@ rm -f fort.*
 rm -f val*.txt
 rm -f params1.txt
 rm -f params_val.txt
-rm -f case.txt
+rm -f case.nml
 
 # --------------------------------------------------
 # Configure test cases to be run
