@@ -71,10 +71,9 @@ for i in {0..1}; do
   done
   if [ ${pass} ]; then
     echo "PASS: test case '${case}', run '${run}'"
-    rm "output/diff_*.txt"
   else
     echo "FAIL: test case '${case}', run '${run}'"
   fi
 done
-
+rm output/diff_*.txt
 echo "===== Job finished: $(date) ====="
