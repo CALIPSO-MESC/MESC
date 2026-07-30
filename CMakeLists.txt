@@ -71,7 +71,7 @@ if(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
 endif()
 
 # ------------------------------------------------------------
-# 6) POST-BUILD: copy main executable to test
+# 6) POST-BUILD: copy `main` executable to test directory
 # ------------------------------------------------------------
 add_custom_command(TARGET main POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
