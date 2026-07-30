@@ -1,11 +1,11 @@
-# SEC
+# MESC
 *A Fortran-based microbial-explicit soil carbon cycle model.*
 
 ---
 
 ## 1. Overview
 
-The **SEC model** is a process-oriented soil carbon model that explicitly represents microbial decomposition processes (using Michaelis-Menten kinetics) implemented in **Fortran**, designed to simulate soil and ecosystem carbon dynamics and their controlling mechanisms.
+The **MESC model** is a process-oriented soil carbon model that explicitly represents microbial decomposition processes (using Michaelis-Menten kinetics) implemented in **Fortran**, designed to simulate soil and ecosystem carbon dynamics and their controlling mechanisms.
 
 The model adopts a **modular architecture**, clearly separating core process representation, input/output handling, and model control logic.  
 It makes use of **netCDF (C + Fortran)**, enabling efficient handling of structured scientific data and deployment on **high-performance computing (HPC) systems**.
@@ -14,7 +14,7 @@ It makes use of **netCDF (C + Fortran)**, enabling efficient handling of structu
 
 ## 2. Code Structure and Design
 ```text
-SEC/
+MESC/
 ├── src/                   # Core Fortran source code
 │   ├── main.f90           # main program or test program
 │   ├── mod_calcost.f90    # compute cost for 14C, POC/MAOC fractions, HWSD SOC profile ...
@@ -62,7 +62,7 @@ SEC/
 
 ## 3. Software Requirements
 
-The SEC model has been developed and tested in the following software environments:
+The MESC model has been developed and tested in the following software environments:
 
 - **Fortran compiler**:
    - Legacy Intel compiler (`ifort`) version **2021.9.0**
@@ -90,12 +90,13 @@ Recommended: One-command build
 ```
 
 This script automatically:
-	1.	Loads the required compiler and libraries
-	2.	Creates an out-of-source build directory
-	3.	Configures and builds the model
-	4.	Copies the executable to **build/** or **test/**
 
-The final executable is located at: **build/main** or **test/main**
+1. Loads the required compiler and libraries
+2. Creates an out-of-source build directory
+3. Configures and builds the model
+4. Copies the executable to `build/` or `test/`
+
+The final executable is located at: `build/main` or `test/main`
 
 Manual build (for development)
 ```bash
