@@ -83,6 +83,24 @@ The exact modules used will be specific to the HPC system.
 
 ## 4. Building the Model
 
+### fpm
+
+MESC can also be built using the
+[Fortran Package Manager (fpm)](https://fpm.fortran-lang.org). First,
+[install](https://fpm.fortran-lang.org/install/index.html) fpm and then call
+```sh
+fpm install \
+  --compiler <FC> \
+  --flag "$(nf-config --fflags)" \
+  --c-flag "$(nc-config --cflags)" \
+  --link-flag "$(nf-config --flibs) $(nc-config --libs)" \
+  --prefix "$(pwd)" \
+  --bindir build
+```
+where `<FC>` is your choice of compiler.
+
+### CMake
+
 Recommended: One-command build
 
 ```bash

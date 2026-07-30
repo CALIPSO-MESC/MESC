@@ -1,0 +1,25 @@
+name = "MESC"
+version = "0.1.0"
+license = "LICENSE"
+author = "CALIPSO-MESC Development Team"
+copyright = "Copyright 2026, CALIPSO-MESC Development Team"
+
+[build]
+auto-executables = true
+auto-tests = false
+auto-examples = false
+# link = ["netcdf", "netcdff"]
+
+[dependencies]
+netcdf-interfaces = { git = "https://github.com/LKedward/netcdf-interfaces.git" }
+
+[install]
+library = false
+
+[[executable]]
+name = "main"
+source-dir = "src"
+link = ["netcdf", "netcdff"]
+
+# [executable.dependencies]
+# netcdf-interfaces = { git = "https://github.com/LKedward/netcdf-interfaces.git" }
