@@ -77,5 +77,5 @@ add_custom_command(TARGET main POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
           $<TARGET_FILE:main>
           ${CMAKE_SOURCE_DIR}/test/main
-  COMMENT "Copying main to test"
+  COMMENT "Copying `main` executable to test directory"
 )
