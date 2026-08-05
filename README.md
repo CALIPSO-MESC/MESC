@@ -1,4 +1,5 @@
 # MESC
+
 *A Fortran-based microbial-explicit soil carbon cycle model.*
 
 ---
@@ -13,49 +14,49 @@ It makes use of **netCDF (C + Fortran)**, enabling efficient handling of structu
 ---
 
 ## 2. Code Structure and Design
+
 ```text
 MESC/
 ├── src/                   # Core Fortran source code
-│   ├── main.f90           # main program or test program
-│   ├── mod_calcost.f90    # compute cost for 14C, POC/MAOC fractions, HWSD SOC profile ...
-│   ├── mod_constants.f90  # all constants
-│   ├── mod_functions.f90  # different functions for 14C, POC/MAOC fractions, HWSD SOC profile ...
-│   ├── functn_wrapper.f90 # 
-│   ├── mod_inout.f90      # input or output (netcdf files)
-│   ├── mod_interface.f90  # 
-│   ├── mod_model_core.f90 # the core routines for the mesc model
-│   └── mod_variables.f90  # all variables
+│   ├── main.f90           # Main program for running MESC as an executable
+│   ├── mod_calcost.f90    # Module for computing cost functions
+│   ├── mod_constants.f90  # Module defining all constants
+│   ├── mod_functions.f90  # Module defining orchestrator functions
+│   ├── mod_inout.f90      # Module for handling input and output
+│   ├── mod_interface.f90  # Module containing high-level driver interface
+│   ├── mod_model_core.f90 # Module containing core model physics
+│   └── mod_variables.f90  # Module defining all model variables
 │
-├── auxil/                 # 
-│   └── to do              #
+├── auxil/                 # Auxiliary code - TODO
 │
 ├── cmake/                 # CMake helper modules
+│   ├── FindNetCDF.cmake
 │   └── FindNetCDFFortran.cmake
 │
 ├── test/                  # Test and example runs
 │   ├── benchmark          # 
-│   ├── input              # input data
-│   ├── output             # ouput
+│   ├── input              # Input data for the tests goes here
+│   ├── output             # Output data from the tests goes here
 │   ├── run_main.sh        # One-command run test script
-│   └── readme      
+│   └── README.md          # Documentation for test suite
 │
-├── pre-processing/        # 
-│   ├── cable              # output data of CABLE
-│   ├── ORCHIDEE           # output data of ORCHIDEE
+├── pre-processing/        # Pre-processing code
+│   ├── cable              # Code for handling outputs from CABLE model
+│   ├── ORCHIDEE           # Code for handling outputs from ORCHIDEE model
 │   ├── available_USDA_SoilSuborder_mask.py # 
 │   ├── convert_scale.bash                  # 
 │   ├── resample_USDA_SoilSuborder.py       # 
-│   └── readme.md      
+│   └── README.md          # Documentation for pre-processing code
 │
-├── pre-processing/        # 
-│   ├── ...                # 
-│   ├── processing.py      # 
-│   └── readme.md      
+├── post-processing/       # Post-processing code - TODO
 │
 ├── CMakeLists.txt         # Build configuration
 ├── build.sh               # One-command build script
-├── README.md
-└── LICENSE
+├── README.md              # High-level documentation for repository
+├── mesc.md                # Configuration for FORD API documentation
+├── fortitude.toml         # Configuration for Fortitude Fortran linter
+├── requirements-dev.txt   # Python developer dependencies
+└── LICENSE                # MESC license
 ```
 
 ---
