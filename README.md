@@ -79,6 +79,17 @@ module load netcdf_intel
 
 The exact modules used will be specific to the HPC system.
 
+### Python requirements
+
+Python is used in MESC's pre-processing steps. If you intend to run scripts in
+the [pre-processing](pre-processing) subdirectory then you will need to install
+the relevant Python modules. To do this, create and activate a
+[Python virtual environment](https://www.datasciencebase.com/fundamentals/python/environment-setup/)
+and install via
+```sh
+pip install -r requirements.txt
+```
+
 ---
 
 ## 4. Building the Model
