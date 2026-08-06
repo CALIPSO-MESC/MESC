@@ -39,9 +39,8 @@ module mesc_interface_module
   use mic_variable, only : mic_param_xscale, mic_param_default, mic_parameter, &
                            mic_input, mic_npool, mic_cpool, mic_output, mic_global_input
   use mesc_inout_module, only: vmic_restart_read ! , vmic_restart_write, vmic_output_write
-   use mesc_model_module, only: rk4modelx, tridag, bioturb, bgc_fractions, &
-                               mget, turnovert, desorpt, vmaxt, &
-                               kmt
+  use mesc_model_module, only: rk4modelx, tridag, bioturb, bgc_fractions, &
+                               mget, turnovert, desorpt, vmaxt, kmt
   implicit none
 
   ! All module members are public by default
