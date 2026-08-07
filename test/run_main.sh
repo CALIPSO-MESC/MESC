@@ -49,7 +49,10 @@ for i in 0 1; do
   # --------------------------------------------------
   # Run the test case
   # --------------------------------------------------
+  START="$(date +%s)"
   ./main >output/outval_${case}_${run}.txt
+  DURATION=$(($(date +%s) - ${START}))
+  echo "Time taken: ${DURATION} seconds"
   mv fort.91 output/valsoc_91_${case}_${run}.txt
   mv fort.92 output/valsoc_92_${case}_${run}.txt
   diff benchmark/valsoc_91_${case}_${run}.txt output/valsoc_91_${case}_${run}.txt >output/diff_valsoc_91_${case}_${run}.txt
