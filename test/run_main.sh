@@ -5,10 +5,10 @@
 # Load environment (users can edit if needed)
 # --------------------------------------------------
 module purge
-module load oneapi23u1 netcdf_intel
-# module load intel-fc/2020.4.304
-# module unload netcdf
-# module load netcdf/4.8.1-intel20
+#module load oneapi23u1 netcdf_intel
+ module load intel-fc/2020.4.304
+ module unload netcdf
+ module load netcdf/4.8.1-intel20
 
 # --------------------------------------------------
 # Set environment variables
@@ -42,8 +42,8 @@ for i in 0 1; do
   # --------------------------------------------------
   # Copy parameter files
   # --------------------------------------------------
-  cp ./input/case_${run}.txt case.txt
-  cp ./input/params1_${run}_${case}.txt params1.txt
+  cp ./input/mesc_${run}_${case}.nml mesc.nml
+  cp ./input/parameters_${run}_${case}.txt parameters.txt
   cp ./input/params_val_${run}_${case}.txt params_val.txt
 
   # --------------------------------------------------
