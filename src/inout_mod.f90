@@ -1,14 +1,15 @@
-module mesc_inout_module
-  use precision_module, only : dp, sp
+module mesc_inout_mod
+  use mesc_precision_mod, only : dp, sp
   use netcdf, only : nf90_clobber, nf90_close, nf90_create, nf90_def_dim, &
                      nf90_def_var, nf90_enddef, nf90_float, nf90_get_var, &
                      nf90_global, nf90_inq_dimid, nf90_inq_varid, &
                      nf90_inquire_dimension, nf90_max_name, nf90_noerr, &
                      nf90_nowrite, nf90_open, nf90_put_att, nf90_put_var, &
                      nf90_redef, nf90_strerror
-  use mic_constant, only : mp, ms, mcpool, nlat, nlon, ntime, mpft, mbgc
-  use mic_variable, only : mic_input, mic_parameter, mic_cpool, mic_npool, &
-                           mic_global_input, mic_output, mic_param_xscale
+  use mesc_constant_mod, only : mp, ms, mcpool, nlat, nlon, ntime, mpft, mbgc
+  use mesc_variable_mod, only : mic_input, mic_parameter, mic_cpool, &
+                                mic_npool, mic_global_input, mic_output, &
+                                mic_param_xscale
   implicit none
 
   ! All module members are public by default
@@ -247,7 +248,7 @@ contains
   !! output: write the parameter values to "micpxdef"
   !!
   subroutine getparam_global(fglobalparam,jmodel,micpxdef)
-    use mic_constant, only : xrootcable, xrootorchidee
+    use mesc_constant_mod, only : xrootcable, xrootorchidee
 
     character(len=140),     intent(in)    :: fglobalparam
     integer,                intent(in)    :: jmodel
@@ -369,7 +370,7 @@ contains
   ! read in the following data
   ! real(sp), dim(lon,lat) :: Ald,Alo,Fed,Feo
   ! real(dp), dimension(lon,lat): cell_area
-  use mic_constant, only : cnleaf1, cnroot1, cnwood1, ligleaf1, ligroot1, ligwood1
+  use mesc_constant_mod, only : cnleaf1, cnroot1, cnwood1, ligleaf1, ligroot1, ligwood1
 
   character(len=140),     INTENT(IN)    :: fglobal(10)
   TYPE(mic_global_input), INTENT(INOUT) :: micglobal
@@ -793,7 +794,7 @@ contains
    ! real(dp), dimension(lon,lat): cell_area
    ! use soil-grid or deafult values of soil silt, sand and clay fraction, soil pH and bulk density
 
-  use mic_constant, only : cnleaf2, cnroot2, cnwood2, ligleaf2, ligroot2, ligwood2
+  use mesc_constant_mod, only : cnleaf2, cnroot2, cnwood2, ligleaf2, ligroot2, ligwood2
 
   character(len=140),     INTENT(IN)    :: fglobal(10)
   TYPE(mic_global_input), INTENT(INOUT) :: micglobal
@@ -1488,7 +1489,7 @@ end subroutine lonlat2mpx4b
   !! "fcluster" is not read in yet
   !!
   subroutine getdata_c14(frac14c,f14c,filecluster,micinput,micparam,micnpool,zse)
-    use mic_constant, only : delt
+    use mesc_constant_mod, only : delt
 
     character(len=140),  INTENT(IN)    :: frac14c,f14c(5)
     character(len=140),  INTENT(IN)    :: filecluster ! cluster filename (not used)
@@ -1799,7 +1800,7 @@ end subroutine lonlat2mpx4b
   !> read in data for model run to calculate POC and MAOC fractions
   !!
   subroutine getdata_frc(cfraction,jglobal,bgcopt,micinput,micparam,micnpool,micglobal,zse)
-    use mic_constant, only : delt
+    use mesc_constant_mod, only : delt
     character(len=140),     INTENT(IN)    :: Cfraction
     integer,                INTENT(IN)    :: jglobal,bgcopt
     TYPE(mic_parameter),    INTENT(INout) :: micparam
@@ -2212,8 +2213,9 @@ end subroutine lonlat2mpx4b
    end subroutine  getdata_hwsd_dim
 
   subroutine getdata_hwsd(fhwsdsoc,fmodis,fanoc,jglobal,bgcopt,jopt,jmodel,micparam,micglobal,zse)
-    use mic_constant, only : cnleaf1, cnroot1, cnwood1, ligleaf1, ligroot1, ligwood1, &
-                             cnleaf2, cnroot2, cnwood2, ligleaf2, ligroot2, ligwood2
+    use mesc_constant_mod, only : cnleaf1, cnroot1, cnwood1, ligleaf1, &
+                                  ligroot1, ligwood1, cnleaf2, cnroot2, &
+                                  cnwood2, ligleaf2, ligroot2, ligwood2
 
     !use micglobal%area (area fraction) as a switch to run for selected sites during parameter optimization (jopt==0)
     !model only runs for those sites with micglobal%area(np) > 0.0
@@ -2830,5 +2832,4 @@ end subroutine screenout
 
 end subroutine getdata_aust
 
-end module mesc_inout_module
-
+end module mesc_inout_mod

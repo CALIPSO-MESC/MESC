@@ -28,15 +28,16 @@ message(STATUS "NetCDFFortran libs   : ${NetCDFFortran_LIBRARIES}")
 #   (name matches your previous -o main)
 # ------------------------------------------------------------
 add_executable(main
-  src/mod_precision.f90
-  src/mod_constants.f90
-  src/mod_variables.f90
-  src/mod_model_core.f90
-  src/mod_inout.f90
-  src/mod_interface.f90
-  src/mod_calcost.f90
-  src/mod_functions.f90
+  src/calcost_mod.f90
+  src/constant_mod.f90
+  src/function_mod.f90
+  src/inout_mod.f90
+  src/interface_mod.f90
   src/main.f90
+  src/model_mod.f90
+  src/namelist_mod.f90
+  src/precision_mod.f90
+  src/variable_mod.f90
 )
 
 # Put .mod files into build/mod

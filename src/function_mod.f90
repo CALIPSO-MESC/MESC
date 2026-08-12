@@ -1,166 +1,32 @@
-module mesc_namelist
-    use precision_module, only: dp
-    use, intrinsic :: iso_fortran_env, only : error_unit, output_unit
-    implicit none
-    private
-
-    integer, parameter :: path_len = 140
-
-    type, public :: mesc_config
-        integer :: runcase = 0
-        integer :: jglobal = 0
-        integer :: kinetics = 3
-        integer :: bgcopt = 1
-        integer :: jopt = 0
-        integer :: jrestart = 0
-        integer :: jmodel = 1
-        integer :: ifsoc14 = 0
-        character(len=path_len) :: frestart_in = ''
-        character(len=path_len) :: frestart_out = ''
-        character(len=path_len) :: foutput = ''
-        character(len=path_len) :: cfraction = ''
-        character(len=path_len) :: frac14c = ''
-        character(len=path_len) :: f14c(5) = ''
-        character(len=path_len) :: filecluster = ''
-        character(len=path_len) :: fhwsdsoc = ''
-        character(len=path_len) :: faustsoc = ''
-        character(len=path_len) :: fmodis = ''
-        character(len=path_len) :: fanoc = ''
-        character(len=path_len) :: fglobal(7) = ''
-        real(dp) :: xopt(16) = 1.0_dp
-        integer  :: nxopt(16) = [1, 2, 3, 4, 5, 6, 7, 8, &
-                                9, 10, 11, 12, 13, 14, 15, 16]
-        real(dp) :: xparam(16)
-    end type mesc_config
-
-    public :: read_mesc_namelist, print_mesc_config
-
-contains
-
-    subroutine read_mesc_namelist(filename, config)
-        character(len=*), intent(in) :: filename
-        type(mesc_config), intent(out) :: config
-
-        integer :: nml_unit, ios
-        character(len=512) :: iomsg
-        integer :: runcase, jglobal, kinetics, bgcopt, jopt
-        integer :: jrestart, jmodel, ifsoc14
-        character(len=path_len) :: frestart_in, frestart_out, foutput
-        character(len=path_len) :: cfraction, frac14c, f14c(5), filecluster
-        character(len=path_len) :: fhwsdsoc, faustsoc
-        character(len=path_len) :: fmodis, fanoc, fglobal(7)
-        real(dp) :: xopt(16), xparam(16)
-        integer :: nxopt(16)
-
-        namelist /mesc/ runcase, jglobal, kinetics, bgcopt, jopt, &
-            jrestart, jmodel, ifsoc14, frestart_in, frestart_out, &
-            foutput, cfraction, frac14c, f14c, filecluster, &
-            fhwsdsoc, faustsoc, fmodis, fanoc, fglobal, xopt, nxopt, xparam
-
-        ! Copy defaults into the local variables read by the namelist.
-        runcase = config%runcase
-        jglobal = config%jglobal
-        kinetics = config%kinetics
-        bgcopt = config%bgcopt
-        jopt = config%jopt
-        jrestart = config%jrestart
-        jmodel = config%jmodel
-        ifsoc14 = config%ifsoc14
-        frestart_in = config%frestart_in
-        frestart_out = config%frestart_out
-        foutput = config%foutput
-        cfraction = config%cfraction
-        frac14c = config%frac14c
-        f14c = config%f14c
-        filecluster = config%filecluster
-        fhwsdsoc = config%fhwsdsoc
-        faustsoc = config%faustsoc
-        fmodis = config%fmodis
-        fanoc = config%fanoc
-        fglobal = config%fglobal
-        xopt = config%xopt
-        nxopt = config%nxopt
-        xparam = config%xparam
-
-        open(newunit=nml_unit, file=trim(filename), status='old', &
-             action='read', iostat=ios, iomsg=iomsg)
-        if (ios /= 0) call fatal_error('Cannot open "' // trim(filename) // '": ' // trim(iomsg))
-
-        read(nml_unit, nml=mesc, iostat=ios, iomsg=iomsg)
-        close(nml_unit)
-        if (ios /= 0) call fatal_error('Cannot read &mesc from "' // &
-            trim(filename) // '": ' // trim(iomsg))
-
-        config%runcase = runcase
-        config%jglobal = jglobal
-        config%kinetics = kinetics
-        config%bgcopt = bgcopt
-        config%jopt = jopt
-        config%jrestart = jrestart
-        config%jmodel = jmodel
-        config%ifsoc14 = ifsoc14
-        config%frestart_in = frestart_in
-        config%frestart_out = frestart_out
-        config%foutput = foutput
-        config%cfraction = cfraction
-        config%frac14c = frac14c
-        config%f14c = f14c
-        config%filecluster = filecluster
-        config%fhwsdsoc = fhwsdsoc
-        config%faustsoc = faustsoc
-        config%fmodis = fmodis
-        config%fanoc = fanoc
-        config%fglobal = fglobal
-        config%xopt = xopt
-        config%nxopt = nxopt
-        config%xparam = xparam
-    end subroutine read_mesc_namelist
-
-    subroutine print_mesc_config(config)
-        type(mesc_config), intent(in) :: config
-        write(output_unit, '(a,i0)') 'runcase     = ', config%runcase
-        write(output_unit, '(a,i0)') 'jglobal     = ', config%jglobal
-        write(output_unit, '(a,i0)') 'kinetics    = ', config%kinetics
-        write(output_unit, '(a,i0)') 'bgcopt      = ', config%bgcopt
-        write(output_unit, '(a,i0)') 'jopt        = ', config%jopt
-        write(output_unit, '(a,i0)') 'jrestart    = ', config%jrestart
-        write(output_unit, '(a,i0)') 'jmodel      = ', config%jmodel
-        write(output_unit, '(a,i0)') 'ifsoc14     = ', config%ifsoc14
-        write(output_unit, '(a,a)')  'foutput     = ', trim(config%foutput)
-        write(output_unit, '(a,a)')  'fhwsdsoc    = ', trim(config%fhwsdsoc)
-        write(output_unit, '(a,a)')  'fanoc       = ', trim(config%fanoc)
-    end subroutine print_mesc_config
-
-    subroutine fatal_error(message)
-        character(len=*), intent(in) :: message
-        write(error_unit, '(a)') 'ERROR: ' // trim(message)
-        error stop 1
-    end subroutine fatal_error
-
-end module mesc_namelist
 !> Per-mode orchestrator functions for MESC calibration.
 !>
 !> Each function allocates arrays, ingests observed data, runs the soil
 !> carbon model via an appropriate driver, computes a cost against
 !> observations, and returns the scalar cost value.  The dispatcher
 !> [[functn]] reads `mesc.nml` and selects the configured run mode.
-module function_module
-  use precision_module, only: dp
-  use mesc_namelist, only: mesc_config, read_mesc_namelist
-  use mic_constant, only: mp, mpft, mbgc, ntime, nlon, nlat, ms
-  use mic_variable, only: mic_param_xscale, mic_param_default, mic_parameter, &
-                          mic_input, mic_global_input, mic_cpool, mic_npool, mic_output, &
-                          mic_allocate_parameter, mic_allocate_input, mic_allocate_output, &
-                          mic_allocate_cpool, mic_allocate_npool, &
-                          mic_deallocate_parameter, mic_deallocate_input, mic_deallocate_output, &
-                          mic_deallocate_cpool, mic_deallocate_npool
-  use mesc_inout_module, only: getdata_c14, getdata_frc_dim, getdata_frc, &
-                               getdata_hwsd_dim, getdata_hwsd, screenout, &
-                               getparam_global,getpatch_global, &
-                               getdata_global4_cable,getdata_global4_orchidee, getdata_aust_dim,getdata_aust
-  use mesc_interface_module, only: vmic_param_xscale, vmic_param_time, vmic_param_time_single, vmicsoil_c14, &
-                                   vmicsoil_frc1_cpu, vmicsoil_hwsd_cpu, vmicsoil_hwsd_gpu
-  use calcost_module, only: calcost_c14, calcost_frc1, calcost_hwsd3, calcost_global_hwsd, calcost_aust
+module mesc_function_mod
+  use mesc_precision_mod, only: dp
+  use mesc_namelist_mod, only: mesc_config, read_mesc_namelist
+  use mesc_constant_mod, only: mp, mpft, mbgc, ntime, nlon, nlat, ms
+  use mesc_variable_mod, only: mic_param_xscale, mic_param_default, &
+                               mic_parameter, mic_input, mic_global_input, &
+                               mic_cpool, mic_npool, mic_output, &
+                               mic_allocate_parameter, mic_allocate_input, &
+                               mic_allocate_output, mic_allocate_cpool, &
+                               mic_allocate_npool, mic_deallocate_parameter, &
+                               mic_deallocate_input, mic_deallocate_output, &
+                               mic_deallocate_cpool, mic_deallocate_npool
+  use mesc_inout_mod, only: getdata_c14, getdata_frc_dim, getdata_frc, &
+                            getdata_hwsd_dim, getdata_hwsd, screenout, &
+                            getparam_global,getpatch_global, &
+                            getdata_global4_cable,getdata_global4_orchidee, &
+                            getdata_aust_dim,getdata_aust
+  use mesc_interface_mod, only: vmic_param_xscale, vmic_param_time, &
+                                vmic_param_time_single, vmicsoil_c14, &
+                                vmicsoil_frc1_cpu, vmicsoil_hwsd_cpu, &
+                                vmicsoil_hwsd_gpu
+  use mesc_calcost_mod, only: calcost_c14, calcost_frc1, calcost_hwsd3, &
+                              calcost_global_hwsd, calcost_aust
   implicit none
 
   ! All module members are public by default
@@ -712,4 +578,4 @@ END function functn_global4
       deallocate(zse)
 END function functn_soc_aust
 
-end module function_module
+end module mesc_function_mod
