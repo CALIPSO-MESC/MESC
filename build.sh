@@ -1,6 +1,7 @@
 #!/bin/bash
 # Shell script for building MESC.
 
+# Ensure the build fails on hitting an error
 set -e
 
 # --------------------------------------------------
@@ -14,9 +15,6 @@ set -e
 # module load netcdf_intel # load netcdf library
 # ```
 # --------------------------------------------------
-
-# Ensure the build fails on hitting an error
-set -e
 
 # --------------------------------------------------
 # Setup build directory
