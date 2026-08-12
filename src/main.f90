@@ -10,11 +10,10 @@ program testvmic
 
     implicit none
 
-    real(dp) :: xparam(16)           !! optimization params
-    real(dp) :: xcost                !! target cost, computed cost
-    real(dp) :: fa                   !! computed cost
-    integer, parameter :: nx = 6     !! number of optimization parameters
-    namelist /params/ xcost, xparam  !! define the namelist
+    real(dp) :: xparam(16)       !! optimization params
+    real(dp) :: fa               !! computed cost
+    integer, parameter :: nx = 6 !! number of optimization parameters
+    namelist /params/ xparam     !! define the namelist
 
     ! Read from the namelist
     open(20, file="params_val.nml", status="old")
@@ -22,6 +21,6 @@ program testvmic
     close(20)
 
     fa = functn(nx, xparam)
-    print *, "cost12", xcost, xparam(1:nx), fa
+    print *, "cost12", xparam(1:nx), fa
 
 end program testvmic
