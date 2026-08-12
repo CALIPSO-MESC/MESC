@@ -12,11 +12,6 @@
 # module load netcdf_intel # load netcdf library
 # ```
 # --------------------------------------------------
-module purge
-module load oneapi23u1 netcdf_intel
-#module load intel-fc/2020.4.304
-#module unload netcdf
-#module load netcdf/4.8.1-intel20
 
 # --------------------------------------------------
 # Set environment variables
