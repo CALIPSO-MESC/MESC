@@ -3,9 +3,9 @@ name: Linting
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on pushes to the "main" branch, i.e., PR merges
+  # Triggers the workflow on pushes to the "master" branch, i.e., PR merges
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
 
   # Triggers the workflow on pushes to open pull requests with code changes
   pull_request:
