@@ -33,4 +33,4 @@ cmake .. -DCMAKE_Fortran_COMPILER=ifort
 cmake --build . -j
 
 echo "Build successful."
-echo "The $(main) executable is available in both test/ and build/"
+echo "The \$(main) executable is available in both test/ and build/"
