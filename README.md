@@ -144,6 +144,14 @@ and install via
 pip install ford
 ```
 
+Optionally, install `graphviz` to generate dependency graphs with FORD. The
+installation method will differ depending on your operating system. On Ubuntu,
+for example, run
+```sh
+sudo apt update
+sudo apt install graphviz
+```
+
 Once you have installed FORD, generate the API documentation with
 ```bash
 ford mesc.md
