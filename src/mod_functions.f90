@@ -17,7 +17,6 @@ module mesc_namelist
         character(len=path_len) :: frestart_in = ''
         character(len=path_len) :: frestart_out = ''
         character(len=path_len) :: foutput = ''
-        character(len=path_len) :: fparameter = ''
         character(len=path_len) :: cfraction = ''
         character(len=path_len) :: frac14c = ''
         character(len=path_len) :: f14c(5) = ''
@@ -47,7 +46,7 @@ contains
         logical :: jopt
         integer :: jrestart, jmodel, ifsoc14
         character(len=path_len) :: frestart_in, frestart_out, foutput
-        character(len=path_len) :: fparameter, cfraction, frac14c, f14c(5), filecluster
+        character(len=path_len) :: cfraction, frac14c, f14c(5), filecluster
         character(len=path_len) :: fhwsdsoc, faustsoc
         character(len=path_len) :: fmodis, fanoc, fglobal(7)
         real(real64) :: xopt(16)
@@ -55,7 +54,7 @@ contains
 
         namelist /mesc/ runcase, jglobal, kinetics, bgcopt, jopt, &
             jrestart, jmodel, ifsoc14, frestart_in, frestart_out, &
-            foutput, fparameter, cfraction, frac14c, f14c, filecluster, &
+            foutput, cfraction, frac14c, f14c, filecluster, &
             fhwsdsoc, faustsoc, fmodis, fanoc, fglobal, xopt, nxopt
 
         ! Copy defaults into the local variables read by the namelist.
@@ -70,7 +69,6 @@ contains
         frestart_in = config%frestart_in
         frestart_out = config%frestart_out
         foutput = config%foutput
-        fparameter = config%fparameter
         cfraction = config%cfraction
         frac14c = config%frac14c
         f14c = config%f14c
@@ -103,7 +101,6 @@ contains
         config%frestart_in = frestart_in
         config%frestart_out = frestart_out
         config%foutput = foutput
-        config%fparameter = fparameter
         config%cfraction = cfraction
         config%frac14c = frac14c
         config%f14c = f14c
@@ -128,7 +125,6 @@ contains
         write(output_unit, '(a,i0)') 'jmodel      = ', config%jmodel
         write(output_unit, '(a,i0)') 'ifsoc14     = ', config%ifsoc14
         write(output_unit, '(a,a)')  'foutput     = ', trim(config%foutput)
-        write(output_unit, '(a,a)')  'fparameter  = ', trim(config%fparameter)
         write(output_unit, '(a,a)')  'fhwsdsoc    = ', trim(config%fhwsdsoc)
         write(output_unit, '(a,a)')  'fanoc       = ', trim(config%fanoc)
     end subroutine print_mesc_config
@@ -246,7 +242,7 @@ module function_module
     integer :: ifsoc14,kinetics,bgcopt,nyeqpool,isoc14,jmodel
     integer :: jrestart,nparam
     character(len=140) :: frestart_in,frestart_out,foutput
-    character(len=140) :: frac14c,f14c(5),filecluster,fparameter
+    character(len=140) :: frac14c,f14c(5),filecluster
     real(dp), dimension(:), allocatable :: zse
 
       jglobal = config%jglobal
@@ -263,11 +259,6 @@ module function_module
       filecluster = config%filecluster
       xopt = config%xopt
       nxopt = config%nxopt
- 
-      open(1,file=config%fparameter)
-      read(1,*) xopt(1:14)
-      read(1,*) nxopt(1:nx)
-      close(1)
 
       if(jopt) then
          do nparam=1,nx
@@ -376,11 +367,6 @@ real(dp) function functn_frc1(nx,xparam16)
       xopt = config%xopt
       nxopt = config%nxopt
 
-      open(1,file=config%fparameter)
-      read(1,*) xopt(1:14)
-      read(1,*) nxopt(1:nx)
-      close(1)
-
       if(.not. jopt) then
          do nparam=1,nx
             if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
@@ -485,11 +471,6 @@ END function functn_frc1
       fanoc = config%fanoc
       xopt = config%xopt
       nxopt = config%nxopt
-      
-      open(1,file=config%fparameter)
-      read(1,*) xopt(1:14)
-      read(1,*) nxopt(1:nx)
-      close(1)      
       
       do nparam=1,nx
          if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
@@ -596,11 +577,6 @@ END function functn_soc_hwsd
       xopt = config%xopt
       nxopt = config%nxopt
 
-      open(1,file=config%fparameter)
-      read(1,*) xopt(1:14)
-      read(1,*) nxopt(1:nx)
-      close(1) 
-
       do nparam=1,nx
          if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
            error stop "ERROR functn_global4: nxopt is outside 1:16"
@@ -703,11 +679,6 @@ END function functn_global4
       faustsoc = config%faustsoc
       xopt = config%xopt
       nxopt = config%nxopt
-
-      open(1,file=config%fparameter)
-      read(1,*) xopt(1:14)
-      read(1,*) nxopt(1:nx)
-      close(1) 
       
       do nparam=1,nx
          if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
