@@ -1,5 +1,6 @@
 module mesc_namelist
-    use, intrinsic :: iso_fortran_env, only : error_unit, output_unit, real64
+    use precision_module, only: dp
+    use, intrinsic :: iso_fortran_env, only : error_unit, output_unit
     implicit none
     private
 
@@ -26,9 +27,10 @@ module mesc_namelist
         character(len=path_len) :: fmodis = ''
         character(len=path_len) :: fanoc = ''
         character(len=path_len) :: fglobal(7) = ''
-        real(real64) :: xopt(16) = 1.0_real64
-        integer :: nxopt(16) = [1, 2, 3, 4, 5, 6, 7, 8, &
+        real(dp) :: xopt(16) = 1.0_dp
+        integer  :: nxopt(16) = [1, 2, 3, 4, 5, 6, 7, 8, &
                                 9, 10, 11, 12, 13, 14, 15, 16]
+        real(dp) :: xparam(16)
     end type mesc_config
 
     public :: read_mesc_namelist, print_mesc_config
@@ -49,13 +51,13 @@ contains
         character(len=path_len) :: cfraction, frac14c, f14c(5), filecluster
         character(len=path_len) :: fhwsdsoc, faustsoc
         character(len=path_len) :: fmodis, fanoc, fglobal(7)
-        real(real64) :: xopt(16)
+        real(dp) :: xopt(16), xparam(16)
         integer :: nxopt(16)
 
         namelist /mesc/ runcase, jglobal, kinetics, bgcopt, jopt, &
             jrestart, jmodel, ifsoc14, frestart_in, frestart_out, &
             foutput, cfraction, frac14c, f14c, filecluster, &
-            fhwsdsoc, faustsoc, fmodis, fanoc, fglobal, xopt, nxopt
+            fhwsdsoc, faustsoc, fmodis, fanoc, fglobal, xopt, nxopt, xparam
 
         ! Copy defaults into the local variables read by the namelist.
         runcase = config%runcase
@@ -80,6 +82,7 @@ contains
         fglobal = config%fglobal
         xopt = config%xopt
         nxopt = config%nxopt
+        xparam = config%xparam
 
         open(newunit=nml_unit, file=trim(filename), status='old', &
              action='read', iostat=ios, iomsg=iomsg)
@@ -112,6 +115,7 @@ contains
         config%fglobal = fglobal
         config%xopt = xopt
         config%nxopt = nxopt
+        config%xparam = xparam
     end subroutine read_mesc_namelist
 
     subroutine print_mesc_config(config)
@@ -180,18 +184,19 @@ module function_module
  !! * 2 -> [[functn_frc1]]
  !! * 3 -> [[functn_soc_hwsd]]
  !! * 4 -> [[functn_global4]]
- real(dp) function functn(nx,xparam16)
+ real(dp) function functn(nx)
 
      integer, intent(in) :: nx
          !! Number of optimized parameters.
-     real(dp), dimension(16), intent(in) :: xparam16
+     real(dp), dimension(16) :: xparam16
          !! Values of the `nx` optimized parameters.
+
+     call read_mesc_namelist("mesc.nml", config)
+     xparam16(:) = config%xparam
 
      if (nx < 1 .or. nx > size(xparam16)) then
        error stop "ERROR functn: nx must be between 1 and 16"
      end if
-
-     call read_mesc_namelist("mesc.nml", config)
 
      SELECT CASE (config%runcase)
      !  CASE (0)

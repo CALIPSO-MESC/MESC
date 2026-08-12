@@ -40,10 +40,9 @@ for i in 0 1; do
   echo "Running test case '${case}', run '${run}'"
 
   # --------------------------------------------------
-  # Copy namelists into run directory
+  # Copy namelist into run directory
   # --------------------------------------------------
   cp ./input/mesc_${run}_${case}.nml mesc.nml
-  cp ./input/params_val_${run}_${case}.nml params_val.nml
 
   # --------------------------------------------------
   # Run the test case
@@ -92,5 +91,5 @@ for i in {0..1}; do
   fi
 done
 rm -f output/diff_*.txt
-rm -f *.nml
+rm -f mesc.nml
 echo "===== Job finished: $(date) ====="
