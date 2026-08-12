@@ -12,6 +12,11 @@
 # module load netcdf_intel # load netcdf library
 # ```
 # --------------------------------------------------
+module purge
+module load oneapi23u1 netcdf_intel
+#module load intel-fc/2020.4.304
+#module unload netcdf
+#module load netcdf/4.8.1-intel20
 
 # --------------------------------------------------
 # Set environment variables
@@ -36,6 +41,7 @@ runs=("frc" "hwsd")
 # --------------------------------------------------
 # Loop over test cases
 # --------------------------------------------------
+rm -rf output
 mkdir -p output
 for i in 0 1; do
   case="${cases[${i}]}"
@@ -45,18 +51,25 @@ for i in 0 1; do
   # --------------------------------------------------
   # Copy parameter files
   # --------------------------------------------------
-  cp ./input/case_${run}.txt case.txt
-  cp ./input/params1_${run}_${case}.txt params1.txt
+  cp ./input/mesc_${run}_${case}.nml mesc.nml
+  cp ./input/parameters_${run}_${case}.txt parameters.txt
   cp ./input/params_val_${run}_${case}.txt params_val.txt
 
   # --------------------------------------------------
   # Run the test case
   # --------------------------------------------------
+  START="$(date +%s)"
   ./main >output/outval_${case}_${run}.txt
-  mv fort.91 output/valsoc_91_${case}_${run}.txt
-  mv fort.92 output/valsoc_92_${case}_${run}.txt
-  diff benchmark/valsoc_91_${case}_${run}.txt output/valsoc_91_${case}_${run}.txt >output/diff_valsoc_91_${case}_${run}.txt
-  diff benchmark/valsoc_92_${case}_${run}.txt output/valsoc_92_${case}_${run}.txt >output/diff_valsoc_92_${case}_${run}.txt
+  DURATION=$(($(date +%s) - ${START}))
+  echo "Time taken: ${DURATION} seconds"
+  if [ -e fort.91 ]; then
+    mv fort.91 output/valsoc_91_${case}_${run}.txt
+    diff benchmark/valsoc_91_${case}_${run}.txt output/valsoc_91_${case}_${run}.txt >output/diff_valsoc_91_${case}_${run}.txt
+  fi
+  if [ -e fort.92 ]; then
+    mv fort.92 output/valsoc_92_${case}_${run}.txt
+    diff benchmark/valsoc_92_${case}_${run}.txt output/valsoc_92_${case}_${run}.txt >output/diff_valsoc_92_${case}_${run}.txt
+  fi
 done
 
 # --------------------------------------------------
@@ -65,18 +78,28 @@ done
 for i in {0..1}; do
   case="${cases[${i}]}"
   run="${runs[${i}]}"
-  pass=1
+  pass=true
   for id in 91 92; do
-    if [ "$(cat output/diff_valsoc_${id}_${case}_${run}.txt)" ]; then
-      pass=0
+    # Check the output file exists and is not empty
+    if [ ! -e "output/valsoc_${id}_${case}_${run}.txt" ]; then
+      pass=false
+      break
+    fi
+    if [ -z "output/valsoc_${id}_${case}_${run}.txt" ]; then
+      pass=false
+      break
+    fi
+    # Check the diff file exists and is empty
+    if [ -s "output/diff_valsoc_${id}_${case}_${run}.txt" ]; then
+      pass=false
       break
     fi
   done
-  if [ ${pass} ]; then
-    echo "PASS: test case '${case}', run '${run}'"
-  else
+  if [ ${pass} == false ]; then
     echo "FAIL: test case '${case}', run '${run}'"
+  else
+    echo "PASS: test case '${case}', run '${run}'"
   fi
 done
-rm output/diff_*.txt
+rm -f output/diff_*.txt
 echo "===== Job finished: $(date) ====="

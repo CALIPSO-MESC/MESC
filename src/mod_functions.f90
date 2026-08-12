@@ -1,11 +1,152 @@
+module mesc_namelist
+    use, intrinsic :: iso_fortran_env, only : error_unit, output_unit, real64
+    implicit none
+    private
+
+    integer, parameter :: path_len = 140
+
+    type, public :: mesc_config
+        integer :: runcase = 0
+        integer :: jglobal = 0
+        integer :: kinetics = 3
+        integer :: bgcopt = 1
+        integer :: jopt = 0
+        integer :: jrestart = 0
+        integer :: jmodel = 1
+        integer :: ifsoc14 = 0
+        character(len=path_len) :: frestart_in = ''
+        character(len=path_len) :: frestart_out = ''
+        character(len=path_len) :: foutput = ''
+        character(len=path_len) :: fparameter = ''
+        character(len=path_len) :: cfraction = ''
+        character(len=path_len) :: frac14c = ''
+        character(len=path_len) :: f14c(5) = ''
+        character(len=path_len) :: filecluster = ''
+        character(len=path_len) :: fhwsdsoc = ''
+        character(len=path_len) :: faustsoc = ''
+        character(len=path_len) :: fmodis = ''
+        character(len=path_len) :: fanoc = ''
+        character(len=path_len) :: fglobal(7) = ''
+        real(real64) :: xopt(16) = 1.0_real64
+        integer :: nxopt(16) = [1, 2, 3, 4, 5, 6, 7, 8, &
+                                9, 10, 11, 12, 13, 14, 15, 16]
+    end type mesc_config
+
+    public :: read_mesc_namelist, print_mesc_config
+
+contains
+
+    subroutine read_mesc_namelist(filename, config)
+        character(len=*), intent(in) :: filename
+        type(mesc_config), intent(out) :: config
+
+        integer :: nml_unit, ios
+        character(len=512) :: iomsg
+        integer :: runcase, jglobal, kinetics, bgcopt, jopt
+        integer :: jrestart, jmodel, ifsoc14
+        character(len=path_len) :: frestart_in, frestart_out, foutput
+        character(len=path_len) :: fparameter, cfraction, frac14c, f14c(5), filecluster
+        character(len=path_len) :: fhwsdsoc, faustsoc
+        character(len=path_len) :: fmodis, fanoc, fglobal(7)
+        real(real64) :: xopt(16)
+        integer :: nxopt(16)
+
+        namelist /mesc/ runcase, jglobal, kinetics, bgcopt, jopt, &
+            jrestart, jmodel, ifsoc14, frestart_in, frestart_out, &
+            foutput, fparameter, cfraction, frac14c, f14c, filecluster, &
+            fhwsdsoc, faustsoc, fmodis, fanoc, fglobal, xopt, nxopt
+
+        ! Copy defaults into the local variables read by the namelist.
+        runcase = config%runcase
+        jglobal = config%jglobal
+        kinetics = config%kinetics
+        bgcopt = config%bgcopt
+        jopt = config%jopt
+        jrestart = config%jrestart
+        jmodel = config%jmodel
+        ifsoc14 = config%ifsoc14
+        frestart_in = config%frestart_in
+        frestart_out = config%frestart_out
+        foutput = config%foutput
+        fparameter = config%fparameter
+        cfraction = config%cfraction
+        frac14c = config%frac14c
+        f14c = config%f14c
+        filecluster = config%filecluster
+        fhwsdsoc = config%fhwsdsoc
+        faustsoc = config%faustsoc
+        fmodis = config%fmodis
+        fanoc = config%fanoc
+        fglobal = config%fglobal
+        xopt = config%xopt
+        nxopt = config%nxopt
+
+        open(newunit=nml_unit, file=trim(filename), status='old', &
+             action='read', iostat=ios, iomsg=iomsg)
+        if (ios /= 0) call fatal_error('Cannot open "' // trim(filename) // '": ' // trim(iomsg))
+
+        read(nml_unit, nml=mesc, iostat=ios, iomsg=iomsg)
+        close(nml_unit)
+        if (ios /= 0) call fatal_error('Cannot read &mesc from "' // &
+            trim(filename) // '": ' // trim(iomsg))
+
+        config%runcase = runcase
+        config%jglobal = jglobal
+        config%kinetics = kinetics
+        config%bgcopt = bgcopt
+        config%jopt = jopt
+        config%jrestart = jrestart
+        config%jmodel = jmodel
+        config%ifsoc14 = ifsoc14
+        config%frestart_in = frestart_in
+        config%frestart_out = frestart_out
+        config%foutput = foutput
+        config%fparameter = fparameter
+        config%cfraction = cfraction
+        config%frac14c = frac14c
+        config%f14c = f14c
+        config%filecluster = filecluster
+        config%fhwsdsoc = fhwsdsoc
+        config%faustsoc = faustsoc
+        config%fmodis = fmodis
+        config%fanoc = fanoc
+        config%fglobal = fglobal
+        config%xopt = xopt
+        config%nxopt = nxopt
+    end subroutine read_mesc_namelist
+
+    subroutine print_mesc_config(config)
+        type(mesc_config), intent(in) :: config
+        write(output_unit, '(a,i0)') 'runcase     = ', config%runcase
+        write(output_unit, '(a,i0)') 'jglobal     = ', config%jglobal
+        write(output_unit, '(a,i0)') 'kinetics    = ', config%kinetics
+        write(output_unit, '(a,i0)') 'bgcopt      = ', config%bgcopt
+        write(output_unit, '(a,i0)') 'jopt        = ', config%jopt
+        write(output_unit, '(a,i0)') 'jrestart    = ', config%jrestart
+        write(output_unit, '(a,i0)') 'jmodel      = ', config%jmodel
+        write(output_unit, '(a,i0)') 'ifsoc14     = ', config%ifsoc14
+        write(output_unit, '(a,a)')  'foutput     = ', trim(config%foutput)
+        write(output_unit, '(a,a)')  'fparameter  = ', trim(config%fparameter)
+        write(output_unit, '(a,a)')  'fhwsdsoc    = ', trim(config%fhwsdsoc)
+        write(output_unit, '(a,a)')  'fanoc       = ', trim(config%fanoc)
+    end subroutine print_mesc_config
+
+    subroutine fatal_error(message)
+        character(len=*), intent(in) :: message
+        write(error_unit, '(a)') 'ERROR: ' // trim(message)
+        error stop 1
+    end subroutine fatal_error
+
+end module mesc_namelist
 !> Per-mode orchestrator functions for MESC calibration.
 !>
 !> Each function allocates arrays, ingests observed data, runs the soil
 !> carbon model via an appropriate driver, computes a cost against
 !> observations, and returns the scalar cost value.  The dispatcher
-!> [[functn]] selects the active mode based on `case.txt`.
+!> [[functn]] reads `mesc.nml` and selects the configured run mode.
 module function_module
   use precision_module, only: dp
+  use mesc_namelist, only: mesc_config, read_mesc_namelist
   use mic_constant, only: mp, mpft, mbgc, ntime, nlon, nlat, ms
   use mic_variable, only: mic_param_xscale, mic_param_default, mic_parameter, &
                           mic_input, mic_global_input, mic_cpool, mic_npool, mic_output, &
@@ -25,11 +166,15 @@ module function_module
   ! All module members are public by default
   public
 
+  ! Configuration is read once by functn() and is then available to the
+  ! selected mode-specific function during that invocation.
+  type(mesc_config), save, private :: config
+
  Contains
 
  !> Dispatcher that selects the appropriate per-mode orchestrator.
  !!
- !! Reads `case.txt` to determine the run mode, then delegates to one
+ !! Reads `mesc.nml` to determine the run mode, then delegates to one
  !! of the mode-specific functions:
  !!
  !! * 0 -> [[functn_soc_aust]]
@@ -44,16 +189,17 @@ module function_module
      real(dp), dimension(16), intent(in) :: xparam16
          !! Values of the `nx` optimized parameters.
 
-     integer :: runcase
+     if (nx < 1 .or. nx > size(xparam16)) then
+       error stop "ERROR functn: nx must be between 1 and 16"
+     end if
 
-     open(1,file="case.txt")
-     read(1,*) runcase
-     close(1)
-     SELECT CASE (runcase)
-       CASE (0)
-         functn = functn_soc_aust(nx,xparam16)
-       CASE (1)    ! run model for 14C
-         functn = functn_c14(nx,xparam16)
+     call read_mesc_namelist("mesc.nml", config)
+
+     SELECT CASE (config%runcase)
+     !  CASE (0)
+     !    functn = functn_soc_aust(nx,xparam16)
+     !  CASE (1)    ! run model for 14C
+     !    functn = functn_c14(nx,xparam16)
        CASE (2)    ! run model for POC/MAOC fractions
          functn = functn_frc1(nx,xparam16)
        CASE (3)    ! run model for site HWSD SOC profile
@@ -63,8 +209,8 @@ module function_module
      !  CASE (5)    ! run model with prescribed forcing (not developed yet for 1% per year offline)
      !    functn = functn_offline(nx,xparam16)
        CASE DEFAULT
-         write(6,"(a,i0,a)") "ERROR functn: Invalid run case '", runcase, "'"
-         stop 999
+         write(6,"(a,i0,a)") "ERROR functn: Invalid run case '", config%runcase, "'"
+         error stop 999
      END SELECT
 
  END function functn
@@ -74,7 +220,7 @@ module function_module
     !!
     !! Runs the model twice: once for stable C (12C) and once for
     !! radiocarbon (14C), then returns the combined cost.  Reads
-    !! configuration and default parameters from `params1.txt`.
+    !! configuration and default parameters from `mesc.nml`.
 
     integer, intent(in) :: nx
         !! Number of optimized parameters.
@@ -96,40 +242,39 @@ module function_module
     integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer :: jrestart,nparam
     character(len=140) :: frestart_in,frestart_out,foutput
-    character(len=140) :: frac14c,f14c(5),filecluster
+    character(len=140) :: frac14c,f14c(5),filecluster,fparameter
     real(dp), dimension(:), allocatable :: zse
 
-      jrestart=0;xopt(:)=1.0
-      do nparam=1,16
-         nxopt(nparam) = nparam
-      end do
-
-      frestart_in="miccpool_in.nc"
-      frestart_out="miccpool_out.nc"
-      foutput="vmic_output.nc"
-
-      open(1,file="params1.txt")
-      read(1,*)
-      read(1,*) jglobal,ifsoc14,kinetics,bgcopt,jopt,jrestart
-      read(1,11) frac14c
-      read(1,11) f14c(1)
-      read(1,11) f14c(2)
-      read(1,11) f14c(3)
-      read(1,11) f14c(4)
-      read(1,11) f14c(5)
-      read(1,11) filecluster
-11    format(a140)
+      jglobal = config%jglobal
+      ifsoc14 = config%ifsoc14
+      kinetics = config%kinetics
+      bgcopt = config%bgcopt
+      jopt = config%jopt
+      jrestart = config%jrestart
+      frestart_in = config%frestart_in
+      frestart_out = config%frestart_out
+      foutput = config%foutput
+      frac14c = config%frac14c
+      f14c = config%f14c
+      filecluster = config%filecluster
+      xopt = config%xopt
+      nxopt = config%nxopt
+ 
+      open(1,file=config%fparameter)
       read(1,*) xopt(1:14)
-
-      if(jopt==0) then
-         read(1,*) nxopt(1:nx)
+      read(1,*) nxopt(1:nx)
+      close(1)
+      
+      if(jopt==1) then
          do nparam=1,nx
+            if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
+              error stop "ERROR functn_c14: nxopt is outside 1:16"
             xopt(nxopt(nparam)) = xparam16(nparam)
          end do
       end if
     !  print*, xopt
 
-      mp = 213
+      mp = 213   ! needs to get the value from input file (to be done)
 
       totcost1 = 0.0; totcost2=0.0
       nyeqpool= 500;jmodel=1;mpft=17;mbgc=12;ntime=1;nlon=1;nlat=1
@@ -171,8 +316,6 @@ module function_module
         !  print *,"tot1 = ",totcost1
         !  print *,"tot2 = ",totcost2
            call screenout("c14run    ",jmodel,bgcopt,xopt,functn_c14)
-      close(1)
-
 !      functn = totcost
 
       call mic_deallocate_parameter(mpft,mbgc,mp,ms,micpxdef,micparam)
@@ -188,7 +331,7 @@ real(dp) function functn_frc1(nx,xparam16)
     !! Orchestrator for POC/MAOC fraction calibration mode.
     !!
     !! Fits simulated soil organic carbon fractions to observed
-    !! fractionation data.  Reads configuration from `params1.txt`.
+    !! fractionation data.  Reads configuration from `mesc.nml`.
 
     integer, intent(in) :: nx
         !! Number of optimized parameters.
@@ -214,31 +357,33 @@ real(dp) function functn_frc1(nx,xparam16)
     real(dp), dimension(:), allocatable :: zse
     integer :: mpx
 
-      jrestart=0;xopt(:)=1.0
-      do nparam=1,16
-         nxopt(nparam) = nparam
-      end do
+      jglobal = config%jglobal
+      ifsoc14 = config%ifsoc14
+      kinetics = config%kinetics
+      bgcopt = config%bgcopt
+      jopt = config%jopt
+      jrestart = config%jrestart
+      frestart_in = config%frestart_in
+      frestart_out = config%frestart_out
+      foutput = config%foutput
+      cfraction = config%cfraction
+      xopt = config%xopt
+      nxopt = config%nxopt
 
-      frestart_in="miccpool_in.nc"
-      frestart_out="miccpool_out.nc"
-      foutput="vmic_output.nc"
-
-      open(1,file="params1.txt")
-      read(1,*)
-      read(1,*) jglobal,ifsoc14,kinetics,bgcopt,jopt,jrestart
-      read(1,11) cfraction
-11    format(a140)
+      open(1,file=config%fparameter)
       read(1,*) xopt(1:14)
-
+      read(1,*) nxopt(1:nx)
+      close(1)
+      
       if(jopt==0) then
-         read(1,*) nxopt(1:nx)
          do nparam=1,nx
+            if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
+              error stop "ERROR functn_frc1: nxopt is outside 1:16"
             xopt(nxopt(nparam)) = xparam16(nparam)
          end do
       end if
     !  print *, xopt
 
-      close(1)
       !mp = 2206
       ntime=365
 
@@ -273,8 +418,6 @@ real(dp) function functn_frc1(nx,xparam16)
     !  print *, 'calcost_frc1'
       call calcost_frc1(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost1)
 
-      close(1)
-
       functn_frc1    = totcost1
       call screenout("fraction  ",jmodel,bgcopt,xopt,functn_frc1)
       call mic_deallocate_parameter(mpft,mbgc,mp,ms,micpxdef,micparam)
@@ -290,7 +433,7 @@ END function functn_frc1
     !! Orchestrator for HWSD SOC profile calibration mode.
     !!
     !! Fits simulated soil carbon profiles to Harmonized World Soil
-    !! Database observations.  Reads configuration from `params1.txt`.
+    !! Database observations.  Reads configuration from `mesc.nml`.
 
     integer, intent(in) :: nx
         !! Number of optimized parameters.
@@ -319,33 +462,36 @@ END function functn_frc1
 
       isoc14=0;nyeqpool = 500;ok=0;totcost1=0.0
 
-      jrestart=0;xopt(:)=1.0
-      do nparam=1,16
-         nxopt(nparam) = nparam
-      end do
-
-      frestart_in="miccpool_in.nc"
-      frestart_out="miccpool_out.nc"
-      foutput="vmic_output.nc"
-
-      open(1,file="params1.txt")
-      read(1,*)
-      read(1,*) jglobal,ifsoc14,kinetics,bgcopt,jopt,jrestart,jmodel
-      read(1,101) fhwsdsoc
-      read(1,101) fmodis
-      read(1,101) fanoc
-      read(1,*)   xopt(1:14)
+      jglobal = config%jglobal
+      ifsoc14 = config%ifsoc14
+      kinetics = config%kinetics
+      bgcopt = config%bgcopt
+      jopt = config%jopt
+      jrestart = config%jrestart
+      jmodel = config%jmodel
+      frestart_in = config%frestart_in
+      frestart_out = config%frestart_out
+      foutput = config%foutput
+      fhwsdsoc = config%fhwsdsoc
+      fmodis = config%fmodis
+      fanoc = config%fanoc
+      xopt = config%xopt
+      nxopt = config%nxopt
+      
+      open(1,file=config%fparameter)
+      read(1,*) xopt(1:14)
       read(1,*) nxopt(1:nx)
+      close(1)      
+      
       do nparam=1,nx
+         if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
+           error stop "ERROR functn_soc_hwsd: nxopt is outside 1:16"
          xopt(nxopt(nparam)) = xparam16(nparam)
       end do
-      close(1)
 
 !      print *, 'nx xparam16 =', nx, nxopt(1:nx),xparam16(1:nx)
 !      print *, 'parameter values used= ', xopt
 !      print *, 'ms zse', ms, zse(:)
-101   format(a140)
-
       ! get dimensions
       call getdata_hwsd_dim(fhwsdsoc,mpx,timex)
       mp=mpx
@@ -390,7 +536,7 @@ END function functn_soc_hwsd
     !! Orchestrator for global-scale calibration with CABLE/ORCHIDEE forcing.
     !!
     !! Runs the model at global spatial resolution.  Reads configuration
-    !! and grid patch definitions from `params1.txt`.  Not yet set up for
+    !! and grid patch definitions from `mesc.nml`.  Not yet set up for
     !! SCE_UA optimization.
 
     integer, intent(in) :: nx
@@ -425,34 +571,31 @@ END function functn_soc_hwsd
       allocate(zse(ms))
       zse(1:5)=0.2;zse(6:7)=0.5
 
-      frestart_in="miccpool_in.nc"
-      frestart_out="miccpool_out.nc"
-      foutput="vmic_output.nc"
+      jglobal = config%jglobal
+      ifsoc14 = config%ifsoc14
+      kinetics = config%kinetics
+      bgcopt = config%bgcopt
+      jopt = config%jopt
+      jrestart = config%jrestart
+      jmodel = config%jmodel
+      frestart_in = config%frestart_in
+      frestart_out = config%frestart_out
+      foutput = config%foutput
+      fglobal = ''
+      fglobal(1:7) = config%fglobal
+      xopt = config%xopt
+      nxopt = config%nxopt
 
-      jrestart=0;xopt(:)=1.0
-      do nparam=1,16
-         nxopt(nparam) = nparam
-      end do
-      xopt = 1.0
+      open(1,file=config%fparameter)
+      read(1,*) xopt(1:14)
+      read(1,*) nxopt(1:nx)
+      close(1) 
 
-!      open(91,file='modobs.txt')
-!      open(92,file='modobs2.txt')
-
-      open(1,file="params1.txt")
-      read(1,*)
-      read(1,*) jglobal,ifsoc14,kinetics,bgcopt,jopt,jrestart,jmodel
-      do nf=1,7
-         read(1,101) fglobal(nf)
-      end do
-      read(1,*)   xopt(1:14)
-      read(1,*)   nxopt(1:nx)
       do nparam=1,nx
+         if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
+           error stop "ERROR functn_global4: nxopt is outside 1:16"
          xopt(nxopt(nparam)) = xparam16(nparam)
       end do
-      close(1)
-
-      close(1)
-101   format(a140)
       print *, xopt
 
       if(jmodel==2 .or. jmodel==3) then
@@ -503,7 +646,7 @@ END function functn_global4
     !! Orchestrator for Australian SOC profile calibration.
     !!
     !! Fits simulated soil carbon profiles to Australian soil data.
-    !! Reads configuration from `params1.txt`.
+    !! Reads configuration from `mesc.nml`.
 
     integer, intent(in) :: nx
         !! Number of optimized parameters.
@@ -532,27 +675,30 @@ END function functn_global4
 
       isoc14=0;nyeqpool = 500;ok=0;totcost1=0.0
 
-      jrestart=0;xopt(:)=1.0
-      do nparam=1,16
-         nxopt(nparam) = nparam
-      end do
+      jglobal = config%jglobal
+      ifsoc14 = config%ifsoc14
+      kinetics = config%kinetics
+      bgcopt = config%bgcopt
+      jopt = config%jopt
+      jrestart = config%jrestart
+      jmodel = config%jmodel
+      frestart_in = config%frestart_in
+      frestart_out = config%frestart_out
+      foutput = config%foutput
+      faustsoc = config%faustsoc
+      xopt = config%xopt
+      nxopt = config%nxopt
 
-      frestart_in="miccpool_in.nc"
-      frestart_out="miccpool_out.nc"
-      foutput="vmic_output.nc"
-
-      open(1,file="params1.txt")
-      read(1,*)
-      read(1,*) jglobal,ifsoc14,kinetics,bgcopt,jopt,jrestart,jmodel
-      read(1,101) faustsoc
-      read(1,*)   xopt(1:14)
+      open(1,file=config%fparameter)
+      read(1,*) xopt(1:14)
       read(1,*) nxopt(1:nx)
+      close(1) 
+      
       do nparam=1,nx
+         if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
+           error stop "ERROR functn_soc_aust: nxopt is outside 1:16"
          xopt(nxopt(nparam)) = xparam16(nparam)
       end do
-      close(1)
-
-101   format(a140)
 
       ! get dimensions
       call getdata_aust_dim(faustsoc,mpx,timex)
