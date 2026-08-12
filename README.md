@@ -17,15 +17,17 @@ It makes use of **netCDF (C + Fortran)**, enabling efficient handling of structu
 
 ```text
 MESC/
-├── src/                   # Core Fortran source code
-│   ├── main.f90           # Main program for running MESC as an executable
-│   ├── mod_calcost.f90    # Module for computing cost functions
-│   ├── mod_constants.f90  # Module defining all constants
-│   ├── mod_functions.f90  # Module defining orchestrator functions
-│   ├── mod_inout.f90      # Module for handling input and output
-│   ├── mod_interface.f90  # Module containing high-level driver interface
-│   ├── mod_model_core.f90 # Module containing core model physics
-│   └── mod_variables.f90  # Module defining all model variables
+├── src/                  # Core Fortran source code
+│   ├── calcost_mod.f90   # Module for computing cost functions
+│   ├── constant_mod.f90  # Module defining all constants
+│   ├── function_mod.f90  # Module defining orchestrator functions
+│   ├── inout_mod.f90     # Module for handling input and output
+│   ├── interface_mod.f90 # Module containing high-level driver interface
+│   ├── main.f90          # Main program for running MESC as an executable
+│   ├── model_mod.f90     # Module containing core model physics
+│   ├── namelist_mod.f90  # Module for handling configuration parameters
+│   ├── precision_mod.f90 # Module for handling numerical precision
+│   └── variable_mod.f90  # Module defining all model variables
 │
 ├── auxil/                 # Auxiliary code - TODO
 │
