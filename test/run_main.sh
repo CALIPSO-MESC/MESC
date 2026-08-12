@@ -2,13 +2,16 @@
 # Shell script for running the MESC test suite.
 
 # --------------------------------------------------
-# Load environment (users can edit if needed)
+# Load environment
+#
+# This will be specific to the machine you are working on and will need to be
+# completed by the user. For example:
+# ```
+# module purge
+# module load oneapi23u1   # load intel compiler
+# module load netcdf_intel # load netcdf library
+# ```
 # --------------------------------------------------
-module purge
-#module load oneapi23u1 netcdf_intel
- module load intel-fc/2020.4.304
- module unload netcdf
- module load netcdf/4.8.1-intel20
 
 # --------------------------------------------------
 # Set environment variables
