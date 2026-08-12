@@ -57,7 +57,7 @@ for i in 0 1; do
   # --------------------------------------------------
   START="$(date +%s)"
   ./main >"output/outval_${case}_${run}.txt"
-  DURATION="$(($(date +%s) - ${START}))"
+  DURATION="$(($(date +%s) - START))"
   echo "Time taken: ${DURATION} seconds"
   if [ -e fort.91 ]; then
     mv fort.91 "output/valsoc_91_${case}_${run}.txt"
@@ -82,7 +82,7 @@ for i in {0..1}; do
       pass=false
       break
     fi
-    if [ -z "output/valsoc_${id}_${case}_${run}.txt" ]; then
+    if [ ! -s "output/valsoc_${id}_${case}_${run}.txt" ]; then
       pass=false
       break
     fi
