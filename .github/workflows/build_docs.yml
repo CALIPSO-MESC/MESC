@@ -3,13 +3,13 @@ name: Build docs
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on pushes to the "main" branch, i.e., PR merges
+  # Triggers the workflow on pushes to the "master" branch, i.e., PR merges
   push:
-    branches: [ "main"]
+    branches: [ "master"]
 
-  # Triggers the workflow on pushes to open pull requests to main with documentation changes
+  # Triggers the workflow on pushes to open pull requests to master with documentation changes
   pull_request:
-    branches: [ "main" ]
+    branches: [ "master" ]
     paths:
       - '.github/workflows/build_docs.yml'
       - '**.md'
@@ -31,7 +31,7 @@ jobs:
   # The first job in this workflow builds the documentation for the website
   build-docs:
     name: build docs
-    if: github.ref != 'refs/heads/main'
+    if: github.ref != 'refs/heads/master'
 
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
