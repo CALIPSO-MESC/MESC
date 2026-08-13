@@ -371,8 +371,8 @@ contains
     !! Flag indicating whether this is a global simulation
   integer,                INTENT(IN)    :: bgcopt
     !! TODO: Define this argument
-  integer,                INTENT(IN)    :: jopt
-    !! Flag indicating whether to optimize parameters or use a lookup table  ! TODO: Use logical
+  logical,                INTENT(IN)    :: jopt
+    !! Flag indicating whether to optimize parameters or use a lookup table
   integer,                INTENT(IN)    :: jmodel
     !! Land-surface model code (1=CABLE, 2=ORCHIDEE, 3=ORCHIDEE?)
   real(dp),               INTENT(IN)    :: zse(ms)
@@ -795,8 +795,8 @@ contains
     !! Flag indicating whether this is a global simulation
   integer,                INTENT(IN)    :: bgcopt
     !! TODO: Define this argument
-  integer,                INTENT(IN)    :: jopt
-    !! Flag indicating whether to optimize parameters or use a lookup table  ! TODO: Use logical
+  logical,                INTENT(IN)    :: jopt
+    !! Flag indicating whether to optimize parameters or use a lookup table
   integer,                INTENT(IN)    :: jmodel
     !! Land-surface model code (1=CABLE, 2=ORCHIDEE, 3=ORCHIDEE?)
   real(dp),               INTENT(IN)    :: zse(ms)
@@ -2223,7 +2223,7 @@ end subroutine lonlat2mpx4b
     character(len=140),           INTENT(IN) :: fhwsdsoc,fmodis,fanoc
     logical,                      INTENT(IN) :: jglobal
     integer,                      INTENT(IN) :: bgcopt
-    integer,                      INTENT(IN) :: jopt
+    logical,                      INTENT(IN) :: jopt
     integer,                      INTENT(IN) :: jmodel
     TYPE(mic_parameter),          INTENT(INout) :: micparam
     TYPE(mic_global_input),       INTENT(INout) :: micglobal
@@ -2641,7 +2641,7 @@ end subroutine screenout
     character(len=140),           INTENT(IN) :: faustsoc
     logical,                      INTENT(IN) :: jglobal
     integer,                      INTENT(IN) :: bgcopt
-    integer,                      INTENT(IN) :: jopt
+    logical,                      INTENT(IN) :: jopt
     integer,                      INTENT(IN) :: jmodel
     TYPE(mic_parameter),          INTENT(INout) :: micparam
     TYPE(mic_global_input),       INTENT(INout) :: micglobal
