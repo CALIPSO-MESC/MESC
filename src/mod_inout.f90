@@ -367,8 +367,8 @@ contains
     !! Object holding global-scale parameters
   TYPE(mic_parameter),    INTENT(INOUT) :: micparam
     !! Object holding model parameters per plot and soil layer
-  integer,                INTENT(IN)    :: jglobal
-    !! Flag indicating whether this is a global simulation  ! TODO: Use logical
+  logical,                INTENT(IN)    :: jglobal
+    !! Flag indicating whether this is a global simulation
   integer,                INTENT(IN)    :: bgcopt
     !! TODO: Define this argument
   integer,                INTENT(IN)    :: jopt
@@ -749,7 +749,7 @@ contains
     micglobal%avgms(:) = sum(sum(micglobal%moist(:,:,:),dim=3),dim=2)/real(ms*ntime)
 
 ! write out time-invariant input data
-    if(jglobal==1) then
+    if(jglobal) then
        open(31,file=fglobal(5))
        do np=1,mp
           write(31,101) micglobal%lon(np),micglobal%lat(np),ilon(np),jlat(np),                 &
@@ -791,8 +791,8 @@ contains
     !! Object holding global-scale parameters
   TYPE(mic_parameter),    INTENT(INOUT) :: micparam
     !! Object holding model parameters per plot and soil layer
-  integer,                INTENT(IN)    :: jglobal
-    !! Flag indicating whether this is a global simulation  ! TODO: Use logical
+  logical,                INTENT(IN)    :: jglobal
+    !! Flag indicating whether this is a global simulation
   integer,                INTENT(IN)    :: bgcopt
     !! TODO: Define this argument
   integer,                INTENT(IN)    :: jopt
@@ -825,6 +825,7 @@ contains
   real(dp), dimension(:),       allocatable :: modisnpp_mp
   integer  :: maxpft,pft, msite,sitemax,intval,isite
   real(dp) :: bulkd2
+
   ! data
   real(sp), dimension(12)    :: sandx,clayx,siltx,porex,bulkdx,fcpx,wiltx
   data sandx/0.93,0.81,0.63,0.17,0.06,0.40,0.54,0.08,0.30,0.48,0.06,0.15/
@@ -1187,7 +1188,7 @@ contains
     micglobal%avgms(:) = sum(sum(micglobal%moist(:,:,:),dim=3),dim=2)/real(ms*ntime)
 
 ! write out time-invariant input data
-    if(jglobal==1) then
+    if(jglobal) then
        open(31,file=fglobal(5))
        do np=1,mp
           write(31,101) micglobal%lon(np),micglobal%lat(np),ilon(np),jlat(np),                 &
@@ -1802,7 +1803,8 @@ end subroutine lonlat2mpx4b
   subroutine getdata_frc(cfraction,jglobal,bgcopt,micinput,micparam,micnpool,micglobal,zse)
     use mic_constant, only : delt
     character(len=140),     INTENT(IN)    :: Cfraction
-    integer,                INTENT(IN)    :: jglobal,bgcopt
+    logical,                INTENT(IN)    :: jglobal
+    integer,                INTENT(IN)    :: bgcopt
     TYPE(mic_parameter),    INTENT(INout) :: micparam
     TYPE(mic_input),        INTENT(INout) :: micinput
     TYPE(mic_npool),        INTENT(INOUT) :: micnpool
@@ -2018,7 +2020,7 @@ end subroutine lonlat2mpx4b
     ! Close netcdf file
     status = NF90_CLOSE(ncid)
 
-    if(jglobal==1) open(100,file="inputdata_frc.txt")
+    if(jglobal) open(100,file="inputdata_frc.txt")
 
     ! converting metal oxide from cmol/kg to kg/m2
     ! metal-oxide(cmol/kg) = metal-oxide(kg/m2) *100/(h*bd*MW)
@@ -2106,7 +2108,7 @@ end subroutine lonlat2mpx4b
          if(micparam%bgctype(np) ==bgcopt) then
             msite=msite + 1
          end if
-         if(jglobal==1) then
+         if(jglobal) then
             write(100,901) micparam%siteid(np),micparam%dataid(np),micparam%pft(np),micparam%bgctype(np),micparam%top(np),micparam%bot(np) , &
                          fnpp(np),fanpp(np),fbnpp(np),fcna(np),fcnb(np),flignin(np),ftemp(np),fmoist(np),fclay(np),fsilt(np),fph(np), &
                          fporosity(np),fmatpot(np),fbulkd(np),fald(np),falo(np),ffed(np),ffeo(np),fsoc(np),fpoc(np),fmaoc(np)
@@ -2115,7 +2117,7 @@ end subroutine lonlat2mpx4b
       end do    ! "np=1,mp"
 
     print *, "total sites = ", msite, "for bgcopt= ",bgcopt
-    if(jglobal==1) close(100)
+    if(jglobal) close(100)
 901 format(6(i5,1x),25(f8.3,1x))
     deallocate(fsoc)
     deallocate(fbulkd)
@@ -2219,7 +2221,10 @@ end subroutine lonlat2mpx4b
     !use micglobal%area (area fraction) as a switch to run for selected sites during parameter optimization (jopt==0)
     !model only runs for those sites with micglobal%area(np) > 0.0
     character(len=140),           INTENT(IN) :: fhwsdsoc,fmodis,fanoc
-    integer,                      INTENT(IN) :: jglobal,bgcopt,jopt,jmodel
+    logical,                      INTENT(IN) :: jglobal
+    integer,                      INTENT(IN) :: bgcopt
+    integer,                      INTENT(IN) :: jopt
+    integer,                      INTENT(IN) :: jmodel
     TYPE(mic_parameter),          INTENT(INout) :: micparam
     TYPE(mic_global_input),       INTENT(INout) :: micglobal
     real(dp),                     INTENT(IN) :: zse(ms)
@@ -2557,7 +2562,7 @@ end subroutine lonlat2mpx4b
     micglobal%avgts(:) = sum(sum(micglobal%tsoil(:,:,:),dim=3),dim=2)/real(ms*ntime)
     micglobal%avgms(:) = sum(sum(micglobal%moist(:,:,:),dim=3),dim=2)/real(ms*ntime)
 
-    if(jglobal==1) then
+    if(jglobal) then
        open(100,file="inputdata.txt")
        do np=1,mp
           write(100,101) micparam%siteid(np),micglobal%area(np),micparam%pft(np), &
@@ -2634,7 +2639,10 @@ end subroutine screenout
     data ligcwood/0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4/
     data ligcroot/0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28,0.28/
     character(len=140),           INTENT(IN) :: faustsoc
-    integer,                      INTENT(IN) :: jglobal,bgcopt,jopt,jmodel
+    logical,                      INTENT(IN) :: jglobal
+    integer,                      INTENT(IN) :: bgcopt
+    integer,                      INTENT(IN) :: jopt
+    integer,                      INTENT(IN) :: jmodel
     TYPE(mic_parameter),          INTENT(INout) :: micparam
     TYPE(mic_global_input),       INTENT(INout) :: micglobal
     real(dp),                     INTENT(IN) :: zse(ms)
@@ -2809,7 +2817,7 @@ end subroutine screenout
        micglobal%time(k)= real(k*1.0,kind=dp)
     end do
 
-    if(jglobal==1) then
+    if(jglobal) then
        open(100,file="inputdata.txt")
        do np=1,mp
           write(100,101) micparam%siteid(np),micglobal%area(np),micparam%pft(np), &

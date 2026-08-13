@@ -3,7 +3,7 @@
     runcase = 2
 
     ! Model options.
-    jglobal = 1       ! 0: no global output; 1: write global output
+    jglobal = .true.  ! Global output
     kinetics = 3      ! 1: forward MM; 2: reverse MM; 3: MES-C
     bgcopt = 3        ! Biogeochemical type to simulate
     jopt = 0          ! 0: forward simulation; 1: SCE-UA optimisation
