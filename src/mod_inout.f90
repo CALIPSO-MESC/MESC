@@ -242,24 +242,25 @@ contains
 
   end subroutine vmic_output_write
 
-  !> get PFT-dependent model paramater values (up to 20 parameters)
-  !! input: hartd-wired parameter filename "parameters_global.csv"
-  !! output: write the parameter values to "micpxdef"
-  !!
+  !> Get PFT-dependent model parameter values (up to 20 parameters)
   subroutine getparam_global(fglobalparam,jmodel,micpxdef)
     use mic_constant, only : xrootcable, xrootorchidee
 
     character(len=140),     intent(in)    :: fglobalparam
+      !! Parameter filename (currently hard-coded to "parameters_global.csv")
     integer,                intent(in)    :: jmodel
+      !! Code for land surface model (1=CABLE, 2=ORCHIDEE, 3=ORCHIDEE?)
     TYPE(mic_param_xscale), intent(inout) :: micpxdef
-    integer :: ibgc,ipft,n
-    real(dp), dimension(14)    :: x
+      !! Object holding parameter values
+
+    integer                 :: ibgc,ipft,n
+    real(dp), dimension(14) :: x
 
     open(100,file=fglobalparam)
     read(100,*)
     do ibgc=1,mbgc
        read(100,*) ipft, (x(n),n=1,14)
-       ! ensire x(1:16) are consistent with "vmic_param_xscale"
+       ! ensure x(1:16) are consistent with "vmic_param_xscale"
        micpxdef%xav(ibgc)        = x(1)
        micpxdef%xak(ibgc)        = x(2)
        micpxdef%xfm(ibgc)        = x(3)
@@ -281,14 +282,12 @@ contains
     close(100)
 
     do ipft=1,mpft
-       if(jmodel==1) then
+       if (jmodel==1) then
           micpxdef%xrootbeta(ipft) = xrootcable(ipft)
-       end if
-       if(jmodel==2 .or. jmodel==3) then
+       else if (jmodel==2 .or. jmodel==3) then
           micpxdef%xrootbeta(ipft) = xrootorchidee(ipft)
        end if
     end do
-
   end subroutine getparam_global
 
   !> get number of patches
@@ -358,43 +357,45 @@ contains
     mpx = np
   end subroutine getpatch_global
 
-  !> get global CABLE forcing for running mes-c
-  !! input: hard-wired parameter filename "fglobal_cable"
-  !! input: hwsd 0-60cm soil properties and new soil cluster
-  !! output: write the parameter values to "micglobal% and micparam%"
-  !!
+  !> Get global forcing from CABLE, averaging for each land cell using PFTfrac
   subroutine getdata_global4_cable(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal,micparam,zse)
-  ! read in global forcing from CABLE/ORCHIDEE from time-invarying and time-varying data files
-  ! averaging the input files for each land cell using PFTfrac
-  ! read in the following data
-  ! real(sp), dim(lon,lat) :: Ald,Alo,Fed,Feo
-  ! real(dp), dimension(lon,lat): cell_area
   use mic_constant, only : cnleaf1, cnroot1, cnwood1, ligleaf1, ligroot1, ligwood1
 
   character(len=140),     INTENT(IN)    :: fglobal(10)
+    !! Parameter filename (currently hard-coded to "fglobal_cable")
   TYPE(mic_global_input), INTENT(INOUT) :: micglobal
+    !! Object holding global-scale parameters
   TYPE(mic_parameter),    INTENT(INOUT) :: micparam
-  integer,                INTENT(IN)    :: jglobal,bgcopt,jopt,jmodel
+    !! Object holding model parameters per plot and soil layer
+  integer,                INTENT(IN)    :: jglobal
+    !! Flag indicating whether this is a global simulation  ! TODO: Use logical
+  integer,                INTENT(IN)    :: bgcopt
+    !! TODO: Define this argument
+  integer,                INTENT(IN)    :: jopt
+    !! Flag indicating whether to optimize parameters or use a lookup table  ! TODO: Use logical
+  integer,                INTENT(IN)    :: jmodel
+    !! Land-surface model code (1=CABLE, 2=ORCHIDEE, 3=ORCHIDEE?)
   real(dp),               INTENT(IN)    :: zse(ms)
+    !! Soil layer thickness (m)
+
   ! local variables
-  real(dp), dimension(nlon)            :: lon
-  real(dp), dimension(nlat)            :: lat
-  real(dp), dimension(ntime)           :: time
-  real(dp), dimension(nlon,nlat,mpft)  :: patchfrac
+  real(dp), dimension(nlon)           :: lon
+  real(dp), dimension(nlat)           :: lat
+  real(dp), dimension(ntime)          :: time
+  real(dp), dimension(nlon,nlat,mpft) :: patchfrac
   integer :: ncid1,ncid3,ok,lonid,latid,timeid,varid,n,np,ns
-  !
   integer :: i,j,k,npx,isoilx,sorderx
-  integer, dimension(:),        allocatable  :: ilon,jlat, fcluster
-  integer, dimension(:,:),      allocatable  :: varx2_int
-  real(dp), dimension(:),         allocatable  :: varmp1_db
-  real(sp), dimension(:,:),       allocatable  :: varx2_flt
-  real(dp), dimension(:,:),       allocatable  :: varx2_db,varmp2_db
-  real(dp), dimension(:,:,:),     allocatable  :: varx3time_db,varx3ms_db,varx3ms5_db
-  real(dp), dimension(:,:,:),     allocatable  :: varx3_db,varmp3_db,varsoc3_db,varbulk_db,varaoc_db
-  real(dp), dimension(:,:,:,:),   allocatable  :: varx4_db
-  real(dp), dimension(:),      allocatable  :: falo,fald,ffeo,ffed
-  integer   :: maxpft,pft, msite,sitemax,intval,isite
-  real(dp)    :: bulkd2
+  integer, dimension(:),        allocatable :: ilon,jlat, fcluster
+  integer, dimension(:,:),      allocatable :: varx2_int
+  real(dp), dimension(:),       allocatable :: varmp1_db
+  real(sp), dimension(:,:),     allocatable :: varx2_flt
+  real(dp), dimension(:,:),     allocatable :: varx2_db,varmp2_db
+  real(dp), dimension(:,:,:),   allocatable :: varx3time_db,varx3ms_db,varx3ms5_db
+  real(dp), dimension(:,:,:),   allocatable :: varx3_db,varmp3_db,varsoc3_db,varbulk_db,varaoc_db
+  real(dp), dimension(:,:,:,:), allocatable :: varx4_db
+  real(dp), dimension(:),       allocatable :: falo,fald,ffeo,ffed
+  integer  :: maxpft,pft, msite,sitemax,intval,isite
+  real(dp) :: bulkd2
 
 
     allocate(ilon(mp),jlat(mp),fcluster(mp))
@@ -780,50 +781,50 @@ contains
 
   end subroutine getdata_global4_cable
 
-  !> get global ORCHIDEE forcing for running mes-c
-  !! input: hard-wired parameter filename "fglobal_cable"
-  !! input: harmonsied HWSD soil properties (0-60cm)
-  !! output: write the parameter values to "micglobal% and micparam%"
-  !!
+  !> Get global forcing from ORCHIDEE, averaging for each land cell using PFTfrac
   subroutine getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal,micparam,zse)
-   ! read in global forcing from ORCHIDEE from time-invarying and time-varying data files
-   ! averaging the input files for each land cell using PFTfrac
-   ! read in the following data
-   ! real(sp), dim(lon,lat) :: Ald,Alo,Fed,Feo
-   ! real(dp), dimension(lon,lat): cell_area
-   ! use soil-grid or deafult values of soil silt, sand and clay fraction, soil pH and bulk density
-
   use mic_constant, only : cnleaf2, cnroot2, cnwood2, ligleaf2, ligroot2, ligwood2
 
   character(len=140),     INTENT(IN)    :: fglobal(10)
+    !! Parameter filename (currently hard-coded to "fglobal_cable")
   TYPE(mic_global_input), INTENT(INOUT) :: micglobal
+    !! Object holding global-scale parameters
   TYPE(mic_parameter),    INTENT(INOUT) :: micparam
-  integer,                INTENT(IN)    :: jglobal,bgcopt,jopt,jmodel
+    !! Object holding model parameters per plot and soil layer
+  integer,                INTENT(IN)    :: jglobal
+    !! Flag indicating whether this is a global simulation  ! TODO: Use logical
+  integer,                INTENT(IN)    :: bgcopt
+    !! TODO: Define this argument
+  integer,                INTENT(IN)    :: jopt
+    !! Flag indicating whether to optimize parameters or use a lookup table  ! TODO: Use logical
+  integer,                INTENT(IN)    :: jmodel
+    !! Land-surface model code (1=CABLE, 2=ORCHIDEE, 3=ORCHIDEE?)
   real(dp),               INTENT(IN)    :: zse(ms)
+    !! Soil layer thickness (m)
+
   ! local variables
-  real(dp), dimension(nlon)            :: lon
-  real(dp), dimension(nlat)            :: lat
-  real(sp),    dimension(nlon)            :: lon_flt
-  real(sp),    dimension(nlat)            :: lat_flt
-  real(dp), dimension(ntime)           :: time
-  real(dp), dimension(nlon,nlat,mpft)  :: patchfrac
+  real(dp), dimension(nlon)           :: lon
+  real(dp), dimension(nlat)           :: lat
+  real(sp),    dimension(nlon)        :: lon_flt
+  real(sp),    dimension(nlat)        :: lat_flt
+  real(dp), dimension(ntime)          :: time
+  real(dp), dimension(nlon,nlat,mpft) :: patchfrac
   integer :: ncid1,ncid3,ok,lonid,latid,timeid,varid,n,np,ns
-  !
   integer :: i,j,k,npx,isoilx,sorderx,ilonx,jlatx
-  integer, dimension(:),        allocatable  :: ilon,jlat, fcluster
-  integer, dimension(:,:),      allocatable  :: varx2_int
-  real(sp), dimension(:,:),       allocatable  :: varx2_flt
-  real(sp), dimension(:,:,:,:),   allocatable  :: varx4_flt
-  real(dp), dimension(:),         allocatable  :: varmp1_db
-  real(dp), dimension(:,:),       allocatable  :: varx2_db,varmp2_db
-  real(dp), dimension(:,:,:),     allocatable  :: varx3time_db,varx3ms_db,varx3ms5_db
-  real(dp), dimension(:,:,:),     allocatable  :: varx3_db,varmp3_db,varsoc3_db,varbulk_db,varaoc_db
-  real(dp), dimension(:,:,:,:),   allocatable  :: varx4_db
-  real(dp), dimension(:),      allocatable  :: falo,fald,ffeo,ffed
-  real(dp), dimension(:,:),       allocatable  :: modisnpp
-  real(dp), dimension(:),         allocatable  :: modisnpp_mp
-  integer   :: maxpft,pft, msite,sitemax,intval,isite
-  real(dp)    :: bulkd2
+  integer, dimension(:),        allocatable :: ilon,jlat, fcluster
+  integer, dimension(:,:),      allocatable :: varx2_int
+  real(sp), dimension(:,:),     allocatable :: varx2_flt
+  real(sp), dimension(:,:,:,:), allocatable :: varx4_flt
+  real(dp), dimension(:),       allocatable :: varmp1_db
+  real(dp), dimension(:,:),     allocatable :: varx2_db,varmp2_db
+  real(dp), dimension(:,:,:),   allocatable :: varx3time_db,varx3ms_db,varx3ms5_db
+  real(dp), dimension(:,:,:),   allocatable :: varx3_db,varmp3_db,varsoc3_db,varbulk_db,varaoc_db
+  real(dp), dimension(:,:,:,:), allocatable :: varx4_db
+  real(dp), dimension(:),       allocatable :: falo,fald,ffeo,ffed
+  real(dp), dimension(:,:),     allocatable :: modisnpp
+  real(dp), dimension(:),       allocatable :: modisnpp_mp
+  integer  :: maxpft,pft, msite,sitemax,intval,isite
+  real(dp) :: bulkd2
   ! data
   real(sp), dimension(12)    :: sandx,clayx,siltx,porex,bulkdx,fcpx,wiltx
   data sandx/0.93,0.81,0.63,0.17,0.06,0.40,0.54,0.08,0.30,0.48,0.06,0.15/
