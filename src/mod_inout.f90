@@ -370,7 +370,7 @@ contains
   logical,                INTENT(IN)    :: jglobal
     !! Flag indicating whether this is a global simulation
   integer,                INTENT(IN)    :: bgcopt
-    !! TODO: Define this argument
+    !! Biogeochemical type to simulate
   logical,                INTENT(IN)    :: jopt
     !! Flag indicating whether to optimize parameters or use a lookup table
   integer,                INTENT(IN)    :: jmodel
@@ -794,7 +794,7 @@ contains
   logical,                INTENT(IN)    :: jglobal
     !! Flag indicating whether this is a global simulation
   integer,                INTENT(IN)    :: bgcopt
-    !! TODO: Define this argument
+    !! Biogeochemical type to simulate
   logical,                INTENT(IN)    :: jopt
     !! Flag indicating whether to optimize parameters or use a lookup table
   integer,                INTENT(IN)    :: jmodel
