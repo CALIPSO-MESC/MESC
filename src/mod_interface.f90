@@ -13,6 +13,14 @@
 !! * vmicsoil_hwsd_cpu — HWSD soil profile calibration (CPU)
 !! * vmicsoil_hwsd_gpu — HWSD soil profile calibration (GPU, OpenACC)
 !!
+!! NOTE: Despite the label "Cable/Orchidee", vmicsoil_frc1_cpu is currently dead code — the
+!! call to it in functn_frc1 (mod_functions.f90) is commented out and replaced with a call to
+!! vmicsoil_hwsd_cpu. The actual ORCHIDEE run path goes through functn_global4, which loads
+!! forcing via getdata_global4_orchidee (when jmodel==2 or 3) and then calls vmicsoil_hwsd_cpu.
+!! For an online coupling with ORCHIDEE, this entire standalone spinup structure would not be
+!! called directly; the relevant lower-level routines are variable_time_single,
+!! vmic_param_time_single, and rk4modelx.
+!!
 !! **General order of operations**
 !!
 !! * (1) assign parameter values (vmic_param_xscale) or read parameter values from lookup table (functn_global)
@@ -214,6 +222,12 @@ end subroutine vmic_init
 !> 13: xrootbeta: scaling for depth-dependent of root C input    [1]    (0.5,5.0)     2.0
 !> 14: xvmaxbeta: scaling for depth-dependent of vmax            [1]    (0.5,5.0)     2.0
 !> ```
+!>
+!> NOTE: This routine is called before all run modes and is not specific to ORCHIDEE.
+!> The ORCHIDEE-specific behaviour is the jmodel==2 branch, which sets PFT root-beta profiles
+!> using xrootorchidee (as opposed to xrootcable for CABLE). In the global ORCHIDEE run
+!> (functn_global4 in mod_functions.f90), vmic_param_xscale is only called when jopt=.true.
+!> (optimisation mode); otherwise getparam_global reads parameters from a lookup table instead.
 subroutine vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
     real(dp), dimension(16), intent(in)  :: xopt              !! optimized parameter values (16-element vector)
     integer,                 intent(in)  :: bgcopt            !! BGC type index to apply `xopt` to
@@ -279,33 +293,38 @@ end subroutine vmic_param_xscale
 !> moisture, matric potential, and soil properties from global forcing,
 !> then writes them into per-patch input arrays for patch np.
 !>
+!> NOTE: This is the key place where time-varying forcing data is injected into the model —
+!> it copies fields from the micglobal structure (CABLE/ORCHIDEE forcing) into micinput on
+!> a per-patch, per-day basis. It is called by vmicsoil_hwsd_cpu, which is the actual driver
+!> used for ORCHIDEE runs (via functn_global4 in mod_functions.f90, with jmodel==2 or 3
+!> selecting getdata_global4_orchidee to populate micglobal). For an online coupling,
+!> this routine (or equivalent logic) is where ORCHIDEE would supply its per-timestep fields.
 subroutine variable_time(year,doy,micglobal,micinput,micnpool,np)
-    integer,                     intent(in)    :: year              !! simulation year
-    integer,                     intent(in)    :: doy               !! day of year forcing index
-    TYPE(mic_global_input),      intent(in)    :: micglobal         !! global forcing data (CABLE/ORCHIDEE)
-    TYPE(mic_input),             intent(inout)   :: micinput          !! per-patch input arrays (populated here)
-    TYPE(mic_npool),             intent(inout)   :: micnpool          !! nitrogen pool state (populated here)
-    integer,                     intent(in)    :: np                !! patch index
+    integer,                intent(in)    :: year      !! simulation year
+    integer,                intent(in)    :: doy       !! day of year forcing index
+    TYPE(mic_global_input), intent(in)    :: micglobal !! global forcing data (CABLE/ORCHIDEE)
+    TYPE(mic_input),        intent(inout) :: micinput  !! per-patch input arrays (populated here)
+    TYPE(mic_npool),        intent(inout) :: micnpool  !! nitrogen pool state (populated here)
+    integer,                intent(in)    :: np        !! patch index
     integer :: ns
 
-
 !        print *, 'calling global2np- ntime', ntime
-   micinput%fcnpp(np)      = max(0.0,micglobal%npp(np))              !gc/m2/year
-   micinput%Dleaf(np)      = (micglobal%dleaf(np,doy)/24.0)*delt     !gc/m2/delt
-   micinput%Droot(np)      = (micglobal%droot(np,doy)/24.0)*delt     !gc/m2/delt
-   micinput%Dwood(np)      = (micglobal%dwood(np,doy)/24.0)*delt     !gc/m2/delt
+  micinput%fcnpp(np) = max(0.0,micglobal%npp(np))          ! gc/m2/year
+  micinput%dleaf(np) = (micglobal%dleaf(np,doy)/24.0)*delt ! gc/m2/delt
+  micinput%droot(np) = (micglobal%droot(np,doy)/24.0)*delt ! gc/m2/delt
+  micinput%dwood(np) = (micglobal%dwood(np,doy)/24.0)*delt ! gc/m2/delt
 
-   do ns=1,ms
-      micinput%tavg(np,ns)     = micglobal%tsoil(np,ns,doy)  ! average temperature in deg C
-      micinput%wavg(np,ns)     = micglobal%moist(np,ns,doy)  ! average soil water content mm3/mm3
-      micinput%matpot(np,ns)   = micglobal%matpot(np,ns,doy)
-      micinput%clay(np,ns)     = micglobal%clay(np)          ! clay content (fraction)
-      micinput%silt(np,ns)     = micglobal%silt(np)          ! silt content (fraction)
-      micinput%ph(np,ns)       = micglobal%ph(np)
-      micinput%porosity(np,ns) = micglobal%poros(np)         ! porosity mm3/mm3
-      micinput%bulkd(np,ns)    = micglobal%bulkd(np)
-      micnpool%mineralN(np,ns) = 0.1                         ! g N /kg soil
-   end do !"ns"
+  do ns=1,ms
+    micinput%tavg(np,ns)     = micglobal%tsoil(np,ns,doy)  ! average temperature in deg C
+    micinput%wavg(np,ns)     = micglobal%moist(np,ns,doy)  ! average soil water content mm3/mm3
+    micinput%matpot(np,ns)   = micglobal%matpot(np,ns,doy)
+    micinput%clay(np,ns)     = micglobal%clay(np)          ! clay content (fraction)
+    micinput%silt(np,ns)     = micglobal%silt(np)          ! silt content (fraction)
+    micinput%ph(np,ns)       = micglobal%ph(np)
+    micinput%porosity(np,ns) = micglobal%poros(np)         ! porosity mm3/mm3
+    micinput%bulkd(np,ns)    = micglobal%bulkd(np)
+    micnpool%mineralN(np,ns) = 0.1                         ! g N /kg soil
+  end do
 
 end subroutine variable_time
 
@@ -545,6 +564,13 @@ end subroutine vmicsoil_c14
 !> RK4 integration with daily forcing from CABLE/ORCHIDEE. Parallelized over
 !> patches with OpenMP.
 !> See [[vmicsoil_c14]]
+!>
+!> NOTE: This subroutine is currently dead code — the call to it in functn_frc1
+!> (mod_functions.f90) is commented out and replaced with vmicsoil_hwsd_cpu. It also
+!> does not call variable_time_single, meaning it would run with static environmental
+!> inputs rather than updating them day by day, unlike vmicsoil_hwsd_cpu which calls
+!> variable_time_single and vmic_param_time_single every day. The actual ORCHIDEE run
+!> path uses vmicsoil_hwsd_cpu throughout.
 SUBROUTINE vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,ifsoc14,bgcopt,nyeqpool, &
                              zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
     integer,                     intent(in)    :: jrestart            !! restart flag (1=read restart file)
@@ -561,7 +587,7 @@ SUBROUTINE vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     TYPE(mic_param_default),     intent(in)    :: micpdef             !! default parameter values
     TYPE(mic_parameter),         intent(inout) :: micparam            !! working parameter array
     TYPE(mic_input),             intent(inout) :: micinput            !! time-varying environmental inputs
-    TYPE(mic_global_input),      intent(inout) :: micglobal           !! global forcing data
+    TYPE(mic_global_input),      intent(inout) :: micglobal           !! global forcing data from CABLE/ORCHIDEE
     TYPE(mic_cpool),             intent(inout) :: miccpool            !! carbon pool state
     TYPE(mic_npool),             intent(inout) :: micnpool            !! nitrogen pool state
     TYPE(mic_output),            intent(inout) :: micoutput           !! output fluxes and diagnostics
