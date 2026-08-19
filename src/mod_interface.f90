@@ -219,10 +219,6 @@ subroutine vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
     integer,                 intent(in)  :: bgcopt            !! BGC type index to apply `xopt` to
     integer,                 intent(in)  :: jmodel            !! forcing model selector (1=CABLE, 2=ORCHIDEE)
     TYPE(mic_param_xscale),  intent(inout) :: micpxdef        !! scaling factors (populated here)
-!    real(dp), dimension(17)                 :: xrootcable
-!    real(dp), dimension(18)                 :: xrootorchidee
-!    data xrootcable/1.43,0.94,1.43,1.04,0.77,0.85,0.62,1.77,0.94,0.94,1.43,0.94,1.04,0.53,1.00,1.00,1.00/
-!    data xrootorchidee/0.94,0.94,1.04,1.04,1.04,1.43,1.43,1.43,0.85,0.62,0.94,0.94,0.85,0.85,0.85,0.85,0.85,0.85/
     integer :: i
 
      ! assign the default values
