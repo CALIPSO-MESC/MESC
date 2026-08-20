@@ -283,9 +283,20 @@ contains
     end do
     close(100)
 
-    do ipft=1,mpft
-       micpxdef%xrootbeta(ipft) = rootdepth(ipft)
-    end do
+    select case (jmodel)
+    case (model_cable)
+      do ipft=1,mpft
+        micpxdef%xrootbeta(ipft) = xrootcable(ipft)
+      end do
+    case (model_orchidee)
+      do ipft=1,mpft
+        micpxdef%xrootbeta(ipft) = xrootorchidee(ipft)
+      end do
+    case default
+      write(6,"(a,i0,a)") "ERROR vmic_param_xscale: Invalid model '", jmodel, "'"
+      stop 999
+    end select
+
   end subroutine getparam_global
 
   !> get number of patches
