@@ -52,12 +52,13 @@ contains
 !! Takes lookup-table parameters and default parameters, then populates
 !! the working parameter structure (`micparam`) for all `mbgc` types.
   SUBROUTINE vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
-    integer,                      intent(in)      :: kinetics        !! kinetics model selector (1, 2, or 3)
-    TYPE(mic_param_xscale),       intent(in)      :: micpxdef        !! BGC-type scaling factors
-    TYPE(mic_param_default),      intent(in)      :: micpdef         !! default parameter values
-    TYPE(mic_parameter),          intent(inout)   :: micparam        !! computed model parameters
-    real(dp),                    intent(in)      :: zse(ms)         !! soil layer thickness
-    !local variables
+    integer,                 intent(in)    :: kinetics !! kinetics model selector (1, 2, or 3)
+    TYPE(mic_param_xscale),  intent(in)    :: micpxdef !! BGC-type scaling factors
+    TYPE(mic_param_default), intent(in)    :: micpdef  !! default parameter values
+    TYPE(mic_parameter),     intent(inout) :: micparam !! computed model parameters
+    real(dp),                intent(in)    :: zse(ms)  !! soil layer thickness
+
+    ! Local variables
     real(dp), dimension(:,:), allocatable      :: froot
     real(dp), dimension(:),   allocatable      :: totroot
     integer    :: nopt,npft,np,ns
@@ -145,13 +146,13 @@ END SUBROUTINE vmic_param_constant
 !> microbial growth efficiency, turnover rates, desorption, Vmax, and Km.
 !>
 subroutine vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
-    integer,                      intent(in)      :: kinetics        !! kinetics model selector (1, 2, or 3)
-    TYPE(mic_param_xscale),       intent(in)      :: micpxdef        !! BGC-type scaling factors
-    TYPE(mic_param_default),      intent(in)      :: micpdef         !! default parameter values
-    TYPE(mic_parameter),          intent(inout)   :: micparam        !! computed model parameters
-    TYPE(mic_input),              intent(inout)   :: micinput        !! model environmental inputs
-    TYPE(mic_npool),              intent(inout)   :: micnpool        !! nitrogen pool state
-    integer,                      intent(in)      :: np              !! patch index
+    integer,                 intent(in)      :: kinetics !! kinetics model selector (1, 2, or 3)
+    TYPE(mic_param_xscale),  intent(in)      :: micpxdef !! BGC-type scaling factors
+    TYPE(mic_param_default), intent(in)      :: micpdef  !! default parameter values
+    TYPE(mic_parameter),     intent(inout)   :: micparam !! computed model parameters
+    TYPE(mic_input),         intent(inout)   :: micinput !! model environmental inputs
+    TYPE(mic_npool),         intent(inout)   :: micnpool !! nitrogen pool state
+    integer,                 intent(in)      :: np       !! patch index
 
     ! compute fractions
     call bgc_fractions(micpxdef,micpdef,micparam,micinput,np)
@@ -175,8 +176,10 @@ end subroutine vmic_param_time
 !> Sets default initial pool concentrations for all `mcpool` carbon pools,
 !> for all patches (`mp`) and soil layers (`ms`).
 subroutine vmic_init(miccpool,micnpool)
-    TYPE(mic_cpool),              intent(inout)   :: miccpool        !! carbon pool state (-initialized here)
-    TYPE(mic_npool),              intent(inout)   :: micnpool        !! nitrogen pool state
+    TYPE(mic_cpool), intent(inout) :: miccpool !! carbon pool state (-initialized here)
+    TYPE(mic_npool), intent(inout) :: micnpool !! nitrogen pool state
+
+    ! Local variables
     integer :: ip
     real(dp), dimension(:), allocatable    :: cpooldef
 
@@ -228,10 +231,12 @@ end subroutine vmic_init
 !> (functn_global4 in mod_functions.f90), vmic_param_xscale is only called when jopt=.true.
 !> (optimisation mode); otherwise getparam_global reads parameters from a lookup table instead.
 subroutine vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
-    real(dp), dimension(16), intent(in)  :: xopt              !! optimized parameter values (16-element vector)
-    integer,                 intent(in)  :: bgcopt            !! BGC type index to apply `xopt` to
-    integer,                 intent(in)  :: jmodel            !! forcing model selector (1=CABLE, 2=ORCHIDEE)
-    TYPE(mic_param_xscale),  intent(inout) :: micpxdef        !! scaling factors (populated here)
+    real(dp), dimension(16), intent(in)    :: xopt     !! optimized parameter values (16-element vector)
+    integer,                 intent(in)    :: bgcopt   !! BGC type index to apply `xopt` to
+    integer,                 intent(in)    :: jmodel   !! forcing model selector (1=CABLE, 2=ORCHIDEE)
+    TYPE(mic_param_xscale),  intent(inout) :: micpxdef !! scaling factors (populated here)
+
+    ! Local variables
     integer :: i
 
      ! assign the default values
@@ -305,6 +310,8 @@ subroutine variable_time(year,doy,micglobal,micinput,micnpool,np)
     TYPE(mic_input),        intent(inout) :: micinput  !! per-patch input arrays (populated here)
     TYPE(mic_npool),        intent(inout) :: micnpool  !! nitrogen pool state (populated here)
     integer,                intent(in)    :: np        !! patch index
+
+    ! Local variables
     integer :: ns
 
 !        print *, 'calling global2np- ntime', ntime
@@ -334,24 +341,24 @@ end subroutine variable_time
 !> execution with bioturbation inlined to avoid auto-allocation issues.
 subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,ifsoc14,bgcopt,nyeqpool, &
                         zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
-    integer,                     intent(in)    :: jrestart            !! restart flag (1=read restart file)
-    character(len=140),          intent(in)    :: frestart_in         !! restart input filename
-    character(len=140),          intent(in)    :: frestart_out        !! restart output filename
-    character(len=140),          intent(in)    :: foutput             !! output filename
-    integer,                     intent(in)    :: kinetics            !! kinetics model selector (1, 2, or 3)
-    integer,                     intent(in)    :: isoc14              !! 14C tracking flag
-    integer,                     intent(in)    :: ifsoc14             !! 14C soil observation flag (1=run back to 1940)
-    integer,                     intent(in)    :: bgcopt              !! target BGC type
-    integer,                     intent(in)    :: nyeqpool            !! years to run for equilibrium
-    real(dp),                   intent(in)    :: zse(ms)             !! soil layer thickness [m]
-    TYPE(mic_param_xscale),      intent(inout) :: micpxdef            !! BGC-type scaling factors
-    TYPE(mic_param_default),     intent(in)    :: micpdef             !! default parameter values
-    TYPE(mic_parameter),         intent(inout) :: micparam            !! working parameter array
-    TYPE(mic_input),             intent(inout) :: micinput            !! time-varying environmental inputs
-    TYPE(mic_global_input),      intent(inout) :: micglobal           !! global forcing data
-    TYPE(mic_cpool),             intent(inout) :: miccpool            !! carbon pool state
-    TYPE(mic_npool),             intent(inout) :: micnpool            !! nitrogen pool state
-    TYPE(mic_output),            intent(inout) :: micoutput           !! output fluxes and diagnostics
+    integer,                 intent(in)    :: jrestart     !! restart flag (1=read restart file)
+    character(len=140),      intent(in)    :: frestart_in  !! restart input filename
+    character(len=140),      intent(in)    :: frestart_out !! restart output filename
+    character(len=140),      intent(in)    :: foutput      !! output filename
+    integer,                 intent(in)    :: kinetics     !! kinetics model selector (1, 2, or 3)
+    integer,                 intent(in)    :: isoc14       !! 14C tracking flag
+    integer,                 intent(in)    :: ifsoc14      !! 14C soil observation flag (1=run back to 1940)
+    integer,                 intent(in)    :: bgcopt       !! target BGC type
+    integer,                 intent(in)    :: nyeqpool     !! years to run for equilibrium
+    real(dp),                intent(in)    :: zse(ms)      !! soil layer thickness [m]
+    TYPE(mic_param_xscale),  intent(inout) :: micpxdef     !! BGC-type scaling factors
+    TYPE(mic_param_default), intent(in)    :: micpdef      !! default parameter values
+    TYPE(mic_parameter),     intent(inout) :: micparam     !! working parameter array
+    TYPE(mic_input),         intent(inout) :: micinput     !! time-varying environmental inputs
+    TYPE(mic_global_input),  intent(inout) :: micglobal    !! global forcing data
+    TYPE(mic_cpool),         intent(inout) :: miccpool     !! carbon pool state
+    TYPE(mic_npool),         intent(inout) :: micnpool     !! nitrogen pool state
+    TYPE(mic_output),        intent(inout) :: micoutput    !! output fluxes and diagnostics
 
     ! local variables
     real(dp),    dimension(mcpool)    :: xpool0,xpool1
@@ -572,24 +579,24 @@ end subroutine vmicsoil_c14
 !> path uses vmicsoil_hwsd_cpu throughout.
 SUBROUTINE vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,ifsoc14,bgcopt,nyeqpool, &
                              zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
-    integer,                     intent(in)    :: jrestart            !! restart flag (1=read restart file)
-    character(len=140),          intent(in)    :: frestart_in         !! restart input filename
-    character(len=140),          intent(in)    :: frestart_out        !! restart output filename
-    character(len=140),          intent(in)    :: foutput             !! output filename
-    integer,                     intent(in)    :: kinetics            !! kinetics model selector (1, 2, or 3)
-    integer,                     intent(in)    :: isoc14              !! 14C tracking flag
-    integer,                     intent(in)    :: ifsoc14             !! 14C soil observation flag (1=run back to 1940)
-    integer,                     intent(in)    :: bgcopt              !! target BGC type
-    integer,                     intent(in)    :: nyeqpool            !! years to run for equilibrium
-    real(dp),                   intent(in)    :: zse(ms)             !! soil layer thickness [m]
-    TYPE(mic_param_xscale),      intent(inout) :: micpxdef            !! BGC-type scaling factors
-    TYPE(mic_param_default),     intent(in)    :: micpdef             !! default parameter values
-    TYPE(mic_parameter),         intent(inout) :: micparam            !! working parameter array
-    TYPE(mic_input),             intent(inout) :: micinput            !! time-varying environmental inputs
-    TYPE(mic_global_input),      intent(inout) :: micglobal           !! global forcing data from CABLE/ORCHIDEE
-    TYPE(mic_cpool),             intent(inout) :: miccpool            !! carbon pool state
-    TYPE(mic_npool),             intent(inout) :: micnpool            !! nitrogen pool state
-    TYPE(mic_output),            intent(inout) :: micoutput           !! output fluxes and diagnostics
+    integer,                 intent(in)    :: jrestart     !! restart flag (1=read restart file)
+    character(len=140),      intent(in)    :: frestart_in  !! restart input filename
+    character(len=140),      intent(in)    :: frestart_out !! restart output filename
+    character(len=140),      intent(in)    :: foutput      !! output filename
+    integer,                 intent(in)    :: kinetics     !! kinetics model selector (1, 2, or 3)
+    integer,                 intent(in)    :: isoc14       !! 14C tracking flag
+    integer,                 intent(in)    :: ifsoc14      !! 14C soil observation flag (1=run back to 1940)
+    integer,                 intent(in)    :: bgcopt       !! target BGC type
+    integer,                 intent(in)    :: nyeqpool     !! years to run for equilibrium
+    real(dp),                intent(in)    :: zse(ms)      !! soil layer thickness [m]
+    TYPE(mic_param_xscale),  intent(inout) :: micpxdef     !! BGC-type scaling factors
+    TYPE(mic_param_default), intent(in)    :: micpdef      !! default parameter values
+    TYPE(mic_parameter),     intent(inout) :: micparam     !! working parameter array
+    TYPE(mic_input),         intent(inout) :: micinput     !! time-varying environmental inputs
+    TYPE(mic_global_input),  intent(inout) :: micglobal    !! global forcing data from CABLE/ORCHIDEE
+    TYPE(mic_cpool),         intent(inout) :: miccpool     !! carbon pool state
+    TYPE(mic_npool),         intent(inout) :: micnpool     !! nitrogen pool state
+    TYPE(mic_output),        intent(inout) :: micoutput    !! output fluxes and diagnostics
 
     ! local variables
     real(dp),    dimension(mcpool)    :: xpool0,xpool1
@@ -715,23 +722,23 @@ end SUBROUTINE vmicsoil_frc1_cpu
 !> See [[vmicsoil_c14]]
 subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
                              zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
-    integer,                     intent(in)    :: jrestart            !! restart flag (1=read restart file)
-    character(len=140),          intent(in)    :: frestart_in         !! restart input filename
-    character(len=140),          intent(in)    :: frestart_out        !! restart output filename
-    character(len=140),          intent(in)    :: foutput             !! output filename
-    integer,                     intent(in)    :: kinetics            !! kinetics model selector (1, 2, or 3)
-    integer,                     intent(in)    :: isoc14              !! 14C tracking flag
-    integer,                     intent(in)    :: bgcopt              !! target BGC type
-    integer,                     intent(in)    :: nyeqpool            !! years to run for equilibrium
-    real(dp),                   intent(in)    :: zse(ms)             !! soil layer thickness [m]
-    TYPE(mic_param_xscale),      intent(inout) :: micpxdef            !! BGC-type scaling factors
-    TYPE(mic_param_default),     intent(in)    :: micpdef             !! default parameter values
-    TYPE(mic_parameter),         intent(inout) :: micparam            !! working parameter array
-    TYPE(mic_input),             intent(inout) :: micinput            !! time-varying environmental inputs
-    TYPE(mic_global_input),      intent(inout) :: micglobal           !! global forcing data
-    TYPE(mic_cpool),             intent(inout) :: miccpool            !! carbon pool state
-    TYPE(mic_npool),             intent(inout) :: micnpool            !! nitrogen pool state
-    TYPE(mic_output),            intent(inout) :: micoutput           !! output fluxes and diagnostics
+    integer,                 intent(in)    :: jrestart     !! restart flag (1=read restart file)
+    character(len=140),      intent(in)    :: frestart_in  !! restart input filename
+    character(len=140),      intent(in)    :: frestart_out !! restart output filename
+    character(len=140),      intent(in)    :: foutput      !! output filename
+    integer,                 intent(in)    :: kinetics     !! kinetics model selector (1, 2, or 3)
+    integer,                 intent(in)    :: isoc14       !! 14C tracking flag
+    integer,                 intent(in)    :: bgcopt       !! target BGC type
+    integer,                 intent(in)    :: nyeqpool     !! years to run for equilibrium
+    real(dp),                intent(in)    :: zse(ms)      !! soil layer thickness [m]
+    TYPE(mic_param_xscale),  intent(inout) :: micpxdef     !! BGC-type scaling factors
+    TYPE(mic_param_default), intent(in)    :: micpdef      !! default parameter values
+    TYPE(mic_parameter),     intent(inout) :: micparam     !! working parameter array
+    TYPE(mic_input),         intent(inout) :: micinput     !! time-varying environmental inputs
+    TYPE(mic_global_input),  intent(inout) :: micglobal    !! global forcing data
+    TYPE(mic_cpool),         intent(inout) :: miccpool     !! carbon pool state
+    TYPE(mic_npool),         intent(inout) :: micnpool     !! nitrogen pool state
+    TYPE(mic_output),        intent(inout) :: micoutput    !! output fluxes and diagnostics
 
     ! local variables
     real(dp),    dimension(:), allocatable  :: xpool0,xpool1
@@ -903,23 +910,23 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
 !> See [[vmicsoil_c14]]
 subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
                              zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
-    integer,                     intent(in)    :: jrestart            !! restart flag (1=read restart file)
-    character(len=140),          intent(in)    :: frestart_in         !! restart input filename
-    character(len=140),          intent(in)    :: frestart_out        !! restart output filename
-    character(len=140),          intent(in)    :: foutput             !! output filename
-    integer,                     intent(in)    :: kinetics            !! kinetics model selector (1, 2, or 3)
-    integer,                     intent(in)    :: isoc14              !! 14C tracking flag
-    integer,                     intent(in)    :: bgcopt              !! target BGC type
-    integer,                     intent(in)    :: nyeqpool            !! years to run for equilibrium
-    real(dp),                   intent(in)    :: zse(ms)             !! soil layer thickness [m]
-    TYPE(mic_param_xscale),      intent(inout) :: micpxdef            !! BGC-type scaling factors
-    TYPE(mic_param_default),     intent(in)    :: micpdef             !! default parameter values
-    TYPE(mic_parameter),         intent(inout) :: micparam            !! working parameter array
-    TYPE(mic_input),             intent(inout) :: micinput            !! time-varying environmental inputs
-    TYPE(mic_global_input),      intent(inout) :: micglobal           !! global forcing data
-    TYPE(mic_cpool),             intent(inout) :: miccpool            !! carbon pool state
-    TYPE(mic_npool),             intent(inout) :: micnpool            !! nitrogen pool state
-    TYPE(mic_output),            intent(inout) :: micoutput           !! output fluxes and diagnostics
+    integer,                 intent(in)    :: jrestart     !! restart flag (1=read restart file)
+    character(len=140),      intent(in)    :: frestart_in  !! restart input filename
+    character(len=140),      intent(in)    :: frestart_out !! restart output filename
+    character(len=140),      intent(in)    :: foutput      !! output filename
+    integer,                 intent(in)    :: kinetics     !! kinetics model selector (1, 2, or 3)
+    integer,                 intent(in)    :: isoc14       !! 14C tracking flag
+    integer,                 intent(in)    :: bgcopt       !! target BGC type
+    integer,                 intent(in)    :: nyeqpool     !! years to run for equilibrium
+    real(dp),                intent(in)    :: zse(ms)      !! soil layer thickness [m]
+    TYPE(mic_param_xscale),  intent(inout) :: micpxdef     !! BGC-type scaling factors
+    TYPE(mic_param_default), intent(in)    :: micpdef      !! default parameter values
+    TYPE(mic_parameter),     intent(inout) :: micparam     !! working parameter array
+    TYPE(mic_input),         intent(inout) :: micinput     !! time-varying environmental inputs
+    TYPE(mic_global_input),  intent(inout) :: micglobal    !! global forcing data
+    TYPE(mic_cpool),         intent(inout) :: miccpool     !! carbon pool state
+    TYPE(mic_npool),         intent(inout) :: micnpool     !! nitrogen pool state
+    TYPE(mic_output),        intent(inout) :: micoutput    !! output fluxes and diagnostics
     ! local variables
   !  real(dp),    dimension(:), allocatable  :: xpool0,xpool1
   !  real(dp),    dimension(:), allocatable  :: ypooli,ypoole,fluxsoc,cfluxa

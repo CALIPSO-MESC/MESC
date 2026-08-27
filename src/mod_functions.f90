@@ -229,15 +229,15 @@ module function_module
     real(dp), dimension(16), intent(in) :: xparam16
         !! Values of the `nx` optimized parameters.
 
-    TYPE(mic_param_xscale)    :: micpxdef
-    TYPE(mic_param_default)   :: micpdef
-    TYPE(mic_parameter)       :: micparam
-    TYPE(mic_input)           :: micinput
-    TYPE(mic_global_input)    :: micglobal
-    TYPE(mic_cpool)           :: miccpool
-    TYPE(mic_npool)           :: micnpool
-    TYPE(mic_output)          :: micoutput
-
+    ! Local variables
+    type(mic_param_xscale)  :: micpxdef
+    type(mic_param_default) :: micpdef
+    type(mic_parameter)     :: micparam
+    type(mic_input)         :: micinput
+    type(mic_global_input)  :: micglobal
+    type(mic_cpool)         :: miccpool
+    type(mic_npool)         :: micnpool
+    type(mic_output)        :: micoutput
     integer,  dimension(16) :: nxopt
     real(dp), dimension(16) :: xopt
     real(dp)                :: totcost1,totcost2
@@ -342,15 +342,15 @@ real(dp) function functn_frc1(nx,xparam16)
     real(dp), dimension(16), intent(in) :: xparam16
         !! Values of the `nx` optimized parameters.
 
-     TYPE(mic_param_xscale)    :: micpxdef
-     TYPE(mic_param_default)   :: micpdef
-     TYPE(mic_parameter)       :: micparam
-     TYPE(mic_input)           :: micinput
-     TYPE(mic_global_input)    :: micglobal
-     TYPE(mic_cpool)           :: miccpool
-     TYPE(mic_npool)           :: micnpool
-     TYPE(mic_output)          :: micoutput
-
+    ! Local variables
+    type(mic_param_xscale)  :: micpxdef
+    type(mic_param_default) :: micpdef
+    type(mic_parameter)     :: micparam
+    type(mic_input)         :: micinput
+    type(mic_global_input)  :: micglobal
+    type(mic_cpool)         :: miccpool
+    type(mic_npool)         :: micnpool
+    type(mic_output)        :: micoutput
     integer,  dimension(16) :: nxopt
     real(dp), dimension(16) :: xopt
     real(dp)                :: totcost1
@@ -446,17 +446,17 @@ END function functn_frc1
     real(dp), dimension(16), intent(in) :: xparam16
         !! Values of the `nx` optimized parameters.
 
+    ! Local variables
     integer,  dimension(16) :: nxopt
     real(dp), dimension(16) :: xopt
-    TYPE(mic_param_xscale)  :: micpxdef
-    TYPE(mic_param_default) :: micpdef
-    TYPE(mic_parameter)     :: micparam
-    TYPE(mic_input)         :: micinput
-    TYPE(mic_global_input)  :: micglobal
-    TYPE(mic_cpool)         :: miccpool
-    TYPE(mic_npool)         :: micnpool
-    TYPE(mic_output)        :: micoutput
-
+    type(mic_param_xscale)  :: micpxdef
+    type(mic_param_default) :: micpdef
+    type(mic_parameter)     :: micparam
+    type(mic_input)         :: micinput
+    type(mic_global_input)  :: micglobal
+    type(mic_cpool)         :: miccpool
+    type(mic_npool)         :: micnpool
+    type(mic_output)        :: micoutput
     logical :: jglobal
     logical :: jopt
     integer :: ifsoc14,kinetics,bgcopt,nyeqpool,isoc14,jmodel
@@ -552,17 +552,17 @@ END function functn_soc_hwsd
     real(dp), dimension(16), intent(in) :: xparam16
         !! Values of the `nx` optimized parameters.
 
-    integer,   dimension(16)  :: nxopt
-    real(dp),    dimension(16)  :: xopt
-    TYPE(mic_param_xscale)    :: micpxdef
-    TYPE(mic_param_default)   :: micpdef
-    TYPE(mic_parameter)       :: micparam
-    TYPE(mic_input)           :: micinput
-    TYPE(mic_global_input)    :: micglobal
-    TYPE(mic_cpool)           :: miccpool
-    TYPE(mic_npool)           :: micnpool
-    TYPE(mic_output)          :: micoutput
-
+    ! Local variables
+    integer,  dimension(16)  :: nxopt
+    real(dp), dimension(16)  :: xopt
+    type(mic_param_xscale)   :: micpxdef
+    type(mic_param_default)  :: micpdef
+    type(mic_parameter)      :: micparam
+    type(mic_input)          :: micinput
+    type(mic_global_input)   :: micglobal
+    type(mic_cpool)          :: miccpool
+    type(mic_npool)          :: micnpool
+    type(mic_output)         :: micoutput
     logical :: jglobal
     logical :: jopt
     integer :: ifsoc14,kinetics,bgcopt,nyeqpool,isoc14,jmodel
@@ -666,17 +666,17 @@ END function functn_global4
     real(dp), dimension(16), intent(in) :: xparam16
         !! Values of the `nx` optimized parameters.
 
+    ! Local variables
     integer,  dimension(16) :: nxopt
     real(dp), dimension(16) :: xopt
-    TYPE(mic_param_xscale)  :: micpxdef
-    TYPE(mic_param_default) :: micpdef
-    TYPE(mic_parameter)     :: micparam
-    TYPE(mic_input)         :: micinput
-    TYPE(mic_global_input)  :: micglobal
-    TYPE(mic_cpool)         :: miccpool
-    TYPE(mic_npool)         :: micnpool
-    TYPE(mic_output)        :: micoutput
-
+    type(mic_param_xscale)  :: micpxdef
+    type(mic_param_default) :: micpdef
+    type(mic_parameter)     :: micparam
+    type(mic_input)         :: micinput
+    type(mic_global_input)  :: micglobal
+    type(mic_cpool)         :: miccpool
+    type(mic_npool)         :: micnpool
+    type(mic_output)        :: micoutput
     logical :: jglobal
     logical :: jopt
     integer :: ifsoc14,kinetics,bgcopt,nyeqpool,isoc14,jmodel
