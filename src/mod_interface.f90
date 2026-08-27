@@ -44,8 +44,7 @@ contains
 !> Assign parameter values from defaults across all BGC types.
 !! Takes lookup-table parameters and default parameters, then populates
 !! the working parameter structure (`micparam`) for all `mbgc` types.
-  SUBROUTINE vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
-    integer,                      intent(in)      :: kinetics        !! kinetics model selector (1, 2, or 3)
+  SUBROUTINE vmic_param_constant(micpxdef,micpdef,micparam,zse)
     TYPE(mic_param_xscale),       intent(in)      :: micpxdef        !! BGC-type scaling factors
     TYPE(mic_param_default),      intent(in)      :: micpdef         !! default parameter values
     TYPE(mic_parameter),          intent(inout)   :: micparam        !! computed model parameters
@@ -110,21 +109,18 @@ contains
          print *, micparam%diffsocx(outp)
       end if
 
-      ! the following parameters are specific to kinetics3
-      if(kinetics==3) then
-         do np=1,mp
-            do ns=1,ms
-               nopt=micparam%bgctype(np)
-               micparam%kadsorp(np,ns)  = micpdef%kadsorpx
-               micparam%kdesorp(np,ns)  = micparam%kadsorp(np,ns) /(micpdef%kbax * micpxdef%xkba(nopt))
-               micparam%fp2a(np,ns)     = micpdef%fp2ax     * micpxdef%xfp2ax(nopt)
-               micparam%tvcpool(np,ns)  = micpdef%tvcpoolx  * micpxdef%xtvc(nopt)
-               micparam%tvppool(np,ns)  = micpdef%tvppoolx  * micpxdef%xtvp(nopt)
-               micparam%tvac(np,ns)     = micpdef%tvacx     * micpxdef%xtvac(nopt)
-               micparam%qmaxcoeff(np,ns)= micpdef%qmaxcoeff * micpxdef%xqmaxcoeff(nopt)
-            end do  !ns
-         end do  !np
-      end if ! kinetics
+      do np=1,mp
+        do ns=1,ms
+            nopt=micparam%bgctype(np)
+            micparam%kadsorp(np,ns)  = micpdef%kadsorpx
+            micparam%kdesorp(np,ns)  = micparam%kadsorp(np,ns) /(micpdef%kbax * micpxdef%xkba(nopt))
+            micparam%fp2a(np,ns)     = micpdef%fp2ax     * micpxdef%xfp2ax(nopt)
+            micparam%tvcpool(np,ns)  = micpdef%tvcpoolx  * micpxdef%xtvc(nopt)
+            micparam%tvppool(np,ns)  = micpdef%tvppoolx  * micpxdef%xtvp(nopt)
+            micparam%tvac(np,ns)     = micpdef%tvacx     * micpxdef%xtvac(nopt)
+            micparam%qmaxcoeff(np,ns)= micpdef%qmaxcoeff * micpxdef%xqmaxcoeff(nopt)
+        end do  !ns
+      end do  !np
 
 
     deallocate(froot)
@@ -137,8 +133,7 @@ END SUBROUTINE vmic_param_constant
 !> otherwise called once at the start of integration. Updates BGC fractions,
 !> microbial growth efficiency, turnover rates, desorption, Vmax, and Km.
 !>
-subroutine vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
-    integer,                      intent(in)      :: kinetics        !! kinetics model selector (1, 2, or 3)
+subroutine vmic_param_time(micpxdef,micpdef,micparam,micinput,micnpool,np)
     TYPE(mic_param_xscale),       intent(in)      :: micpxdef        !! BGC-type scaling factors
     TYPE(mic_param_default),      intent(in)      :: micpdef         !! default parameter values
     TYPE(mic_parameter),          intent(inout)   :: micparam        !! computed model parameters
@@ -153,9 +148,9 @@ subroutine vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,
     call mget(micpdef,micparam,micinput,micnpool,np)
 
     ! compute microbial turnover rates
-    call turnovert(kinetics,micpxdef,micpdef,micparam,micinput,np)
+    call turnovert(micpxdef,micpdef,micparam,micinput,np)
 
-    if(kinetics/=3) call desorpt(micpxdef,micparam,micinput,np)
+    call desorpt(micpxdef,micparam,micinput,np)
 
     call vmaxt(micpxdef,micpdef,micparam,micinput,np)
     call kmt(micpxdef,micpdef,micparam,micinput,np)
@@ -318,13 +313,12 @@ end subroutine variable_time
 !> Runs the soil C model to equilibrium (or back to 1940 for 14C mode) using
 !> RK4 integration with inlined Crank-Nicolson bioturbation. Designed for GPU
 !> execution with bioturbation inlined to avoid auto-allocation issues.
-subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,ifsoc14,bgcopt,nyeqpool, &
+subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,isoc14,ifsoc14,bgcopt,nyeqpool, &
                         zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
     integer,                     intent(in)    :: jrestart            !! restart flag (1=read restart file)
     character(len=140),          intent(in)    :: frestart_in         !! restart input filename
     character(len=140),          intent(in)    :: frestart_out        !! restart output filename
     character(len=140),          intent(in)    :: foutput             !! output filename
-    integer,                     intent(in)    :: kinetics            !! kinetics model selector (1, 2, or 3)
     integer,                     intent(in)    :: isoc14              !! 14C tracking flag
     integer,                     intent(in)    :: ifsoc14             !! 14C soil observation flag (1=run back to 1940)
     integer,                     intent(in)    :: bgcopt              !! target BGC type
@@ -364,10 +358,10 @@ subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc1
   !  allocate(at(ms),bt(ms),ct(ms),rt(ms))
   !  allocate(xpool(ms))
 
-      call vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
+      call vmic_param_constant(micpxdef,micpdef,micparam,zse)
       call vmic_init(miccpool,micnpool)
       do np=1,mp
-         call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
+         call vmic_param_time(micpxdef,micpdef,micparam,micinput,micnpool,np)
       end do
 
     !  print *, 'initial pool size np=1 ns=1', miccpool%cpool(1,1,:)
@@ -383,7 +377,7 @@ subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc1
 ! "private": every cell-dependent variables used in paralelling computing
 
 !$acc data copyin(micpdef,micparam,miccpool,micinput,micoutput,  &
-!$acc nyrun,bgcopt,ndelt,zse,kinetics,nyeqpool,isoc14)      &
+!$acc nyrun,bgcopt,ndelt,zse,nyeqpool,isoc14)      &
 !$acc create(delty,timex,fluxsoc,year,ny,i,ns,np,ip,xpool0,xpool1,ypooli,ypoole,diffsocxx,cfluxa, &
 !$acc j,deltD,xzse,sdepthx,coeffA,coeffB,at,bt,ct,rt,xpool,cleachloss)              &
 !$acc copyout(miccpool%cpool,micoutput%fluxcinput,micoutput%fluxrsoil,micoutput%fluxcleach)
@@ -424,7 +418,7 @@ subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc1
                  ! here the integration step is "delty" in rk4 and "ndelt" is number of "delt (hour) per year
                   timex=real(i*delt)
                   delty = real(ndelt)/(365.0*delt)  ! time step in rk4 in "24 * delt (or daily)", all C input are in " per delt"
-                  call rk4modelx(timex,delty,ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,xpool0,xpool1)
+                  call rk4modelx(timex,delty,ny,isoc14,np,ns,micpdef,micparam,micinput,xpool0,xpool1)
 
                   do ip=1,mcpool
                      miccpool%cpool(np,ns,ip) = max(xpool1(ip),1.0e-8)
@@ -549,13 +543,12 @@ end subroutine vmicsoil_c14
 !> RK4 integration with daily forcing from CABLE/ORCHIDEE. Parallelized over
 !> patches with OpenMP.
 !> See [[vmicsoil_c14]]
-SUBROUTINE vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,ifsoc14,bgcopt,nyeqpool, &
+SUBROUTINE vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,ifsoc14,bgcopt,nyeqpool, &
                              zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
     integer,                     intent(in)    :: jrestart            !! restart flag (1=read restart file)
     character(len=140),          intent(in)    :: frestart_in         !! restart input filename
     character(len=140),          intent(in)    :: frestart_out        !! restart output filename
     character(len=140),          intent(in)    :: foutput             !! output filename
-    integer,                     intent(in)    :: kinetics            !! kinetics model selector (1, 2, or 3)
     integer,                     intent(in)    :: isoc14              !! 14C tracking flag
     integer,                     intent(in)    :: ifsoc14             !! 14C soil observation flag (1=run back to 1940)
     integer,                     intent(in)    :: bgcopt              !! target BGC type
@@ -591,10 +584,10 @@ SUBROUTINE vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
    real(dp)  :: depthx1,depthx2
 
 
-      call vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
+      call vmic_param_constant(micpxdef,micpdef,micparam,zse)
       call vmic_init(miccpool,micnpool)
       do np=1,mp
-         call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
+         call vmic_param_time(micpxdef,micpdef,micparam,micinput,micnpool,np)
       end do
 
       print *, "initial pool size np=1 ns=1", miccpool%cpool(1,1,:)
@@ -605,7 +598,7 @@ SUBROUTINE vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
       ndelt   = int(24*365/delt) ! number of time step per year in "delt" unit
 
 !$OMP PARALLEL DEFAULT(NONE) SHARED (micparam,micpxdef,micnpool,micinput,micglobal,miccpool,micoutput,micpdef,&
-!$OMP kinetics,isoc14,ifsoc14,nyeqpool,bgcopt,ndelt,zse,mp,ms) &
+!$OMP isoc14,ifsoc14,nyeqpool,bgcopt,ndelt,zse,mp,ms) &
 !$OMP PRIVATE (np,nyrun,ny,year,i,timex,delty, &
 !$OMP ns,ip,xpool0,xpool1,fluxsoc,diffsocxx,ypooli,ypoole,cpool0,cpool1,totcinput,depthx1,depthx2)
 !$OMP DO
@@ -646,7 +639,7 @@ SUBROUTINE vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                      ! here the integration step is "delty" in rk4 and "ndelt" is number of "delt (hour) per year
                      timex=real(i*delt)
                      delty = real(ndelt)/(365.0*delt)  ! time step in rk4 in "24 * delt (or daily)", all C input are in " per delt"
-                     call rk4modelx(timex,delty,ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,xpool0,xpool1)
+                     call rk4modelx(timex,delty,ny,isoc14,np,ns,micpdef,micparam,micinput,xpool0,xpool1)
 
                      do ip=1,mcpool
                         miccpool%cpool(np,ns,ip) = max(xpool1(ip),1.0e-8)
@@ -692,13 +685,12 @@ end SUBROUTINE vmicsoil_frc1_cpu
 !> time-varying forcing per station. Includes bioturbation and leaching. Parallelized
 !> over stations with OpenMP.
 !> See [[vmicsoil_c14]]
-subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
+subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bgcopt,nyeqpool, &
                              zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
     integer,                     intent(in)    :: jrestart            !! restart flag (1=read restart file)
     character(len=140),          intent(in)    :: frestart_in         !! restart input filename
     character(len=140),          intent(in)    :: frestart_out        !! restart output filename
     character(len=140),          intent(in)    :: foutput             !! output filename
-    integer,                     intent(in)    :: kinetics            !! kinetics model selector (1, 2, or 3)
     integer,                     intent(in)    :: isoc14              !! 14C tracking flag
     integer,                     intent(in)    :: bgcopt              !! target BGC type
     integer,                     intent(in)    :: nyeqpool            !! years to run for equilibrium
@@ -730,7 +722,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
        allocate(ypooli(ms),ypoole(ms),fluxsoc(ms),cfluxa(ms))
 
     !   print *, 'calling vmic_param_constant'
-       call vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
+       call vmic_param_constant(micpxdef,micpdef,micparam,zse)
 
     !   print *, 'calling vmic_init'
        call vmic_init(miccpool,micnpool)
@@ -750,7 +742,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
    end do
 
 !$OMP PARALLEL DEFAULT(NONE) SHARED (micparam,micpxdef,micnpool,micinput,micglobal,miccpool,micoutput,micpdef,&
-!$OMP kinetics,isoc14,nyeqpool,bgcopt,ndelt,zse,mp,ms,stations_used) &
+!$OMP isoc14,nyeqpool,bgcopt,ndelt,zse,mp,ms,stations_used) &
 !$OMP PRIVATE (np,timex,delty,ns,ip,station_index,&
 !$OMP xpool0,xpool1,fluxsoc,diffsocxx,ypooli,ypoole,cpool0,cpool1,totcinput,cfluxa,ny,i,year) &
 !$OMP FIRSTPRIVATE (station_count)
@@ -769,7 +761,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
          do i=1,365   !ntime
             call variable_time(year,i,micglobal,micinput,micnpool,np)
          ! calculate parameter values that depend on soil temperature or moisture (varying with time)
-            call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
+            call vmic_param_time(micpxdef,micpdef,micparam,micinput,micnpool,np)
 
                ! for each soil layer
                ! sum last all C pools of all layers for compute the soil respiration = input - sum(delCpool)
@@ -787,7 +779,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                  ! here the integration step is "delty" in rk4 and "ndelt" is number of "delt (hour) per year
                   timex=real(i*delt)
                   delty = real(ndelt)/(365.0*delt)  ! time step in rk4 in "24 * delt (or daily)", all C input are in " per delt"
-                  call rk4modelx(timex,delty,ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,xpool0,xpool1)
+                  call rk4modelx(timex,delty,ny,isoc14,np,ns,micpdef,micparam,micinput,xpool0,xpool1)
 
                   do ip=1,mcpool
                      miccpool%cpool(np,ns,ip) = max(xpool1(ip),1.0e-8)
@@ -804,9 +796,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                micoutput%fluxcinput(np)= micoutput%fluxcinput(np) + totcinput * real(delty)
                micoutput%fluxrsoil(np) = micoutput%fluxrsoil(np)  + totcinput * real(delty) + (cpool1 - cpool0)
 
-            !! do labile carbon leaching only for kinetics=3
             !! the following leachate transport calculations caused mass imbalance: disabled temporarily
-            !   if(kinetics==3) then
             !      cfluxa(:)=0.0
             !      do ns=1,ms
             !         cfluxa(ns) = sqrt(micinput%wavg(np,ns)/micinput%porosity(np,ns)) * micparam%tvac(np,ns) * miccpool%cpool(np,ns,7) * delty
@@ -820,7 +810,6 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
             !      enddo
             !     ! converting flux from mg C cm-3 delty-1 to g C m-2 delty-1
             !      micoutput%fluxcleach(np) = micoutput%fluxcleach(np) + cfluxa(ms) * zse(ms) * 1000.0
-            !   endif
 
             ! only do leaching the bottom layer, as other layers are done via bioturb
                cfluxa(:) = 0.0
@@ -880,13 +869,12 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
 !> Runs the soil C model to equilibrium for HWSD-based profiles with
 !> inlined Crank-Nicolson bioturbation to avoid GPU auto-allocation issues.
 !> See [[vmicsoil_c14]]
-subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
+subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bgcopt,nyeqpool, &
                              zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
     integer,                     intent(in)    :: jrestart            !! restart flag (1=read restart file)
     character(len=140),          intent(in)    :: frestart_in         !! restart input filename
     character(len=140),          intent(in)    :: frestart_out        !! restart output filename
     character(len=140),          intent(in)    :: foutput             !! output filename
-    integer,                     intent(in)    :: kinetics            !! kinetics model selector (1, 2, or 3)
     integer,                     intent(in)    :: isoc14              !! 14C tracking flag
     integer,                     intent(in)    :: bgcopt              !! target BGC type
     integer,                     intent(in)    :: nyeqpool            !! years to run for equilibrium
@@ -934,10 +922,10 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
   !  allocate(at(ms),bt(ms),ct(ms),rt(ms))
   !  allocate(xpool(ms))
 
-      call vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
+      call vmic_param_constant(micpxdef,micpdef,micparam,zse)
       call vmic_init(miccpool,micnpool)
       do np=1,mp
-         call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
+         call vmic_param_time(micpxdef,micpdef,micparam,micinput,micnpool,np)
       end do
 
       if(jrestart==1) call vmic_restart_read(miccpool,micnpool,frestart_in)
@@ -950,7 +938,7 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
 ! "private": every cell-dependent variables used in paralelling computing
 
 !$acc data copyin(micpdef,micparam,miccpool,micinput,micoutput,micglobal,  &
-!$acc bgcopt,ndelt,zse,kinetics,nyeqpool,isoc14)      &
+!$acc bgcopt,ndelt,zse,nyeqpool,isoc14)      &
 !$acc create(delty,timex,fluxsoc,year,ny,i,ns,np,ip,xpool0,xpool1,ypooli,ypoole,diffsocxx,cfluxa, &
 !$acc j,deltD,xzse,sdepthx,coeffA,coeffB,at,bt,ct,rt,xpool,cleachloss)              &
 !$acc copyout(miccpool%cpool,micoutput%fluxcinput,micoutput%fluxrsoil,micoutput%fluxcleach)
@@ -971,7 +959,7 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                call variable_time(year,i,micglobal,micinput,micnpool,np)
 
                ! calculate parameter values that depend on soil temperature or moisture (varying with time)
-               call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
+               call vmic_param_time(micpxdef,micpdef,micparam,micinput,micnpool,np)
 
                ! for each soil layer
                ! sum last all C pools of all layers for compute the soil respiration = input - sum(delCpool)
@@ -990,7 +978,7 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                   timex=real(i*delt)
                   delty = real(ndelt)/(365.0*delt)  ! time step in rk4 in "24 * delt (or daily)", all C input are in " per delt"
 
-                  call rk4modelx(timex,delty,ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,xpool0,xpool1)
+                  call rk4modelx(timex,delty,ny,isoc14,np,ns,micpdef,micparam,micinput,xpool0,xpool1)
 
                   do ip=1,mcpool
                      miccpool%cpool(np,ns,ip) = max(xpool1(ip),1.0e-8)
@@ -1002,9 +990,7 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                micoutput%fluxcinput(np)= micoutput%fluxcinput(np) + totcinput * real(delty)
                micoutput%fluxrsoil(np) = micoutput%fluxrsoil(np)  + totcinput * real(delty) + (cpool1 - cpool0)
 
-               ! do labile carbon leaching only for kinetics=3
                ! the following leachate transport calculations caused mass imbalance: disabled temporarily
-            !   if(kinetics==3) then
             !     cfluxa(:)=0.0
             !     do ns=1,ms
             !        cfluxa(ns) = sqrt(micinput%wavg(np,ns)/micinput%porosity(np,ns)) * micparam%tvac(np,ns) * miccpool%cpool(np,ns,7) * delty
@@ -1016,7 +1002,6 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
             !     enddo
             !    ! converting flux from mg C cm-3 delty-1 to g C m-2 delty-1
             !    micoutput%fluxcleach(np) = micoutput%fluxcleach(np) + cfluxa(ms) * zse(ms) * 1000.0
-            !  endif
 
                 if(diag==1) then
                    print *, "year day site np1", year, i, outp,micparam%diffsocx(outp)
