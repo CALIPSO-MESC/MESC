@@ -31,10 +31,9 @@ module mesc_interface_module
   use mic_variable, only : mic_param_xscale, mic_param_default, mic_parameter, &
                            mic_input, mic_npool, mic_cpool, mic_output, mic_global_input
   use mesc_inout_module, only: vmic_restart_read ! , vmic_restart_write, vmic_output_write
-  use mesc_model_module, only: rk4modelx, tridag, bioturb, bgc_fractions, mget, &
-                               turnovert, desorpt, vmaxt, kmt, bgc_fractions_single, &
-                               mget_single, turnovert_single, desorpt_single, vmaxt_single, &
-                               kmt_single
+   use mesc_model_module, only: rk4modelx, tridag, bioturb, bgc_fractions, &
+                               mget, turnovert, desorpt, vmaxt, &
+                               kmt
   implicit none
 
   ! All module members are public by default
@@ -132,40 +131,13 @@ contains
     deallocate(totroot)
 END SUBROUTINE vmic_param_constant
 
-!> Compute time-dependent model parameters for all patches.
+!> Compute time-dependent model parameters for one patch np.
 !>
 !> Called each time step when forcing variables (e.g., air temperature) vary in time;
 !> otherwise called once at the start of integration. Updates BGC fractions,
 !> microbial growth efficiency, turnover rates, desorption, Vmax, and Km.
 !>
-!> See [[vmic_param_time_single]]
-subroutine vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool)
-    integer,                      intent(in)      :: kinetics        !! kinetics model selector (1, 2, or 3)
-    TYPE(mic_param_xscale),       intent(in)      :: micpxdef        !! BGC-type scaling factors
-    TYPE(mic_param_default),      intent(in)      :: micpdef         !! default parameter values
-    TYPE(mic_parameter),          intent(inout)   :: micparam        !! computed model parameters
-    TYPE(mic_input),              intent(inout)   :: micinput        !! model environmental inputs
-    TYPE(mic_npool),              intent(inout)   :: micnpool        !! nitrogen pool state
-
-    ! compute fractions
-    call bgc_fractions(micpxdef,micpdef,micparam,micinput)
-
-    ! compute microbial growth efficiency
-    call mget(micpdef,micparam,micinput,micnpool)
-
-    ! compute microbial turnover rates
-    call turnovert(kinetics,micpxdef,micpdef,micparam,micinput)
-
-    if(kinetics/=3) call Desorpt(micpxdef,micparam,micinput)
-
-    call Vmaxt(micpxdef,micpdef,micparam,micinput)
-    call Kmt(micpxdef,micpdef,micparam,micinput)
-
-end subroutine vmic_param_time
-
-
-!> Single-patch variant of [[vmic_param_time]]
-subroutine vmic_param_time_single(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
+subroutine vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
     integer,                      intent(in)      :: kinetics        !! kinetics model selector (1, 2, or 3)
     TYPE(mic_param_xscale),       intent(in)      :: micpxdef        !! BGC-type scaling factors
     TYPE(mic_param_default),      intent(in)      :: micpdef         !! default parameter values
@@ -175,20 +147,20 @@ subroutine vmic_param_time_single(kinetics,micpxdef,micpdef,micparam,micinput,mi
     integer,                      intent(in)      :: np              !! patch index
 
     ! compute fractions
-    call bgc_fractions_single(micpxdef,micpdef,micparam,micinput,np)
+    call bgc_fractions(micpxdef,micpdef,micparam,micinput,np)
 
     ! compute microbial growth efficiency
-    call mget_single(micpdef,micparam,micinput,micnpool,np)
+    call mget(micpdef,micparam,micinput,micnpool,np)
 
     ! compute microbial turnover rates
-    call turnovert_single(kinetics,micpxdef,micpdef,micparam,micinput,np)
+    call turnovert(kinetics,micpxdef,micpdef,micparam,micinput,np)
 
-    if(kinetics/=3) call Desorpt_single(micpxdef,micparam,micinput,np)
+    if(kinetics/=3) call desorpt(micpxdef,micparam,micinput,np)
 
-    call Vmaxt_single(micpxdef,micpdef,micparam,micinput,np)
-    call Kmt_single(micpxdef,micpdef,micparam,micinput,np)
+    call vmaxt(micpxdef,micpdef,micparam,micinput,np)
+    call kmt(micpxdef,micpdef,micparam,micinput,np)
 
-end subroutine vmic_param_time_single
+end subroutine vmic_param_time
 
 
 !> Initialize carbon pool sizes across all patches and soil layers.
@@ -305,46 +277,13 @@ subroutine vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
 end subroutine vmic_param_xscale
 
 
-!> Inject time-varying environmental forcing into model inputs for all patches.
+!> Inject time-varying environmental forcing into model inputs for one patch np.
 !>
-!> For each patch, pulls carbon inputs (NPP, leaf/root/wood litter), soil
-!> temperature, moisture, matric potential, and soil properties from the
-!> global forcing structure and writes them into the per-patch input arrays.
+!> Pulls carbon inputs (NPP, leaf/root/wood litter), soil temperature,
+!> moisture, matric potential, and soil properties from global forcing,
+!> then writes them into per-patch input arrays for patch np.
 !>
-!> See [[variable_time_single]]
-subroutine variable_time(year,doy,micglobal,micinput,micnpool)
-    integer,                     intent(in)    :: year              !! simulation year
-    integer,                     intent(in)    :: doy               !! day of year forcing index
-    TYPE(mic_global_input),      intent(inout) :: micglobal         !! global forcing data (CABLE/ORCHIDEE)
-    TYPE(mic_input),             intent(inout) :: micinput          !! per-patch input arrays (populated here)
-    TYPE(mic_npool),             intent(inout) :: micnpool          !! nitrogen pool state (populated here)
-    integer :: np,ns
-
-
-!        print *, 'calling global2np- ntime', ntime
-     do np=1,mp
-        micinput%fcnpp(np)      = max(0.0,micglobal%npp(np))              !gc/m2/year
-        micinput%Dleaf(np)      = (micglobal%dleaf(np,doy)/24.0)*delt     !gc/m2/delt
-        micinput%Droot(np)      = (micglobal%droot(np,doy)/24.0)*delt     !gc/m2/delt
-        micinput%Dwood(np)      = (micglobal%dwood(np,doy)/24.0)*delt     !gc/m2/delt
-
-        do ns=1,ms
-           micinput%tavg(np,ns)     = micglobal%tsoil(np,ns,doy)  ! average temperature in deg C
-           micinput%wavg(np,ns)     = micglobal%moist(np,ns,doy)  ! average soil water content mm3/mm3
-           micinput%matpot(np,ns)   = micglobal%matpot(np,ns,doy)
-           micinput%clay(np,ns)     = micglobal%clay(np)     ! clay content (fraction)
-           micinput%silt(np,ns)     = micglobal%silt(np)     ! silt content (fraction)
-           micinput%ph(np,ns)       = micglobal%ph(np)
-           micinput%porosity(np,ns) = micglobal%poros(np)    ! porosity mm3/mm3
-           micinput%bulkd(np,ns)    = micglobal%bulkd(np)
-           micnpool%mineralN(np,ns) = 0.1                    ! g N /kg soil
-        end do !"ns"
-     end do !"np"
-
-end subroutine variable_time
-
-!> Single-patch variant of [[variable_time]]
-subroutine variable_time_single(year,doy,micglobal,micinput,micnpool,np)
+subroutine variable_time(year,doy,micglobal,micinput,micnpool,np)
     integer,                     intent(in)    :: year              !! simulation year
     integer,                     intent(in)    :: doy               !! day of year forcing index
     TYPE(mic_global_input),      intent(in)    :: micglobal         !! global forcing data (CABLE/ORCHIDEE)
@@ -372,7 +311,7 @@ subroutine variable_time_single(year,doy,micglobal,micinput,micnpool,np)
       micnpool%mineralN(np,ns) = 0.1                         ! g N /kg soil
    end do !"ns"
 
-end subroutine variable_time_single
+end subroutine variable_time
 
 !> 14C calibration model driver (OpenACC GPU target).
 !>
@@ -427,7 +366,9 @@ subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc1
 
       call vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
       call vmic_init(miccpool,micnpool)
-      call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool)
+      do np=1,mp
+         call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
+      end do
 
     !  print *, 'initial pool size np=1 ns=1', miccpool%cpool(1,1,:)
     !  print *, 'xav=', bgcopt,micpxdef%xav(:)
@@ -652,7 +593,9 @@ SUBROUTINE vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
 
       call vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
       call vmic_init(miccpool,micnpool)
-      call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool)
+      do np=1,mp
+         call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
+      end do
 
       print *, "initial pool size np=1 ns=1", miccpool%cpool(1,1,:)
       print *, "xav=", bgcopt,micpxdef%xav(:)
@@ -824,9 +767,9 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
          micoutput%fluxcinput(np)=0.0; micoutput%fluxrsoil(np) = 0.0; micoutput%fluxcleach(np)= 0.0    ! yearly fluxes
 
          do i=1,365   !ntime
-            call variable_time_single(year,i,micglobal,micinput,micnpool,np)
+            call variable_time(year,i,micglobal,micinput,micnpool,np)
          ! calculate parameter values that depend on soil temperature or moisture (varying with time)
-            call vmic_param_time_single(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
+            call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
 
                ! for each soil layer
                ! sum last all C pools of all layers for compute the soil respiration = input - sum(delCpool)
@@ -993,7 +936,9 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
 
       call vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
       call vmic_init(miccpool,micnpool)
-      call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool)
+      do np=1,mp
+         call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
+      end do
 
       if(jrestart==1) call vmic_restart_read(miccpool,micnpool,frestart_in)
 
@@ -1023,10 +968,10 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
 
             do i=1,365
 
-               call variable_time(year,i,micglobal,micinput,micnpool)
+               call variable_time(year,i,micglobal,micinput,micnpool,np)
 
                ! calculate parameter values that depend on soil temperature or moisture (varying with time)
-               call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool)
+               call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
 
                ! for each soil layer
                ! sum last all C pools of all layers for compute the soil respiration = input - sum(delCpool)
