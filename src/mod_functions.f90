@@ -17,7 +17,7 @@ module function_module
                                getdata_hwsd_dim, getdata_hwsd, screenout, &
                                getparam_global,getpatch_global, &
                                getdata_global4_cable,getdata_global4_orchidee, getdata_aust_dim,getdata_aust
-   use mesc_interface_module, only: vmic_param_xscale, vmic_param_time_single, vmicsoil_c14, &
+   use mesc_interface_module, only: vmic_param_xscale, vmic_param_time, vmicsoil_c14, &
                                    vmicsoil_frc1_cpu, vmicsoil_hwsd_cpu, vmicsoil_hwsd_gpu
   use calcost_module, only: calcost_c14, calcost_frc1, calcost_hwsd3, calcost_global_hwsd, calcost_aust
   implicit none

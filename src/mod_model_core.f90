@@ -52,7 +52,7 @@ contains
 
  !> Computes Michaelis-Menten half-saturation constants (K and J) for one grid point np.
  !! Values are temperature- and clay-dependent. Unit: mg Mic C/cm3.
- subroutine Kmt_single(micpxdef,micpdef,micparam,micinput,np)
+ subroutine Kmt(micpxdef,micpdef,micparam,micinput,np)
     TYPE(mic_param_xscale),  INTENT(IN)      :: micpxdef      !! PFT-specific scaling factors
     TYPE(mic_param_default), INTENT(IN)      :: micpdef       !! fixed default parameters
     TYPE(mic_parameter),     INTENT(INOUT)   :: micparam      !! computed model parameters. K1:K3, J1:J3 updated at (np,ns)
@@ -85,13 +85,13 @@ contains
          print *, "J3=",micparam%J3(outp,1)
       end if
 
-    end subroutine Kmt_single
+    end subroutine Kmt
 
 
  !> Computes Vmax-based enzymatic rate constants (V1:V3, W1:W3) for one grid point np.
  !! Values are temperature-, depth-, and PFT-dependent.
  !! Unit: mg C per mg mic C per hour.
- subroutine Vmaxt_single(micpxdef,micpdef,micparam,micinput,np)
+ subroutine Vmaxt(micpxdef,micpdef,micparam,micinput,np)
     TYPE(mic_param_xscale),  INTENT(IN)     :: micpxdef      !! PFT-specific scaling factors
     TYPE(mic_param_default), INTENT(IN)     :: micpdef       !! fixed default parameters
     TYPE(mic_parameter),     INTENT(INOUT)  :: micparam      !! computed model parameters. V1:V3, W1:W3 updated at (np,ns)
@@ -126,7 +126,6 @@ contains
          micparam%W3(np,ns)   =  micpdef%xw3 * vmax(ns)
       end do
 
-
       if(diag==1.and.np==outp) then
          print *, "Vmaxt",micinput%tavg(outp,1),vmax(1)
          print *, "V1=",micparam%V1(outp,1)
@@ -137,12 +136,12 @@ contains
          print *, "W3=",micparam%W3(outp,1)
       end if
 
-    end subroutine Vmaxt_single
+    end subroutine Vmaxt
 
 
  !> Computes clay-dependent desorption rate (desorp) for one grid point np.
  !! Controls physical protection pool turnover.
- subroutine Desorpt_single(micpxdef,micparam,micinput,np)
+ subroutine Desorpt(micpxdef,micparam,micinput,np)
     TYPE(mic_param_xscale), INTENT(IN)      :: micpxdef      !! PFT-specific scaling factors
     TYPE(mic_parameter),    INTENT(INOUT)   :: micparam      !! computed model parameters; desorp updated at (np,ns)
     TYPE(mic_input),        INTENT(IN)      :: micinput      !! environmental model inputs
@@ -161,12 +160,12 @@ contains
          print *, "desorpt=",micparam%desorp(outp,:)
       end if
 
-    end subroutine Desorpt_single
+    end subroutine Desorpt
 
 
  !> Computes microbial growth efficiency (mgeR, mgeK) for one grid point np.
  !! Updates mgeR1:3 and mgeK1:3 over all soil layers at the selected site.
- subroutine mget_single(micpdef,micparam,micinput,micnpool,np)
+ subroutine mget(micpdef,micparam,micinput,micnpool,np)
     TYPE(mic_param_default), INTENT(IN)     :: micpdef       !! fixed default parameters
     TYPE(mic_parameter),     INTENT(INOUT)  :: micparam      !! computed model parameters. mgeR1:3, mgeK1:3 updated at (np,ns)
     TYPE(mic_input),         INTENT(IN)     :: micinput      !! environmental model inputs
@@ -211,12 +210,12 @@ contains
          print *, "epislon1-4=",micpdef%epislon1,micpdef%epislon2,micpdef%epislon3,micpdef%epislon4
       end if
 
-  end subroutine mget_single
+  end subroutine mget
 
 
  !> Computes microbial turnover rate coefficients (tvmicR/K, betamicR/K) for one grid point np.
  !! Turnover is PFT-, NPP-, and metabolic-fraction-dependent.
- subroutine turnovert_single(kinetics,micpxdef,micpdef,micparam,micinput,np)
+ subroutine turnovert(kinetics,micpxdef,micpdef,micparam,micinput,np)
     integer,                 INTENT(IN)      :: np            !! grid point index
     integer,                 INTENT(IN)      :: kinetics      !! kinetics model selector (1/2/3)
     TYPE(mic_param_xscale),  INTENT(IN)      :: micpxdef      !! PFT-specific scaling factors
@@ -251,14 +250,14 @@ contains
          print *, "tvmicR=",micparam%tvmicR(outp,:)
          print *, "tvmicR=",micparam%tvmicR(outp,:)
       end if
-  end subroutine turnovert_single
+  end subroutine turnovert
 
 
 
  !> Computes C-input partitioning and SOM routing fractions for one grid point np.
  !! Calculates metabolic vs structural litter inputs and routing terms
  !! fr2*, fk2* across all soil layers using litter quality and soil texture.
- subroutine bgc_fractions_single(micpxdef,micpdef,micparam,micinput,np)
+ subroutine bgc_fractions(micpxdef,micpdef,micparam,micinput,np)
     integer,                 INTENT(IN)     :: np            !! grid point index
     TYPE(mic_param_xscale),  INTENT(IN)     :: micpxdef      !! PFT-specific scaling factors
     TYPE(mic_param_default), INTENT(IN)     :: micpdef       !! fixed default parameters (currently unused)
@@ -375,7 +374,7 @@ contains
          print *, "fk2a=",micparam%fk2a(outp,:)
       end if
 
-   end subroutine bgc_fractions_single
+   end subroutine bgc_fractions
 
 
  !> Treats litter-C and SOC bioturbation as a diffusion process.
