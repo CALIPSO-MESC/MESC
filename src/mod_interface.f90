@@ -36,6 +36,7 @@
 module mesc_interface_module
   use precision_module, only : dp
   use mic_constant, only : diag, delt, mp, ms, mpft, mcpool, outp, tvc14, xrootcable, xrootorchidee
+  use mesc_namelist, only: model_cable, model_orchidee
   use mic_variable, only : mic_param_xscale, mic_param_default, mic_parameter, &
                            mic_input, mic_npool, mic_cpool, mic_output, mic_global_input
   use mesc_inout_module, only: vmic_restart_read ! , vmic_restart_write, vmic_output_write
@@ -204,7 +205,7 @@ end subroutine vmic_init
 !> First sets all scaling factors to unity defaults, then overwrites entries
 !> for the target BGC type (`bgcopt`) with optimized values from `xopt`. If a
 !> forcing model is specified (`jmodel`), also sets PFT-specific root-beta
-!> profiles for CABLE (1) or ORCHIDEE (2).
+!> profiles for CABLE or ORCHIDEE.
 !>
 !> The order is fixed:
 !> ```txt
@@ -237,7 +238,7 @@ subroutine vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
     TYPE(mic_param_xscale),  intent(inout) :: micpxdef !! scaling factors (populated here)
 
     ! Local variables
-    integer :: i
+    integer :: ipft
 
      ! assign the default values
      ! this should be replaced by a parameter lookup tables for gloabl simulations
@@ -260,14 +261,19 @@ subroutine vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
       micpxdef%xbeta     = 1.0
       micpxdef%xdesorp   = 1.0
 
-      do i=1,mpft
-         if(jmodel==1) then
-            micpxdef%xrootbeta(i) = xrootcable(i)
-         end if
-         if(jmodel==2) then
-            micpxdef%xrootbeta(i) = xrootorchidee(i)
-         end if
-      end do
+      select case (jmodel)
+      case (model_cable)
+        do ipft=1,mpft
+          micpxdef%xrootbeta(ipft) = xrootcable(ipft)
+        end do
+      case (model_orchidee)
+        do ipft=1,mpft
+          micpxdef%xrootbeta(ipft) = xrootorchidee(ipft)
+        end do
+      case default
+        write(6,"(a,i0,a)") "ERROR vmic_param_xscale: Invalid model '", jmodel, "'"
+        stop 999
+      end select
 
       ! assign the values to the optimized parameters
 
