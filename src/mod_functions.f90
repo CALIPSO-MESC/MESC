@@ -7,10 +7,10 @@ module mesc_namelist
 
     type, public :: mesc_config
         integer :: runcase = 0
-        integer :: jglobal = 0
+        logical :: jglobal = .false.
         integer :: kinetics = 3
         integer :: bgcopt = 1
-        integer :: jopt = 0
+        logical :: jopt = .false.
         integer :: jrestart = 0
         integer :: jmodel = 1
         integer :: ifsoc14 = 0
@@ -42,7 +42,9 @@ contains
 
         integer :: nml_unit, ios
         character(len=512) :: iomsg
-        integer :: runcase, jglobal, kinetics, bgcopt, jopt
+        logical :: jglobal
+        integer :: runcase, kinetics, bgcopt
+        logical :: jopt
         integer :: jrestart, jmodel, ifsoc14
         character(len=path_len) :: frestart_in, frestart_out, foutput
         character(len=path_len) :: fparameter, cfraction, frac14c, f14c(5), filecluster
@@ -118,7 +120,7 @@ contains
     subroutine print_mesc_config(config)
         type(mesc_config), intent(in) :: config
         write(output_unit, '(a,i0)') 'runcase     = ', config%runcase
-        write(output_unit, '(a,i0)') 'jglobal     = ', config%jglobal
+        write(output_unit, '(a,l1)') 'jglobal     = ', config%jglobal
         write(output_unit, '(a,i0)') 'kinetics    = ', config%kinetics
         write(output_unit, '(a,i0)') 'bgcopt      = ', config%bgcopt
         write(output_unit, '(a,i0)') 'jopt        = ', config%jopt
@@ -158,7 +160,7 @@ module function_module
                                getdata_hwsd_dim, getdata_hwsd, screenout, &
                                getparam_global,getpatch_global, &
                                getdata_global4_cable,getdata_global4_orchidee, getdata_aust_dim,getdata_aust
-   use mesc_interface_module, only: vmic_param_xscale, vmic_param_time, vmicsoil_c14, &
+  use mesc_interface_module, only: vmic_param_xscale, vmic_param_time, vmicsoil_c14, &
                                    vmicsoil_frc1_cpu, vmicsoil_hwsd_cpu, vmicsoil_hwsd_gpu
   use calcost_module, only: calcost_c14, calcost_frc1, calcost_hwsd3, calcost_global_hwsd, calcost_aust
   implicit none
@@ -227,19 +229,21 @@ module function_module
     real(dp), dimension(16), intent(in) :: xparam16
         !! Values of the `nx` optimized parameters.
 
-    TYPE(mic_param_xscale)    :: micpxdef
-    TYPE(mic_param_default)   :: micpdef
-    TYPE(mic_parameter)       :: micparam
-    TYPE(mic_input)           :: micinput
-    TYPE(mic_global_input)    :: micglobal
-    TYPE(mic_cpool)           :: miccpool
-    TYPE(mic_npool)           :: micnpool
-    TYPE(mic_output)          :: micoutput
-
-    integer,   dimension(16)           :: nxopt
-    real(dp),    dimension(16)           :: xopt
-    real(dp)     :: totcost1,totcost2
-    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    ! Local variables
+    type(mic_param_xscale)  :: micpxdef
+    type(mic_param_default) :: micpdef
+    type(mic_parameter)     :: micparam
+    type(mic_input)         :: micinput
+    type(mic_global_input)  :: micglobal
+    type(mic_cpool)         :: miccpool
+    type(mic_npool)         :: micnpool
+    type(mic_output)        :: micoutput
+    integer,  dimension(16) :: nxopt
+    real(dp), dimension(16) :: xopt
+    real(dp)                :: totcost1,totcost2
+    logical :: jglobal
+    logical :: jopt
+    integer :: ifsoc14,kinetics,bgcopt,nyeqpool,isoc14,jmodel
     integer :: jrestart,nparam
     character(len=140) :: frestart_in,frestart_out,foutput
     character(len=140) :: frac14c,f14c(5),filecluster,fparameter
@@ -264,8 +268,8 @@ module function_module
       read(1,*) xopt(1:14)
       read(1,*) nxopt(1:nx)
       close(1)
-      
-      if(jopt==1) then
+
+      if(jopt) then
          do nparam=1,nx
             if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
               error stop "ERROR functn_c14: nxopt is outside 1:16"
@@ -338,19 +342,21 @@ real(dp) function functn_frc1(nx,xparam16)
     real(dp), dimension(16), intent(in) :: xparam16
         !! Values of the `nx` optimized parameters.
 
-     TYPE(mic_param_xscale)    :: micpxdef
-     TYPE(mic_param_default)   :: micpdef
-     TYPE(mic_parameter)       :: micparam
-     TYPE(mic_input)           :: micinput
-     TYPE(mic_global_input)    :: micglobal
-     TYPE(mic_cpool)           :: miccpool
-     TYPE(mic_npool)           :: micnpool
-     TYPE(mic_output)          :: micoutput
-
-    integer,   dimension(16)           :: nxopt
-    real(dp),    dimension(16)           :: xopt
-    real(dp)     :: totcost1
-    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    ! Local variables
+    type(mic_param_xscale)  :: micpxdef
+    type(mic_param_default) :: micpdef
+    type(mic_parameter)     :: micparam
+    type(mic_input)         :: micinput
+    type(mic_global_input)  :: micglobal
+    type(mic_cpool)         :: miccpool
+    type(mic_npool)         :: micnpool
+    type(mic_output)        :: micoutput
+    integer,  dimension(16) :: nxopt
+    real(dp), dimension(16) :: xopt
+    real(dp)                :: totcost1
+    logical :: jglobal
+    logical :: jopt
+    integer :: ifsoc14,kinetics,bgcopt,nyeqpool,isoc14,jmodel
     integer :: jrestart,nparam
     character(len=140) :: frestart_in,frestart_out,foutput
     character(len=140) :: cfraction
@@ -374,8 +380,8 @@ real(dp) function functn_frc1(nx,xparam16)
       read(1,*) xopt(1:14)
       read(1,*) nxopt(1:nx)
       close(1)
-      
-      if(jopt==0) then
+
+      if(.not. jopt) then
          do nparam=1,nx
             if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
               error stop "ERROR functn_frc1: nxopt is outside 1:16"
@@ -440,23 +446,25 @@ END function functn_frc1
     real(dp), dimension(16), intent(in) :: xparam16
         !! Values of the `nx` optimized parameters.
 
-    integer,   dimension(16)           :: nxopt
-    real(dp),    dimension(16)           :: xopt
-    TYPE(mic_param_xscale)    :: micpxdef
-    TYPE(mic_param_default)   :: micpdef
-    TYPE(mic_parameter)       :: micparam
-    TYPE(mic_input)           :: micinput
-    TYPE(mic_global_input)    :: micglobal
-    TYPE(mic_cpool)           :: miccpool
-    TYPE(mic_npool)           :: micnpool
-    TYPE(mic_output)          :: micoutput
-
-    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    ! Local variables
+    integer,  dimension(16) :: nxopt
+    real(dp), dimension(16) :: xopt
+    type(mic_param_xscale)  :: micpxdef
+    type(mic_param_default) :: micpdef
+    type(mic_parameter)     :: micparam
+    type(mic_input)         :: micinput
+    type(mic_global_input)  :: micglobal
+    type(mic_cpool)         :: miccpool
+    type(mic_npool)         :: micnpool
+    type(mic_output)        :: micoutput
+    logical :: jglobal
+    logical :: jopt
+    integer :: ifsoc14,kinetics,bgcopt,nyeqpool,isoc14,jmodel
     integer :: jrestart,nf,ok,nparam,mpx,timex
-    character(len=140)  :: frestart_in,frestart_out,fparam_global,foutput
+    character(len=140) :: frestart_in,frestart_out,fparam_global,foutput
     character(len=140) :: fhwsdsoc,fmodis,fanoc
-    real(dp)     :: totcost1
-    integer       :: ns
+    real(dp) :: totcost1
+    integer :: ns
     real(dp), dimension(:), allocatable :: zse
 
 
@@ -544,19 +552,21 @@ END function functn_soc_hwsd
     real(dp), dimension(16), intent(in) :: xparam16
         !! Values of the `nx` optimized parameters.
 
-    integer,   dimension(16)  :: nxopt
-    real(dp),    dimension(16)  :: xopt
-    TYPE(mic_param_xscale)    :: micpxdef
-    TYPE(mic_param_default)   :: micpdef
-    TYPE(mic_parameter)       :: micparam
-    TYPE(mic_input)           :: micinput
-    TYPE(mic_global_input)    :: micglobal
-    TYPE(mic_cpool)           :: miccpool
-    TYPE(mic_npool)           :: micnpool
-    TYPE(mic_output)          :: micoutput
-
-    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
-    integer    :: jrestart,nf,ok,nparam
+    ! Local variables
+    integer,  dimension(16)  :: nxopt
+    real(dp), dimension(16)  :: xopt
+    type(mic_param_xscale)   :: micpxdef
+    type(mic_param_default)  :: micpdef
+    type(mic_parameter)      :: micparam
+    type(mic_input)          :: micinput
+    type(mic_global_input)   :: micglobal
+    type(mic_cpool)          :: miccpool
+    type(mic_npool)          :: micnpool
+    type(mic_output)         :: micoutput
+    logical :: jglobal
+    logical :: jopt
+    integer :: ifsoc14,kinetics,bgcopt,nyeqpool,isoc14,jmodel
+    integer :: jrestart,nf,ok,nparam
     character(len=140) :: frestart_in,frestart_out,fparam_global,foutput
     character(len=140) :: fglobal(10)
     real(dp) :: totcost1
@@ -618,8 +628,11 @@ END function functn_soc_hwsd
       if(jmodel==2 .or. jmodel==3) call getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal,micparam,zse)
       print *, "global input data are read in"
 
-      if(jopt==0) call getparam_global(fglobal(4),jmodel,micpxdef)     ! reading global parameter lookup table
-      if(jopt==1) call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)  ! parameter optimization
+      if(.not. jopt) then
+        call getparam_global(fglobal(4),jmodel,micpxdef)     ! reading global parameter lookup table
+      else
+        call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)  ! parameter optimization
+      end if
 
       print *, "vmicsoil_global"
       call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
@@ -653,23 +666,25 @@ END function functn_global4
     real(dp), dimension(16), intent(in) :: xparam16
         !! Values of the `nx` optimized parameters.
 
-    integer,   dimension(16)           :: nxopt
-    real(dp),    dimension(16)           :: xopt
-    TYPE(mic_param_xscale)    :: micpxdef
-    TYPE(mic_param_default)   :: micpdef
-    TYPE(mic_parameter)       :: micparam
-    TYPE(mic_input)           :: micinput
-    TYPE(mic_global_input)    :: micglobal
-    TYPE(mic_cpool)           :: miccpool
-    TYPE(mic_npool)           :: micnpool
-    TYPE(mic_output)          :: micoutput
-
-    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
-    integer    :: jrestart,nf,ok,nparam,mpx,timex
+    ! Local variables
+    integer,  dimension(16) :: nxopt
+    real(dp), dimension(16) :: xopt
+    type(mic_param_xscale)  :: micpxdef
+    type(mic_param_default) :: micpdef
+    type(mic_parameter)     :: micparam
+    type(mic_input)         :: micinput
+    type(mic_global_input)  :: micglobal
+    type(mic_cpool)         :: miccpool
+    type(mic_npool)         :: micnpool
+    type(mic_output)        :: micoutput
+    logical :: jglobal
+    logical :: jopt
+    integer :: ifsoc14,kinetics,bgcopt,nyeqpool,isoc14,jmodel
+    integer :: jrestart,nf,ok,nparam,mpx,timex
     character(len=140) :: frestart_in,frestart_out,foutput
     character(len=140) :: faustsoc
-    real(dp)     :: totcost1
-    integer       :: ns
+    real(dp) :: totcost1
+    integer  :: ns
     real(dp), dimension(:), allocatable :: zse
 
 
