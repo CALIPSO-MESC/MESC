@@ -8,7 +8,6 @@ module mesc_namelist
     type, public :: mesc_config
         integer :: runcase = 0
         integer :: jglobal = 0
-        integer :: kinetics = 3
         integer :: bgcopt = 1
         integer :: jopt = 0
         integer :: jrestart = 0
@@ -42,7 +41,7 @@ contains
 
         integer :: nml_unit, ios
         character(len=512) :: iomsg
-        integer :: runcase, jglobal, kinetics, bgcopt, jopt
+        integer :: runcase, jglobal, bgcopt, jopt
         integer :: jrestart, jmodel, ifsoc14
         character(len=path_len) :: frestart_in, frestart_out, foutput
         character(len=path_len) :: fparameter, cfraction, frac14c, f14c(5), filecluster
@@ -51,7 +50,7 @@ contains
         real(real64) :: xopt(16)
         integer :: nxopt(16)
 
-        namelist /mesc/ runcase, jglobal, kinetics, bgcopt, jopt, &
+        namelist /mesc/ runcase, jglobal, bgcopt, jopt, &
             jrestart, jmodel, ifsoc14, frestart_in, frestart_out, &
             foutput, fparameter, cfraction, frac14c, f14c, filecluster, &
             fhwsdsoc, faustsoc, fmodis, fanoc, fglobal, xopt, nxopt
@@ -59,7 +58,6 @@ contains
         ! Copy defaults into the local variables read by the namelist.
         runcase = config%runcase
         jglobal = config%jglobal
-        kinetics = config%kinetics
         bgcopt = config%bgcopt
         jopt = config%jopt
         jrestart = config%jrestart
@@ -92,7 +90,6 @@ contains
 
         config%runcase = runcase
         config%jglobal = jglobal
-        config%kinetics = kinetics
         config%bgcopt = bgcopt
         config%jopt = jopt
         config%jrestart = jrestart
@@ -119,7 +116,6 @@ contains
         type(mesc_config), intent(in) :: config
         write(output_unit, '(a,i0)') 'runcase     = ', config%runcase
         write(output_unit, '(a,i0)') 'jglobal     = ', config%jglobal
-        write(output_unit, '(a,i0)') 'kinetics    = ', config%kinetics
         write(output_unit, '(a,i0)') 'bgcopt      = ', config%bgcopt
         write(output_unit, '(a,i0)') 'jopt        = ', config%jopt
         write(output_unit, '(a,i0)') 'jrestart    = ', config%jrestart
@@ -239,7 +235,7 @@ module function_module
     integer,   dimension(16)           :: nxopt
     real(dp),    dimension(16)           :: xopt
     real(dp)     :: totcost1,totcost2
-    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    integer    :: ifsoc14,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer :: jrestart,nparam
     character(len=140) :: frestart_in,frestart_out,foutput
     character(len=140) :: frac14c,f14c(5),filecluster,fparameter
@@ -247,7 +243,6 @@ module function_module
 
       jglobal = config%jglobal
       ifsoc14 = config%ifsoc14
-      kinetics = config%kinetics
       bgcopt = config%bgcopt
       jopt = config%jopt
       jrestart = config%jrestart
@@ -293,7 +288,7 @@ module function_module
           call getdata_c14(frac14c,f14c,filecluster,micinput,micparam,micnpool,zse)
           call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
       !    print *, 'vmicsoil_c14'
-          call vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,ifsoc14,bgcopt,nyeqpool, &
+          call vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,isoc14,ifsoc14,bgcopt,nyeqpool, &
                         zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
        !   print *, 'calcost_c14'
@@ -307,7 +302,7 @@ module function_module
           call getdata_c14(frac14c,f14c,filecluster,micinput,micparam,micnpool,zse)
           call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
        !   print *, 'vmicsoil_c14'
-          call vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,ifsoc14,bgcopt,nyeqpool+2000, &
+          call vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,isoc14,ifsoc14,bgcopt,nyeqpool+2000, &
                         zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
         !  print *, 'calcost_c14'
@@ -350,7 +345,7 @@ real(dp) function functn_frc1(nx,xparam16)
     integer,   dimension(16)           :: nxopt
     real(dp),    dimension(16)           :: xopt
     real(dp)     :: totcost1
-    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    integer    :: ifsoc14,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer :: jrestart,nparam
     character(len=140) :: frestart_in,frestart_out,foutput
     character(len=140) :: cfraction
@@ -359,7 +354,6 @@ real(dp) function functn_frc1(nx,xparam16)
 
       jglobal = config%jglobal
       ifsoc14 = config%ifsoc14
-      kinetics = config%kinetics
       bgcopt = config%bgcopt
       jopt = config%jopt
       jrestart = config%jrestart
@@ -409,10 +403,10 @@ real(dp) function functn_frc1(nx,xparam16)
       call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
 
     !  print *, 'vmicsoil_frc1_cpu'
-    !  call vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,ifsoc14,bgcopt,nyeqpool, &
+    !  call vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,ifsoc14,bgcopt,nyeqpool, &
     !                         zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
-      call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
+      call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bgcopt,nyeqpool, &
                          zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
     !  print *, 'calcost_frc1'
@@ -451,7 +445,7 @@ END function functn_frc1
     TYPE(mic_npool)           :: micnpool
     TYPE(mic_output)          :: micoutput
 
-    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    integer    :: ifsoc14,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer :: jrestart,nf,ok,nparam,mpx,timex
     character(len=140)  :: frestart_in,frestart_out,fparam_global,foutput
     character(len=140) :: fhwsdsoc,fmodis,fanoc
@@ -464,7 +458,6 @@ END function functn_frc1
 
       jglobal = config%jglobal
       ifsoc14 = config%ifsoc14
-      kinetics = config%kinetics
       bgcopt = config%bgcopt
       jopt = config%jopt
       jrestart = config%jrestart
@@ -514,7 +507,7 @@ END function functn_frc1
       !  call profile()
       call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
 
-      call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
+      call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bgcopt,nyeqpool, &
                          zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
       call calcost_hwsd3(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost1)
@@ -555,7 +548,7 @@ END function functn_soc_hwsd
     TYPE(mic_npool)           :: micnpool
     TYPE(mic_output)          :: micoutput
 
-    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    integer    :: ifsoc14,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer    :: jrestart,nf,ok,nparam
     character(len=140) :: frestart_in,frestart_out,fparam_global,foutput
     character(len=140) :: fglobal(10)
@@ -573,7 +566,6 @@ END function functn_soc_hwsd
 
       jglobal = config%jglobal
       ifsoc14 = config%ifsoc14
-      kinetics = config%kinetics
       bgcopt = config%bgcopt
       jopt = config%jopt
       jrestart = config%jrestart
@@ -622,7 +614,7 @@ END function functn_soc_hwsd
       if(jopt==1) call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)  ! parameter optimization
 
       print *, "vmicsoil_global"
-      call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
+      call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bgcopt,nyeqpool, &
                          zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
       call calcost_hwsd3(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost1)
@@ -664,7 +656,7 @@ END function functn_global4
     TYPE(mic_npool)           :: micnpool
     TYPE(mic_output)          :: micoutput
 
-    integer    :: ifsoc14,kinetics,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
+    integer    :: ifsoc14,bgcopt,jopt,nyeqpool,isoc14,jglobal,jmodel
     integer    :: jrestart,nf,ok,nparam,mpx,timex
     character(len=140) :: frestart_in,frestart_out,foutput
     character(len=140) :: faustsoc
@@ -677,7 +669,6 @@ END function functn_global4
 
       jglobal = config%jglobal
       ifsoc14 = config%ifsoc14
-      kinetics = config%kinetics
       bgcopt = config%bgcopt
       jopt = config%jopt
       jrestart = config%jrestart
@@ -721,7 +712,7 @@ END function functn_global4
       !  call profile()
       call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
 
-      call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
+      call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bgcopt,nyeqpool, &
                          zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
       call calcost_aust(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost1)
