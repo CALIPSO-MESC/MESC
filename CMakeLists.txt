@@ -24,10 +24,12 @@ message(STATUS "NetCDFFortran include: ${NetCDFFortran_INCLUDE_DIRS}")
 message(STATUS "NetCDFFortran libs   : ${NetCDFFortran_LIBRARIES}")
 
 # ------------------------------------------------------------
-# 3) Sources and executable
-#   (name matches your previous -o main)
+# 3) Sources
+#   - `mesc` static library holds the model modules
+#   - `main` is the standalone MESC driver
+#   - `mock_lsm_driver` exercises the coupling API in place of an LSM
 # ------------------------------------------------------------
-add_executable(main
+add_library(mesc STATIC
   src/mod_precision.f90
   src/mod_namelist.f90
   src/mod_constants.f90
@@ -38,11 +40,10 @@ add_executable(main
   src/mod_coupling.f90
   src/mod_calcost.f90
   src/mod_functions.f90
-  src/main.f90
 )
 
 # Put .mod files into build/mod
-set_target_properties(main PROPERTIES
+set_target_properties(mesc PROPERTIES
   Fortran_MODULE_DIRECTORY "${CMAKE_BINARY_DIR}/mod"
 )
 
@@ -50,8 +51,9 @@ set_target_properties(main PROPERTIES
 # 4) Include + Link
 #   - include: netcdf.mod location
 #   - link: nf-config --flibs output or fallback libs
+#   (PUBLIC so that executables inherit them)
 # ------------------------------------------------------------
-target_include_directories(main PRIVATE
+target_include_directories(mesc PUBLIC
   "${CMAKE_BINARY_DIR}/mod"
   ${NetCDF_INCLUDES}
   ${NetCDFFortran_INCLUDE_DIRS}
@@ -59,7 +61,7 @@ target_include_directories(main PRIVATE
 
 # NetCDFFortran_LIBRARIES may be a list of raw flags (e.g., -L... -lnetcdff -lnetcdf ...)
 # CMake is OK with passing these through to the linker.
-target_link_libraries(main PRIVATE
+target_link_libraries(mesc PUBLIC
   ${NetCDF_LIBRARIES}
   ${NetCDFFortran_LIBRARIES}
 )
@@ -68,16 +70,34 @@ target_link_libraries(main PRIVATE
 # 5) Intel tweaks (optional)
 # ------------------------------------------------------------
 if(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
-  target_compile_options(main PRIVATE -qopenmp -O3 -fp-model precise)
-  target_link_options(main PRIVATE -qopenmp)
+  target_compile_options(mesc PRIVATE -qopenmp -O3 -fp-model precise)
+  target_link_options(mesc PUBLIC -qopenmp)
 endif()
 
 # ------------------------------------------------------------
-# 6) POST-BUILD: copy `main` executable to test directory
+# 6) Executables
+#   (name `main` matches your previous -o main)
+# ------------------------------------------------------------
+add_executable(main src/main.f90)
+target_link_libraries(main PRIVATE mesc)
+
+# Mock LSM driver: tests the coupling API end-to-end (runs from test/)
+add_executable(mock_lsm_driver test/mock_lsm_driver.f90)
+target_link_libraries(mock_lsm_driver PRIVATE mesc)
+
+# ------------------------------------------------------------
+# 7) POST-BUILD: copy executables to test directory
 # ------------------------------------------------------------
 add_custom_command(TARGET main POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
           $<TARGET_FILE:main>
           ${CMAKE_SOURCE_DIR}/test/main
   COMMENT "Copying `main` executable to test directory"
+)
+
+add_custom_command(TARGET mock_lsm_driver POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+          $<TARGET_FILE:mock_lsm_driver>
+          ${CMAKE_SOURCE_DIR}/test/mock_lsm_driver
+  COMMENT "Copying `mock_lsm_driver` executable to test directory"
 )

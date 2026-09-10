@@ -27,3 +27,15 @@ command line with
 ```bash
 ./run_main.sh
 ```
+
+### Step 3 (automatic): Mock LSM driver
+
+The same `run_main.sh` script also runs the mock LSM driver
+(`mock_lsm_driver`, built alongside `main`). This is a self-contained test
+program that stands in for ORCHIDEE: it exercises the coupling API
+(`mesc_coupling_module`) end-to-end with synthetic inputs — initialisation,
+daily stepping of four synthetic grid cells, pool-state retrieval, restart
+from a mid-run snapshot, and finalisation. It performs internal sanity checks
+and prints PASS/FAIL along with a table of annual fluxes and carbon stocks.
+The full log is written to `output/outval_mock_lsm.txt`. No input files are
+required.
