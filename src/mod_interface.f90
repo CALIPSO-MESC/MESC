@@ -19,10 +19,10 @@
 
 module mesc_interface_module
   use precision_module, only : dp
-   use mic_constant, only : diag, delt, mp, ms, mpft, mcpool, outp
+  use mic_constant, only : diag, delt, mp, ms, mpft, mcpool, outp
   use mic_variable, only : mic_param_xscale, mic_param_default, mic_parameter, &
                            mic_input, mic_npool, mic_cpool, mic_output, mic_global_input
-  use mesc_inout_module, only: vmic_restart_read ! , vmic_restart_write, vmic_output_write
+  use mesc_inout_module, only: vmic_restart_read
   use mesc_model_module, only: rk4modelx, tridag, bioturb, bgc_fractions, &
                                mget, turnovert, desorpt, vmaxt, kmt
   implicit none
@@ -35,93 +35,89 @@ contains
 !> Assign parameter values from defaults across all BGC types.
 !! Takes lookup-table parameters and default parameters, then populates
 !! the working parameter structure (`micparam`) for all `mbgc` types.
-  SUBROUTINE vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
-    integer,                 intent(in)    :: kinetics !! kinetics model selector (1, 2, or 3)
-    TYPE(mic_param_xscale),  intent(in)    :: micpxdef !! BGC-type scaling factors
-    TYPE(mic_param_default), intent(in)    :: micpdef  !! default parameter values
-    TYPE(mic_parameter),     intent(inout) :: micparam !! computed model parameters
-    real(dp),                intent(in)    :: zse(ms)  !! soil layer thickness
+subroutine vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
+  integer,                 intent(in)    :: kinetics !! kinetics model selector (1, 2, or 3)
+  type(mic_param_xscale),  intent(in)    :: micpxdef !! BGC-type scaling factors
+  type(mic_param_default), intent(in)    :: micpdef  !! default parameter values
+  type(mic_parameter),     intent(inout) :: micparam !! computed model parameters
+  real(dp),                intent(in)    :: zse(ms)  !! soil layer thickness
 
-    ! Local variables
-    real(dp), dimension(:,:), allocatable      :: froot
-    real(dp), dimension(:),   allocatable      :: totroot
-    integer    :: nopt,npft,np,ns
-    real(dp)  :: depths1,depths2,krootx
+  ! Local variables
+  real(dp), dimension(:,:), allocatable :: froot
+  real(dp), dimension(:),   allocatable :: totroot
+  integer  :: nopt,npft,np,ns
+  real(dp) :: depths1,depths2,krootx
 
+  allocate(froot(mpft,ms))
+  allocate(totroot(mpft))
 
-      allocate(froot(mpft,ms))
-      allocate(totroot(mpft))
+  do np=1,mp
+    nopt=micparam%bgctype(np)
+    do ns=1,ms
+      micparam%Q1(np,ns)=micpdef%Q1
+      micparam%Q2(np,ns)=micpdef%Q2
+      micparam%fm(np,ns)=micpdef%fm * micpxdef%xfm(nopt)
+      micparam%fs(np,ns)=micpdef%fs * micpxdef%xfs(nopt)
+    end do ! ns
+  end do ! np
 
-      do np=1,mp
-!         print *, 'np pft', np,micparam%pft(np)
-          nopt=micparam%bgctype(np)
-          do ns=1,ms
-            micparam%Q1(np,ns)=micpdef%Q1
-            micparam%Q2(np,ns)=micpdef%Q2
-            micparam%fm(np,ns)=micpdef%fm * micpxdef%xfm(nopt)
-            micparam%fs(np,ns)=micpdef%fs * micpxdef%xfs(nopt)
-         end do  !ns
-      end do     ! np
+  depths1=0.0;depths2=0.0
+  do ns=1,ms
+    depths2 = depths2 + zse(ns)
+    do npft=1,mpft
+      krootx = micpdef%rootbeta * micpxdef%xrootbeta(npft)
+      froot(npft,ns) = (1.0/krootx) *( exp(-krootx*depths1)-exp(-krootx*depths2))
+    end do ! npft
+    depths1=depths2
+  end do ! ns
 
-      depths1=0.0;depths2=0.0
+  do npft=1,mpft
+    totroot(npft) =sum(froot(npft,1:ms))
+  end do
+
+  ! normalizing
+  do ns=1,ms
+    do npft=1,mpft
+      froot(npft,ns) = froot(npft,ns)/totroot(npft)
+    end do
+  end do
+
+  ! calculate mp by ms all parameter values
+  do np=1, mp
+    npft=min(mpft,max(1,micparam%pft(np)))
+    nopt=micparam%bgctype(np)
+    do ns=1,ms
+      micparam%sdepth(np,ns)   = zse(ns)
+      micparam%fracroot(np,ns) = froot(npft,ns)
+    end do ! ns
+    micparam%diffsocx(np) = micpxdef%xdiffsoc(nopt) * micpdef%diffsoc ! "diffsoc" from mic_constant
+  end do ! np
+
+  if(diag==1) then
+    print *, micparam%fracroot(outp,:)
+    print *, micparam%sdepth(outp,:)
+    print *, micparam%diffsocx(outp)
+  end if
+
+  ! the following parameters are specific to kinetics3
+  if(kinetics==3) then
+    do np=1,mp
       do ns=1,ms
-          depths2 = depths2 + zse(ns)
-          do npft=1,mpft
-              krootx = micpdef%rootbeta * micpxdef%xrootbeta(npft)
-              froot(npft,ns) = (1.0/krootx) *( exp(-krootx*depths1)-exp(-krootx*depths2))
-          end do  !npft
-          depths1=depths2
-      end do   !ns
+        nopt=micparam%bgctype(np)
+        micparam%kadsorp(np,ns)  = micpdef%kadsorpx
+        micparam%kdesorp(np,ns)  = micparam%kadsorp(np,ns) /(micpdef%kbax * micpxdef%xkba(nopt))
+        micparam%fp2a(np,ns)     = micpdef%fp2ax     * micpxdef%xfp2ax(nopt)
+        micparam%tvcpool(np,ns)  = micpdef%tvcpoolx  * micpxdef%xtvc(nopt)
+        micparam%tvppool(np,ns)  = micpdef%tvppoolx  * micpxdef%xtvp(nopt)
+        micparam%tvac(np,ns)     = micpdef%tvacx     * micpxdef%xtvac(nopt)
+        micparam%qmaxcoeff(np,ns)= micpdef%qmaxcoeff * micpxdef%xqmaxcoeff(nopt)
+      end do ! ns
+    end do ! np
+  end if ! kinetics
 
-
-      do npft=1,mpft
-         totroot(npft) =sum(froot(npft,1:ms))
-      end do
-
-      ! !normalizing
-      do ns=1,ms
-         do npft=1,mpft
-            froot(npft,ns) = froot(npft,ns)/totroot(npft)
-         end do
-      end do
-
-      ! calculate mp by ms all parameter values
-      do np=1, mp
-         npft=min(mpft,max(1,micparam%pft(np)))
-         nopt=micparam%bgctype(np)
-         do ns=1,ms
-            micparam%sdepth(np,ns)   = zse(ns)
-            micparam%fracroot(np,ns) = froot(npft,ns)
-         end do !"ns"
-          micparam%diffsocx(np) = micpxdef%xdiffsoc(nopt) * micpdef%diffsoc  !"diffsoc" from mic_constant
-      end do    ! "np=1,mp"
-
-      if(diag==1) then
-         print *, micparam%fracroot(outp,:)
-         print *, micparam%sdepth(outp,:)
-         print *, micparam%diffsocx(outp)
-      end if
-
-      ! the following parameters are specific to kinetics3
-      if(kinetics==3) then
-         do np=1,mp
-            do ns=1,ms
-               nopt=micparam%bgctype(np)
-               micparam%kadsorp(np,ns)  = micpdef%kadsorpx
-               micparam%kdesorp(np,ns)  = micparam%kadsorp(np,ns) /(micpdef%kbax * micpxdef%xkba(nopt))
-               micparam%fp2a(np,ns)     = micpdef%fp2ax     * micpxdef%xfp2ax(nopt)
-               micparam%tvcpool(np,ns)  = micpdef%tvcpoolx  * micpxdef%xtvc(nopt)
-               micparam%tvppool(np,ns)  = micpdef%tvppoolx  * micpxdef%xtvp(nopt)
-               micparam%tvac(np,ns)     = micpdef%tvacx     * micpxdef%xtvac(nopt)
-               micparam%qmaxcoeff(np,ns)= micpdef%qmaxcoeff * micpxdef%xqmaxcoeff(nopt)
-            end do  !ns
-         end do  !np
-      end if ! kinetics
-
-
-    deallocate(froot)
-    deallocate(totroot)
-END SUBROUTINE vmic_param_constant
+  deallocate(froot)
+  deallocate(totroot)
+end subroutine vmic_param_constant
 
 !> Compute time-dependent model parameters for one patch np.
 !>
@@ -130,27 +126,27 @@ END SUBROUTINE vmic_param_constant
 !> microbial growth efficiency, turnover rates, desorption, Vmax, and Km.
 !>
 subroutine vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
-    integer,                 intent(in)      :: kinetics !! kinetics model selector (1, 2, or 3)
-    TYPE(mic_param_xscale),  intent(in)      :: micpxdef !! BGC-type scaling factors
-    TYPE(mic_param_default), intent(in)      :: micpdef  !! default parameter values
-    TYPE(mic_parameter),     intent(inout)   :: micparam !! computed model parameters
-    TYPE(mic_input),         intent(inout)   :: micinput !! model environmental inputs
-    TYPE(mic_npool),         intent(inout)   :: micnpool !! nitrogen pool state
-    integer,                 intent(in)      :: np       !! patch index
+  integer,                 intent(in)      :: kinetics !! kinetics model selector (1, 2, or 3)
+  type(mic_param_xscale),  intent(in)      :: micpxdef !! BGC-type scaling factors
+  type(mic_param_default), intent(in)      :: micpdef  !! default parameter values
+  type(mic_parameter),     intent(inout)   :: micparam !! computed model parameters
+  type(mic_input),         intent(inout)   :: micinput !! model environmental inputs
+  type(mic_npool),         intent(inout)   :: micnpool !! nitrogen pool state
+  integer,                 intent(in)      :: np       !! patch index
 
-    ! compute fractions
-    call bgc_fractions(micpxdef,micpdef,micparam,micinput,np)
+  ! compute fractions
+  call bgc_fractions(micpxdef,micpdef,micparam,micinput,np)
 
-    ! compute microbial growth efficiency
-    call mget(micpdef,micparam,micinput,micnpool,np)
+  ! compute microbial growth efficiency
+  call mget(micpdef,micparam,micinput,micnpool,np)
 
-    ! compute microbial turnover rates
-    call turnovert(kinetics,micpxdef,micpdef,micparam,micinput,np)
+  ! compute microbial turnover rates
+  call turnovert(kinetics,micpxdef,micpdef,micparam,micinput,np)
 
-    if(kinetics/=3) call desorpt(micpxdef,micparam,micinput,np)
+  if(kinetics/=3) call desorpt(micpxdef,micparam,micinput,np)
 
-    call vmaxt(micpxdef,micpdef,micparam,micinput,np)
-    call kmt(micpxdef,micpdef,micparam,micinput,np)
+  call vmaxt(micpxdef,micpdef,micparam,micinput,np)
+  call kmt(micpxdef,micpdef,micparam,micinput,np)
 
 end subroutine vmic_param_time
 
@@ -160,26 +156,30 @@ end subroutine vmic_param_time
 !> Sets default initial pool concentrations for all `mcpool` carbon pools,
 !> for all patches (`mp`) and soil layers (`ms`).
 subroutine vmic_init(miccpool,micnpool)
-    TYPE(mic_cpool), intent(inout) :: miccpool !! carbon pool state (-initialized here)
-    TYPE(mic_npool), intent(inout) :: micnpool !! nitrogen pool state
+  type(mic_cpool), intent(inout) :: miccpool !! carbon pool state (-initialized here)
+  type(mic_npool), intent(inout) :: micnpool !! nitrogen pool state
 
-    ! Local variables
-    integer :: ip
-    real(dp), dimension(:), allocatable    :: cpooldef
+  ! Local variables
+  integer :: ip
+  real(dp), dimension(:), allocatable    :: cpooldef
 
-      allocate(cpooldef(mcpool))
-!	  print *, 'calling vmic_init'
+  allocate(cpooldef(mcpool))
 
-      cpooldef(1) = 16.5*0.1;     cpooldef(2) = 16.5*0.1
-      cpooldef(3) = 16.5*0.025;   cpooldef(4) = 16.5*0.025
-      cpooldef(5) = 16.5*0.1125;  cpooldef(6) = 16.5*0.375;  cpooldef(7) = 16.5*0.2625
-      cpooldef(8) = 0.0;          cpooldef(9) = 0.0;         cpooldef(10)= 0.0
+  cpooldef(1) = 16.5*0.1
+  cpooldef(2) = 16.5*0.1
+  cpooldef(3) = 16.5*0.025
+  cpooldef(4) = 16.5*0.025
+  cpooldef(5) = 16.5*0.1125
+  cpooldef(6) = 16.5*0.375
+  cpooldef(7) = 16.5*0.2625
+  cpooldef(8) = 0.0
+  cpooldef(9) = 0.0
+  cpooldef(10) = 0.0
 
-      do ip=1,mcpool
-         miccpool%cpool(:,:,ip) = cpooldef(ip)
-      end do
-!    print *, 'at np=1 ns=1 cpool', miccpool%cpool(1,1,1:mcpool)
-    deallocate(cpooldef)
+  do ip=1,mcpool
+    miccpool%cpool(:,:,ip) = cpooldef(ip)
+  end do
+  deallocate(cpooldef)
 end subroutine vmic_init
 
 
@@ -220,55 +220,55 @@ end subroutine vmic_init
 !> (19 PFTs) from mod_constants.f90. For online coupling, ORCHIDEE supplies this array
 !> directly.
 subroutine vmic_param_xscale(xopt,bgcopt,rootdepth,micpxdef)
-    real(dp), dimension(16), intent(in)  :: xopt              !! optimized parameter values (16-element vector)
-    integer,                 intent(in)  :: bgcopt            !! BGC type index to apply `xopt` to
-    real(dp), dimension(:),  intent(in)  :: rootdepth         !! per-PFT rooting depths [m] (size mpft)
-    TYPE(mic_param_xscale),  intent(inout) :: micpxdef        !! scaling factors (populated here)
-    integer :: i
+  real(dp), dimension(16), intent(in)  :: xopt              !! optimized parameter values (16-element vector)
+  integer,                 intent(in)  :: bgcopt            !! BGC type index to apply `xopt` to
+  real(dp), dimension(:),  intent(in)  :: rootdepth         !! per-PFT rooting depths [m] (size mpft)
+  type(mic_param_xscale),  intent(inout) :: micpxdef        !! scaling factors (populated here)
+  integer :: i
 
-     ! assign the default values
-     ! this should be replaced by a parameter lookup tables for gloabl simulations
-      micpxdef%xav       = 1.0
-      micpxdef%xak       = 1.0
-      micpxdef%xfm       = 1.0
-      micpxdef%xfs       = 1.0
-      micpxdef%xtvmic    = 1.0
-      micpxdef%xtvp      = 1.0
-      micpxdef%xtvc      = 1.0   ! unstop the backflow from MAOC to aggregate pool
-      micpxdef%xtvac     = 1.0
-      micpxdef%xkba      = 1.0
-      micpxdef%xqmaxcoeff= 1.0
-      micpxdef%xdiffsoc  = 1.0
-      micpxdef%xNPP      = 1.0
-      micpxdef%xrootbeta = 1.0
-      micpxdef%xvmaxbeta = 1.0
+  ! assign the default values
+  ! this should be replaced by a parameter lookup tables for gloabl simulations
+  micpxdef%xav       = 1.0
+  micpxdef%xak       = 1.0
+  micpxdef%xfm       = 1.0
+  micpxdef%xfs       = 1.0
+  micpxdef%xtvmic    = 1.0
+  micpxdef%xtvp      = 1.0
+  micpxdef%xtvc      = 1.0   ! unstop the backflow from MAOC to aggregate pool
+  micpxdef%xtvac     = 1.0
+  micpxdef%xkba      = 1.0
+  micpxdef%xqmaxcoeff= 1.0
+  micpxdef%xdiffsoc  = 1.0
+  micpxdef%xNPP      = 1.0
+  micpxdef%xrootbeta = 1.0
+  micpxdef%xvmaxbeta = 1.0
 
-      micpxdef%xfp2ax    = 1.0
-      micpxdef%xbeta     = 1.0
-      micpxdef%xdesorp   = 1.0
+  micpxdef%xfp2ax    = 1.0
+  micpxdef%xbeta     = 1.0
+  micpxdef%xdesorp   = 1.0
 
-      do i=1,mpft
-         micpxdef%xrootbeta(i) = rootdepth(i)
-      end do
+  do i=1,mpft
+    micpxdef%xrootbeta(i) = rootdepth(i)
+  end do
 
-      ! assign the values to the optimized parameters
+  ! assign the values to the optimized parameters
 
-      micpxdef%xav(bgcopt)        = xopt(1)
-      micpxdef%xak(bgcopt)        = xopt(2)
-      micpxdef%xfm(bgcopt)        = xopt(3)
-      micpxdef%xfs(bgcopt)        = xopt(4)
-      micpxdef%xtvmic(bgcopt)     = xopt(5)
-      micpxdef%xtvp(bgcopt)       = xopt(6)
-      micpxdef%xtvc(bgcopt)       = xopt(7)
-      micpxdef%xtvac(bgcopt)      = xopt(8)
-      micpxdef%xkba(bgcopt)       = xopt(9)
-      micpxdef%xqmaxcoeff(bgcopt) = xopt(10)
-      micpxdef%xdiffsoc(bgcopt)   = xopt(11)
-     ! NPP was from CABLE/ORCHIDEE
-      micpxdef%xnpp(:)            = xopt(12)
-     ! "rootbeta" was assigned above based on mean profile for each PFT in HWSD_SOC
-     ! micpxdef%xrootbeta(pftopt)  = xopt(13)
-      micpxdef%xvmaxbeta(bgcopt)  = xopt(14)
+  micpxdef%xav(bgcopt)        = xopt(1)
+  micpxdef%xak(bgcopt)        = xopt(2)
+  micpxdef%xfm(bgcopt)        = xopt(3)
+  micpxdef%xfs(bgcopt)        = xopt(4)
+  micpxdef%xtvmic(bgcopt)     = xopt(5)
+  micpxdef%xtvp(bgcopt)       = xopt(6)
+  micpxdef%xtvc(bgcopt)       = xopt(7)
+  micpxdef%xtvac(bgcopt)      = xopt(8)
+  micpxdef%xkba(bgcopt)       = xopt(9)
+  micpxdef%xqmaxcoeff(bgcopt) = xopt(10)
+  micpxdef%xdiffsoc(bgcopt)   = xopt(11)
+  ! NPP was from CABLE/ORCHIDEE
+  micpxdef%xnpp(:)            = xopt(12)
+  ! "rootbeta" was assigned above based on mean profile for each PFT in HWSD_SOC
+  ! micpxdef%xrootbeta(pftopt)  = xopt(13)
+  micpxdef%xvmaxbeta(bgcopt)  = xopt(14)
 
 end subroutine vmic_param_xscale
 
@@ -286,17 +286,16 @@ end subroutine vmic_param_xscale
 !> selecting getdata_global4_orchidee to populate micglobal). For an online coupling,
 !> this routine (or equivalent logic) is where ORCHIDEE would supply its per-timestep fields.
 subroutine variable_time(year,doy,micglobal,micinput,micnpool,np)
-    integer,                intent(in)    :: year      !! simulation year
-    integer,                intent(in)    :: doy       !! day of year forcing index
-    TYPE(mic_global_input), intent(in)    :: micglobal !! global forcing data (CABLE/ORCHIDEE)
-    TYPE(mic_input),        intent(inout) :: micinput  !! per-patch input arrays (populated here)
-    TYPE(mic_npool),        intent(inout) :: micnpool  !! nitrogen pool state (populated here)
-    integer,                intent(in)    :: np        !! patch index
+  integer,                intent(in)    :: year      !! simulation year
+  integer,                intent(in)    :: doy       !! day of year forcing index
+  type(mic_global_input), intent(in)    :: micglobal !! global forcing data (CABLE/ORCHIDEE)
+  type(mic_input),        intent(inout) :: micinput  !! per-patch input arrays (populated here)
+  type(mic_npool),        intent(inout) :: micnpool  !! nitrogen pool state (populated here)
+  integer,                intent(in)    :: np        !! patch index
 
-    ! Local variables
-    integer :: ns
+  ! Local variables
+  integer :: ns
 
-!        print *, 'calling global2np- ntime', ntime
   micinput%fcnpp(np) = max(0.0,micglobal%npp(np))          ! gc/m2/year
   micinput%dleaf(np) = (micglobal%dleaf(np,doy)/24.0)*delt ! gc/m2/delt
   micinput%droot(np) = (micglobal%droot(np,doy)/24.0)*delt ! gc/m2/delt
@@ -333,14 +332,14 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
   integer,                 intent(in)    :: bgcopt       !! target BGC type
   integer,                 intent(in)    :: nyeqpool     !! years to run for equilibrium
   real(dp),                intent(in)    :: zse(ms)      !! soil layer thickness [m]
-  TYPE(mic_param_xscale),  intent(inout) :: micpxdef     !! BGC-type scaling factors
-  TYPE(mic_param_default), intent(in)    :: micpdef      !! default parameter values
-  TYPE(mic_parameter),     intent(inout) :: micparam     !! working parameter array
-  TYPE(mic_input),         intent(inout) :: micinput     !! time-varying environmental inputs
-  TYPE(mic_global_input),  intent(inout) :: micglobal    !! global forcing data
-  TYPE(mic_cpool),         intent(inout) :: miccpool     !! carbon pool state
-  TYPE(mic_npool),         intent(inout) :: micnpool     !! nitrogen pool state
-  TYPE(mic_output),        intent(inout) :: micoutput    !! output fluxes and diagnostics
+  type(mic_param_xscale),  intent(inout) :: micpxdef     !! BGC-type scaling factors
+  type(mic_param_default), intent(in)    :: micpdef      !! default parameter values
+  type(mic_parameter),     intent(inout) :: micparam     !! working parameter array
+  type(mic_input),         intent(inout) :: micinput     !! time-varying environmental inputs
+  type(mic_global_input),  intent(inout) :: micglobal    !! global forcing data
+  type(mic_cpool),         intent(inout) :: miccpool     !! carbon pool state
+  type(mic_npool),         intent(inout) :: micnpool     !! nitrogen pool state
+  type(mic_output),        intent(inout) :: micoutput    !! output fluxes and diagnostics
 
   ! Local variables
   integer  :: i,j,year,np,ny
@@ -383,14 +382,14 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
       micoutput%fluxrsoil(np) = 0.0
       micoutput%fluxcleach(np) = 0.0
 
-      do i=1,365   !ntime
+      do i=1,365 ! ntime
         call mesc_step(np, i, year, ny, kinetics, isoc14, zse, &
                         micpxdef, micpdef, micparam, micinput, micglobal, &
                         miccpool, micnpool, micoutput)
-      end do   !"i: day of year (ntime)"
-    end do !"year (nyeqpool)"
+      end do ! i: day of year (ntime)
+    end do ! year (nyeqpool)
 
-  end do !" station_index(station_count)"
+  end do ! station_index(station_count)
   !$OMP END DO
 
   !$OMP END PARALLEL
@@ -425,21 +424,21 @@ subroutine mesc_step(np, doy, year, ny, kinetics, isoc14, zse, &
     !! 14C tracking flag
   real(dp),                    intent(in)    :: zse(ms)
     !! soil layer thicknesses [m]  (size ms)
-  TYPE(mic_param_xscale),      intent(inout) :: micpxdef
+  type(mic_param_xscale),      intent(inout) :: micpxdef
     !! BGC-type scaling factors
-  TYPE(mic_param_default),     intent(in)    :: micpdef
+  type(mic_param_default),     intent(in)    :: micpdef
     !! default parameter values
-  TYPE(mic_parameter),         intent(inout) :: micparam
+  type(mic_parameter),         intent(inout) :: micparam
     !! working parameter array (updated by [[vmic_param_time_single]])
-  TYPE(mic_input),             intent(inout) :: micinput
+  type(mic_input),             intent(inout) :: micinput
     !! time-varying environmental inputs (updated by [[variable_time_single]])
-  TYPE(mic_global_input),      intent(inout) :: micglobal
+  type(mic_global_input),      intent(inout) :: micglobal
     !! global forcing data
-  TYPE(mic_cpool),             intent(inout) :: miccpool
+  type(mic_cpool),             intent(inout) :: miccpool
     !! carbon pool state (updated on output)
-  TYPE(mic_npool),             intent(inout) :: micnpool
+  type(mic_npool),             intent(inout) :: micnpool
     !! nitrogen pool state
-  TYPE(mic_output),            intent(inout) :: micoutput
+  type(mic_output),            intent(inout) :: micoutput
     !! output fluxes and diagnostics
 
   ! Local variables
@@ -461,7 +460,7 @@ subroutine mesc_step(np, doy, year, ny, kinetics, isoc14, zse, &
   cpool0 = 0.0; cpool1 = 0.0; totcinput = 0.0
   do ns = 1, ms
     ! micinput%cinputm + micinput%cinputs in mg C/cm3/delt
-    totcinput = totcinput + (micinput%cinputm(np,ns) + micinput%cinputs(np,ns)) * 1000.0 * zse(ns)  ! g C/m2/delt
+    totcinput = totcinput + (micinput%cinputm(np,ns) + micinput%cinputs(np,ns)) * 1000.0 * zse(ns) ! g C/m2/delt
 
     do ip = 1, mcpool
       xpool0(ip) = miccpool%cpool(np,ns,ip)
@@ -477,7 +476,7 @@ subroutine mesc_step(np, doy, year, ny, kinetics, isoc14, zse, &
       miccpool%cpool(np,ns,ip) = max(xpool1(ip), 1.0e-8)
       cpool1 = cpool1 + miccpool%cpool(np,ns,ip) * zse(ns) * 1000.0  ! mg C/cm3 -> g C/m2
     end do
-  end do  ! ns
+  end do ! ns
 
   micoutput%fluxcinput(np) = micoutput%fluxcinput(np) + totcinput * real(delty)
   micoutput%fluxrsoil(np)  = micoutput%fluxrsoil(np)  + totcinput * real(delty) + (cpool1 - cpool0)
@@ -501,7 +500,7 @@ subroutine mesc_step(np, doy, year, ny, kinetics, isoc14, zse, &
   ! bioturbation: diffuse each pool across soil layers
   do ip = 1, mcpool
     do ns = 1, ms
-      ypooli(ns) = miccpool%cpool(np,ns,ip)  ! mg C/cm3
+      ypooli(ns) = miccpool%cpool(np,ns,ip) ! mg C/cm3
     end do
     fluxsoc(:) = 0.0
     diffsocxx = micparam%diffsocx(np)
@@ -509,9 +508,8 @@ subroutine mesc_step(np, doy, year, ny, kinetics, isoc14, zse, &
     do ns = 1, ms
       miccpool%cpool(np,ns,ip) = ypoole(ns)
     end do
-  end do  ! ip
+  end do ! ip
 
 end subroutine mesc_step
 
 end module mesc_interface_module
-
