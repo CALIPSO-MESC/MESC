@@ -329,82 +329,79 @@ end subroutine variable_time
 !> over stations with OpenMP.
 subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
                              zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
-    integer,                 intent(in)    :: jrestart     !! restart flag (1=read restart file)
-    character(len=140),      intent(in)    :: frestart_in  !! restart input filename
-    character(len=140),      intent(in)    :: frestart_out !! restart output filename
-    character(len=140),      intent(in)    :: foutput      !! output filename
-    integer,                 intent(in)    :: kinetics     !! kinetics model selector (1, 2, or 3)
-    integer,                 intent(in)    :: isoc14       !! 14C tracking flag
-    integer,                 intent(in)    :: bgcopt       !! target BGC type
-    integer,                 intent(in)    :: nyeqpool     !! years to run for equilibrium
-    real(dp),                intent(in)    :: zse(ms)      !! soil layer thickness [m]
-    TYPE(mic_param_xscale),  intent(inout) :: micpxdef     !! BGC-type scaling factors
-    TYPE(mic_param_default), intent(in)    :: micpdef      !! default parameter values
-    TYPE(mic_parameter),     intent(inout) :: micparam     !! working parameter array
-    TYPE(mic_input),         intent(inout) :: micinput     !! time-varying environmental inputs
-    TYPE(mic_global_input),  intent(inout) :: micglobal    !! global forcing data
-    TYPE(mic_cpool),         intent(inout) :: miccpool     !! carbon pool state
-    TYPE(mic_npool),         intent(inout) :: micnpool     !! nitrogen pool state
-    TYPE(mic_output),        intent(inout) :: micoutput    !! output fluxes and diagnostics
+  integer,                 intent(in)    :: jrestart     !! restart flag (1=read restart file)
+  character(len=140),      intent(in)    :: frestart_in  !! restart input filename
+  character(len=140),      intent(in)    :: frestart_out !! restart output filename
+  character(len=140),      intent(in)    :: foutput      !! output filename
+  integer,                 intent(in)    :: kinetics     !! kinetics model selector (1, 2, or 3)
+  integer,                 intent(in)    :: isoc14       !! 14C tracking flag
+  integer,                 intent(in)    :: bgcopt       !! target BGC type
+  integer,                 intent(in)    :: nyeqpool     !! years to run for equilibrium
+  real(dp),                intent(in)    :: zse(ms)      !! soil layer thickness [m]
+  TYPE(mic_param_xscale),  intent(inout) :: micpxdef     !! BGC-type scaling factors
+  TYPE(mic_param_default), intent(in)    :: micpdef      !! default parameter values
+  TYPE(mic_parameter),     intent(inout) :: micparam     !! working parameter array
+  TYPE(mic_input),         intent(inout) :: micinput     !! time-varying environmental inputs
+  TYPE(mic_global_input),  intent(inout) :: micglobal    !! global forcing data
+  TYPE(mic_cpool),         intent(inout) :: miccpool     !! carbon pool state
+  TYPE(mic_npool),         intent(inout) :: micnpool     !! nitrogen pool state
+  TYPE(mic_output),        intent(inout) :: micoutput    !! output fluxes and diagnostics
 
-    ! local variables
-    integer       :: i,j,year,np,ny
-    integer       :: nyrun
-    real(dp)      :: fluxdocsx
-    integer       :: station_count, station_index
-    integer, dimension(:), allocatable :: stations_used
+  ! Local variables
+  integer  :: i,j,year,np,ny
+  integer  :: nyrun
+  real(dp) :: fluxdocsx
+  integer  :: station_count, station_index
+  integer, dimension(:), allocatable :: stations_used
 
-    !   print *, 'calling vmic_param_constant'
-       call vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
+  call vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
+  call vmic_init(miccpool,micnpool)
 
-    !   print *, 'calling vmic_init'
-       call vmic_init(miccpool,micnpool)
+  if(jrestart==1) call vmic_restart_read(miccpool,micnpool,frestart_in)
 
-       if(jrestart==1) call vmic_restart_read(miccpool,micnpool,frestart_in)
+  ! Check which stations to calculate
+  station_count = 0
+  allocate(stations_used(mp))
+  do station_index=1,mp
+    if (micparam%bgctype(station_index)==bgcopt .and. micglobal%area(station_index)>0.0) then
+      stations_used(station_count+1) = station_index
+      station_count = station_count + 1
+    end if
+  end do
 
-   !check which stations to calculate
-   station_count = 0
-   allocate(stations_used(mp))
-   do station_index=1,mp
-      if (micparam%bgctype(station_index)==bgcopt .and. micglobal%area(station_index)>0.0) then
-         stations_used(station_count+1) = station_index
-         station_count = station_count + 1
-      end if   !bgctype(np) = bgcopt
-   end do
+  !$OMP PARALLEL DEFAULT(NONE) &
+  !$OMP SHARED (micparam,micpxdef,micnpool,micinput,micglobal,miccpool, &
+  !$OMP         micoutput,micpdef,kinetics,isoc14,nyeqpool,bgcopt,zse,mp,ms, &
+  !$OMP         stations_used) &
+  !$OMP PRIVATE (np,station_index,ny,i,year) &
+  !$OMP FIRSTPRIVATE (station_count)
 
-!$OMP PARALLEL DEFAULT(NONE) SHARED (micparam,micpxdef,micnpool,micinput,micglobal,miccpool,micoutput,micpdef,&
-!$OMP kinetics,isoc14,nyeqpool,bgcopt,zse,mp,ms,stations_used) &
-!$OMP PRIVATE (np,station_index,ny,i,year) &
-!$OMP FIRSTPRIVATE (station_count)
-!!$OMP REDUCTION (+:data_count,data_used)  &,
-!$OMP DO
+  !$OMP DO
+  do station_index=1,station_count
+    np = stations_used(station_index)
 
-   do station_index=1,station_count
-      np=stations_used(station_index)
+    do year=1,nyeqpool
+      ny = year-nyeqpool
 
+      ! Zero yearly fluxes
+      micoutput%fluxcinput(np) = 0.0
+      micoutput%fluxrsoil(np) = 0.0
+      micoutput%fluxcleach(np) = 0.0
 
-      do year=1,nyeqpool
-         ny = year-nyeqpool
+      do i=1,365   !ntime
+        call mesc_step(np, i, year, ny, kinetics, isoc14, zse, &
+                        micpxdef, micpdef, micparam, micinput, micglobal, &
+                        miccpool, micnpool, micoutput)
+      end do   !"i: day of year (ntime)"
+    end do !"year (nyeqpool)"
 
-         micoutput%fluxcinput(np)=0.0; micoutput%fluxrsoil(np) = 0.0; micoutput%fluxcleach(np)= 0.0    ! yearly fluxes
+  end do !" station_index(station_count)"
+  !$OMP END DO
 
-         do i=1,365   !ntime
-            call mesc_step(np, i, year, ny, kinetics, isoc14, zse, &
-                           micpxdef, micpdef, micparam, micinput, micglobal, &
-                           miccpool, micnpool, micoutput)
-         end do   !"i: day of year (ntime)"
-      end do !"year (nyeqpool)"
+  !$OMP END PARALLEL
 
-   end do !" station_index(station_count)"
-!$OMP END DO
-!$OMP END PARALLEL
-
-     miccpool%cpooleq(:,:,:) = miccpool%cpool(:,:,:)
-
-    ! call vmic_output_write(foutput,micinput,micoutput)
-    ! call vmic_restart_write(frestart_out,miccpool,micnpool)
-
-    end subroutine vmicsoil_hwsd_cpu
+  miccpool%cpooleq(:,:,:) = miccpool%cpool(:,:,:)
+end subroutine vmicsoil_hwsd_cpu
 
 !> HWSD soil profile calibration driver (OpenACC GPU).
 !>
