@@ -110,6 +110,12 @@ contains
             micparam%sdepth(np,ns)   = zse(ns)
             micparam%fracroot(np,ns) = froot(npft,ns)
          end do !"ns"
+         ! same recurrence as the original Vmaxt: first layer at its midpoint, then
+         ! incremented by the full thickness of each following layer
+         micparam%sdepthz(np,1) = 0.5_dp*micparam%sdepth(np,1)
+         do ns=2,ms
+            micparam%sdepthz(np,ns) = micparam%sdepthz(np,ns-1) + micparam%sdepth(np,ns)
+         end do
           micparam%diffsocx(np) = micpxdef%xdiffsoc(nopt) * micpdef%diffsoc  !"diffsoc" from mic_constant
       end do    ! "np=1,mp"
 
@@ -146,28 +152,134 @@ END SUBROUTINE vmic_param_constant
 !> otherwise called once at the start of integration. Updates BGC fractions,
 !> microbial growth efficiency, turnover rates, desorption, Vmax, and Km.
 !>
-subroutine vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
-    integer,                 intent(in)      :: kinetics !! kinetics model selector (1, 2, or 3)
-    TYPE(mic_param_xscale),  intent(in)      :: micpxdef !! BGC-type scaling factors
-    TYPE(mic_param_default), intent(in)      :: micpdef  !! default parameter values
-    TYPE(mic_parameter),     intent(inout)   :: micparam !! computed model parameters
-    TYPE(mic_input),         intent(inout)   :: micinput !! model environmental inputs
-    TYPE(mic_npool),         intent(inout)   :: micnpool !! nitrogen pool state
-    integer,                 intent(in)      :: np       !! patch index
+subroutine vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np,ns)
+  integer,                 intent(in)      :: kinetics !! kinetics model selector (1, 2, or 3)
+  TYPE(mic_param_xscale),  intent(in)      :: micpxdef !! BGC-type scaling factors
+  TYPE(mic_param_default), intent(in)      :: micpdef  !! default parameter values
+  TYPE(mic_parameter),     intent(inout)   :: micparam !! computed model parameters
+  TYPE(mic_input),         intent(inout)   :: micinput !! model environmental inputs
+  TYPE(mic_npool),         intent(inout)   :: micnpool !! nitrogen pool state
+  integer,                 intent(in)      :: np       !! patch index
+  integer,                 intent(in)      :: ns       !! depth index
 
-    ! compute fractions
-    call bgc_fractions(micpxdef,micpdef,micparam,micinput,np)
+  integer  :: nopt, npft
+  logical  :: prt
 
-    ! compute microbial growth efficiency
-    call mget(micpdef,micparam,micinput,micnpool,np)
+  nopt = micparam%bgctype(np)
+  npft = micparam%pft(np)
+  prt  = (diag==1 .and. np==outp .and. ns==1)
 
-    ! compute microbial turnover rates
-    call turnovert(kinetics,micpxdef,micpdef,micparam,micinput,np)
+  ! compute fractions
+  call bgc_fractions( &
+    dleaf      = micinput%dleaf(np),         &  ! litter input: leaf (g C/m2/delt)
+    droot      = micinput%droot(np),         &  ! litter input: root (g C/m2/delt)
+    dwood      = micinput%dwood(np),         &  ! litter input: wood (g C/m2/delt)
+    clay       = micinput%clay(np,ns),       &  ! clay fraction of this layer
+    fracroot   = micparam%fracroot(np,ns),   &  ! root fraction in this layer
+    sdepth     = micparam%sdepth(np,ns),     &  ! layer thickness
+    fligleaf   = micparam%fligleaf(np),      &  ! lability fraction: leaf
+    fligroot   = micparam%fligroot(np),      &  ! lability fraction: root
+    fligwood   = micparam%fligwood(np),      &  ! lability fraction: wood
+    xcnleaf    = micparam%xcnleaf(np),       &  ! C:N ratio: leaf
+    xcnroot    = micparam%xcnroot(np),       &  ! C:N ratio: root
+    xcnwood    = micparam%xcnwood(np),       &  ! C:N ratio: wood
+    xNPP       = micpxdef%xNPP(npft),        &  ! carbon input scaling
+    cinputm    = micinput%cinputm(np,ns),    &  ! out: C input to metabolic litter
+    cinputs    = micinput%cinputs(np,ns),    &  ! out: C input to structural litter
+    fmetave    = micparam%fmetave(np,ns),    &  ! out: input-weighted metabolic fraction
+    cn_r       = micparam%cn_r(np,ns,:),     &  ! out: C:N ratios per pool
+    fr2p       = micparam%fr2p(np,ns),       &  ! out: routing fraction R -> POC
+    fk2p       = micparam%fk2p(np,ns),       &  ! out: routing fraction K -> POC
+    fr2c       = micparam%fr2c(np,ns),       &  ! out: routing fraction R -> MAOC
+    fk2c       = micparam%fk2c(np,ns),       &  ! out: routing fraction K -> MAOC
+    fr2a       = micparam%fr2a(np,ns),       &  ! out: routing fraction R -> mineral-associated
+    fk2a       = micparam%fk2a(np,ns),       &  ! out: routing fraction K -> mineral-associated
+    is_surface = (ns==1),                    &  ! only the top layer receives leaf/wood litter
+    print_output = prt)
 
-    if(kinetics/=3) call desorpt(micpxdef,micparam,micinput,np)
+  ! compute microbial growth efficiency
+  call mget( &
+    tavg     = micinput%tavg(np,ns),         &  ! soil temperature (deg C)
+    epsilon1 = micpdef%epislon1,             &  ! CUE epsilon 1
+    epsilon2 = micpdef%epislon2,             &  ! CUE epsilon 2
+    epsilon3 = micpdef%epislon3,             &  ! CUE epsilon 3
+    epsilon4 = micpdef%epislon4,             &  ! CUE epsilon 4
+    mgeR1    = micparam%mgeR1(np,ns),        &  ! out: maintenance coeff R1
+    mgeR2    = micparam%mgeR2(np,ns),        &  ! out: maintenance coeff R2
+    mgeR3    = micparam%mgeR3(np,ns),        &  ! out: maintenance coeff R3
+    mgeK1    = micparam%mgeK1(np,ns),        &  ! out: maintenance coeff K1
+    mgeK2    = micparam%mgeK2(np,ns),        &  ! out: maintenance coeff K2
+    mgeK3    = micparam%mgeK3(np,ns),        &  ! out: maintenance coeff K3
+    print_output = prt)
 
-    call vmaxt(micpxdef,micpdef,micparam,micinput,np)
-    call kmt(micpxdef,micpdef,micparam,micinput,np)
+  ! compute microbial turnover rates
+  call turnovert( &
+    fcnpp      = micinput%fcnpp(np),         &  ! fine root C:N fraction of NPP
+    delt       = delt,                       &  ! model time step (h)
+    tvmicR_def = micpdef%tvmicR,             &  ! default turnover rate R
+    tvmicK_def = micpdef%tvmicK,             &  ! default turnover rate K
+    betamic    = micpdef%betamic,            &  ! default turnover beta
+    fmetave    = micparam%fmetave(np,ns),    &  ! metabolic fraction (from bgc_fractions)
+    xtv        = micpdef%xtv,                &  ! default microbial pool turnover base
+    xtvmic     = micpxdef%xtvmic(nopt),      &  ! turnover scaling factor
+    xbeta      = micpxdef%xbeta(nopt),       &  ! beta scaling factor
+    tvmicR     = micparam%tvmicR(np,ns),     &  ! out: turnover rate R
+    tvmicK     = micparam%tvmicK(np,ns),     &  ! out: turnover rate K
+    betamicR   = micparam%betamicR(np,ns),   &  ! out: turnover beta R
+    betamicK   = micparam%betamicK(np,ns),   &  ! out: turnover beta K
+    print_output = prt)
+
+  if(kinetics/=3) call desorpt( &
+    clay     = micinput%clay(np,ns),         &  ! clay fraction
+    xdesorp  = micpxdef%xdesorp(nopt),       &  ! desorption scaling factor
+    desorp   = micparam%desorp(np,ns),       &  ! out: desorption rate
+    print_output = prt)
+
+  call vmaxt( &
+    tavg      = micinput%tavg(np,ns),        &  ! soil temperature (deg C)
+    sdepthz   = micparam%sdepthz(np,ns),     &  ! depth for Vmax decay
+    delt      = delt,                        &  ! model time step (h)
+    vmaxbeta  = micpdef%vmaxbeta,            &  ! default Vmax depth decay
+    xvmaxbeta = micpxdef%xvmaxbeta(nopt),    &  ! Vmax depth decay scaling
+    av        = micpdef%av,                  &  ! Vmax baseline
+    xav       = micpxdef%xav(nopt),          &  ! Vmax scaling factor
+    sv        = micpdef%sv,                  &  ! Vmax temperature coefficient
+    bv        = micpdef%bv,                  &  ! Vmax intercept
+    xv1       = micpdef%xv1,                 &  ! default V param 1
+    xv2       = micpdef%xv2,                 &  ! default V param 2
+    xv3       = micpdef%xv3,                 &  ! default V param 3
+    xw1       = micpdef%xw1,                 &  ! default W param 1
+    xw2       = micpdef%xw2,                 &  ! default W param 2
+    xw3       = micpdef%xw3,                 &  ! default W param 3
+    V1        = micparam%V1(np,ns),          &  ! out: Vmax substrate 1
+    V2        = micparam%V2(np,ns),          &  ! out: Vmax substrate 2
+    V3        = micparam%V3(np,ns),          &  ! out: Vmax substrate 3
+    W1        = micparam%W1(np,ns),          &  ! out: Vmax W 1
+    W2        = micparam%W2(np,ns),          &  ! out: Vmax W 2
+    W3        = micparam%W3(np,ns),          &  ! out: Vmax W 3
+    print_output = prt)
+
+  call kmt( &
+    clay      = micinput%clay(np,ns),        &  ! clay fraction
+    tavg      = micinput%tavg(np,ns),        &  ! soil temperature (deg C)
+    xak       = micpxdef%xak(nopt),          &  ! Km scaling factor
+    sk        = micpdef%sk,                  &  ! Km temperature coefficient
+    skx       = micpdef%skx,                 &  ! Km temperature coefficient (alt. pathway)
+    ak        = micpdef%ak,                  &  ! Km baseline
+    bk        = micpdef%bk,                  &  ! Km intercept
+    xk1       = micpdef%xk1,                 &  ! default K param 1
+    xk2       = micpdef%xk2,                 &  ! default K param 2
+    xk3       = micpdef%xk3,                 &  ! default K param 3
+    xj1       = micpdef%xj1,                 &  ! default J param 1
+    xj2       = micpdef%xj2,                 &  ! default J param 2
+    xj3       = micpdef%xj3,                 &  ! default J param 3
+    K1        = micparam%K1(np,ns),          &  ! out: Km substrate 1
+    K2        = micparam%K2(np,ns),          &  ! out: Km substrate 2
+    K3        = micparam%K3(np,ns),          &  ! out: Km substrate 3
+    J1        = micparam%J1(np,ns),          &  ! out: J substrate 1
+    J2        = micparam%J2(np,ns),          &  ! out: J substrate 2
+    J3        = micparam%J3(np,ns),          &  ! out: J substrate 3
+    print_output = prt)
 
 end subroutine vmic_param_time
 
@@ -387,7 +499,9 @@ subroutine vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc1
       call vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
       call vmic_init(miccpool,micnpool)
       do np=1,mp
-         call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
+         do ns=1,ms
+            call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np,ns)
+         end do
       end do
 
     !  print *, 'initial pool size np=1 ns=1', miccpool%cpool(1,1,:)
@@ -621,7 +735,9 @@ SUBROUTINE vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
       call vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
       call vmic_init(miccpool,micnpool)
       do np=1,mp
-         call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
+         do ns=1,ms
+            call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np,ns)
+         end do
       end do
 
       print *, "initial pool size np=1 ns=1", miccpool%cpool(1,1,:)
@@ -860,7 +976,9 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
       call vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
       call vmic_init(miccpool,micnpool)
       do np=1,mp
-         call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
+         do ns=1,ms
+            call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np,ns)
+         end do
       end do
 
       if(jrestart==1) call vmic_restart_read(miccpool,micnpool,frestart_in)
@@ -894,7 +1012,9 @@ subroutine vmicsoil_hwsd_gpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                call variable_time(year,i,micglobal,micinput,micnpool,np)
 
                ! calculate parameter values that depend on soil temperature or moisture (varying with time)
-               call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
+               do ns=1,ms
+                  call vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np,ns)
+               end do
 
                ! for each soil layer
                ! sum last all C pools of all layers for compute the soil respiration = input - sum(delCpool)
@@ -1099,7 +1219,9 @@ end subroutine vmicsoil_hwsd_gpu
 
     call variable_time(year, doy, micglobal, micinput, micnpool, np)
     ! calculate parameter values that depend on soil temperature or moisture (varying with time)
-    call vmic_param_time(kinetics, micpxdef, micpdef, micparam, micinput, micnpool, np)
+    do ns = 1, ms
+      call vmic_param_time(kinetics, micpxdef, micpdef, micparam, micinput, micnpool, np, ns)
+    end do
 
     ! for each soil layer
     ! sum all C pools across layers to compute soil respiration = input - sum(delCpool)

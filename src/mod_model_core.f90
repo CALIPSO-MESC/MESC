@@ -619,7 +619,7 @@ contains
 
     ! additional variables for kinetics3
     real(dp)  :: cfluxa, cfluxp, cfluxc2p, cfluxa2c, cfluxp2c
-    real(dp)  :: kadsorpx, kdesorpx, fp2ax, moistx, soilphx, porex, xwater,
+    real(dp)  :: kadsorpx, kdesorpx, fp2ax, moistx, soilphx, porex, xwater
     real(dp)  :: phx1, phx2, phx3, siltx, tvcpoolx, tvppoolx, tvacx
     real(dp)  :: smexpa, smopt, qmaxcoeffx, qmax
     real(dp)  :: swbx, swdx, matpotx, xwater1, xwater2
