@@ -350,7 +350,7 @@ contains
       dwoodx = 0.0
     end if
 
-    ! **this is a temporary solution, to be modified after N cycle is included
+    ! TODO: this is a temporary solution, to be modified after N cycle is included
     cn_r(1) = max(5.0, 0.5*(xcnleaf + xcnroot))
     cn_r(2) = max(10.0, 0.5*xcnleaf)
     cn_r(3) = 7.4
