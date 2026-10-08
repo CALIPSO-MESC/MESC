@@ -1,0 +1,11 @@
+jglobal  ifsoc14  kinetics pftopt jopt jrestart jmodel
+   1        0        3       3     0     0        2
+./input/ORCHIDEE_time_invariant.nc
+./input/ORCHIDEE_ave_1990_2020_time_varing_PFTave.nc
+./input/hwsd-soil-orchidee-cluster.nc
+./input/orchidee/global_parameter_orchidee.txt
+./output/global_inputdat_orchidee.txt
+./input/MODIS_npp_2001-2009_0.5d.nc
+./input/hwsd_aoc_halfdeg.nc
+  1.0000  1.0000  1.0000  1.000  1.0000  1.0000  1.0000  1.0000  1.0000  1.0000  1.0000  1.0000  1.0000  1.0000
+14      7      6    1     3       10

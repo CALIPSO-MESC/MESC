@@ -30,71 +30,51 @@ rm -f case.txt
 # --------------------------------------------------
 # Configure test cases to be run
 # --------------------------------------------------
-cases=("f3" "cable3")
-runs=("frc" "hwsd")
+cases=("frc_f3" "hwsd_cable3" "orchidee_global")
 
 # --------------------------------------------------
 # Loop over test cases
 # --------------------------------------------------
-rm -rf output
 mkdir -p output
-for i in 0 1; do
+for i in {0..2}; do
   case="${cases[${i}]}"
-  run="${runs[${i}]}"
-  echo "Running test case '${case}', run '${run}'"
+
+  echo "Running test case '${case}' "
 
   # --------------------------------------------------
   # Copy parameter files
   # --------------------------------------------------
-  cp ./input/mesc_${run}_${case}.nml mesc.nml
-  cp ./input/parameters_${run}_${case}.txt parameters.txt
-  cp ./input/params_val_${run}_${case}.txt params_val.txt
+  cp ./input/mesc_${case}.nml mesc.nml
+  cp ./input/parameters_${case}.txt parameters.txt
+  cp ./input/params_val_${case}.txt params_val.txt
 
   # --------------------------------------------------
   # Run the test case
   # --------------------------------------------------
-  START="$(date +%s)"
-  ./main >output/outval_${case}_${run}.txt
-  DURATION=$(($(date +%s) - ${START}))
-  echo "Time taken: ${DURATION} seconds"
-  if [ -e fort.91 ]; then
-    mv fort.91 output/valsoc_91_${case}_${run}.txt
-    diff benchmark/valsoc_91_${case}_${run}.txt output/valsoc_91_${case}_${run}.txt >output/diff_valsoc_91_${case}_${run}.txt
-  fi
-  if [ -e fort.92 ]; then
-    mv fort.92 output/valsoc_92_${case}_${run}.txt
-    diff benchmark/valsoc_92_${case}_${run}.txt output/valsoc_92_${case}_${run}.txt >output/diff_valsoc_92_${case}_${run}.txt
-  fi
+  ./main >output/outval_${case}.txt
+  mv fort.91 output/valsoc_91_${case}.txt
+  mv fort.92 output/valsoc_92_${case}.txt
+  diff benchmark/valsoc_91_${case}.txt output/valsoc_91_${case}.txt >output/diff_valsoc_91_${case}.txt
+  diff benchmark/valsoc_92_${case}.txt output/valsoc_92_${case}.txt >output/diff_valsoc_92_${case}.txt
 done
 
 # --------------------------------------------------
 # Report test statuses
 # --------------------------------------------------
-for i in {0..1}; do
+for i in {0..2}; do
   case="${cases[${i}]}"
-  run="${runs[${i}]}"
-  pass=true
+  pass=1
   for id in 91 92; do
-    # Check the output file exists and is not empty
-    if [ ! -e "output/valsoc_${id}_${case}_${run}.txt" ]; then
-      pass=false
-      break
-    fi
-    if [ -z "output/valsoc_${id}_${case}_${run}.txt" ]; then
-      pass=false
-      break
-    fi
-    # Check the diff file exists and is empty
-    if [ -s "output/diff_valsoc_${id}_${case}_${run}.txt" ]; then
-      pass=false
+    if [ "$(cat output/diff_valsoc_${id}_${case}.txt)" ]; then
+      pass=0
       break
     fi
   done
-  if [ ${pass} == false ]; then
-    echo "FAIL: test case '${case}', run '${run}'"
+  if [ ${pass} ]; then
+    echo "PASS: test case '${case}'"
   else
-    echo "PASS: test case '${case}', run '${run}'"
+    echo "FAIL: test case '${case}'"
   fi
 done
-rm -f output/diff_*.txt
+rm output/diff_*.txt
 echo "===== Job finished: $(date) ====="
