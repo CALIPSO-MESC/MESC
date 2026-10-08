@@ -1273,6 +1273,9 @@ end subroutine vmicsoil_hwsd_gpu
       end do
       fluxsoc(:) = 0.0
       diffsocxx = micparam%diffsocx(np)
+      ! requires interactions between neighboring vertical levels along ns
+      ! bioturb (and therefore mesc_step) cannot be refactored into 
+      ! per-cell core subroutines.
       call bioturb(int(delty/delty), ms, zse, delty, diffsocxx, fluxsoc, ypooli, ypoole)
       do ns = 1, ms
         miccpool%cpool(np,ns,ip) = ypoole(ns)
