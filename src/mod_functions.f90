@@ -131,11 +131,6 @@ module mesc_function_module
       xopt = config%xopt
       nxopt = config%nxopt
 
-      open(1,file=config%fparameter)
-      read(1,*) xopt(1:14)
-      read(1,*) nxopt(1:nx)
-      close(1)
-
       if(jopt) then
          do nparam=1,nx
             if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) then
@@ -361,11 +356,6 @@ END function functn_frc1
       xopt = config%xopt
       nxopt = config%nxopt
 
-      open(1,file=config%fparameter)
-      read(1,*) xopt(1:14)
-      read(1,*) nxopt(1:nx)
-      close(1)
-
       do nparam=1,nx
          if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) then
            error stop "ERROR functn_soc_hwsd: nxopt is outside 1:16"
@@ -489,11 +479,6 @@ END function functn_soc_hwsd
       xopt = config%xopt
       nxopt = config%nxopt
 
-      open(1,file=config%fparameter)
-      read(1,*) xopt(1:14)
-      read(1,*) nxopt(1:nx)
-      close(1)
-
       do nparam=1,nx
          if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) then
            error stop "ERROR functn_global4: nxopt is outside 1:16"
@@ -616,11 +601,6 @@ END function functn_global4
       faustsoc = config%faustsoc
       xopt = config%xopt
       nxopt = config%nxopt
-
-      open(1,file=config%fparameter)
-      read(1,*) xopt(1:14)
-      read(1,*) nxopt(1:nx)
-      close(1)
 
       do nparam=1,nx
          if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) then

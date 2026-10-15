@@ -45,8 +45,6 @@ for i in 0 1; do
   # Copy namelist into run directory
   # --------------------------------------------------
   cp "./input/mesc_${run}_${case}.nml" mesc.nml
-  cp "./input/parameters_${run}_${case}.txt" parameters.txt
-  cp "./input/params_val_${run}_${case}.txt" params_val.txt
 
   # --------------------------------------------------
   # Run the test case
