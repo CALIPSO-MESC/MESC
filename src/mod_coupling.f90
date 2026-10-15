@@ -156,8 +156,9 @@ contains
     ! Local variables
     integer :: icell
 
-    if (state%initialised) &
-       error stop "ERROR mesc_coupling_init: state is already initialised"
+    if (state%initialised) then
+      error stop "ERROR mesc_coupling_init: state is already initialised"
+    end if
 
     ! Set MESC's runtime dimensions (module-level variables in mic_constant).
     ! Time-varying forcing is staged one year at a time through micglobal.
@@ -278,12 +279,15 @@ contains
     real(dp) :: cinput_prev, rsoil_prev
     integer  :: ny
 
-    if (.not. state%initialised) &
-       error stop "ERROR mesc_coupling_step: state is not initialised"
-    if (icell < 1 .or. icell > state%ncell) &
-       error stop "ERROR mesc_coupling_step: icell is outside 1:ncell"
-    if (doy < 1 .or. doy > nday_year) &
-       error stop "ERROR mesc_coupling_step: doy is outside 1:365"
+    if (.not. state%initialised) then
+      error stop "ERROR mesc_coupling_step: state is not initialised"
+    end if
+    if (icell < 1 .or. icell > state%ncell) then
+      error stop "ERROR mesc_coupling_step: icell is outside 1:ncell"
+    end if
+    if (doy < 1 .or. doy > nday_year) then
+      error stop "ERROR mesc_coupling_step: doy is outside 1:365"
+    end if
 
     ! Reset year-to-date flux accumulators at the start of each year
     if (doy == 1) then
@@ -332,10 +336,12 @@ contains
     real(dp),                  intent(out) :: cpool_out(state%nlev, mcpool)
       !! carbon pool state of cell `icell` [mg C cm-3]
 
-    if (.not. state%initialised) &
-       error stop "ERROR mesc_coupling_get_cpool: state is not initialised"
-    if (icell < 1 .or. icell > state%ncell) &
-       error stop "ERROR mesc_coupling_get_cpool: icell is outside 1:ncell"
+    if (.not. state%initialised) then
+      error stop "ERROR mesc_coupling_get_cpool: state is not initialised"
+    end if
+    if (icell < 1 .or. icell > state%ncell) then
+      error stop "ERROR mesc_coupling_get_cpool: icell is outside 1:ncell"
+    end if
 
     cpool_out(:,:) = state%miccpool%cpool(icell,:,:)
   end subroutine mesc_coupling_get_cpool
