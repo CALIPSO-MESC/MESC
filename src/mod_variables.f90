@@ -134,6 +134,7 @@ module mic_variable
       real(dp), dimension(:,:), allocatable  :: qmaxcoeff !! Qmax-clay+silt coefficient
       integer,   dimension(:), allocatable  :: pft,bgctype,isoil,sorder,region,siteid,dataid !! site metadata
       real(dp), dimension(:,:), allocatable  :: sdepth,fracroot  !! soil depth [cm], root fraction
+      real(dp), dimension(:,:), allocatable  :: sdepthz           !! depth used for Vmax depth decay (set in vmic_param_constant)
       real(dp), dimension(:,:), allocatable  :: csoilobs          !! measured SOC [mg C cm-3]
       real(dp), dimension(:,:), allocatable  :: csoilobsp,csoilobsm,fracaoc !! SOC profile components
       real(dp), dimension(:),  allocatable  :: c14soilobsp,c14soilobsm !! 14C observations
@@ -277,6 +278,7 @@ module mic_variable
                micparam%dataid(mp))
 
       allocate(micparam%sdepth(mp,ms),   &
+               micparam%sdepthz(mp,ms),  &
                micparam%fracroot(mp,ms), &
                micparam%csoilobs(mp,ms), &
                micparam%fracaoc(mp,ms), &
@@ -476,6 +478,7 @@ module mic_variable
                micparam%siteid)
 
       deallocate(micparam%sdepth,   &
+               micparam%sdepthz,    &
                micparam%fracroot,   &
                micparam%csoilobs,   &
                micparam%fracaoc,    &
