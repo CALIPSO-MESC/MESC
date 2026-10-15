@@ -31,9 +31,9 @@
 !! fluxes and stocks to standard output.
 program mock_lsm_driver
   use, intrinsic :: ieee_arithmetic, only : ieee_is_finite
-  use precision_module, only : dp
-  use mic_constant, only : mcpool, xrootorchidee, cnleaf2, cnwood2, cnroot2, &
-                           ligleaf2, ligwood2, ligroot2
+  use mesc_precision_module, only: dp
+  use mesc_constant_module, only: mcpool, xrootorchidee, cnleaf2, cnwood2, &
+                                  cnroot2, ligleaf2, ligwood2, ligroot2
   use mesc_coupling_module, only : mesc_coupling_state, nday_year, &
                                    mesc_coupling_init, mesc_coupling_step, &
                                    mesc_coupling_get_cpool, &
