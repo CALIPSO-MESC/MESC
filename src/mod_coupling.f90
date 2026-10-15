@@ -45,14 +45,17 @@
 !!   the model dimensions in `mic_constant` (`mp`, `ms`, `mpft`, ...) are
 !!   module-level variables shared by all of MESC.
 module mesc_coupling_module
-  use precision_module, only : dp
-  use mic_constant, only : mp, ms, mpft, mbgc, ntime, nlon, nlat, mcpool
-  use mic_variable, only : mic_param_xscale, mic_param_default, mic_parameter, &
-                           mic_input, mic_npool, mic_cpool, mic_output, mic_global_input, &
-                           mic_allocate_parameter, mic_allocate_input, mic_allocate_output, &
-                           mic_allocate_cpool, mic_allocate_npool, &
-                           mic_deallocate_parameter, mic_deallocate_input, mic_deallocate_output, &
-                           mic_deallocate_cpool, mic_deallocate_npool
+  use mesc_precision_module, only: dp
+  use mesc_constant_module, only: mp, ms, mpft, mbgc, ntime, nlon, nlat, mcpool
+  use mesc_variable_module, only: mic_param_xscale, mic_param_default, &
+                                  mic_parameter, mic_input, mic_npool, &
+                                  mic_cpool, mic_output, mic_global_input, &
+                                  mic_allocate_parameter, mic_allocate_input, &
+                                  mic_allocate_output, mic_allocate_cpool, &
+                                  mic_allocate_npool, &
+                                  mic_deallocate_parameter, &
+                                  mic_deallocate_input, mic_deallocate_output, &
+                                  mic_deallocate_cpool, mic_deallocate_npool
   use mesc_inout_module, only : getparam_global
   use mesc_interface_module, only : vmic_param_constant, vmic_init, mesc_step
   implicit none
