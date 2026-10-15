@@ -1,11 +1,19 @@
 !> Module for MESC namelist configuration.
-module mesc_namelist
-  use, intrinsic :: iso_fortran_env, only : error_unit, output_unit
-  use precision_module, only: dp
+module mesc_namelist_module
+  use, intrinsic :: iso_fortran_env, only: error_unit, output_unit
+  use mesc_precision_module, only: dp
   implicit none
   private
 
   integer, parameter :: path_len = 140
+
+  logical, public :: use_modis_npp = .false.
+
+  ! Enumerator for handling the different models supported by jmodel
+  enum, bind(c)
+    enumerator :: model_cable = 1
+    enumerator :: model_orchidee = 2
+  end enum
 
   !> Derived type for holding parameter values related to MESC.
   type, public :: mesc_config
@@ -31,11 +39,12 @@ module mesc_namelist
     character(len=path_len) :: fanoc = ""
     character(len=path_len) :: fglobal(7) = ""
     real(dp) :: xopt(16) = 1.0_dp
+    real(dp) :: xparam(16) = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     integer :: nxopt(16) = [1, 2, 3, 4, 5, 6, 7, 8, &
                             9, 10, 11, 12, 13, 14, 15, 16]
   end type mesc_config
 
-  public :: read_mesc_namelist, print_mesc_config
+  public :: read_mesc_namelist, print_mesc_config, model_orchidee, model_cable
 
 contains
 
@@ -57,13 +66,14 @@ contains
     character(len=path_len) :: fparameter, cfraction, frac14c, f14c(5), filecluster
     character(len=path_len) :: fhwsdsoc, faustsoc
     character(len=path_len) :: fmodis, fanoc, fglobal(7)
-    real(dp) :: xopt(16)
+    real(dp) :: xopt(16), xparam(16)
     integer :: nxopt(16)
 
     namelist /mesc/ runcase, jglobal, kinetics, bgcopt, jopt, &
       jrestart, jmodel, ifsoc14, frestart_in, frestart_out, &
       foutput, fparameter, cfraction, frac14c, f14c, filecluster, &
-      fhwsdsoc, faustsoc, fmodis, fanoc, fglobal, xopt, nxopt
+      fhwsdsoc, faustsoc, fmodis, fanoc, fglobal, xopt, xparam, nxopt, &
+      use_modis_npp
 
     ! Copy defaults into the local variables read by the namelist.
     runcase = config%runcase
@@ -88,6 +98,7 @@ contains
     fanoc = config%fanoc
     fglobal = config%fglobal
     xopt = config%xopt
+    xparam = config%xparam
     nxopt = config%nxopt
 
     open(newunit=nml_unit, file=trim(filename), status="old", &
@@ -121,6 +132,7 @@ contains
     config%fanoc = fanoc
     config%fglobal = fglobal
     config%xopt = xopt
+    config%xparam = xparam
     config%nxopt = nxopt
   end subroutine read_mesc_namelist
 
@@ -150,4 +162,4 @@ contains
     error stop 1
   end subroutine fatal_error
 
-end module mesc_namelist
+end module mesc_namelist_module

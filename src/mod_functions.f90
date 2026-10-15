@@ -4,23 +4,31 @@
 !> carbon model via an appropriate driver, computes a cost against
 !> observations, and returns the scalar cost value.  The dispatcher
 !> [[functn]] reads `mesc.nml` and selects the configured run mode.
-module function_module
-  use precision_module, only: dp
-  use mesc_namelist, only: mesc_config, read_mesc_namelist
-  use mic_constant, only: mp, mpft, mbgc, ntime, nlon, nlat, ms
-  use mic_variable, only: mic_param_xscale, mic_param_default, mic_parameter, &
-                          mic_input, mic_global_input, mic_cpool, mic_npool, mic_output, &
-                          mic_allocate_parameter, mic_allocate_input, mic_allocate_output, &
-                          mic_allocate_cpool, mic_allocate_npool, &
-                          mic_deallocate_parameter, mic_deallocate_input, mic_deallocate_output, &
-                          mic_deallocate_cpool, mic_deallocate_npool
+module mesc_function_module
+  use mesc_precision_module, only: dp
+  use mesc_constant_module, only: mp, mpft, mbgc, ntime, nlon, nlat, ms, &
+                                  xrootcable, xrootorchidee
+  use mesc_namelist_module, only: mesc_config, read_mesc_namelist, &
+                                  model_cable, model_orchidee
+  use mesc_variable_module, only: mic_param_xscale, mic_param_default, &
+                                  mic_parameter, mic_input, mic_global_input, &
+                                  mic_cpool, mic_npool, mic_output, &
+                                  mic_allocate_parameter, mic_allocate_input, &
+                                  mic_allocate_output, mic_allocate_cpool, &
+                                  mic_allocate_npool, &
+                                  mic_deallocate_parameter, &
+                                  mic_deallocate_input, mic_deallocate_output, &
+                                  mic_deallocate_cpool, mic_deallocate_npool
   use mesc_inout_module, only: getdata_c14, getdata_frc_dim, getdata_frc, &
                                getdata_hwsd_dim, getdata_hwsd, screenout, &
                                getparam_global,getpatch_global, &
-                               getdata_global4_cable,getdata_global4_orchidee, getdata_aust_dim,getdata_aust
-  use mesc_interface_module, only: vmic_param_xscale, vmic_param_time, vmicsoil_c14, &
-                                   vmicsoil_frc1_cpu, vmicsoil_hwsd_cpu, vmicsoil_hwsd_gpu
-  use calcost_module, only: calcost_c14, calcost_frc1, calcost_hwsd3, calcost_global_hwsd, calcost_aust
+                               getdata_global4_cable,getdata_global4_orchidee, &
+                               getdata_aust_dim,getdata_aust
+  use mesc_interface_module, only: vmic_param_xscale, vmic_param_time, &
+                                   vmicsoil_c14, vmicsoil_frc1_cpu, &
+                                   vmicsoil_hwsd_cpu, vmicsoil_hwsd_gpu
+  use mesc_calcost_module, only: calcost_c14, calcost_frc1, calcost_hwsd3, &
+                                 calcost_global_hwsd, calcost_aust
   implicit none
 
   ! All module members are public by default
@@ -42,18 +50,19 @@ module function_module
  !! * 2 -> [[functn_frc1]]
  !! * 3 -> [[functn_soc_hwsd]]
  !! * 4 -> [[functn_global4]]
- real(dp) function functn(nx,xparam16)
+ real(dp) function functn(nx)
 
      integer, intent(in) :: nx
          !! Number of optimized parameters.
-     real(dp), dimension(16), intent(in) :: xparam16
+     real(dp), dimension(16) :: xparam16
          !! Values of the `nx` optimized parameters.
+
+     call read_mesc_namelist("mesc.nml", config)
+     xparam16(:) = config%xparam
 
      if (nx < 1 .or. nx > size(xparam16)) then
        error stop "ERROR functn: nx must be between 1 and 16"
      end if
-
-     call read_mesc_namelist("mesc.nml", config)
 
      SELECT CASE (config%runcase)
      !  CASE (0)
@@ -104,7 +113,7 @@ module function_module
     integer :: ifsoc14,kinetics,bgcopt,nyeqpool,isoc14,jmodel
     integer :: jrestart,nparam
     character(len=140) :: frestart_in,frestart_out,foutput
-    character(len=140) :: frac14c,f14c(5),filecluster,fparameter
+    character(len=140) :: frac14c,f14c(5),filecluster
     real(dp), dimension(:), allocatable :: zse
 
       jglobal = config%jglobal
@@ -139,8 +148,15 @@ module function_module
 
       mp = 213   ! needs to get the value from input file (to be done)
 
-      totcost1 = 0.0; totcost2=0.0
-      nyeqpool= 500;jmodel=1;mpft=17;mbgc=12;ntime=1;nlon=1;nlat=1
+      totcost1 = 0.0
+      totcost2=0.0
+      nyeqpool= 500
+      jmodel=model_cable
+      mpft=17
+      mbgc=12
+      ntime=1
+      nlon=1
+      nlat=1
       ms=15
       allocate(zse(ms))
       zse(1:ms)=0.1
@@ -154,7 +170,7 @@ module function_module
           isoc14 = 0
       !    print *, "isoc14 =",isoc14,'--getdata_c14'
           call getdata_c14(frac14c,f14c,filecluster,micinput,micparam,micnpool,zse)
-          call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
+          call vmic_param_xscale(xopt,bgcopt,xrootcable,micpxdef)
       !    print *, 'vmicsoil_c14'
           call vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,ifsoc14,bgcopt,nyeqpool, &
                         zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
@@ -168,7 +184,7 @@ module function_module
           isoc14 = 1
        !   print *, "isoc14 =",isoc14,'--getdata_c14'
           call getdata_c14(frac14c,f14c,filecluster,micinput,micparam,micnpool,zse)
-          call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
+          call vmic_param_xscale(xopt,bgcopt,xrootcable,micpxdef)
        !   print *, 'vmicsoil_c14'
           call vmicsoil_c14(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,ifsoc14,bgcopt,nyeqpool+2000, &
                         zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
@@ -235,11 +251,6 @@ real(dp) function functn_frc1(nx,xparam16)
       xopt = config%xopt
       nxopt = config%nxopt
 
-      open(1,file=config%fparameter)
-      read(1,*) xopt(1:14)
-      read(1,*) nxopt(1:nx)
-      close(1)
-
       if(.not. jopt) then
          do nparam=1,nx
             if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) then
@@ -256,7 +267,11 @@ real(dp) function functn_frc1(nx,xparam16)
       totcost1 = 0.0
       nyeqpool= 1000
       isoc14 = 0
-      jmodel=1;mpft=17;mbgc=12;nlon=1;nlat=1
+      jmodel=model_cable
+      mpft=17
+      mbgc=12
+      nlon=1
+      nlat=1
       ms = 10
       allocate(zse(ms))
       zse(1) =0.02;zse(2)=0.04;zse(3)=0.06;zse(4)=0.08
@@ -272,7 +287,7 @@ real(dp) function functn_frc1(nx,xparam16)
 
     !  print *, "isoc14 =",isoc14,'--getdata_frc'
       call getdata_frc(cfraction,jglobal,bgcopt,micinput,micparam,micnpool,micglobal,zse)
-      call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
+      call vmic_param_xscale(xopt,bgcopt,xrootcable,micpxdef)
 
     !  print *, 'vmicsoil_frc1_cpu'
     !  call vmicsoil_frc1_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,ifsoc14,bgcopt,nyeqpool, &
@@ -365,9 +380,20 @@ END function functn_frc1
       call getdata_hwsd_dim(fhwsdsoc,mpx,timex)
       mp=mpx
       ntime=timex
-      if(jmodel==1)                mpft=17   !CABLE
-      if(jmodel==2 .or. jmodel==3) mpft=19   !ORCHIDEE
-      mbgc=12;nlon=1;nlat=1
+
+      select case (jmodel)
+      case (model_cable)
+        mpft = 17
+      case (model_orchidee)
+        mpft = 19
+      case default
+        write(6,"(a,i0,a)") "ERROR functn_soc_hwsd: Invalid model '", jmodel, "'"
+        stop 999
+      end select
+
+      mbgc=12
+      nlon=1
+      nlat=1
       ms=7
       allocate(zse(ms))
       zse(1:5)=0.2;zse(6:7)=0.5
@@ -381,7 +407,11 @@ END function functn_frc1
       call getdata_hwsd(fhwsdsoc,fmodis,fanoc,jglobal,bgcopt,jopt,jmodel,micparam,micglobal,zse)
 
       !  call profile()
-      call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
+      if (jmodel==1) then
+        call vmic_param_xscale(xopt,bgcopt,xrootcable,micpxdef)
+      else
+        call vmic_param_xscale(xopt,bgcopt,xrootorchidee,micpxdef)
+      end if
 
       call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
                          zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
@@ -437,7 +467,9 @@ END function functn_soc_hwsd
       nyeqpool = 500
       ok=0
       totcost1=0.0
-      jmodel=1;mpft=17;mbgc=10;ntime=365;nlon=192;nlat=112
+      jmodel=model_cable
+      mbgc=10
+      ntime=365
       ms=7
       allocate(zse(ms))
       zse(1:5)=0.2;zse(6:7)=0.5
@@ -470,9 +502,20 @@ END function functn_soc_hwsd
       end do
       print *, xopt
 
-      if(jmodel==2 .or. jmodel==3) then
-         mpft=19; nlon=720; nlat=360
-      end if
+      ! Set model-specific parameters
+      select case (jmodel)
+      case (model_cable)
+        mpft=17
+        nlon=192
+        nlat=112
+      case (model_orchidee)
+        mpft=19
+        nlon=720
+        nlat=360
+      case default
+        write(6,"(a,i0,a)") "ERROR functn_global4: Invalid model '", jmodel, "'"
+        stop 999
+      end select
 
       ! reading global parameter values here      xopt =xparam16(1:nx)
       call getpatch_global(fglobal(1),jmodel,mp)
@@ -486,14 +529,22 @@ END function functn_soc_hwsd
 
       print *, " all  arrays are allocated!"
 
-      if(jmodel==1)                call getdata_global4_cable(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal,micparam,zse)
-      if(jmodel==2 .or. jmodel==3) call getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal,micparam,zse)
+      ! Call getdata_global4 variant appropriate to model
+      select case (jmodel)
+      case (model_cable)
+        call getdata_global4_cable(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal,micparam,zse)
+      case (model_orchidee)
+        call getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal,micparam,zse)
+      case default
+        write(6,"(a,i0,a)") "ERROR functn_global4: Invalid model '", jmodel, "'"
+        stop 999
+      end select
       print *, "global input data are read in"
 
       if(.not. jopt) then
-        call getparam_global(fglobal(4),jmodel,micpxdef)     ! reading global parameter lookup table
+        call getparam_global(fglobal(4),xrootorchidee,micpxdef)     ! reading global parameter lookup table
       else
-        call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)  ! parameter optimization
+        call vmic_param_xscale(xopt,bgcopt,xrootorchidee,micpxdef)  ! parameter optimization
       end if
 
       print *, "vmicsoil_global"
@@ -597,7 +648,11 @@ END function functn_global4
       call getdata_aust(faustsoc,jglobal,bgcopt,jopt,jmodel,micparam,micglobal,zse)
 
       !  call profile()
-      call vmic_param_xscale(xopt,bgcopt,jmodel,micpxdef)
+      if (jmodel==1) then
+        call vmic_param_xscale(xopt,bgcopt,xrootcable,micpxdef)
+      else
+        call vmic_param_xscale(xopt,bgcopt,xrootorchidee,micpxdef)
+      end if
 
       call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
                          zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
@@ -614,4 +669,4 @@ END function functn_global4
       deallocate(zse)
 END function functn_soc_aust
 
-end module function_module
+end module mesc_function_module
