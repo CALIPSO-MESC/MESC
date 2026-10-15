@@ -4,25 +4,31 @@
 !> carbon model via an appropriate driver, computes a cost against
 !> observations, and returns the scalar cost value.  The dispatcher
 !> [[functn]] reads `mesc.nml` and selects the configured run mode.
-module function_module
-  use precision_module, only: dp
-  use mic_constant, only: mp, mpft, mbgc, ntime, nlon, nlat, ms, xrootcable, &
-                          xrootorchidee
-  use mesc_namelist, only: mesc_config, read_mesc_namelist, model_cable, &
-                           model_orchidee
-  use mic_variable, only: mic_param_xscale, mic_param_default, mic_parameter, &
-                          mic_input, mic_global_input, mic_cpool, mic_npool, mic_output, &
-                          mic_allocate_parameter, mic_allocate_input, mic_allocate_output, &
-                          mic_allocate_cpool, mic_allocate_npool, &
-                          mic_deallocate_parameter, mic_deallocate_input, mic_deallocate_output, &
-                          mic_deallocate_cpool, mic_deallocate_npool
+module mesc_function_module
+  use mesc_precision_module, only: dp
+  use mesc_constant_module, only: mp, mpft, mbgc, ntime, nlon, nlat, ms, &
+                                  xrootcable, xrootorchidee
+  use mesc_namelist_module, only: mesc_config, read_mesc_namelist, &
+                                  model_cable, model_orchidee
+  use mesc_variable_module, only: mic_param_xscale, mic_param_default, &
+                                  mic_parameter, mic_input, mic_global_input, &
+                                  mic_cpool, mic_npool, mic_output, &
+                                  mic_allocate_parameter, mic_allocate_input, &
+                                  mic_allocate_output, mic_allocate_cpool, &
+                                  mic_allocate_npool, &
+                                  mic_deallocate_parameter, &
+                                  mic_deallocate_input, mic_deallocate_output, &
+                                  mic_deallocate_cpool, mic_deallocate_npool
   use mesc_inout_module, only: getdata_c14, getdata_frc_dim, getdata_frc, &
                                getdata_hwsd_dim, getdata_hwsd, screenout, &
                                getparam_global,getpatch_global, &
-                               getdata_global4_cable,getdata_global4_orchidee, getdata_aust_dim,getdata_aust
-  use mesc_interface_module, only: vmic_param_xscale, vmic_param_time, vmicsoil_c14, &
-                                   vmicsoil_frc1_cpu, vmicsoil_hwsd_cpu, vmicsoil_hwsd_gpu
-  use calcost_module, only: calcost_c14, calcost_frc1, calcost_hwsd3, calcost_global_hwsd, calcost_aust
+                               getdata_global4_cable,getdata_global4_orchidee, &
+                               getdata_aust_dim,getdata_aust
+  use mesc_interface_module, only: vmic_param_xscale, vmic_param_time, &
+                                   vmicsoil_c14, vmicsoil_frc1_cpu, &
+                                   vmicsoil_hwsd_cpu, vmicsoil_hwsd_gpu
+  use mesc_calcost_module, only: calcost_c14, calcost_frc1, calcost_hwsd3, &
+                                 calcost_global_hwsd, calcost_aust
   implicit none
 
   ! All module members are public by default
@@ -44,18 +50,19 @@ module function_module
  !! * 2 -> [[functn_frc1]]
  !! * 3 -> [[functn_soc_hwsd]]
  !! * 4 -> [[functn_global4]]
- real(dp) function functn(nx,xparam16)
+ real(dp) function functn(nx)
 
      integer, intent(in) :: nx
          !! Number of optimized parameters.
-     real(dp), dimension(16), intent(in) :: xparam16
+     real(dp), dimension(16) :: xparam16
          !! Values of the `nx` optimized parameters.
+
+     call read_mesc_namelist("mesc.nml", config)
+     xparam16(:) = config%xparam
 
      if (nx < 1 .or. nx > size(xparam16)) then
        error stop "ERROR functn: nx must be between 1 and 16"
      end if
-
-     call read_mesc_namelist("mesc.nml", config)
 
      SELECT CASE (config%runcase)
      !  CASE (0)
@@ -106,7 +113,7 @@ module function_module
     integer :: ifsoc14,bgcopt,nyeqpool,isoc14,jmodel
     integer :: jrestart,nparam
     character(len=140) :: frestart_in,frestart_out,foutput
-    character(len=140) :: frac14c,f14c(5),filecluster,fparameter
+    character(len=140) :: frac14c,f14c(5),filecluster
     real(dp), dimension(:), allocatable :: zse
 
       jglobal = config%jglobal
@@ -122,16 +129,12 @@ module function_module
       filecluster = config%filecluster
       xopt = config%xopt
       nxopt = config%nxopt
- 
-      open(1,file=config%fparameter)
-      read(1,*) xopt(1:14)
-      read(1,*) nxopt(1:nx)
-      close(1)
 
       if(jopt) then
          do nparam=1,nx
-            if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
+            if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) then
               error stop "ERROR functn_c14: nxopt is outside 1:16"
+            end if
             xopt(nxopt(nparam)) = xparam16(nparam)
          end do
       end if
@@ -241,15 +244,11 @@ real(dp) function functn_frc1(nx,xparam16)
       xopt = config%xopt
       nxopt = config%nxopt
 
-      open(1,file=config%fparameter)
-      read(1,*) xopt(1:14)
-      read(1,*) nxopt(1:nx)
-      close(1)
-
       if(.not. jopt) then
          do nparam=1,nx
-            if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
+            if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) then
               error stop "ERROR functn_frc1: nxopt is outside 1:16"
+            end if
             xopt(nxopt(nparam)) = xparam16(nparam)
          end do
       end if
@@ -353,15 +352,11 @@ END function functn_frc1
       fanoc = config%fanoc
       xopt = config%xopt
       nxopt = config%nxopt
-      
-      open(1,file=config%fparameter)
-      read(1,*) xopt(1:14)
-      read(1,*) nxopt(1:nx)
-      close(1)      
-      
+
       do nparam=1,nx
-         if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
+         if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) then
            error stop "ERROR functn_soc_hwsd: nxopt is outside 1:16"
+         end if
          xopt(nxopt(nparam)) = xparam16(nparam)
       end do
 
@@ -475,19 +470,15 @@ END function functn_soc_hwsd
       frestart_in = config%frestart_in
       frestart_out = config%frestart_out
       foutput = config%foutput
-      fglobal = ''
+      fglobal = ""
       fglobal(1:7) = config%fglobal
       xopt = config%xopt
       nxopt = config%nxopt
 
-      open(1,file=config%fparameter)
-      read(1,*) xopt(1:14)
-      read(1,*) nxopt(1:nx)
-      close(1) 
-
       do nparam=1,nx
-         if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
+         if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) then
            error stop "ERROR functn_global4: nxopt is outside 1:16"
+         end if
          xopt(nxopt(nparam)) = xparam16(nparam)
       end do
       print *, xopt
@@ -606,14 +597,10 @@ END function functn_global4
       xopt = config%xopt
       nxopt = config%nxopt
 
-      open(1,file=config%fparameter)
-      read(1,*) xopt(1:14)
-      read(1,*) nxopt(1:nx)
-      close(1) 
-      
       do nparam=1,nx
-         if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
+         if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) then
            error stop "ERROR functn_soc_aust: nxopt is outside 1:16"
+         end if
          xopt(nxopt(nparam)) = xparam16(nparam)
       end do
 
@@ -657,4 +644,4 @@ END function functn_global4
       deallocate(zse)
 END function functn_soc_aust
 
-end module function_module
+end module mesc_function_module

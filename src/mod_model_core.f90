@@ -1,9 +1,10 @@
 !> Core model physics: RK4 integrator, Michaelis-Menten kinetics, bioturbation, and C-flux RHS.
 !! A combined kinetics approach of MIMICS and MILLENNIAL2 is taken, with support for adsorption and desorption.
 module mesc_model_module
-  use precision_module, only : dp
-  use mic_constant, only : diag, outp, mcpool, delt, mp, ms, tvc14
-  use mic_variable, only : mic_param_xscale, mic_param_default, mic_parameter, mic_input, mic_npool
+  use mesc_precision_module, only: dp
+  use mesc_constant_module, only: diag, outp, mcpool, delt, mp, ms, tvc14
+  use mesc_variable_module, only: mic_param_xscale, mic_param_default, &
+                                  mic_parameter, mic_input, mic_npool
   implicit none
 
   ! All module members are public by default
@@ -533,8 +534,18 @@ end subroutine bioturb
 
 
  !> ODE right-hand side: computes carbon fluxes (dxpool/dt) for all pools in a single grid layer.
- !! Pools: metabolic litter (1), structural litter (2), microbe-R (3), microbe-K (4),
- !! physically protected (5), chemically protected (6), active/LWC (7), and additional pools (8-10).
+ !! Implements kinetics=3
+ !! Pools: 1: unaggregated metabolic litter
+ !!        2: unaggregated structural litter
+ !!        3: microbe-R (3)
+ !!        4: microbe-K (4)
+ !!        5: aggregated metabolic litter
+ !!        6: unaggregated MAOC (Mineral-associated organic carbon)
+ !!        7: low-mass weighted carbon
+ !!        8: aggregated structural litter
+ !!        9: aggregated MAOC (Mineral-associated organic carbon)
+ !!       10: dummy (unused)
+ !!        aggregated metabolic pool (5)
  !! Pools in mg C/cm3, time step in hours. Adapted from Zhang et al. (2019, GCB) and Abramoff et al. (2022).
  subroutine vmic_c(ny,isoc14,np,ns,micpdef,micparam,micinput,xpool,y)
 
