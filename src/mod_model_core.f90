@@ -552,6 +552,7 @@ end subroutine bioturb
  !!        9: aggregated MAOC 
  !!       10: dummy (unused)
  !!        aggregated metabolic pool (5)
+ !! Pools in mg C/cm3, time step in hours. Adapted from Zhang et al. (2019, GCB) and Abramoff et al. (2022).
  subroutine vmic_c(ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,xpool,y)
 
      TYPE(mic_param_default), INTENT(IN)     :: micpdef       !! fixed default parameters
