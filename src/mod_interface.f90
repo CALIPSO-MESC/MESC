@@ -18,10 +18,11 @@
 !!     * (3e) call model for each of mp and integration over time
 
 module mesc_interface_module
-  use precision_module, only : dp
-  use mic_constant, only : diag, delt, mp, ms, mpft, mcpool, outp
-  use mic_variable, only : mic_param_xscale, mic_param_default, mic_parameter, &
-                           mic_input, mic_npool, mic_cpool, mic_output, mic_global_input
+  use mesc_precision_module, only: dp
+  use mesc_constant_module, only: diag, delt, mp, ms, mpft, mcpool, outp
+  use mesc_variable_module, only: mic_param_xscale, mic_param_default, &
+                                  mic_parameter, mic_input, mic_npool, &
+                                  mic_cpool, mic_output, mic_global_input
   use mesc_inout_module, only: vmic_restart_read
   use mesc_model_module, only: rk4modelx, bioturb, bgc_fractions, &
                                 mget, turnovert, desorpt, vmaxt, kmt
