@@ -36,7 +36,7 @@ fi
 # --------------------------------------------------
 # Configure & build
 # --------------------------------------------------
-cmake .. -DCMAKE_Fortran_COMPILER=${FC}
+cmake .. -DCMAKE_Fortran_COMPILER="${FC}"
 cmake --build . -j
 
 echo "Build successful."

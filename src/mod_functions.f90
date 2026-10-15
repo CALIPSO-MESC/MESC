@@ -133,8 +133,9 @@ module mesc_function_module
 
       if(jopt) then
          do nparam=1,nx
-            if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
+            if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) then
               error stop "ERROR functn_c14: nxopt is outside 1:16"
+            end if
             xopt(nxopt(nparam)) = xparam16(nparam)
          end do
       end if
@@ -247,8 +248,9 @@ real(dp) function functn_frc1(nx,xparam16)
 
       if(.not. jopt) then
          do nparam=1,nx
-            if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
+            if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) then
               error stop "ERROR functn_frc1: nxopt is outside 1:16"
+            end if
             xopt(nxopt(nparam)) = xparam16(nparam)
          end do
       end if
@@ -353,10 +355,11 @@ END function functn_frc1
       fanoc = config%fanoc
       xopt = config%xopt
       nxopt = config%nxopt
-      
+
       do nparam=1,nx
-         if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
+         if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) then
            error stop "ERROR functn_soc_hwsd: nxopt is outside 1:16"
+         end if
          xopt(nxopt(nparam)) = xparam16(nparam)
       end do
 
@@ -471,14 +474,15 @@ END function functn_soc_hwsd
       frestart_in = config%frestart_in
       frestart_out = config%frestart_out
       foutput = config%foutput
-      fglobal = ''
+      fglobal = ""
       fglobal(1:7) = config%fglobal
       xopt = config%xopt
       nxopt = config%nxopt
 
       do nparam=1,nx
-         if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
+         if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) then
            error stop "ERROR functn_global4: nxopt is outside 1:16"
+         end if
          xopt(nxopt(nparam)) = xparam16(nparam)
       end do
       print *, xopt
@@ -597,10 +601,11 @@ END function functn_global4
       faustsoc = config%faustsoc
       xopt = config%xopt
       nxopt = config%nxopt
-      
+
       do nparam=1,nx
-         if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) &
+         if (nxopt(nparam) < 1 .or. nxopt(nparam) > size(xopt)) then
            error stop "ERROR functn_soc_aust: nxopt is outside 1:16"
+         end if
          xopt(nxopt(nparam)) = xparam16(nparam)
       end do
 
