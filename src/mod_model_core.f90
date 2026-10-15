@@ -550,7 +550,7 @@ end subroutine bioturb
  !!        7: low-mass weighted carbon
  !!        8: aggregated structural litter
  !!        9: aggregated MAOC 
- !!       10: dummy (unsed)
+ !!       10: dummy (unused)
  !!        aggregated metabolic pool (5)
  subroutine vmic_c(ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,xpool,y)
 
