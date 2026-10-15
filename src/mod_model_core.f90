@@ -546,10 +546,10 @@ end subroutine bioturb
  !!        3: microbe-R (3)
  !!        4: microbe-K (4)
  !!        5: aggregated metabolic litter
- !!        6: unaggregated MAOC
+ !!        6: unaggregated MAOC (Mineral-associated organic carbon)
  !!        7: low-mass weighted carbon
  !!        8: aggregated structural litter
- !!        9: aggregated MAOC 
+ !!        9: aggregated MAOC (Mineral-associated organic carbon)
  !!       10: dummy (unused)
  !!        aggregated metabolic pool (5)
  !! Pools in mg C/cm3, time step in hours. Adapted from Zhang et al. (2019, GCB) and Abramoff et al. (2022).
