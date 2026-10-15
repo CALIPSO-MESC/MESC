@@ -1,4 +1,4 @@
-# Workflow to run the MESC test suite using jobs
+# Workflow to run the test suite for the project
 name: Test suite
 
 # Controls when the workflow will run
@@ -7,34 +7,36 @@ on:
   push:
     branches: [ "main" ]
 
-  # Triggers the workflow on pushes to open pull requests with changes to this workflow
+  # Triggers the workflow on pushes to open pull requests with source changes
   pull_request:
     paths:
       - '.github/workflows/test_suite.yml'
       - 'src/*.f90'
+      - '**/*.sh'
+      - 'requirements-dev.txt'
       - 'CMakeLists.txt'
       - 'test/input/*.nc'
-      - 'test/input/*.txt'
+      - 'test/input/*.nml'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Cancel jobs running if new commits are pushed
+# Helps prevent parallel runs of the workflow from overlapping
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Write permissions are not required
+# Write permissions are not needed for all jobs in this workflow
 permissions: {}
 
-# Job definitions
+# Workflow run - one or more jobs that can run sequentially or in parallel
 jobs:
+  # Run the project test suite
   test-suite:
     name: ${{ matrix.FC }} ${{ matrix.version }}, ${{ matrix.std }}
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
-    # Terminate the job if it runs for more than 15 minutes
+    # The timeout minutes for the job to complete
     timeout-minutes: 15
 
     strategy:
@@ -52,10 +54,10 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Checkout MESC repository
+      # Checkout your repository under $GITHUB_WORKSPACE so your job can access it
+      - name: Checkout code
         with:
-          persist-credentials: true
+          persist-credentials: false
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Install Intel tools
