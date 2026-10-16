@@ -36,12 +36,11 @@ contains
 !> Assign parameter values from defaults across all BGC types.
 !! Takes lookup-table parameters and default parameters, then populates
 !! the working parameter structure (`micparam`) for all `mbgc` types.
-subroutine vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
-  integer,                 intent(in)    :: kinetics !! kinetics model selector (1, 2, or 3)
-  type(mic_param_xscale),  intent(in)    :: micpxdef !! BGC-type scaling factors
-  type(mic_param_default), intent(in)    :: micpdef  !! default parameter values
-  type(mic_parameter),     intent(inout) :: micparam !! computed model parameters
-  real(dp),                intent(in)    :: zse(ms)  !! soil layer thickness
+  SUBROUTINE vmic_param_constant(micpxdef,micpdef,micparam,zse)
+    TYPE(mic_param_xscale),  intent(in)    :: micpxdef !! BGC-type scaling factors
+    TYPE(mic_param_default), intent(in)    :: micpdef  !! default parameter values
+    TYPE(mic_parameter),     intent(inout) :: micparam !! computed model parameters
+    real(dp),                intent(in)    :: zse(ms)  !! soil layer thickness
 
   ! Local variables
   real(dp), dimension(:,:), allocatable :: froot
@@ -100,21 +99,18 @@ subroutine vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
     print *, micparam%diffsocx(outp)
   end if
 
-  ! the following parameters are specific to kinetics3
-  if(kinetics==3) then
-    do np=1,mp
-      do ns=1,ms
-        nopt=micparam%bgctype(np)
-        micparam%kadsorp(np,ns)  = micpdef%kadsorpx
-        micparam%kdesorp(np,ns)  = micparam%kadsorp(np,ns) /(micpdef%kbax * micpxdef%xkba(nopt))
-        micparam%fp2a(np,ns)     = micpdef%fp2ax     * micpxdef%xfp2ax(nopt)
-        micparam%tvcpool(np,ns)  = micpdef%tvcpoolx  * micpxdef%xtvc(nopt)
-        micparam%tvppool(np,ns)  = micpdef%tvppoolx  * micpxdef%xtvp(nopt)
-        micparam%tvac(np,ns)     = micpdef%tvacx     * micpxdef%xtvac(nopt)
-        micparam%qmaxcoeff(np,ns)= micpdef%qmaxcoeff * micpxdef%xqmaxcoeff(nopt)
-      end do ! ns
-    end do ! np
-  end if ! kinetics
+      do np=1,mp
+        do ns=1,ms
+            nopt=micparam%bgctype(np)
+            micparam%kadsorp(np,ns)  = micpdef%kadsorpx
+            micparam%kdesorp(np,ns)  = micparam%kadsorp(np,ns) /(micpdef%kbax * micpxdef%xkba(nopt))
+            micparam%fp2a(np,ns)     = micpdef%fp2ax     * micpxdef%xfp2ax(nopt)
+            micparam%tvcpool(np,ns)  = micpdef%tvcpoolx  * micpxdef%xtvc(nopt)
+            micparam%tvppool(np,ns)  = micpdef%tvppoolx  * micpxdef%xtvp(nopt)
+            micparam%tvac(np,ns)     = micpdef%tvacx     * micpxdef%xtvac(nopt)
+            micparam%qmaxcoeff(np,ns)= micpdef%qmaxcoeff * micpxdef%xqmaxcoeff(nopt)
+        end do  !ns
+      end do  !np
 
   deallocate(froot)
   deallocate(totroot)
@@ -126,14 +122,13 @@ end subroutine vmic_param_constant
 !> otherwise called once at the start of integration. Updates BGC fractions,
 !> microbial growth efficiency, turnover rates, desorption, Vmax, and Km.
 !>
-subroutine vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,np)
-  integer,                 intent(in)      :: kinetics !! kinetics model selector (1, 2, or 3)
-  type(mic_param_xscale),  intent(in)      :: micpxdef !! BGC-type scaling factors
-  type(mic_param_default), intent(in)      :: micpdef  !! default parameter values
-  type(mic_parameter),     intent(inout)   :: micparam !! computed model parameters
-  type(mic_input),         intent(inout)   :: micinput !! model environmental inputs
-  type(mic_npool),         intent(inout)   :: micnpool !! nitrogen pool state
-  integer,                 intent(in)      :: np       !! patch index
+subroutine vmic_param_time(micpxdef,micpdef,micparam,micinput,micnpool,np)
+    TYPE(mic_param_xscale),  intent(in)      :: micpxdef !! BGC-type scaling factors
+    TYPE(mic_param_default), intent(in)      :: micpdef  !! default parameter values
+    TYPE(mic_parameter),     intent(inout)   :: micparam !! computed model parameters
+    TYPE(mic_input),         intent(inout)   :: micinput !! model environmental inputs
+    TYPE(mic_npool),         intent(inout)   :: micnpool !! nitrogen pool state
+    integer,                 intent(in)      :: np       !! patch index
 
   ! compute fractions
   call bgc_fractions(micpxdef,micpdef,micparam,micinput,np)
@@ -141,10 +136,10 @@ subroutine vmic_param_time(kinetics,micpxdef,micpdef,micparam,micinput,micnpool,
   ! compute microbial growth efficiency
   call mget(micpdef,micparam,micinput,micnpool,np)
 
-  ! compute microbial turnover rates
-  call turnovert(kinetics,micpxdef,micpdef,micparam,micinput,np)
+    ! compute microbial turnover rates
+    call turnovert(micpxdef,micpdef,micparam,micinput,np)
 
-  if(kinetics/=3) call desorpt(micpxdef,micparam,micinput,np)
+    call desorpt(micpxdef,micparam,micinput,np)
 
   call vmaxt(micpxdef,micpdef,micparam,micinput,np)
   call kmt(micpxdef,micpdef,micparam,micinput,np)
@@ -322,25 +317,25 @@ end subroutine variable_time
 !> Runs the soil C model to equilibrium for HWSD-based profiles using
 !> time-varying forcing per station. Includes bioturbation and leaching. Parallelized
 !> over stations with OpenMP.
-subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,isoc14,bgcopt,nyeqpool, &
+!> See [[vmicsoil_c14]]
+subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bgcopt,nyeqpool, &
                              zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
-  integer,                 intent(in)    :: jrestart     !! restart flag (1=read restart file)
-  character(len=140),      intent(in)    :: frestart_in  !! restart input filename
-  character(len=140),      intent(in)    :: frestart_out !! restart output filename
-  character(len=140),      intent(in)    :: foutput      !! output filename
-  integer,                 intent(in)    :: kinetics     !! kinetics model selector (1, 2, or 3)
-  integer,                 intent(in)    :: isoc14       !! 14C tracking flag
-  integer,                 intent(in)    :: bgcopt       !! target BGC type
-  integer,                 intent(in)    :: nyeqpool     !! years to run for equilibrium
-  real(dp),                intent(in)    :: zse(ms)      !! soil layer thickness [m]
-  type(mic_param_xscale),  intent(inout) :: micpxdef     !! BGC-type scaling factors
-  type(mic_param_default), intent(in)    :: micpdef      !! default parameter values
-  type(mic_parameter),     intent(inout) :: micparam     !! working parameter array
-  type(mic_input),         intent(inout) :: micinput     !! time-varying environmental inputs
-  type(mic_global_input),  intent(inout) :: micglobal    !! global forcing data
-  type(mic_cpool),         intent(inout) :: miccpool     !! carbon pool state
-  type(mic_npool),         intent(inout) :: micnpool     !! nitrogen pool state
-  type(mic_output),        intent(inout) :: micoutput    !! output fluxes and diagnostics
+    integer,                 intent(in)    :: jrestart     !! restart flag (1=read restart file)
+    character(len=140),      intent(in)    :: frestart_in  !! restart input filename
+    character(len=140),      intent(in)    :: frestart_out !! restart output filename
+    character(len=140),      intent(in)    :: foutput      !! output filename
+    integer,                 intent(in)    :: isoc14       !! 14C tracking flag
+    integer,                 intent(in)    :: bgcopt       !! target BGC type
+    integer,                 intent(in)    :: nyeqpool     !! years to run for equilibrium
+    real(dp),                intent(in)    :: zse(ms)      !! soil layer thickness [m]
+    TYPE(mic_param_xscale),  intent(inout) :: micpxdef     !! BGC-type scaling factors
+    TYPE(mic_param_default), intent(in)    :: micpdef      !! default parameter values
+    TYPE(mic_parameter),     intent(inout) :: micparam     !! working parameter array
+    TYPE(mic_input),         intent(inout) :: micinput     !! time-varying environmental inputs
+    TYPE(mic_global_input),  intent(inout) :: micglobal    !! global forcing data
+    TYPE(mic_cpool),         intent(inout) :: miccpool     !! carbon pool state
+    TYPE(mic_npool),         intent(inout) :: micnpool     !! nitrogen pool state
+    TYPE(mic_output),        intent(inout) :: micoutput    !! output fluxes and diagnostics
 
   ! Local variables
   integer  :: i,j,year,np,ny
@@ -349,8 +344,11 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
   integer  :: station_count, station_index
   integer, dimension(:), allocatable :: stations_used
 
-  call vmic_param_constant(kinetics,micpxdef,micpdef,micparam,zse)
-  call vmic_init(miccpool,micnpool)
+    !   print *, 'calling vmic_param_constant'
+       call vmic_param_constant(micpxdef,micpdef,micparam,zse)
+
+    !   print *, 'calling vmic_init'
+       call vmic_init(miccpool,micnpool)
 
   if(jrestart==1) call vmic_restart_read(miccpool,micnpool,frestart_in)
 
@@ -364,16 +362,16 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
     end if
   end do
 
-  !$OMP PARALLEL DEFAULT(NONE) &
-  !$OMP SHARED (micparam,micpxdef,micnpool,micinput,micglobal,miccpool, &
-  !$OMP         micoutput,micpdef,kinetics,isoc14,nyeqpool,bgcopt,zse,mp,ms, &
-  !$OMP         stations_used) &
-  !$OMP PRIVATE (np,station_index,ny,i,year) &
-  !$OMP FIRSTPRIVATE (station_count)
+!$OMP PARALLEL DEFAULT(NONE) SHARED (micparam,micpxdef,micnpool,micinput,micglobal,miccpool,micoutput,micpdef,&
+!$OMP isoc14,nyeqpool,bgcopt,zse,mp,ms,stations_used) &
+!$OMP PRIVATE (np,station_index,ny,i,year) &
+!$OMP FIRSTPRIVATE (station_count)
+!!$OMP REDUCTION (+:data_count,data_used)  &,
+!$OMP DO
 
-  !$OMP DO
-  do station_index=1,station_count
-    np = stations_used(station_index)
+   do station_index=1,station_count
+      np=stations_used(station_index)
+
 
     do year=1,nyeqpool
       ny = year-nyeqpool
@@ -383,12 +381,12 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
       micoutput%fluxrsoil(np) = 0.0
       micoutput%fluxcleach(np) = 0.0
 
-      do i=1,365 ! ntime
-        call mesc_step(np, i, year, ny, kinetics, isoc14, zse, &
-                        micpxdef, micpdef, micparam, micinput, micglobal, &
-                        miccpool, micnpool, micoutput)
-      end do ! i: day of year (ntime)
-    end do ! year (nyeqpool)
+         do i=1,365   !ntime
+            call mesc_step(np, i, year, ny, isoc14, zse, &
+                           micpxdef, micpdef, micparam, micinput, micglobal, &
+                           miccpool, micnpool, micoutput)
+         end do   !"i: day of year (ntime)"
+      end do !"year (nyeqpool)"
 
   end do ! station_index(station_count)
   !$OMP END DO
@@ -399,48 +397,46 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
 end subroutine vmicsoil_hwsd_cpu
 
 
-!> Advance MESC state for a single patch (`np`) for one day (`doy`).
-!!
-!! This subroutine contains the inner-loop body that was previously inlined
-!! inside [[vmicsoil_hwsd_cpu]]. It provides a clean, single-timestep entry
-!! point suitable for coupling to ORCHIDEE or for unit testing.
-!!
-!! The caller is responsible for zeroing the annual flux accumulators
-!! (`micoutput%fluxcinput`, `micoutput%fluxrsoil`, `micoutput%fluxcleach`)
-!! at the start of each year, as [[vmicsoil_hwsd_cpu]] does.
-subroutine mesc_step(np, doy, year, ny, kinetics, isoc14, zse, &
-                    micpxdef, micpdef, micparam, micinput, micglobal, &
-                    miccpool, micnpool, micoutput)
-  integer,                     intent(in)    :: np
-    !! patch index (1-based)
-  integer,                     intent(in)    :: doy
-    !! day of year (1–365)
-  integer,                     intent(in)    :: year
-    !! simulation year (1-based, used by [[variable_time_single]])
-  integer,                     intent(in)    :: ny
-    !! year offset passed to [[rk4modelx]] (year - nyeqpool)
-  integer,                     intent(in)    :: kinetics
-    !! kinetics model selector (1, 2, or 3)
-  integer,                     intent(in)    :: isoc14
-    !! 14C tracking flag
-  real(dp),                    intent(in)    :: zse(ms)
-    !! soil layer thicknesses [m]  (size ms)
-  type(mic_param_xscale),      intent(inout) :: micpxdef
-    !! BGC-type scaling factors
-  type(mic_param_default),     intent(in)    :: micpdef
-    !! default parameter values
-  type(mic_parameter),         intent(inout) :: micparam
-    !! working parameter array (updated by [[vmic_param_time_single]])
-  type(mic_input),             intent(inout) :: micinput
-    !! time-varying environmental inputs (updated by [[variable_time_single]])
-  type(mic_global_input),      intent(inout) :: micglobal
-    !! global forcing data
-  type(mic_cpool),             intent(inout) :: miccpool
-    !! carbon pool state (updated on output)
-  type(mic_npool),             intent(inout) :: micnpool
-    !! nitrogen pool state
-  type(mic_output),            intent(inout) :: micoutput
-    !! output fluxes and diagnostics
+  !> Advance MESC state for a single patch (`np`) for one day (`doy`).
+  !!
+  !! This subroutine contains the inner-loop body that was previously inlined
+  !! inside [[vmicsoil_hwsd_cpu]]. It provides a clean, single-timestep entry
+  !! point suitable for coupling to ORCHIDEE or for unit testing.
+  !!
+  !! The caller is responsible for zeroing the annual flux accumulators
+  !! (`micoutput%fluxcinput`, `micoutput%fluxrsoil`, `micoutput%fluxcleach`)
+  !! at the start of each year, as [[vmicsoil_hwsd_cpu]] does.
+  subroutine mesc_step(np, doy, year, ny, isoc14, zse, micpxdef, micpdef, &
+                       micparam, micinput, micglobal, miccpool, micnpool, &
+                       micoutput)
+    integer,                     intent(in)    :: np
+      !! patch index (1-based)
+    integer,                     intent(in)    :: doy
+      !! day of year (1–365)
+    integer,                     intent(in)    :: year
+      !! simulation year (1-based, used by [[variable_time]])
+    integer,                     intent(in)    :: ny
+      !! year offset passed to [[rk4modelx]] (year - nyeqpool)
+    integer,                     intent(in)    :: isoc14
+      !! 14C tracking flag
+    real(dp),                    intent(in)    :: zse(ms)
+      !! soil layer thicknesses [m]  (size ms)
+    TYPE(mic_param_xscale),      intent(inout) :: micpxdef
+      !! BGC-type scaling factors
+    TYPE(mic_param_default),     intent(in)    :: micpdef
+      !! default parameter values
+    TYPE(mic_parameter),         intent(inout) :: micparam
+      !! working parameter array (updated by [[vmic_param_time]])
+    TYPE(mic_input),             intent(inout) :: micinput
+      !! time-varying environmental inputs (updated by [[variable_time]])
+    TYPE(mic_global_input),      intent(inout) :: micglobal
+      !! global forcing data
+    TYPE(mic_cpool),             intent(inout) :: miccpool
+      !! carbon pool state (updated on output)
+    TYPE(mic_npool),             intent(inout) :: micnpool
+      !! nitrogen pool state
+    TYPE(mic_output),            intent(inout) :: micoutput
+      !! output fluxes and diagnostics
 
   ! Local variables
   real(dp), dimension(mcpool) :: xpool0, xpool1
@@ -451,9 +447,9 @@ subroutine mesc_step(np, doy, year, ny, kinetics, isoc14, zse, &
 
   ndelt = int(24*365/delt)  ! number of time steps per year in "delt" units
 
-  call variable_time(year, doy, micglobal, micinput, micnpool, np)
-  ! calculate parameter values that depend on soil temperature or moisture (varying with time)
-  call vmic_param_time(kinetics, micpxdef, micpdef, micparam, micinput, micnpool, np)
+    call variable_time(year, doy, micglobal, micinput, micnpool, np)
+    ! calculate parameter values that depend on soil temperature or moisture (varying with time)
+    call vmic_param_time(micpxdef, micpdef, micparam, micinput, micnpool, np)
 
   ! for each soil layer
   ! sum all C pools across layers to compute soil respiration = input - sum(delCpool)
@@ -468,10 +464,10 @@ subroutine mesc_step(np, doy, year, ny, kinetics, isoc14, zse, &
       cpool0     = cpool0 + xpool0(ip) * zse(ns) * 1000.0  ! mg C/cm3 -> g C/m2
     end do
 
-    ! integration step: delty in rk4; ndelt is number of delt-steps per year
-    timex = real(doy * delt)
-    delty = real(ndelt) / (365.0 * delt)  ! time step in "24*delt (daily)" units
-    call rk4modelx(timex, delty, ny, isoc14, np, ns, kinetics, micpdef, micparam, micinput, xpool0, xpool1)
+      ! integration step: delty in rk4; ndelt is number of delt-steps per year
+      timex = real(doy * delt)
+      delty = real(ndelt) / (365.0 * delt)  ! time step in "24*delt (daily)" units
+      call rk4modelx(timex, delty, ny, isoc14, np, ns, micpdef, micparam, micinput, xpool0, xpool1)
 
     do ip = 1, mcpool
       miccpool%cpool(np,ns,ip) = max(xpool1(ip), 1.0e-8)
