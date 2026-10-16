@@ -41,7 +41,7 @@ jobs:
       # Checkout your repository under $GITHUB_WORKSPACE so your job can access it
       - name: Checkout code
         with:
-          persist-credentials: true
+          persist-credentials: false
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Install Graphviz (Required by FORD)
