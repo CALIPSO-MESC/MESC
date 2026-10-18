@@ -44,3 +44,7 @@ command line with
 ```bash
 ./run_main.sh
 ```
+or
+```
+sbatch ./run_global_orchidee.sh
+```

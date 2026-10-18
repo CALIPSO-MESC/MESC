@@ -87,21 +87,3 @@ done
 # rm output/diff_*.txt
 echo "===== Job finished of frc and hwsd: $(date) ====="
 
-# --------------------------------------------------
-# Run the global_orchidee case
-# --------------------------------------------------
-rm -f -- *.txt mesc.nml
-case_name="global_orchidee"
-echo "Running test case '${case_name}' "
-
-cp -- "./input/mesc_${case_name}.nml" mesc.nml
-START="$(date +%s)"
-./main >"outval_${case_name}.txt"
-DURATION="$(($(date +%s) - START))"
-echo "Time taken: ${DURATION} seconds"
-
-cp -- vmic_output.nc  "output/vmic_output_${case_name}.nc"
-cp -- miccpool_out.nc "output/miccpool_out_${case_name}.nc"
-cp -- "outval_${case_name}.txt" output/
-
-echo "===== Job finished of global_orchidee: $(date) ====="
