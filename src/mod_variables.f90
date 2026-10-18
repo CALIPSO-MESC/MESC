@@ -3,9 +3,9 @@
 !> Defines derived types for model parameters, inputs, outputs, C/N pools,
 !> and default parameter values. Provides paired allocation and deallocation
 !> subroutines for each type to manage dynamic array storage.
-module mic_variable
-  use precision_module, only : dp
-  use mic_constant, only : mcpool
+module mesc_variable_module
+  use mesc_precision_module, only: dp
+  use mesc_constant_module, only: mcpool
   implicit none
 
   ! All module members are public by default
@@ -103,8 +103,8 @@ module mic_variable
 
   !> Computed model parameters per plot and soil layer.
   !>
-  !> Km, Vmax, Q10, microbial turnover, necromass partitioning, and
-  !> kinetics-3-specific coefficients (adsorption, POC/MAOC turnover, leaching).
+  !> Km, Vmax, Q10, microbial turnover, necromass partitioning, and coefficients
+  !> for adsorption, POC/MAOC turnover, and leaching.
   type mic_parameter
       real(dp), dimension(:,:), allocatable  :: K1,K2,K3 !! Michaelis constants for substrates 1-3
       real(dp), dimension(:,:), allocatable  :: J1,J2,J3  !! Michaelis constants for substrates 1-3
@@ -291,7 +291,6 @@ module mic_variable
                micparam%top(mp),        &
                micparam%bot(mp))
 
-      ! additional variables for kinetics3
       allocate(micparam%kdesorp(mp,ms), &
                micparam%kadsorp(mp,ms), &
                micparam%fp2a(mp,ms),    &
@@ -303,7 +302,7 @@ module mic_variable
 
   !> Allocates arrays in `mic_input` and `mic_global_input` derived types.
   subroutine mic_allocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
-      use mic_constant, only : mpft
+      use mesc_constant_module, only: mpft
 
       integer, intent(in) :: mp      !! number of plots
       integer, intent(in) :: ms      !! number of soil layers
@@ -491,7 +490,6 @@ module mic_variable
                micparam%top,        &
                micparam%bot)
 
-      ! additional variables for kinetics3
       deallocate(micparam%kdesorp,  &
                micparam%kadsorp,  &
                micparam%fp2a,     &
@@ -604,5 +602,5 @@ module mic_variable
 
   end subroutine mic_deallocate_npool
 
-end module mic_variable
+end module mesc_variable_module
 
