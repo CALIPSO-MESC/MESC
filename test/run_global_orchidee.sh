@@ -4,7 +4,7 @@
 #SBATCH -e slurm_%j.err
 #SBATCH -o slurm_%j.out
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=8
 
 # Shell script for running the MESC test suite.
 # --------------------------------------------------
@@ -45,8 +45,10 @@ START="$(date +%s)"
 DURATION="$(($(date +%s) - START))"
 echo "Time taken: ${DURATION} seconds"
 
-cp -- vmic_output.nc  "output/vmic_output_${case_name}.nc"
-cp -- miccpool_out.nc "output/miccpool_out_${case_name}.nc"
-cp -- "outval_${case_name}.txt" output/
+mv -- vmic_output.nc  "output/vmic_output_${case_name}.nc"
+mv -- miccpool_out.nc "output/miccpool_out_${case_name}.nc"
+mv -- "outval_${case_name}.txt" output/
+mv -- fort.91 "output/valsoc_91_${case_name}.txt"
+mv -- fort.92 "output/valsoc_92_${case_name}.txt"
 
 echo "===== Job finished of global_orchidee: $(date) ====="

@@ -23,7 +23,7 @@ module mesc_interface_module
   use mesc_variable_module, only: mic_param_xscale, mic_param_default, &
                                   mic_parameter, mic_input, mic_npool, &
                                   mic_cpool, mic_output, mic_global_input
-  use mesc_inout_module, only: vmic_restart_read
+  use mesc_inout_module, only: vmic_restart_read, vmic_output_write, vmic_restart_write
   use mesc_model_module, only: rk4modelx, bioturb, bgc_fractions, &
                                 mget, turnovert, desorpt, vmaxt, kmt
   implicit none
@@ -394,10 +394,12 @@ subroutine vmicsoil_hwsd_cpu(jopt,jrestart,frestart_in,frestart_out,foutput,isoc
 
   end do ! station_index(station_count)
   !$OMP END DO
-
   !$OMP END PARALLEL
 
   miccpool%cpooleq(:,:,:) = miccpool%cpool(:,:,:)
+  call vmic_output_write(foutput,micinput,micoutput)
+  call vmic_restart_write(frestart_out,miccpool,micnpool)
+
 end subroutine vmicsoil_hwsd_cpu
 
 
