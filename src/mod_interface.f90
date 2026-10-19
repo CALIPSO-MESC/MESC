@@ -357,7 +357,7 @@ subroutine vmicsoil_hwsd_cpu(jopt,jrestart,frestart_in,frestart_out,foutput,isoc
   station_count = 0
   allocate(stations_used(mp))
   do station_index=1,mp
-    if (jopt == .false. .and. micglobal%area(station_index) > 0.0)   then
+    if (.not. jopt .and. micglobal%area(station_index) > 0.0)   then
       station_count = station_count + 1
       stations_used(station_count) = station_index
     else if (micparam%bgctype(station_index)==bgcopt .and. micglobal%area(station_index)>0.0) then
