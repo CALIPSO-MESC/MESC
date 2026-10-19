@@ -15,7 +15,7 @@ You may wish to run the test suite over a full global data set rather than the
 small subset. If so, you will need to download the files named
 `data_extraction_cable_model_calibration_cluster_new.nc` 
 
-`ORCHIDEE_time_invarian.nc `
+`ORCHIDEE_time_invariant.nc `
 
 ``hwsd_aoc_halfdeg.nc`` 
 
