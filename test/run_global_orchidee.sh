@@ -35,7 +35,6 @@ rm -f -- *.txt mesc.nml
 # --------------------------------------------------
 # Run the global_orchidee case
 # --------------------------------------------------
-rm -f -- *.txt mesc.nml
 case_name="global_orchidee"
 echo "Running test case '${case_name}' "
 
