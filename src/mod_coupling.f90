@@ -55,8 +55,8 @@ module mesc_coupling_module
                                   mic_deallocate_parameter, &
                                   mic_deallocate_input, mic_deallocate_output, &
                                   mic_deallocate_cpool, mic_deallocate_npool
-  use mesc_inout_module, only : getparam_global
-  use mesc_interface_module, only : vmic_param_constant, vmic_init, mesc_step
+  use mesc_inout_module, only: getparam_global
+  use mesc_interface_module, only: vmic_param_constant, vmic_init, mesc_step
   implicit none
 
   ! All module members are public by default
