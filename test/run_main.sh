@@ -50,7 +50,7 @@ for i in 0 1; do
   # Run the test case
   # --------------------------------------------------
   START="$(date +%s)"
-  ./main >"output/outval_${case}_${run}.txt"
+  ./main | tee "output/outval_${case}_${run}.txt"
   DURATION="$(($(date +%s) - START))"
   echo "Time taken: ${DURATION} seconds"
   if [ -e fort.91 ]; then
