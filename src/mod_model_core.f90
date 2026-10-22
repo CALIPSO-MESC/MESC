@@ -1,6 +1,7 @@
 !> Core model physics: RK4 integrator, Michaelis-Menten kinetics, bioturbation, and C-flux RHS.
 !! A combined kinetics approach of MIMICS and MILLENNIAL2 is taken, with support for adsorption and desorption.
 module mesc_model_module
+  ! use, intrinsic :: iso_fortran_env, only: stdout => output_unit
   use mesc_precision_module, only: dp
   use mesc_constant_module, only: diag, outp, mcpool, delt, mp, ms, tvc14
   use mesc_variable_module, only: mic_param_xscale, mic_param_default, &
@@ -44,7 +45,7 @@ contains
     ! Euler
     ! xpool1(:) = xpool0(:) + dy1dt(:) * h
 
-!    write(*,101) np,ns,delty,micinput%cinputm(np,ns)+micinput%cinputs(np,ns),sum(dy1dt(1:7)), &
+!    write(stdout,101) np,ns,delty,micinput%cinputm(np,ns)+micinput%cinputs(np,ns),sum(dy1dt(1:7)), &
 !                 micinput%cinputm(np,ns)+micinput%cinputs(np,ns)-sum(dy1dt(1:7))
 101 format("rk4: input, sumdelc rsoil",2(i3,1x),f6.2,1x,3(f10.6,1x))
 
@@ -771,7 +772,7 @@ end subroutine bioturb
       rsoil = (1.0-mgeRx1) * (cfluxm2r+cfluxa2r) + (1.0-mgeKx1)* (cfluxm2k + cfluxa2k)  &
             + (1.0-mgeRx2) * cfluxs2r            + (1.0-mgeKx2)* cfluxs2k  - cfluxa
 
-!       write(*,101) np,ns, cinputmx+cinputsx,sum(y(1:7)),rsoil, cinputmx+cinputsx-sum(y(1:7))-rsoil
+!       write(stdout,101) np,ns, cinputmx+cinputsx,sum(y(1:7)),rsoil, cinputmx+cinputsx-sum(y(1:7))-rsoil
 101 format("vmic_c: input, sumdelc rsoil",2(i3,1x),10(f10.6,1x))
 
 !      print *, ' @ vmic_c xpool =', xpool(:)

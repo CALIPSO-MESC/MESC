@@ -1,5 +1,6 @@
 module mesc_inout_module
-  use, intrinsic :: iso_fortran_env, only: stderr => error_unit
+  use, intrinsic :: iso_fortran_env, only: stderr => error_unit, &
+                                           stdout => output_unit
   use mesc_precision_module, only: dp, sp
   use netcdf, only: nf90_clobber, nf90_close, nf90_create, nf90_def_dim, &
                     nf90_def_var, nf90_enddef, nf90_float, nf90_get_var, &
@@ -105,7 +106,7 @@ contains
     STATUS = NF90_create(frestart_out, NF90_CLOBBER, FILE_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error creating restart file ")
 
-    WRITE(*,*) "writing mic restart", frestart_out
+    WRITE(stdout,*) "writing mic restart", frestart_out
     ! Put the file in define mode:
     STATUS = NF90_redef(FILE_ID)
 
@@ -145,7 +146,7 @@ contains
     STATUS = NF90_close(FILE_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error closing restart file "  )
 
-    write(*, *) "restart file written to ", frestart_out
+    write(stdout, *) "restart file written to ", frestart_out
 
   end subroutine vmic_restart_write
 
@@ -189,7 +190,7 @@ contains
     STATUS = NF90_create(foutput, NF90_CLOBBER, FILE_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error creating output file ")
 
-    WRITE(*,*) "writing output file", foutput
+    WRITE(stdout,*) "writing output file", foutput
     print *, CDATE
 
     ! Put the file in define mode:
@@ -241,7 +242,7 @@ contains
     STATUS = NF90_close(FILE_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error closing restart file "  )
 
-    write(*, *) "output written to ", foutput
+    write(stdout,*) "output written to ", foutput
 
   end subroutine vmic_output_write
 
@@ -733,7 +734,7 @@ contains
              if(int(isite/intval)*intval /= isite.or. isite>sitemax*intval) micglobal%area(np) = -1.0
           end if
  !         if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
- !            write(*,103) isite,np, micglobal%bgctype(np), micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
+ !            write(stdout,103) isite,np, micglobal%bgctype(np), micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
  !         endif
        end do
     else
@@ -742,7 +743,7 @@ contains
       do np=1,mp
          if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
             isite=isite+1
- !           write(*,103) isite,np,micglobal%bgctype(np),micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
+ !           write(stdout,103) isite,np,micglobal%bgctype(np),micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
          end if
       end do
       if(isite<10) print *, "too few sites ", isite
@@ -1173,7 +1174,7 @@ contains
              if(int(isite/intval)*intval /= isite.or. isite>sitemax*intval) micglobal%area(np) = -1.0
           end if
    !       if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
-   !          write(*,103) isite,np, micglobal%bgctype(np), micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
+   !          write(stdout,103) isite,np, micglobal%bgctype(np), micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
    !       endif
        end do
     else
@@ -1182,7 +1183,7 @@ contains
       do np=1,mp
          if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
             isite=isite+1
-   !         write(*,103) isite,np,micglobal%bgctype(np),micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
+   !         write(stdout,103) isite,np,micglobal%bgctype(np),micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
          end if
       end do
       if(isite<10) print *, "too few sites ", isite
@@ -2560,7 +2561,7 @@ end subroutine lonlat2mpx4b
              if(int(isite/intval)*intval /= isite.or. isite>sitemax*intval) micglobal%area(np) = -1.0
           end if
           if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
-             write(*,103) isite,np, micglobal%bgctype(np), micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
+             write(stdout,103) isite,np, micglobal%bgctype(np), micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
           end if
        end do
     else
@@ -2569,7 +2570,7 @@ end subroutine lonlat2mpx4b
       do np=1,mp
          if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
             isite=isite+1
-            write(*,103) isite,np,micglobal%bgctype(np),micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
+            write(stdout,103) isite,np,micglobal%bgctype(np),micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
          end if
       end do
       if(isite<10) print *, "too few sites ", isite
@@ -2612,7 +2613,7 @@ subroutine screenout(runmodel,jmodel,bgcopt,xopt,cost)
     integer,                 intent(in) :: jmodel,bgcopt
     real(dp), dimension(16), intent(in) :: xopt
     real(dp),                intent(in) :: cost
-    write(*,901) runmodel,jmodel,bgcopt,cost,xopt(1:14)
+    write(stdout,901) runmodel,jmodel,bgcopt,cost,xopt(1:14)
 901 format(a10,2(i3,1x),f12.3,1x,14(f7.3,1x))
 
 end subroutine screenout
