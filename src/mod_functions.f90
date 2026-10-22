@@ -5,7 +5,8 @@
 !> observations, and returns the scalar cost value.  The dispatcher
 !> [[functn]] reads `mesc.nml` and selects the configured run mode.
 module mesc_function_module
-  use, intrinsic :: iso_fortran_env, only: stderr => error_unit
+  use, intrinsic :: iso_fortran_env, only: stderr => error_unit, &
+                                           stdout => output_unit
   use mesc_precision_module, only: dp
   use mesc_constant_module, only: mp, mpft, mbgc, ntime, nlon, nlat, ms, &
                                   xrootcable, xrootorchidee
@@ -138,7 +139,7 @@ real(dp) function functn_frc1(nx,xparam16)
             xopt(nxopt(nparam)) = xparam16(nparam)
          end do
       end if
-    !  print *, xopt
+    !  write(stdout,*) xopt
 
       !mp = 2206
       ntime=365
@@ -164,14 +165,14 @@ real(dp) function functn_frc1(nx,xparam16)
       call mic_allocate_npool(mp,ms,micnpool)
 
 
-    !  print *, "isoc14 =",isoc14,'--getdata_frc'
+    !  write(stdout,*) "isoc14 =",isoc14,'--getdata_frc'
       call getdata_frc(cfraction,jglobal,bgcopt,micinput,micparam,micnpool,micglobal,zse)
       call vmic_param_xscale(xopt,bgcopt,xrootcable,micpxdef)
 
       call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bgcopt,nyeqpool, &
                          zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
-    !  print *, 'calcost_frc1'
+    !  write(stdout,*) 'calcost_frc1'
       call calcost_frc1(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost1)
 
       functn_frc1    = totcost1
@@ -242,9 +243,9 @@ END function functn_frc1
          xopt(nxopt(nparam)) = xparam16(nparam)
       end do
 
-!      print *, 'nx xparam16 =', nx, nxopt(1:nx),xparam16(1:nx)
-!      print *, 'parameter values used= ', xopt
-!      print *, 'ms zse', ms, zse(:)
+!      write(stdout,*) 'nx xparam16 =', nx, nxopt(1:nx),xparam16(1:nx)
+!      write(stdout,*) 'parameter values used= ', xopt
+!      write(stdout,*) 'ms zse', ms, zse(:)
       ! get dimensions
       call getdata_hwsd_dim(fhwsdsoc,mpx,timex)
       mp=mpx
@@ -363,7 +364,7 @@ END function functn_soc_hwsd
          end if
          xopt(nxopt(nparam)) = xparam16(nparam)
       end do
-      print *, xopt
+      write(stdout,*) xopt
 
       ! Set model-specific parameters
       select case (jmodel)
@@ -382,7 +383,7 @@ END function functn_soc_hwsd
 
       ! reading global parameter values here      xopt =xparam16(1:nx)
       call getpatch_global(fglobal(1),jmodel,mp)
-      print *, "total number of patches= ", mp
+      write(stdout,*) "total number of patches= ", mp
 
       call mic_allocate_parameter(mpft,mbgc,mp,ms,micpxdef,micparam)
       call mic_allocate_input(mp,ms,nlon,nlat,ntime,micinput,micglobal)
@@ -390,7 +391,7 @@ END function functn_soc_hwsd
       call mic_allocate_cpool(mp,ms,miccpool)
       call mic_allocate_npool(mp,ms,micnpool)
 
-      print *, " all  arrays are allocated!"
+      write(stdout,*) " all  arrays are allocated!"
 
       ! Call getdata_global4 variant appropriate to model
       select case (jmodel)
@@ -402,7 +403,7 @@ END function functn_soc_hwsd
         write(stderr,"(a,i0,a)") "ERROR functn_global4: Invalid model '", jmodel, "'"
         error stop 999
       end select
-      print *, "global input data are read in"
+      write(stdout,*) "global input data are read in"
 
       if(.not. jopt) then
         call getparam_global(fglobal(4),xrootorchidee,micpxdef)     ! reading global parameter lookup table
@@ -410,7 +411,7 @@ END function functn_soc_hwsd
         call vmic_param_xscale(xopt,bgcopt,xrootorchidee,micpxdef)  ! parameter optimization
       end if
 
-      print *, "vmicsoil_global"
+      write(stdout,*) "vmicsoil_global"
       call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bgcopt,nyeqpool, &
                          zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
@@ -426,7 +427,7 @@ END function functn_soc_hwsd
 !      close(92)
 
       functn_global4=totcost1
-      print *, "total cost =", totcost1
+      write(stdout,*) "total cost =", totcost1
       deallocate(zse)
 
 END function functn_global4

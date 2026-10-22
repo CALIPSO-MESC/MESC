@@ -95,9 +95,9 @@ contains
   end do ! np
 
   if(diag==1) then
-    print *, micparam%fracroot(outp,:)
-    print *, micparam%sdepth(outp,:)
-    print *, micparam%diffsocx(outp)
+    write(stdout,*) micparam%fracroot(outp,:)
+    write(stdout,*) micparam%sdepth(outp,:)
+    write(stdout,*) micparam%diffsocx(outp)
   end if
 
       do np=1,mp
@@ -345,10 +345,10 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bg
   integer  :: station_count, station_index
   integer, dimension(:), allocatable :: stations_used
 
-    !   print *, 'calling vmic_param_constant'
+    !   write(stdout,*) 'calling vmic_param_constant'
        call vmic_param_constant(micpxdef,micpdef,micparam,zse)
 
-    !   print *, 'calling vmic_init'
+    !   write(stdout,*) 'calling vmic_init'
        call vmic_init(miccpool,micnpool)
 
   if(jrestart==1) call vmic_restart_read(miccpool,micnpool,frestart_in)
@@ -506,9 +506,9 @@ end subroutine vmicsoil_hwsd_cpu
   miccpool%cpool(np,ms,7)  = miccpool%cpool(np,ms,7) - cfluxa(ms)
 
   if (diag == 1) then
-    print *, "year day site np1", year, doy, outp, micparam%diffsocx(outp)
+    write(stdout,*) "year day site np1", year, doy, outp, micparam%diffsocx(outp)
     do ns = 1, ms
-      print *, ns, miccpool%cpool(outp,ns,:)
+      write(stdout,*) ns, miccpool%cpool(outp,ns,:)
     end do
   end if
 

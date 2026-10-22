@@ -4,6 +4,7 @@
 !> model function via the functor interface, and returns the cost function value.
 !
 program testvmic
+    use, intrinsic :: iso_fortran_env, only: stdout => output_unit
     use mesc_precision_module, only: dp
     use mesc_function_module, only: functn
 
@@ -13,6 +14,6 @@ program testvmic
     integer, parameter :: nx = 6 !! number of optimization parameters
 
     fa = functn(nx)
-    print *, "cost12", fa
+    write(stdout,*) "cost12", fa
 
 end program testvmic
