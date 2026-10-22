@@ -365,9 +365,9 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bg
 
   ! Print the stations to iterate over
   write(stdout,"('stations')")
-  write(stdout,"('1')",advance='no')
+  write(stdout,"('1')",advance="no")
   do station_index=2,station_count-1
-     write(stdout,"('.')", advance='no')
+     write(stdout,"('.')", advance="no")
   end do
   write(stdout,"(i0)") station_count
   call flush(stdout)
@@ -382,7 +382,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bg
    do station_index=1,station_count
 
       ! Print station progress to the screen
-      write(stdout,"('%')", advance='no')
+      write(stdout,"('%')", advance="no")
       call flush(stdout)
 
       np=stations_used(station_index)
