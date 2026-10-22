@@ -28,7 +28,7 @@ overwrite `data_extraction_cable_model_calibration_cluster_test.nc`.
 
 **Note** : 
 
-`ORCHIDEE_time_invarian.nc `
+`ORCHIDEE_time_invariant.nc `
 
 ``hwsd_aoc_halfdeg.nc``
 
