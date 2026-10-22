@@ -18,6 +18,7 @@
 !!     * (3e) call model for each of mp and integration over time
 
 module mesc_interface_module
+  use, intrinsic :: iso_fortran_env, only: stdout => output_unit
   use mesc_precision_module, only: dp
   use mesc_constant_module, only: diag, delt, mp, ms, mpft, mcpool, outp
   use mesc_variable_module, only: mic_param_xscale, mic_param_default, &
@@ -94,9 +95,9 @@ contains
   end do ! np
 
   if(diag==1) then
-    print *, micparam%fracroot(outp,:)
-    print *, micparam%sdepth(outp,:)
-    print *, micparam%diffsocx(outp)
+    write(stdout,*) micparam%fracroot(outp,:)
+    write(stdout,*) micparam%sdepth(outp,:)
+    write(stdout,*) micparam%diffsocx(outp)
   end if
 
       do np=1,mp
@@ -344,10 +345,10 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bg
   integer  :: station_count, station_index
   integer, dimension(:), allocatable :: stations_used
 
-    !   print *, 'calling vmic_param_constant'
+    !   write(stdout,*) 'calling vmic_param_constant'
        call vmic_param_constant(micpxdef,micpdef,micparam,zse)
 
-    !   print *, 'calling vmic_init'
+    !   write(stdout,*) 'calling vmic_init'
        call vmic_init(miccpool,micnpool)
 
   if(jrestart==1) call vmic_restart_read(miccpool,micnpool,frestart_in)
@@ -362,6 +363,15 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bg
     end if
   end do
 
+  ! Print the stations to iterate over
+  write(stdout,"('stations')")
+  write(stdout,"('1')",advance="no")
+  do station_index=2,station_count-1
+     write(stdout,"('.')", advance="no")
+  end do
+  write(stdout,"(i0)") station_count
+  call flush(stdout)
+
 !$OMP PARALLEL DEFAULT(NONE) SHARED (micparam,micpxdef,micnpool,micinput,micglobal,miccpool,micoutput,micpdef,&
 !$OMP isoc14,nyeqpool,bgcopt,zse,mp,ms,stations_used) &
 !$OMP PRIVATE (np,station_index,ny,i,year) &
@@ -370,6 +380,11 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bg
 !$OMP DO
 
    do station_index=1,station_count
+
+      ! Print station progress to the screen
+      write(stdout,"('%')", advance="no")
+      call flush(stdout)
+
       np=stations_used(station_index)
 
 
@@ -392,6 +407,9 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bg
   !$OMP END DO
 
   !$OMP END PARALLEL
+
+  ! Print to the screen when all stations have been accounted for
+  write(stdout,"(' done!')")
 
   miccpool%cpooleq(:,:,:) = miccpool%cpool(:,:,:)
 end subroutine vmicsoil_hwsd_cpu
@@ -488,9 +506,9 @@ end subroutine vmicsoil_hwsd_cpu
   miccpool%cpool(np,ms,7)  = miccpool%cpool(np,ms,7) - cfluxa(ms)
 
   if (diag == 1) then
-    print *, "year day site np1", year, doy, outp, micparam%diffsocx(outp)
+    write(stdout,*) "year day site np1", year, doy, outp, micparam%diffsocx(outp)
     do ns = 1, ms
-      print *, ns, miccpool%cpool(outp,ns,:)
+      write(stdout,*) ns, miccpool%cpool(outp,ns,:)
     end do
   end if
 

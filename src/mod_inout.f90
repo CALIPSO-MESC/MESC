@@ -1,4 +1,6 @@
 module mesc_inout_module
+  use, intrinsic :: iso_fortran_env, only: stderr => error_unit, &
+                                           stdout => output_unit
   use mesc_precision_module, only: dp, sp
   use netcdf, only: nf90_clobber, nf90_close, nf90_create, nf90_def_dim, &
                     nf90_def_var, nf90_enddef, nf90_float, nf90_get_var, &
@@ -71,8 +73,8 @@ contains
 
     ! assign the values from the restart file
     if(mpx/=mp .or. msx/=ms .or. mcpoolx/=mcpool) then
-       print *, "dimensions do not match! ", mp,mpx,ms,msx,mcpool,mcpoolx
-       STOP
+       write(stderr,*) "dimensions do not match! ", mp,mpx,ms,msx,mcpool,mcpoolx
+       error stop 999
     end if
     miccpool%cpool    = fcpool
     micnpool%mineralN = fnpool
@@ -104,7 +106,7 @@ contains
     STATUS = NF90_create(frestart_out, NF90_CLOBBER, FILE_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error creating restart file ")
 
-    WRITE(*,*) "writing mic restart", frestart_out
+    WRITE(stdout,*) "writing mic restart", frestart_out
     ! Put the file in define mode:
     STATUS = NF90_redef(FILE_ID)
 
@@ -144,7 +146,7 @@ contains
     STATUS = NF90_close(FILE_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error closing restart file "  )
 
-    write(*, *) "restart file written to ", frestart_out
+    write(stdout, *) "restart file written to ", frestart_out
 
   end subroutine vmic_restart_write
 
@@ -156,10 +158,10 @@ contains
     CHARACTER(LEN=*), INTENT(IN) :: message !! Error message
     INTEGER, INTENT(IN) :: ok               !! Error status
 
-    WRITE(*,*) message ! error from subroutine
-    WRITE(*,*) NF90_STRERROR(ok) ! netcdf error details
+    WRITE(stderr,*) message ! error from subroutine
+    WRITE(stderr,*) NF90_STRERROR(ok) ! netcdf error details
 
-    ERROR STOP
+    ERROR STOP 999
 
   end subroutine nc_abort
 
@@ -188,8 +190,8 @@ contains
     STATUS = NF90_create(foutput, NF90_CLOBBER, FILE_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error creating output file ")
 
-    WRITE(*,*) "writing output file", foutput
-    print *, CDATE
+    WRITE(stdout,*) "writing output file", foutput
+    write(stdout,*) CDATE
 
     ! Put the file in define mode:
     STATUS = NF90_redef(FILE_ID)
@@ -240,7 +242,7 @@ contains
     STATUS = NF90_close(FILE_ID)
     IF(STATUS /= NF90_NOERR) CALL nc_abort(STATUS, "Error closing restart file "  )
 
-    write(*, *) "output written to ", foutput
+    write(stdout,*) "output written to ", foutput
 
   end subroutine vmic_output_write
 
@@ -308,7 +310,7 @@ contains
     integer :: i,j,np,maxpft
     integer :: ncid1,ok,varid !! Variables for handling NetCDF files
 
-    print *, "patch filename", fpatch
+    write(stdout,*) "patch filename", fpatch
 
     mpx = 0
     ok = NF90_OPEN(fpatch,0,ncid1)
@@ -351,9 +353,9 @@ contains
       deallocate(xfield4)
 
     case default
-      write(6,"(a,i0,a)") "ERROR getpatch_global: Invalid model '", jmodel, "'"
+      write(stderr,"(a,i0,a)") "ERROR getpatch_global: Invalid model '", jmodel, "'"
       ok = NF90_close(ncid1)
-      stop 999
+      error stop 999
 
     end select
     ok = NF90_close(ncid1)
@@ -415,7 +417,7 @@ contains
   ! file 7: with aoc fraction
     ok = NF90_OPEN(fglobal(7),0,ncid1)
     IF (ok /= NF90_NOERR) CALL nc_abort(ok,"Error opening file"//fglobal(7))
-    print *, "global input1 = ", fglobal(7)
+    write(stdout,*) "global input1 = ", fglobal(7)
     ok = NF90_INQ_VARID(ncid1,"aoc_fraction",varid)
     ok = NF90_GET_VAR(ncid1,varid,varaoc_db)
     ok = NF90_close(ncid1)
@@ -424,7 +426,7 @@ contains
   ! file 1: time-invarying data
     ok = NF90_OPEN(fglobal(1),0,ncid3)
     IF (ok /= NF90_NOERR) CALL nc_abort(ok,"Error opening file"//fglobal(1))
-    print *, "global input1 = ", fglobal(1)
+    write(stdout,*) "global input1 = ", fglobal(1)
 
     ok = NF90_INQ_VARID(ncid3,"lon",lonid)
     ok = NF90_GET_VAR(ncid3,lonid,lon)
@@ -468,8 +470,8 @@ contains
     end do
 
     if(np/=mp) then
-      print *, "np is not equal to mp", np,mp
-      STOP
+      write(stderr, *) "np is not equal to mp", np,mp
+      error stop 999
     end if
 
 
@@ -495,50 +497,50 @@ contains
     call lonlat2mpx3(ilon,jlat,patchfrac,varx3_db,varmp1_db)
     micglobal%npp = real(varmp1_db,kind=dp)
     micglobal%npp = max(100.0,micglobal%npp)
-    print *, "npp", maxval(micglobal%npp), minval(micglobal%npp),sum(micglobal%npp)/real(mp)
+    write(stdout,*) "npp", maxval(micglobal%npp), minval(micglobal%npp),sum(micglobal%npp)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,"lignin_CWD",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3_db)
     call lonlat2mpx3(ilon,jlat,patchfrac,varx3_db,varmp1_db)
     micglobal%ligwood = real(varmp1_db,kind=dp)
-    print *, "ligwood", maxval(micglobal%ligwood), minval(micglobal%ligwood),sum(micglobal%ligwood)/real(mp)
+    write(stdout,*) "ligwood", maxval(micglobal%ligwood), minval(micglobal%ligwood),sum(micglobal%ligwood)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,"lignin_leaf",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3_db)
     call lonlat2mpx3(ilon,jlat,patchfrac,varx3_db,varmp1_db)
     micglobal%ligleaf = real(varmp1_db,kind=dp)
-    print *, "ligleaf", maxval(micglobal%ligleaf), minval(micglobal%ligleaf),sum(micglobal%ligleaf)/real(mp)
+    write(stdout,*) "ligleaf", maxval(micglobal%ligleaf), minval(micglobal%ligleaf),sum(micglobal%ligleaf)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,"lignin_root",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3_db)
     call lonlat2mpx3(ilon,jlat,patchfrac,varx3_db,varmp1_db)
     micglobal%ligroot = real(varmp1_db,kind=dp)
-    print *, "ligroot", maxval(micglobal%ligroot), minval(micglobal%ligroot),sum(micglobal%ligroot)/real(mp)
+    write(stdout,*) "ligroot", maxval(micglobal%ligroot), minval(micglobal%ligroot),sum(micglobal%ligroot)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,"CN_ratio_leaf",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3_db)
     call lonlat2mpx3(ilon,jlat,patchfrac,varx3_db,varmp1_db)
     micglobal%cnleaf = real(spread(varmp1_db,dim=2,ncopies=ntime),kind=dp)
-    print *, "cnleaf", maxval(micglobal%cnleaf), minval(micglobal%cnleaf),sum(micglobal%cnleaf)/real(size(micglobal%cnleaf))
+    write(stdout,*) "cnleaf", maxval(micglobal%cnleaf), minval(micglobal%cnleaf),sum(micglobal%cnleaf)/real(size(micglobal%cnleaf))
 
     ok = NF90_INQ_VARID(ncid3,"CN_ratio_noleaf",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3_db)
     call lonlat2mpx3(ilon,jlat,patchfrac,varx3_db,varmp1_db)
     micglobal%cnwood = real(spread(varmp1_db,dim=2,ncopies=ntime),kind=dp)
-    print *, "cnwood", maxval(micglobal%cnwood), minval(micglobal%cnwood),sum(micglobal%cnwood)/real(size(micglobal%cnwood))
+    write(stdout,*) "cnwood", maxval(micglobal%cnwood), minval(micglobal%cnwood),sum(micglobal%cnwood)/real(size(micglobal%cnwood))
 
     ok = NF90_INQ_VARID(ncid3,"CN_ratio_belowground",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3_db)
     call lonlat2mpx3(ilon,jlat,patchfrac,varx3_db,varmp1_db)
     micglobal%cnroot = real(spread(varmp1_db,dim=2,ncopies=ntime),kind=dp)
-    print *, "cnroot", maxval(micglobal%cnroot), minval(micglobal%cnroot),sum(micglobal%cnroot)/real(size(micglobal%cnroot))
+    write(stdout,*) "cnroot", maxval(micglobal%cnroot), minval(micglobal%cnroot),sum(micglobal%cnroot)/real(size(micglobal%cnroot))
 
     ok = NF90_close(ncid3)
 
     ! read in the HWSD soil properties and soil cluster
     ok = NF90_OPEN(fglobal(3),0,ncid3)
     IF (ok /= NF90_NOERR) CALL nc_abort(ok,"Error opening file"//fglobal(3))
-    print *, "global input1 = ", fglobal(3)
+    write(stdout,*) "global input1 = ", fglobal(3)
 
     ok = NF90_INQ_VARID(ncid3,"Bulk_density",varid)
     ok = NF90_GET_VAR(ncid3,varid,varbulk_db)
@@ -547,49 +549,49 @@ contains
     ok = NF90_GET_VAR(ncid3,varid,varx3ms_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms_db(:,:,1:3), varmp1_db)
     micglobal%clay(:) = real(varmp1_db(:)*0.01,kind=dp)
-    print *, "clay", maxval(micglobal%clay), minval(micglobal%clay),sum(micglobal%clay)/real(mp)
+    write(stdout,*) "clay", maxval(micglobal%clay), minval(micglobal%clay),sum(micglobal%clay)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,"Silt_fraction",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms_db(:,:,1:3), varmp1_db)
     micglobal%silt(:) = real(varmp1_db(:)*0.01,kind=dp)
-    print *, "silt", maxval(micglobal%silt), minval(micglobal%silt),sum(micglobal%silt)/real(mp)
+    write(stdout,*) "silt", maxval(micglobal%silt), minval(micglobal%silt),sum(micglobal%silt)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,"ph",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms_db(:,:,1:3), varmp1_db)
     micglobal%ph = real(varmp1_db,kind=dp)
     micglobal%ph =min(9.5,max(3.5,micglobal%ph))
-    print *, "ph", maxval(micglobal%ph), minval(micglobal%ph),sum(micglobal%ph)/real(mp)
+    write(stdout,*) "ph", maxval(micglobal%ph), minval(micglobal%ph),sum(micglobal%ph)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,"Ald",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)
     fald = real(varmp1_db,kind=dp)
-    print *, "Ald", maxval(fald), minval(fald),sum(fald)/real(mp)
+    write(stdout,*) "Ald", maxval(fald), minval(fald),sum(fald)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,"Alo",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)
     falo = real(varmp1_db,kind=dp)
-    print *, "Alo", maxval(falo), minval(falo),sum(falo)/real(mp)
+    write(stdout,*) "Alo", maxval(falo), minval(falo),sum(falo)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,"Fed",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)
     ffed = real(varmp1_db,kind=dp)
-    print *, "fed", maxval(ffed), minval(ffed),sum(ffed)/real(mp)
+    write(stdout,*) "fed", maxval(ffed), minval(ffed),sum(ffed)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,"Feo",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)
     ffeo = real(varmp1_db,kind=dp)
-    print *, "feo", maxval(ffeo), minval(ffeo),sum(ffeo)/real(mp)
+    write(stdout,*) "feo", maxval(ffeo), minval(ffeo),sum(ffeo)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,"Cluster",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx2_int)
     call lonlat2mpx2int(ilon, jlat, varx2_int, fcluster)
-    print *, "Cluster", maxval(fcluster), minval(fcluster)
+    write(stdout,*) "Cluster", maxval(fcluster), minval(fcluster)
 
     micparam%bgctype =fcluster
     micglobal%bgctype=fcluster
@@ -636,7 +638,7 @@ contains
        micglobal%time(n) = n
     end do
 
-    print *, "reading time-varying data", fglobal(2)
+    write(stdout,*) "reading time-varying data", fglobal(2)
 
   ! file 2: daily aboveground leaf fall (g C/m2/day)     ! Open netcdf file
     ok = NF90_OPEN(fglobal(2),0,ncid3)
@@ -647,7 +649,7 @@ contains
     varx3time_db = max(0.0, varx3time_db)
     call lonlat2mpx3time(ilon,jlat,varx3time_db,varmp2_db)
     micglobal%dleaf = real(varmp2_db,kind=dp)
-    print *, "dleaf", minval(micglobal%dleaf),maxval(micglobal%dleaf), &
+    write(stdout,*) "dleaf", minval(micglobal%dleaf),maxval(micglobal%dleaf), &
                       sum(micglobal%dleaf)/real(size(micglobal%dleaf))
 
     ok = NF90_INQ_VARID(ncid3,"non_leaf_aboveground_litterfall",varid)
@@ -655,7 +657,7 @@ contains
     varx3time_db = max(0.0, varx3time_db)
     call lonlat2mpx3time(ilon,jlat,varx3time_db,varmp2_db)
     micglobal%dwood = real(varmp2_db,kind=dp)
-    print *, "dwood", minval(micglobal%dwood),maxval(micglobal%dwood), &
+    write(stdout,*) "dwood", minval(micglobal%dwood),maxval(micglobal%dwood), &
                       sum(micglobal%dwood)/real(size(micglobal%dwood))
 
     ok = NF90_INQ_VARID(ncid3,"Belowground_litter_fall",varid)
@@ -663,42 +665,42 @@ contains
     varx3time_db = max(0.0, varx3time_db)
     call lonlat2mpx3time(ilon,jlat,varx3time_db,varmp2_db)
     micglobal%droot = real(varmp2_db,kind=dp)
-    print *, "droot", minval(micglobal%droot),maxval(micglobal%droot), &
+    write(stdout,*) "droot", minval(micglobal%droot),maxval(micglobal%droot), &
                       sum(micglobal%droot)/real(size(micglobal%droot))
 
     ok = NF90_INQ_VARID(ncid3,"SoilTemp",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx4_db)
     call lonlat2mpx4b(ilon,jlat,-100.0d0,50.0d0,0.0d0,varx4_db,varmp3_db)
     micglobal%tsoil = real(varmp3_db,kind=dp)
-    print *, "tsoil", minval(micglobal%tsoil),maxval(micglobal%tsoil), &
+    write(stdout,*) "tsoil", minval(micglobal%tsoil),maxval(micglobal%tsoil), &
                       sum(micglobal%tsoil)/real(size(micglobal%tsoil))
 
     ok = NF90_INQ_VARID(ncid3,"SoilMoist",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx4_db)
     call lonlat2mpx4b(ilon,jlat,0.0d0,0.8d0,0.15d0,varx4_db,varmp3_db)
     micglobal%moist = real(varmp3_db,kind=dp)
-    print *, "moist", minval(micglobal%moist),maxval(micglobal%moist), &
+    write(stdout,*) "moist", minval(micglobal%moist),maxval(micglobal%moist), &
                       sum(micglobal%moist)/real(size(micglobal%moist))
 
     ok = NF90_INQ_VARID(ncid3,"water_potential",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx4_db)
     call lonlat2mpx4b(ilon,jlat,-1000.0d0,0.0d0,-100.0d0,varx4_db,varmp3_db)
     micglobal%matpot = real(varmp3_db,kind=dp)
-    print *, "matpot", minval(micglobal%matpot),maxval(micglobal%matpot), &
+    write(stdout,*) "matpot", minval(micglobal%matpot),maxval(micglobal%matpot), &
                        sum(micglobal%matpot)/real(size(micglobal%matpot))
 
     ok = NF90_close(ncid3)
 
 
     ! filter out land cells with "bgctype<0"
-  !  print *, 'calculations are not done for the following cells'
+  !  write(stdout,*) 'calculations are not done for the following cells'
 
     msite = 0
     do np=1,mp
        if(micparam%bgctype(np) <1 .or. micparam%bgctype(np) >mbgc &
          .or. minval(micparam%csoilobs(np,:)) < 0.0               &
          .or. maxval(micparam%csoilobs(np,:)) > 120.0) then
-  !        print *, np, micparam%bgctype(np),micglobal%area(np),micglobal%isoil(np), &
+  !        write(stdout,*) np, micparam%bgctype(np),micglobal%area(np),micglobal%isoil(np), &
   !                 micglobal%sorder(np),micglobal%bgctype(np), micglobal%npp(np)
           micparam%bgctype(np)= mbgc
           micglobal%area(np)  = -1.0
@@ -732,7 +734,7 @@ contains
              if(int(isite/intval)*intval /= isite.or. isite>sitemax*intval) micglobal%area(np) = -1.0
           end if
  !         if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
- !            write(*,103) isite,np, micglobal%bgctype(np), micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
+ !            write(stdout,103) isite,np, micglobal%bgctype(np), micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
  !         endif
        end do
     else
@@ -741,10 +743,10 @@ contains
       do np=1,mp
          if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
             isite=isite+1
- !           write(*,103) isite,np,micglobal%bgctype(np),micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
+ !           write(stdout,103) isite,np,micglobal%bgctype(np),micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
          end if
       end do
-      if(isite<10) print *, "too few sites ", isite
+      if(isite<10) write(stdout,*) "too few sites ", isite
 
     end if
 
@@ -858,7 +860,7 @@ contains
   ! file 7: with aoc fraction
     ok = NF90_OPEN(fglobal(7),0,ncid1)
     IF (ok /= NF90_NOERR) CALL nc_abort(ok,"Error opening file"//fglobal(7))
-    print *, "global input1 = ", fglobal(7)
+    write(stdout,*) "global input1 = ", fglobal(7)
     ok = NF90_INQ_VARID(ncid1,"aoc_fraction",varid)
     ok = NF90_GET_VAR(ncid1,varid,varaoc_db)
     ok = NF90_close(ncid1)
@@ -866,7 +868,7 @@ contains
   ! file 1: time-invarying data
     ok = NF90_OPEN(fglobal(1),0,ncid3)
     IF (ok /= NF90_NOERR) CALL nc_abort(ok,"Error opening file"//fglobal(1))
-    print *, "global input1 = ", fglobal(1)
+    write(stdout,*) "global input1 = ", fglobal(1)
 
     ok = NF90_INQ_VARID(ncid3,"lon",lonid)
     ok = NF90_GET_VAR(ncid3,lonid,lon_flt)
@@ -912,8 +914,8 @@ contains
     end do
 
     if(np/=mp) then
-      print *, "np is not equal to mp", np,mp
-      STOP
+      write(stderr,*) "np is not equal to mp", np,mp
+      error stop 999
     end if
 
 
@@ -938,7 +940,7 @@ contains
     call lonlat2mpx2(ilon,jlat,varx2_db,varmp1_db)
     micglobal%npp = real(varmp1_db,kind=dp)
     micglobal%npp = max(100.0,micglobal%npp)
-    print *, "npp", maxval(micglobal%npp), minval(micglobal%npp),sum(micglobal%npp)/real(mp)
+    write(stdout,*) "npp", maxval(micglobal%npp), minval(micglobal%npp),sum(micglobal%npp)/real(mp)
 
 
     ok = NF90_close(ncid3)
@@ -948,7 +950,7 @@ contains
     ! read in the HWSD soil properties and soil cluster
     ok = NF90_OPEN(fglobal(3),0,ncid3)
     IF (ok /= NF90_NOERR) CALL nc_abort(ok,"Error opening file"//fglobal(3))
-    print *, "global input1 = ", fglobal(3)
+    write(stdout,*) "global input1 = ", fglobal(3)
 
     ok = NF90_INQ_VARID(ncid3,"Bulk_density",varid)
     ok = NF90_GET_VAR(ncid3,varid,varbulk_db)
@@ -957,50 +959,50 @@ contains
     ok = NF90_GET_VAR(ncid3,varid,varx3ms_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms_db(:,:,1:3), varmp1_db)
     micglobal%clay(:) = real(varmp1_db(:)*0.01,kind=dp)
-    print *, "clay", maxval(micglobal%clay), minval(micglobal%clay),sum(micglobal%clay)/real(mp)
+    write(stdout,*) "clay", maxval(micglobal%clay), minval(micglobal%clay),sum(micglobal%clay)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,"Silt_fraction",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms_db(:,:,1:3), varmp1_db)
     micglobal%silt(:) = real(varmp1_db(:)*0.01,kind=dp)
-    print *, "silt", maxval(micglobal%silt), minval(micglobal%silt),sum(micglobal%silt)/real(mp)
+    write(stdout,*) "silt", maxval(micglobal%silt), minval(micglobal%silt),sum(micglobal%silt)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,"ph",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms_db(:,:,1:3), varmp1_db)
     micglobal%ph = real(varmp1_db,kind=dp)
     micglobal%ph =min(9.5,max(3.5,micglobal%ph))
-    print *, "ph", maxval(micglobal%ph), minval(micglobal%ph),sum(micglobal%ph)/real(mp)
+    write(stdout,*) "ph", maxval(micglobal%ph), minval(micglobal%ph),sum(micglobal%ph)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,"Ald",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)
     fald = real(varmp1_db,kind=dp)
-    print *, "Ald", maxval(fald), minval(fald),sum(fald)/real(mp)
+    write(stdout,*) "Ald", maxval(fald), minval(fald),sum(fald)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,"Alo",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)
     falo = real(varmp1_db,kind=dp)
-    print *, "Alo", maxval(falo), minval(falo),sum(falo)/real(mp)
+    write(stdout,*) "Alo", maxval(falo), minval(falo),sum(falo)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,"Fed",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)
     ffed = real(varmp1_db,kind=dp)
-    print *, "fed", maxval(ffed), minval(ffed),sum(ffed)/real(mp)
+    write(stdout,*) "fed", maxval(ffed), minval(ffed),sum(ffed)/real(mp)
 
     ok = NF90_INQ_VARID(ncid3,"Feo",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx3ms5_db)
     call lonlat2mpx3a(ilon, jlat, 3, dble(zse(1:3)), varbulk_db(:,:,1:3), varx3ms5_db(:,:,1:3), varmp1_db)
     ffeo = real(varmp1_db,kind=dp)
-    print *, "feo", maxval(ffeo), minval(ffeo),sum(ffeo)/real(mp)
+    write(stdout,*) "feo", maxval(ffeo), minval(ffeo),sum(ffeo)/real(mp)
 
 
     ok = NF90_INQ_VARID(ncid3,"Cluster",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx2_int)
     call lonlat2mpx2int(ilon, jlat, varx2_int, fcluster)
-    print *, "Cluster", maxval(fcluster), minval(fcluster)
+    write(stdout,*) "Cluster", maxval(fcluster), minval(fcluster)
 
     micparam%bgctype =fcluster
     micglobal%bgctype=fcluster
@@ -1049,7 +1051,7 @@ contains
        micglobal%time(n) = n
     end do
 
-    print *, "reading time-varying data", fglobal(2)
+    write(stdout,*) "reading time-varying data", fglobal(2)
 
   ! file 2: daily aboveground leaf fall (g C/m2/day)     ! Open netcdf file
     ok = NF90_OPEN(fglobal(2),0,ncid3)
@@ -1060,7 +1062,7 @@ contains
     varx3time_db = max(0.0, varx3time_db)
     call lonlat2mpx3time(ilon,jlat,varx3time_db,varmp2_db)
     micglobal%dleaf = real(varmp2_db,kind=dp)
-    print *, "dleaf", minval(micglobal%dleaf),maxval(micglobal%dleaf), &
+    write(stdout,*) "dleaf", minval(micglobal%dleaf),maxval(micglobal%dleaf), &
                       sum(micglobal%dleaf)/real(size(micglobal%dleaf))
 
     ok = NF90_INQ_VARID(ncid3,"non_leaf_aboveground_litterfall",varid)
@@ -1068,7 +1070,7 @@ contains
     varx3time_db = max(0.0, varx3time_db)
     call lonlat2mpx3time(ilon,jlat,varx3time_db,varmp2_db)
     micglobal%dwood = real(varmp2_db,kind=dp)
-    print *, "dwood", minval(micglobal%dwood),maxval(micglobal%dwood), &
+    write(stdout,*) "dwood", minval(micglobal%dwood),maxval(micglobal%dwood), &
                       sum(micglobal%dwood)/real(size(micglobal%dwood))
 
     ok = NF90_INQ_VARID(ncid3,"Belowground_litter_fall",varid)
@@ -1076,28 +1078,28 @@ contains
     varx3time_db = max(0.0, varx3time_db)
     call lonlat2mpx3time(ilon,jlat,varx3time_db,varmp2_db)
     micglobal%droot = real(varmp2_db,kind=dp)
-    print *, "droot", minval(micglobal%droot),maxval(micglobal%droot), &
+    write(stdout,*) "droot", minval(micglobal%droot),maxval(micglobal%droot), &
                       sum(micglobal%droot)/real(size(micglobal%droot))
 
     ok = NF90_INQ_VARID(ncid3,"SoilTemp",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx4_db)
     call lonlat2mpx4b(ilon,jlat,-100.0d0,50.0d0,0.0d0,varx4_db,varmp3_db)
     micglobal%tsoil = real(varmp3_db,kind=dp)
-    print *, "tsoil", minval(micglobal%tsoil),maxval(micglobal%tsoil), &
+    write(stdout,*) "tsoil", minval(micglobal%tsoil),maxval(micglobal%tsoil), &
                       sum(micglobal%tsoil)/real(size(micglobal%tsoil))
 
     ok = NF90_INQ_VARID(ncid3,"SoilMoist",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx4_db)
     call lonlat2mpx4b(ilon,jlat,0.0d0,0.8d0,0.15d0,varx4_db,varmp3_db)
     micglobal%moist = real(varmp3_db,kind=dp)
-    print *, "moist", minval(micglobal%moist),maxval(micglobal%moist), &
+    write(stdout,*) "moist", minval(micglobal%moist),maxval(micglobal%moist), &
                       sum(micglobal%moist)/real(size(micglobal%moist))
 
     ok = NF90_INQ_VARID(ncid3,"water_potential",varid)
     ok = NF90_GET_VAR(ncid3,varid,varx4_db)
     call lonlat2mpx4b(ilon,jlat,-1000.0d0,0.0d0,-100.0d0,varx4_db,varmp3_db)
     micglobal%matpot = real(varmp3_db,kind=dp)
-    print *, "matpot", minval(micglobal%matpot),maxval(micglobal%matpot), &
+    write(stdout,*) "matpot", minval(micglobal%matpot),maxval(micglobal%matpot), &
                        sum(micglobal%matpot)/real(size(micglobal%matpot))
 
     ok = NF90_close(ncid3)
@@ -1106,13 +1108,13 @@ contains
     ! use modis-npp to rescale the orchidee NPP and carbon inputs to soil
     if (use_modis_npp) then
        ok = nf90_open(fglobal(6),nf90_nowrite,ncid3)
-       if(ok /= nf90_noerr) print*, "Error opening modisnpp"
+       if(ok /= nf90_noerr) write(stdout,*) "Error opening modisnpp"
 
        ! get variables
        ok = nf90_inq_varid(ncid3,"npp",varid)
-       if(ok /= nf90_noerr) print*, "Error inquiring data modis_npp"
+       if(ok /= nf90_noerr) write(stdout,*) "Error inquiring data modis_npp"
        ok = nf90_get_var(ncid3,varid,modisnpp)
-       if(ok /= nf90_noerr) print*,"Error reading data npp"
+       if(ok /= nf90_noerr) write(stdout,*)"Error reading data npp"
        ! Close netcdf file
        ok = NF90_CLOSE(ncid3)
 
@@ -1130,13 +1132,13 @@ contains
     end if
 
     ! filter out land cells with "bgctype<0"
-  !  print *, 'calculations are not done for the following cells'
+  !  write(stdout,*) 'calculations are not done for the following cells'
     msite=0
     do np=1,mp
        if(micparam%bgctype(np) <1 .or. micparam%bgctype(np) >mbgc &
          .or. minval(micparam%csoilobs(np,:)) < 0.0               &
          .or. maxval(micparam%csoilobs(np,:)) > 120.0) then
-    !      print *, np, micparam%bgctype(np),micglobal%area(np),micglobal%isoil(np), &
+    !      write(stdout,*) np, micparam%bgctype(np),micglobal%area(np),micglobal%isoil(np), &
     !               micglobal%sorder(np),micglobal%bgctype(np), micglobal%npp(np)
           micparam%bgctype(np)= mbgc
           micglobal%area(np)  = -1.0
@@ -1172,7 +1174,7 @@ contains
              if(int(isite/intval)*intval /= isite.or. isite>sitemax*intval) micglobal%area(np) = -1.0
           end if
    !       if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
-   !          write(*,103) isite,np, micglobal%bgctype(np), micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
+   !          write(stdout,103) isite,np, micglobal%bgctype(np), micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
    !       endif
        end do
     else
@@ -1181,10 +1183,10 @@ contains
       do np=1,mp
          if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
             isite=isite+1
-   !         write(*,103) isite,np,micglobal%bgctype(np),micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
+   !         write(stdout,103) isite,np,micglobal%bgctype(np),micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
          end if
       end do
-      if(isite<10) print *, "too few sites ", isite
+      if(isite<10) write(stdout,*) "too few sites ", isite
 
     end if
 
@@ -1441,11 +1443,11 @@ subroutine lonlat2mpx3time(ilon, jlat, varx3time_db, varmp2_db)
 
        if (ilon(np) < 1 .or. ilon(np) > nlon .or. &
            jlat(np) < 1 .or. jlat(np) > nlat) then
-           write(*,*) "ERROR in lonlat2mpx3a"
-           write(*,*) "np=", np
-           write(*,*) "ilon=", ilon(np), " valid range 1:", nlon
-           write(*,*) "jlat=", jlat(np), " valid range 1:", nlat
-           stop
+           write(stderr,*) "ERROR in lonlat2mpx3a"
+           write(stderr,*) "np=", np
+           write(stderr,*) "ilon=", ilon(np), " valid range 1:", nlon
+           write(stderr,*) "jlat=", jlat(np), " valid range 1:", nlat
+           error stop 999
        end if
 
        varmp2_db(np,:) = varx3time_db(ilon(np), jlat(np), :)
@@ -1472,11 +1474,11 @@ subroutine lonlat2mpx4b(ilon,jlat,xmin,xmax,xdef,varx4_db,varmp3_db)
     do np = 1, mp
        if (ilon(np) < 1 .or. ilon(np) > nlon .or. &
            jlat(np) < 1 .or. jlat(np) > nlat) then
-           write(*,*) "ERROR in lonlat2mpx4: invalid grid index"
-           write(*,*) "np=", np
-           write(*,*) "ilon=", ilon(np), " valid 1:", nlon
-           write(*,*) "jlat=", jlat(np), " valid 1:", nlat
-           stop
+           write(stderr,*) "ERROR in lonlat2mpx4: invalid grid index"
+           write(stderr,*) "np=", np
+           write(stderr,*) "ilon=", ilon(np), " valid 1:", nlon
+           write(stderr,*) "jlat=", jlat(np), " valid 1:", nlat
+           error stop 999
        end if
        varmp3_db(np,:,:) = varx4_db(ilon(np),jlat(np),:,:)
 
@@ -1555,144 +1557,144 @@ end subroutine lonlat2mpx4b
 
    ! open .nc file
     status = nf90_open(frac14c,nf90_nowrite,ncid)
-    if(status /= nf90_noerr) print*, "Error opening frc_c14.nc"
+    if(status /= nf90_noerr) write(stdout,*) "Error opening frc_c14.nc"
 
     ! get dimensions/profile_id
     status = nf90_inq_varid(ncid,"nsite",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring dimensions/profile_id"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring dimensions/profile_id"
     status = nf90_get_var(ncid,varid,fid)
-    if(status /= nf90_noerr) print*,"Error reading profile_id"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading profile_id"
 
     ! get variables
     status = nf90_inq_varid(ncid,"SOC",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring soc"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring soc"
     status = nf90_get_var(ncid,varid,fsoc)
-    if(status /= nf90_noerr) print*,"Error reading soc"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading soc"
 
     status = nf90_inq_varid(ncid,"bulkd",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring bulk density"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring bulk density"
     status = nf90_get_var(ncid,varid,fbulkd)
-    if(status /= nf90_noerr) print*,"Error reading bulk density"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading bulk density"
 
     status = nf90_inq_varid(ncid,"clay",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring clay"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring clay"
     status = nf90_get_var(ncid,varid,fclay)
-    if(status /= nf90_noerr) print*,"Error reading clay"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading clay"
 
     status = nf90_inq_varid(ncid,"silt",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring silt"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring silt"
     status = nf90_get_var(ncid,varid,fsilt)
-    if(status /= nf90_noerr) print*,"Error reading silt"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading silt"
 
     status = nf90_inq_varid(ncid,"ph",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring ph"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring ph"
     status = nf90_get_var(ncid,varid,fph)
-    if(status /= nf90_noerr) print*,"Error reading ph"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading ph"
 
     status = nf90_inq_varid(ncid,"temp",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring soil temperature"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring soil temperature"
     status = nf90_get_var(ncid,varid,ftemp)
-    if(status /= nf90_noerr) print*,"Error reading soil temperature"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading soil temperature"
 
     status = nf90_inq_varid(ncid,"moist",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring soil moisture"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring soil moisture"
     status = nf90_get_var(ncid,varid,fmoist)
-    if(status /= nf90_noerr) print*,"Error reading soil moisture"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading soil moisture"
 
     status = nf90_inq_varid(ncid,"porosity",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring soil porosity"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring soil porosity"
     status = nf90_get_var(ncid,varid,fporosity)
-    if(status /= nf90_noerr) print*,"Error reading soil porosity"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading soil porosity"
 
     status = nf90_inq_varid(ncid,"matpot",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring soil matric potential"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring soil matric potential"
     status = nf90_get_var(ncid,varid,fmatpot)
-    if(status /= nf90_noerr) print*,"Error reading soil matric potential"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading soil matric potential"
 
     status = nf90_inq_varid(ncid,"npp",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring npp"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring npp"
     status = nf90_get_var(ncid,varid,fnpp)
-    if(status /= nf90_noerr) print*,"Error reading npp"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading npp"
 
     status = nf90_inq_varid(ncid,"anpp",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring anpp"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring anpp"
     status = nf90_get_var(ncid,varid,fanpp)
-    if(status /= nf90_noerr) print*,"Error reading anpp"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading anpp"
 
     status = nf90_inq_varid(ncid,"bnpp",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring bnpp"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring bnpp"
     status = nf90_get_var(ncid,varid,fbnpp)
-    if(status /= nf90_noerr) print*,"Error reading bnpp"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading bnpp"
 
     status = nf90_inq_varid(ncid,"lignin_C",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring lignin/C"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring lignin/C"
     status = nf90_get_var(ncid,varid,flignin)
-    if(status /= nf90_noerr) print*,"Error reading lignin/C"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading lignin/C"
 
     status = nf90_inq_varid(ncid,"cna",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring C/N aboveground"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring C/N aboveground"
     status = nf90_get_var(ncid,varid,fcna)
-    if(status /= nf90_noerr) print*,"Error reading C/N aboveground"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading C/N aboveground"
 
     status = nf90_inq_varid(ncid,"cnb",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring C/N belowground"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring C/N belowground"
     status = nf90_get_var(ncid,varid,fcnb)
-    if(status /= nf90_noerr) print*,"Error reading C/N belowground"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading C/N belowground"
 
     status = nf90_inq_varid(ncid,"pft",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring plant functional type"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring plant functional type"
     status = nf90_get_var(ncid,varid,fpft)
-    if(status /= nf90_noerr) print*,"Error reading plant functional type"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading plant functional type"
 
       status = nf90_inq_varid(ncid,"POC",varid)
-      if(status /= nf90_noerr) print*, "Error inquiring POC"
+      if(status /= nf90_noerr) write(stdout,*) "Error inquiring POC"
       status = nf90_get_var(ncid,varid,fpoc)
-      if(status /= nf90_noerr) print*,"Error reading POC"
+      if(status /= nf90_noerr) write(stdout,*)"Error reading POC"
 
       status = nf90_inq_varid(ncid,"MAOC",varid)
-      if(status /= nf90_noerr) print*, "Error inquiring MAOC"
+      if(status /= nf90_noerr) write(stdout,*) "Error inquiring MAOC"
       status = nf90_get_var(ncid,varid,fmaoc)
-      if(status /= nf90_noerr) print*,"Error reading MAOC"
+      if(status /= nf90_noerr) write(stdout,*)"Error reading MAOC"
 
       status = nf90_inq_varid(ncid,"fm_poc",varid)
-      if(status /= nf90_noerr) print*, "Error inquiring fm_poc"
+      if(status /= nf90_noerr) write(stdout,*) "Error inquiring fm_poc"
       status = nf90_get_var(ncid,varid,ffmpoc)
-      if(status /= nf90_noerr) print*,"Error reading fm_poc"
+      if(status /= nf90_noerr) write(stdout,*)"Error reading fm_poc"
 
       status = nf90_inq_varid(ncid,"fm_maoc",varid)
-      if(status /= nf90_noerr) print*, "Error inquiring fm_maoc"
+      if(status /= nf90_noerr) write(stdout,*) "Error inquiring fm_maoc"
       status = nf90_get_var(ncid,varid,ffmmaoc)
-      if(status /= nf90_noerr) print*,"Error reading fm_maoc"
+      if(status /= nf90_noerr) write(stdout,*)"Error reading fm_maoc"
 
       status = nf90_inq_varid(ncid,"top_depth",varid)
-      if(status /= nf90_noerr) print*, "Error inquiring top depth"
+      if(status /= nf90_noerr) write(stdout,*) "Error inquiring top depth"
       status = nf90_get_var(ncid,varid,ftop)
-      if(status /= nf90_noerr) print*,"Error reading top depth"
+      if(status /= nf90_noerr) write(stdout,*)"Error reading top depth"
 
       status = nf90_inq_varid(ncid,"bot_depth",varid)
-      if(status /= nf90_noerr) print*, "Error inquiring bottom depth"
+      if(status /= nf90_noerr) write(stdout,*) "Error inquiring bottom depth"
       status = nf90_get_var(ncid,varid,fbot)
-      if(status /= nf90_noerr) print*,"Error reading bottom depth"
+      if(status /= nf90_noerr) write(stdout,*)"Error reading bottom depth"
 
       status = nf90_inq_varid(ncid,"c14_year",varid)
-      if(status /= nf90_noerr) print*, "Error inquiring c14 year"
+      if(status /= nf90_noerr) write(stdout,*) "Error inquiring c14 year"
       status = nf90_get_var(ncid,varid,fyear)
-      if(status /= nf90_noerr) print*,"Error reading c14 year"
+      if(status /= nf90_noerr) write(stdout,*)"Error reading c14 year"
 
       status = nf90_inq_varid(ncid,"c14_region",varid)
-      if(status /= nf90_noerr) print*, "Error inquiring c14 region"
+      if(status /= nf90_noerr) write(stdout,*) "Error inquiring c14 region"
       status = nf90_get_var(ncid,varid,fregion)
-      if(status /= nf90_noerr) print*,"Error reading c14 region"
+      if(status /= nf90_noerr) write(stdout,*)"Error reading c14 region"
 
       status = nf90_inq_varid(ncid,"Lon",varid)
-      if(status /= nf90_noerr) print*, "Error inquiring Lon"
+      if(status /= nf90_noerr) write(stdout,*) "Error inquiring Lon"
       status = nf90_get_var(ncid,varid,lon)
-      if(status /= nf90_noerr) print*,"Error reading Lon"
+      if(status /= nf90_noerr) write(stdout,*)"Error reading Lon"
 
       status = nf90_inq_varid(ncid,"Lat",varid)
-      if(status /= nf90_noerr) print*, "Error inquiring Lat"
+      if(status /= nf90_noerr) write(stdout,*) "Error inquiring Lat"
       status = nf90_get_var(ncid,varid,lat)
-      if(status /= nf90_noerr) print*,"Error reading Lat"
+      if(status /= nf90_noerr) write(stdout,*)"Error reading Lat"
 
     ! Close netcdf file
     status = NF90_CLOSE(ncid)
@@ -1794,13 +1796,13 @@ end subroutine lonlat2mpx4b
     integer :: ncid,varid,status
     ! open .nc file
     status = nf90_open(cfraction,nf90_nowrite,ncid)
-    if(status /= nf90_noerr) print*, "Error opening c_fraction.nc"
+    if(status /= nf90_noerr) write(stdout,*) "Error opening c_fraction.nc"
 
     ! get dimension
     status = nf90_inq_dimid(ncid,"nsite",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring dimensions/nsite"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring dimensions/nsite"
     status = nf90_inquire_dimension(ncid,varid,len=mpx)
-    if(status /= nf90_noerr) print*,"Error dimensions/nsite"
+    if(status /= nf90_noerr) write(stdout,*)"Error dimensions/nsite"
 
     ! Close netcdf file
     status = NF90_CLOSE(ncid)
@@ -1871,159 +1873,159 @@ end subroutine lonlat2mpx4b
 
    ! open .nc file
     status = nf90_open(Cfraction,nf90_nowrite,ncid)
-    if(status /= nf90_noerr) print*, "Error opening c_fraction.nc"
+    if(status /= nf90_noerr) write(stdout,*) "Error opening c_fraction.nc"
 
     ! get dimensions/profile_id
     status = nf90_inq_varid(ncid,"nsite",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring dimensions/profile_id"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring dimensions/profile_id"
     status = nf90_get_var(ncid,varid,fid)
-    if(status /= nf90_noerr) print*,"Error reading profile_id"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading profile_id"
 
     ! get variables
     status = nf90_inq_varid(ncid,"dataid",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring data ID"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring data ID"
     status = nf90_get_var(ncid,varid,fdataid)
-    if(status /= nf90_noerr) print*,"Error reading data ID"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading data ID"
 
     status = nf90_inq_varid(ncid,"SOC",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring soc"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring soc"
     status = nf90_get_var(ncid,varid,fsoc)
-    if(status /= nf90_noerr) print*,"Error reading soc"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading soc"
 
     status = nf90_inq_varid(ncid,"bulkd",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring bulk density"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring bulk density"
     status = nf90_get_var(ncid,varid,fbulkd)
-    if(status /= nf90_noerr) print*,"Error reading bulk density"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading bulk density"
 
     status = nf90_inq_varid(ncid,"clay",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring clay"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring clay"
     status = nf90_get_var(ncid,varid,fclay)
-    if(status /= nf90_noerr) print*,"Error reading clay"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading clay"
 
     status = nf90_inq_varid(ncid,"silt",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring silt"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring silt"
     status = nf90_get_var(ncid,varid,fsilt)
-    if(status /= nf90_noerr) print*,"Error reading silt"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading silt"
 
     status = nf90_inq_varid(ncid,"ph",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring ph"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring ph"
     status = nf90_get_var(ncid,varid,fph)
-    if(status /= nf90_noerr) print*,"Error reading ph"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading ph"
 
     status = nf90_inq_varid(ncid,"temp",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring soil temperature"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring soil temperature"
     status = nf90_get_var(ncid,varid,ftemp)
-    if(status /= nf90_noerr) print*,"Error reading soil temperature"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading soil temperature"
 
     status = nf90_inq_varid(ncid,"moist",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring soil moisture"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring soil moisture"
     status = nf90_get_var(ncid,varid,fmoist)
-    if(status /= nf90_noerr) print*,"Error reading soil moisture"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading soil moisture"
 
     status = nf90_inq_varid(ncid,"porosity",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring soil porosity"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring soil porosity"
     status = nf90_get_var(ncid,varid,fporosity)
-    if(status /= nf90_noerr) print*,"Error reading soil porosity"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading soil porosity"
 
     status = nf90_inq_varid(ncid,"matpot",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring soil matric potential"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring soil matric potential"
     status = nf90_get_var(ncid,varid,fmatpot)
-    if(status /= nf90_noerr) print*,"Error reading soil matric potential"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading soil matric potential"
 
     status = nf90_inq_varid(ncid,"npp",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring npp"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring npp"
     status = nf90_get_var(ncid,varid,fnpp)
-    if(status /= nf90_noerr) print*,"Error reading npp"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading npp"
 
     status = nf90_inq_varid(ncid,"anpp",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring anpp"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring anpp"
     status = nf90_get_var(ncid,varid,fanpp)
-    if(status /= nf90_noerr) print*,"Error reading anpp"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading anpp"
 
     status = nf90_inq_varid(ncid,"bnpp",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring bnpp"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring bnpp"
     status = nf90_get_var(ncid,varid,fbnpp)
-    if(status /= nf90_noerr) print*,"Error reading bnpp"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading bnpp"
 
     status = nf90_inq_varid(ncid,"lignin_C",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring lignin/C"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring lignin/C"
     status = nf90_get_var(ncid,varid,flignin)
-    if(status /= nf90_noerr) print*,"Error reading lignin/C"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading lignin/C"
 
     status = nf90_inq_varid(ncid,"cna",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring C/N aboveground"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring C/N aboveground"
     status = nf90_get_var(ncid,varid,fcna)
-    if(status /= nf90_noerr) print*,"Error reading C/N aboveground"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading C/N aboveground"
 
     status = nf90_inq_varid(ncid,"cnb",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring C/N belowground"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring C/N belowground"
     status = nf90_get_var(ncid,varid,fcnb)
-    if(status /= nf90_noerr) print*,"Error reading C/N belowground"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading C/N belowground"
 
     status = nf90_inq_varid(ncid,"pft",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring plant functional type"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring plant functional type"
     status = nf90_get_var(ncid,varid,fpft)
-    if(status /= nf90_noerr) print*,"Error reading plant functional type"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading plant functional type"
 
     status = nf90_inq_varid(ncid,"POC",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring POC"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring POC"
     status = nf90_get_var(ncid,varid,fpoc)
-    if(status /= nf90_noerr) print*,"Error reading POC"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading POC"
 
     status = nf90_inq_varid(ncid,"MAOC",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring MAOC"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring MAOC"
     status = nf90_get_var(ncid,varid,fmaoc)
-    if(status /= nf90_noerr) print*,"Error reading MAOC"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading MAOC"
 
     status = nf90_inq_varid(ncid,"top_depth",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring top depth"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring top depth"
     status = nf90_get_var(ncid,varid,ftop)
-    if(status /= nf90_noerr) print*,"Error reading top depth"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading top depth"
 
     status = nf90_inq_varid(ncid,"bot_depth",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring bottom depth"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring bottom depth"
     status = nf90_get_var(ncid,varid,fbot)
-    if(status /= nf90_noerr) print*,"Error reading bottom depth"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading bottom depth"
 
     status = nf90_inq_varid(ncid,"Mg",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring Mg"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring Mg"
     status = nf90_get_var(ncid,varid,fmg)
-    if(status /= nf90_noerr) print*,"Error reading Mg"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading Mg"
 
     status = nf90_inq_varid(ncid,"Ca",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring Ca"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring Ca"
     status = nf90_get_var(ncid,varid,fca)
-    if(status /= nf90_noerr) print*,"Error reading Ca"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading Ca"
 
     status = nf90_inq_varid(ncid,"Alo",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring Alo"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring Alo"
     status = nf90_get_var(ncid,varid,falo)
-    if(status /= nf90_noerr) print*,"Error reading Alo"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading Alo"
 
     status = nf90_inq_varid(ncid,"Ald",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring Ald"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring Ald"
     status = nf90_get_var(ncid,varid,fald)
-    if(status /= nf90_noerr) print*,"Error reading Ald"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading Ald"
 
     status = nf90_inq_varid(ncid,"Feo",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring Feo"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring Feo"
     status = nf90_get_var(ncid,varid,ffeo)
-    if(status /= nf90_noerr) print*,"Error reading Feo"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading Feo"
 
     status = nf90_inq_varid(ncid,"Fed",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring Fed"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring Fed"
     status = nf90_get_var(ncid,varid,ffed)
-    if(status /= nf90_noerr) print*,"Error reading Fed"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading Fed"
 
     status = nf90_inq_varid(ncid,"Lat",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring Lat"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring Lat"
     status = nf90_get_var(ncid,varid,lat)
-    if(status /= nf90_noerr) print*,"Error reading Lat"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading Lat"
 
     status = nf90_inq_varid(ncid,"Lon",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring Lon"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring Lon"
     status = nf90_get_var(ncid,varid,lon)
-    if(status /= nf90_noerr) print*,"Error reading Lon"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading Lon"
 
     ! Close netcdf file
     status = NF90_CLOSE(ncid)
@@ -2124,7 +2126,7 @@ end subroutine lonlat2mpx4b
 
       end do    ! "np=1,mp"
 
-    print *, "total sites = ", msite, "for bgcopt= ",bgcopt
+    write(stdout,*) "total sites = ", msite, "for bgcopt= ",bgcopt
     if(jglobal) close(100)
 901 format(6(i5,1x),25(f8.3,1x))
     deallocate(fsoc)
@@ -2188,8 +2190,8 @@ end subroutine lonlat2mpx4b
         read(13,*,end=91) year,c14del,sdx1,c14fm,sdx2
         ny = year - 1940
          if(ny<1 .or. ny>79) then
-            print *, "year", year, "outside the range"
-            stop
+            write(stderr, *) "year", year, "outside the range"
+            error stop 999
          else
             micparam%c14atm(ny,nz,1) = c14del !!! delta c14
             micparam%c14atm(ny,nz,2) = c14fm
@@ -2204,19 +2206,19 @@ end subroutine lonlat2mpx4b
     integer :: ncid,varid,status
    ! open .nc file
     status = nf90_open(fhwsdsoc,nf90_nowrite,ncid)
-    if(status /= nf90_noerr) print*, "Error opening c_fraction.nc"
+    if(status /= nf90_noerr) write(stdout,*) "Error opening c_fraction.nc"
 
     ! get dimensions
     status = nf90_inq_dimid(ncid,"nsite",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring dimensions/nsite"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring dimensions/nsite"
     status = nf90_inquire_dimension(ncid,varid,len=mpx)
-    if(status /= nf90_noerr) print*,"Error dimensions/nsite"
+    if(status /= nf90_noerr) write(stdout,*)"Error dimensions/nsite"
 
     !
     status = nf90_inq_dimid(ncid,"time",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring dimensions/ntime"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring dimensions/ntime"
     status = nf90_inquire_dimension(ncid,varid,len=timex)
-    if(status /= nf90_noerr) print*,"Error reading profile_id"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading profile_id"
 
     ! Close netcdf file
     status = NF90_CLOSE(ncid)
@@ -2260,165 +2262,165 @@ end subroutine lonlat2mpx4b
     allocate(fracaoc(mp,7))
 
    ! open .nc file
-    print *, " calling getdata_hwsd"
-    print *,"input file", fhwsdsoc
-    print *,"fansoc file", fanoc
-    print *,"mp ms bgcopt=",    mp,ms,bgcopt
+    write(stdout,*) " calling getdata_hwsd"
+    write(stdout,*)"input file", fhwsdsoc
+    write(stdout,*)"fansoc file", fanoc
+    write(stdout,*)"mp ms bgcopt=",    mp,ms,bgcopt
 
     status = nf90_open(fhwsdsoc,nf90_nowrite,ncid)
-    if(status /= nf90_noerr) print*, "Error opening c_fraction.nc"
+    if(status /= nf90_noerr) write(stdout,*) "Error opening c_fraction.nc"
 
     ! get variables
     status = nf90_inq_varid(ncid,"lat",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring data lat"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring data lat"
     status = nf90_get_var(ncid,varid,varx1db)
-    if(status /= nf90_noerr) print*,"Error reading data lat"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading data lat"
     micglobal%lat = real(varx1db,kind=dp)
 
     status = nf90_inq_varid(ncid,"lon",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring data lont"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring data lont"
     status = nf90_get_var(ncid,varid,varx1db)
-    if(status /= nf90_noerr) print*,"Error reading data lon"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading data lon"
     micglobal%lon=real(varx1db,kind=dp)
 
     status = nf90_inq_varid(ncid,"max_PFT",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring data PFT"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring data PFT"
     status = nf90_get_var(ncid,varid,ivarx1)
-    if(status /= nf90_noerr) print*,"Error reading data PFT"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading data PFT"
     micglobal%pft = ivarx1
 
     status = nf90_inq_varid(ncid,"USDA_SoilSuborder",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring soil order"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring soil order"
     status = nf90_get_var(ncid,varid,ivarx1)
-    if(status /= nf90_noerr) print*,"Error reading soil order"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading soil order"
     micglobal%sorder = ivarx1
 
     select case (jmodel)
     case (model_cable)
        status = nf90_inq_varid(ncid,"isoil",varid)
-       if(status /= nf90_noerr) print*, "Error inquiring soil texturep"
+       if(status /= nf90_noerr) write(stdout,*) "Error inquiring soil texturep"
        status = nf90_get_var(ncid,varid,ivarx1)
-       if(status /= nf90_noerr) print*,"Error reading soil texure"
+       if(status /= nf90_noerr) write(stdout,*)"Error reading soil texure"
        micglobal%isoil = ivarx1
     case (model_orchidee)
        status = nf90_inq_varid(ncid,"USDA_Soil_texture_class",varid)
-       if(status /= nf90_noerr) print*, "Error inquiring soil texturep"
+       if(status /= nf90_noerr) write(stdout,*) "Error inquiring soil texturep"
        status = nf90_get_var(ncid,varid,ivarx1)
-       if(status /= nf90_noerr) print*,"Error reading soil texure"
+       if(status /= nf90_noerr) write(stdout,*)"Error reading soil texure"
        micglobal%isoil = ivarx1
     case default
-      write(6,"(a,i0,a)") "ERROR getdata_hwsd: Invalid model '", jmodel, "'"
-      stop 999
+      write(stderr,"(a,i0,a)") "ERROR getdata_hwsd: Invalid model '", jmodel, "'"
+      error stop 999
     end select
 
     status = nf90_inq_varid(ncid,"max_PFTfrac",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring max_PFTfrac"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring max_PFTfrac"
     status = nf90_get_var(ncid,varid,varx1float)
-    if(status /= nf90_noerr) print*,"Error reading max_PFTfrac"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading max_PFTfrac"
     micglobal%area = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,"npp",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring npp"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring npp"
     status = nf90_get_var(ncid,varid,varx1db)
-    if(status /= nf90_noerr) print*,"Error reading npp"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading npp"
     micglobal%npp = real(varx1db,kind=dp)
 
     status = nf90_inq_varid(ncid,"pH",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring ph"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring ph"
     status = nf90_get_var(ncid,varid,varx1float)
-    if(status /= nf90_noerr) print*,"Error reading ph"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading ph"
     micglobal%ph = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,"clay",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring clay"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring clay"
     status = nf90_get_var(ncid,varid,varx1float)
-    if(status /= nf90_noerr) print*,"Error reading clay"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading clay"
     micglobal%clay = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,"silt",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring silt"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring silt"
     status = nf90_get_var(ncid,varid,varx1float)
-    if(status /= nf90_noerr) print*,"Error reading silt"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading silt"
     micglobal%silt = real(varx1float,kind=dp)
 
  !   status = nf90_inq_varid(ncid,'bulk_density',varid)
- !   if(status /= nf90_noerr) print*, 'Error inquiring soil bulk density'
+ !   if(status /= nf90_noerr) write(stdout,*) 'Error inquiring soil bulk density'
  !   status = nf90_get_var(ncid,varid,varx1float)
- !   if(status /= nf90_noerr) print*,'Error reading bulk density'
+ !   if(status /= nf90_noerr) write(stdout,*)'Error reading bulk density'
  !   micglobal%bulkd= real(varx1float,kind=dp)
  !   use HWSD bulk density (vary with soil layer)
      status = nf90_inq_varid(ncid,"HWSD_bulk_density",varid)
-     if(status /= nf90_noerr) print*, "Error inquiring soil bulk density"
+     if(status /= nf90_noerr) write(stdout,*) "Error inquiring soil bulk density"
      status = nf90_get_var(ncid,varid,bulkd)
-     if(status /= nf90_noerr) print*,"Error reading bulk density"
+     if(status /= nf90_noerr) write(stdout,*)"Error reading bulk density"
 
     status = nf90_inq_varid(ncid,"HWSD_SOC",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring soil carbon"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring soil carbon"
     status = nf90_get_var(ncid,varid,fsoc7)
-    if(status /= nf90_noerr) print*,"Error reading soil carbon"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading soil carbon"
 
     status = nf90_inq_varid(ncid,"SoilTemp",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring soil temperature"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring soil temperature"
     status = nf90_get_var(ncid,varid,tsoil7)
-    if(status /= nf90_noerr) print*,"Error reading soil temperature"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading soil temperature"
 !    micglobal%tsoil=real(varx3db,kind=dp)
 
     status = nf90_inq_varid(ncid,"SoilMoist",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring soil moisture"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring soil moisture"
     status = nf90_get_var(ncid,varid,moist7)
-    if(status /= nf90_noerr) print*,"Error reading soil moisture"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading soil moisture"
 !    micglobal%moist=real(varx3db,kind=dp)
 
     status = nf90_inq_varid(ncid,"water_potential",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring soil matric potential"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring soil matric potential"
     status = nf90_get_var(ncid,varid,watpot7)
-    if(status /= nf90_noerr) print*,"Error reading soil matric potential"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading soil matric potential"
 !    micglobal%matpot=real(varx3db,kind=dp)
 
     status = nf90_inq_varid(ncid,"Leaf_fall",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring Leaf_fall"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring Leaf_fall"
     status = nf90_get_var(ncid,varid,varx2db)
-    if(status /= nf90_noerr) print*,"Error reading Leaf_fall"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading Leaf_fall"
     micglobal%dleaf=real(varx2db,kind=dp)
 
     status = nf90_inq_varid(ncid,"Belowground_litter_fall",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring Belowground_litter_fall"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring Belowground_litter_fall"
     status = nf90_get_var(ncid,varid,varx2db)
-    if(status /= nf90_noerr) print*,"Error reading Belowground_litter_fall"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading Belowground_litter_fall"
     micglobal%droot=real(varx2db,kind=dp)
 
     status = nf90_inq_varid(ncid,"non_leaf_aboveground_litterfall",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring non_leaf_aboveground_litterfall"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring non_leaf_aboveground_litterfall"
     status = nf90_get_var(ncid,varid,varx2db)
-    if(status /= nf90_noerr) print*,"Error reading non_leaf_aboveground_litterfall"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading non_leaf_aboveground_litterfall"
     micglobal%dwood =real(varx2db,kind=dp)
 
     status = nf90_inq_varid(ncid,"Cluster",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring data Cluster"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring data Cluster"
     status = nf90_get_var(ncid,varid,ivarx1)
-    if(status /= nf90_noerr) print*,"Error reading data Cluster"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading data Cluster"
     micglobal%bgctype = ivarx1
     micparam%bgctype  = ivarx1
 
     status = nf90_inq_varid(ncid,"Ald",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring data Ald"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring data Ald"
     status = nf90_get_var(ncid,varid,fald)
-    if(status /= nf90_noerr) print*,"Error reading data ald"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading data ald"
 
     status = nf90_inq_varid(ncid,"Alo",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring data Alo"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring data Alo"
     status = nf90_get_var(ncid,varid,falo)
-    if(status /= nf90_noerr) print*,"Error reading data alo"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading data alo"
 
     status = nf90_inq_varid(ncid,"Fed",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring data Fed"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring data Fed"
     status = nf90_get_var(ncid,varid,ffed)
-    if(status /= nf90_noerr) print*,"Error reading data Fed"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading data Fed"
 
     status = nf90_inq_varid(ncid,"Feo",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring data Feo"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring data Feo"
     status = nf90_get_var(ncid,varid,ffeo)
-    if(status /= nf90_noerr) print*,"Error reading data Feo"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading data Feo"
 
     ! Close netcdf file
     status = NF90_CLOSE(ncid)
@@ -2440,24 +2442,24 @@ end subroutine lonlat2mpx4b
 
    ! get the ancient soc fraction for mp
      status = nf90_open(fanoc,nf90_nowrite,ncid)
-     if(status /= nf90_noerr) print *, "Error opening fanoc.nc"
+     if(status /= nf90_noerr) write(stdout,*) "Error opening fanoc.nc"
      status = nf90_inq_varid(ncid,"fanoc_mp",varid)
-     if(status /= nf90_noerr) print *, "Error inquiring fanoc_mp"
+     if(status /= nf90_noerr) write(stdout,*) "Error inquiring fanoc_mp"
      status = nf90_get_var(ncid,varid,fracaoc)
-     if(status /= nf90_noerr) print *,"Error reading fanoc_mp"
+     if(status /= nf90_noerr) write(stdout,*)"Error reading fanoc_mp"
      ! Close netcdf file
      status = NF90_CLOSE(ncid)
 
     if(use_modis_npp) then
        ! use the annual modis NPP to scale the orchidee npp
        status = nf90_open(fmodis,nf90_nowrite,ncid)
-       if(status /= nf90_noerr) print*, "Error opening modisnpp"
+       if(status /= nf90_noerr) write(stdout,*) "Error opening modisnpp"
 
        ! get variables
        status = nf90_inq_varid(ncid,"npp",varid)
-       if(status /= nf90_noerr) print*, "Error inquiring data modis_npp"
+       if(status /= nf90_noerr) write(stdout,*) "Error inquiring data modis_npp"
        status = nf90_get_var(ncid,varid,modisnpp)
-       if(status /= nf90_noerr) print*,"Error reading data npp"
+       if(status /= nf90_noerr) write(stdout,*)"Error reading data npp"
        ! Close netcdf file
        status = NF90_CLOSE(ncid)
 
@@ -2473,7 +2475,7 @@ end subroutine lonlat2mpx4b
        micglobal%time(k)= real(k*1.0,kind=dp)
     end do
 
-    ! print *, 'PFT=', micglobal%pft
+    ! write(stdout,*) 'PFT=', micglobal%pft
     msite = 0
     do np=1, mp
        micglobal%siteid(np)  = np
@@ -2491,8 +2493,8 @@ end subroutine lonlat2mpx4b
        case (model_cable)
          ipft =  micglobal%pft(np)
          if(ipft<1 .or. ipft >17) then
-           write(6,"(a,i0,a,i0)") "PFT error for CABLE at ipft=", ipft, ", np=", np
-           stop
+           write(stderr,"(a,i0,a,i0)") "PFT error for CABLE at ipft=", ipft, ", np=", np
+           error stop 999
          end if
          micparam%xcnleaf(np)  = cnleaf1(ipft)
          micparam%xcnroot(np)  = cnroot1(ipft)
@@ -2503,8 +2505,8 @@ end subroutine lonlat2mpx4b
        case (model_orchidee)
          ipft =  micglobal%pft(np)
          if(ipft<1 .or. ipft >19) then
-           write(6,"(a,i0,a,i0)") "PFT error for ORCHIDEE at ipft=", ipft, ", np=", np
-           stop
+           write(stderr,"(a,i0,a,i0)") "PFT error for ORCHIDEE at ipft=", ipft, ", np=", np
+           error stop 999
          end if
          micparam%xcnleaf(np)  = cnleaf2(ipft)
          micparam%xcnroot(np)  = cnroot2(ipft)
@@ -2513,8 +2515,8 @@ end subroutine lonlat2mpx4b
          micparam%fligroot(np) = ligroot2(ipft)
          micparam%fligwood(np) = ligwood2(ipft)
        case default
-         write(6,"(a,i0,a)") "ERROR getdata_hwsd: Invalid model '", jmodel, "'"
-         stop 999
+         write(stderr,"(a,i0,a)") "ERROR getdata_hwsd: Invalid model '", jmodel, "'"
+         error stop 999
        end select
 
        nsocobs=0
@@ -2559,7 +2561,7 @@ end subroutine lonlat2mpx4b
              if(int(isite/intval)*intval /= isite.or. isite>sitemax*intval) micglobal%area(np) = -1.0
           end if
           if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
-             write(*,103) isite,np, micglobal%bgctype(np), micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
+             write(stdout,103) isite,np, micglobal%bgctype(np), micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
           end if
        end do
     else
@@ -2568,10 +2570,10 @@ end subroutine lonlat2mpx4b
       do np=1,mp
          if(micglobal%area(np) > 0.0 .and. micglobal%bgctype(np) == bgcopt) then
             isite=isite+1
-            write(*,103) isite,np,micglobal%bgctype(np),micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
+            write(stdout,103) isite,np,micglobal%bgctype(np),micglobal%area(np),micglobal%npp(np),micglobal%ph(np)
          end if
       end do
-      if(isite<10) print *, "too few sites ", isite
+      if(isite<10) write(stdout,*) "too few sites ", isite
 
     end if
 
@@ -2601,7 +2603,7 @@ end subroutine lonlat2mpx4b
     deallocate(tsoil7,moist7,watpot7)
     deallocate(fald,falo,ffed,ffeo)
     deallocate(fracaoc)
-!    print *, 'exit getdata_hwsd'
+!    write(stdout,*) 'exit getdata_hwsd'
 
 end subroutine getdata_hwsd
 
@@ -2611,7 +2613,7 @@ subroutine screenout(runmodel,jmodel,bgcopt,xopt,cost)
     integer,                 intent(in) :: jmodel,bgcopt
     real(dp), dimension(16), intent(in) :: xopt
     real(dp),                intent(in) :: cost
-    write(*,901) runmodel,jmodel,bgcopt,cost,xopt(1:14)
+    write(stdout,901) runmodel,jmodel,bgcopt,cost,xopt(1:14)
 901 format(a10,2(i3,1x),f12.3,1x,14(f7.3,1x))
 
 end subroutine screenout
@@ -2624,18 +2626,18 @@ end subroutine screenout
     integer:: ncid,varid,status
    ! open .nc file
     status = nf90_open(faustsoc,nf90_nowrite,ncid)
-    if(status /= nf90_noerr) print*, "Error opening faustsoc.nc"
+    if(status /= nf90_noerr) write(stdout,*) "Error opening faustsoc.nc"
 
     ! get dimensions
     status = nf90_inq_dimid(ncid,"msite",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring dimensions/nsite"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring dimensions/nsite"
     status = nf90_inquire_dimension(ncid,varid,len=mpx)
-    if(status /= nf90_noerr) print*,"Error dimensions/nsite"
+    if(status /= nf90_noerr) write(stdout,*)"Error dimensions/nsite"
     !
     status = nf90_inq_dimid(ncid,"mday",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring dimensions/ntime"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring dimensions/ntime"
     status = nf90_inquire_dimension(ncid,varid,len=timex)
-    if(status /= nf90_noerr) print*,"Error reading profile_id"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading profile_id"
 
     ! Close netcdf file
     status = NF90_CLOSE(ncid)
@@ -2678,108 +2680,108 @@ end subroutine screenout
 
 
    ! open .nc file
-    print *, " calling getdata_aust"
-    print *,"input file", faustsoc
-    print *,"mp ms bgcopt=",    mp,ms,bgcopt
+    write(stdout,*) " calling getdata_aust"
+    write(stdout,*)"input file", faustsoc
+    write(stdout,*)"mp ms bgcopt=",    mp,ms,bgcopt
 
     status = nf90_open(faustsoc,nf90_nowrite,ncid)
-    if(status /= nf90_noerr) print*, "Error opening faustsoc.nc"
+    if(status /= nf90_noerr) write(stdout,*) "Error opening faustsoc.nc"
 
     ! get variables
     status = nf90_inq_varid(ncid,"lat",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring data lat"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring data lat"
     status = nf90_get_var(ncid,varid,varx1float)
-    if(status /= nf90_noerr) print*,"Error reading data lat"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading data lat"
     micglobal%lat = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,"lon",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring data lon"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring data lon"
     status = nf90_get_var(ncid,varid,varx1float)
-    if(status /= nf90_noerr) print*,"Error reading data lon"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading data lon"
     micglobal%lon=real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,"vtype",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring data PFT"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring data PFT"
     status = nf90_get_var(ncid,varid,ivarx1)
-    if(status /= nf90_noerr) print*,"Error reading data PFT"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading data PFT"
     micglobal%pft = ivarx1
 
     status = nf90_inq_varid(ncid,"nsite",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring nsite"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring nsite"
     status = nf90_get_var(ncid,varid,ivarx1)
-    if(status /= nf90_noerr) print*,"Error reading nsite"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading nsite"
     micglobal%siteid = ivarx1
 
     status = nf90_inq_varid(ncid,"ph",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring ph"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring ph"
     status = nf90_get_var(ncid,varid,varx1float)
-    if(status /= nf90_noerr) print*,"Error reading ph"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading ph"
     micglobal%ph = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,"clay",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring clay"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring clay"
     status = nf90_get_var(ncid,varid,varx1float)
-    if(status /= nf90_noerr) print*,"Error reading clay"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading clay"
     micglobal%clay = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,"silt",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring silt"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring silt"
     status = nf90_get_var(ncid,varid,varx1float)
-    if(status /= nf90_noerr) print*,"Error reading silt"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading silt"
     micglobal%silt = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,"bulkd",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring bulkd"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring bulkd"
     status = nf90_get_var(ncid,varid,varx1float)
-    if(status /= nf90_noerr) print*,"Error reading bulkd"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading bulkd"
     micglobal%bulkd = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,"soc",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring soc"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring soc"
     status = nf90_get_var(ncid,varid,varx2float)
-    if(status /= nf90_noerr) print*,"Error reading soc"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading soc"
     soc3 = real(varx2float,kind=dp)
 
     status = nf90_inq_varid(ncid,"poc",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring poc"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring poc"
     status = nf90_get_var(ncid,varid,varx1float)
-    if(status /= nf90_noerr) print*,"Error reading poc"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading poc"
     poc = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,"hoc",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring hoc"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring hoc"
     status = nf90_get_var(ncid,varid,varx1float)
-    if(status /= nf90_noerr) print*,"Error reading hoc"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading hoc"
     hoc = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,"roc",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring roc"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring roc"
     status = nf90_get_var(ncid,varid,varx1float)
-    if(status /= nf90_noerr) print*,"Error reading roc"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading roc"
     roc = real(varx1float,kind=dp)
 
     status = nf90_inq_varid(ncid,"npp",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring npp"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring npp"
     status = nf90_get_var(ncid,varid,varx3float)
-    if(status /= nf90_noerr) print*,"Error reading npp"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading npp"
     npp10y = sum(real(varx3float,kind=dp),dim=2)/10.0  !(mp,ntime)
 
     status = nf90_inq_varid(ncid,"tsoil",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring tsoil"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring tsoil"
     status = nf90_get_var(ncid,varid,varx3float)
-    if(status /= nf90_noerr) print*,"Error reading tsoil"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading tsoil"
     tsoil10y = sum(real(varx3float,kind=dp),dim=2)/10.0   !(mp,ntime)
 
     status = nf90_inq_varid(ncid,"moist10",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring moist10"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring moist10"
     status = nf90_get_var(ncid,varid,varx3float)
-    if(status /= nf90_noerr) print*,"Error reading moist10"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading moist10"
     moist10y10 = sum(real(varx3float,kind=dp),dim=2)/10.0  !(mp,ntime)
 
     status = nf90_inq_varid(ncid,"moist100",varid)
-    if(status /= nf90_noerr) print*, "Error inquiring moist100"
+    if(status /= nf90_noerr) write(stdout,*) "Error inquiring moist100"
     status = nf90_get_var(ncid,varid,varx3float)
-    if(status /= nf90_noerr) print*,"Error reading moist100"
+    if(status /= nf90_noerr) write(stdout,*)"Error reading moist100"
     moist10y100= sum(real(varx3float,kind=dp),dim=2)/10.0 !(mp,ntime)
 
     ! Close netcdf file
@@ -2851,7 +2853,7 @@ end subroutine screenout
     deallocate(varx1float,avgts,avgms,soc3,poc,hoc,roc)
     deallocate(varx2float)
     deallocate(varx3float,npp10y,tsoil10y,moist10y10,moist10y100)
-!    print *, 'exit getdata_hwsd'
+!    write(stdout,*) 'exit getdata_hwsd'
 
 end subroutine getdata_aust
 
