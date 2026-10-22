@@ -5,6 +5,7 @@
 !> observations, and returns the scalar cost value.  The dispatcher
 !> [[functn]] reads `mesc.nml` and selects the configured run mode.
 module mesc_function_module
+  use, intrinsic :: iso_fortran_env, only: stderr => error_unit
   use mesc_precision_module, only: dp
   use mesc_constant_module, only: mp, mpft, mbgc, ntime, nlon, nlat, ms, &
                                   xrootcable, xrootorchidee
@@ -78,7 +79,7 @@ module mesc_function_module
      !  CASE (5)    ! run model with prescribed forcing (not developed yet for 1% per year offline)
      !    functn = functn_offline(nx,xparam16)
        CASE DEFAULT
-         write(6,"(a,i0,a)") "ERROR functn: Invalid run case '", config%runcase, "'"
+         write(stderr,"(a,i0,a)") "ERROR functn: Invalid run case '", config%runcase, "'"
          error stop 999
      END SELECT
 
@@ -255,8 +256,8 @@ END function functn_frc1
       case (model_orchidee)
         mpft = 19
       case default
-        write(6,"(a,i0,a)") "ERROR functn_soc_hwsd: Invalid model '", jmodel, "'"
-        stop 999
+        write(stderr,"(a,i0,a)") "ERROR functn_soc_hwsd: Invalid model '", jmodel, "'"
+        error stop 999
       end select
 
       mbgc=12
@@ -375,8 +376,8 @@ END function functn_soc_hwsd
         nlon=720
         nlat=360
       case default
-        write(6,"(a,i0,a)") "ERROR functn_global4: Invalid model '", jmodel, "'"
-        stop 999
+        write(stderr,"(a,i0,a)") "ERROR functn_global4: Invalid model '", jmodel, "'"
+        error stop 999
       end select
 
       ! reading global parameter values here      xopt =xparam16(1:nx)
@@ -398,8 +399,8 @@ END function functn_soc_hwsd
       case (model_orchidee)
         call getdata_global4_orchidee(fglobal,jglobal,bgcopt,jopt,jmodel,micglobal,micparam,zse)
       case default
-        write(6,"(a,i0,a)") "ERROR functn_global4: Invalid model '", jmodel, "'"
-        stop 999
+        write(stderr,"(a,i0,a)") "ERROR functn_global4: Invalid model '", jmodel, "'"
+        error stop 999
       end select
       print *, "global input data are read in"
 

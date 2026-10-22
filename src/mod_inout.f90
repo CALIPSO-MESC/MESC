@@ -1,4 +1,5 @@
 module mesc_inout_module
+  use, intrinsic :: iso_fortran_env, only: stderr => error_unit
   use mesc_precision_module, only: dp, sp
   use netcdf, only: nf90_clobber, nf90_close, nf90_create, nf90_def_dim, &
                     nf90_def_var, nf90_enddef, nf90_float, nf90_get_var, &
@@ -71,8 +72,8 @@ contains
 
     ! assign the values from the restart file
     if(mpx/=mp .or. msx/=ms .or. mcpoolx/=mcpool) then
-       print *, "dimensions do not match! ", mp,mpx,ms,msx,mcpool,mcpoolx
-       STOP
+       write(stderr,*) "dimensions do not match! ", mp,mpx,ms,msx,mcpool,mcpoolx
+       error stop 999
     end if
     miccpool%cpool    = fcpool
     micnpool%mineralN = fnpool
@@ -156,10 +157,10 @@ contains
     CHARACTER(LEN=*), INTENT(IN) :: message !! Error message
     INTEGER, INTENT(IN) :: ok               !! Error status
 
-    WRITE(*,*) message ! error from subroutine
-    WRITE(*,*) NF90_STRERROR(ok) ! netcdf error details
+    WRITE(stderr,*) message ! error from subroutine
+    WRITE(stderr,*) NF90_STRERROR(ok) ! netcdf error details
 
-    ERROR STOP
+    ERROR STOP 999
 
   end subroutine nc_abort
 
@@ -351,9 +352,9 @@ contains
       deallocate(xfield4)
 
     case default
-      write(6,"(a,i0,a)") "ERROR getpatch_global: Invalid model '", jmodel, "'"
+      write(stderr,"(a,i0,a)") "ERROR getpatch_global: Invalid model '", jmodel, "'"
       ok = NF90_close(ncid1)
-      stop 999
+      error stop 999
 
     end select
     ok = NF90_close(ncid1)
@@ -468,8 +469,8 @@ contains
     end do
 
     if(np/=mp) then
-      print *, "np is not equal to mp", np,mp
-      STOP
+      write(stderr, *) "np is not equal to mp", np,mp
+      error stop 999
     end if
 
 
@@ -912,8 +913,8 @@ contains
     end do
 
     if(np/=mp) then
-      print *, "np is not equal to mp", np,mp
-      STOP
+      write(stderr,*) "np is not equal to mp", np,mp
+      error stop 999
     end if
 
 
@@ -1441,11 +1442,11 @@ subroutine lonlat2mpx3time(ilon, jlat, varx3time_db, varmp2_db)
 
        if (ilon(np) < 1 .or. ilon(np) > nlon .or. &
            jlat(np) < 1 .or. jlat(np) > nlat) then
-           write(*,*) "ERROR in lonlat2mpx3a"
-           write(*,*) "np=", np
-           write(*,*) "ilon=", ilon(np), " valid range 1:", nlon
-           write(*,*) "jlat=", jlat(np), " valid range 1:", nlat
-           stop
+           write(stderr,*) "ERROR in lonlat2mpx3a"
+           write(stderr,*) "np=", np
+           write(stderr,*) "ilon=", ilon(np), " valid range 1:", nlon
+           write(stderr,*) "jlat=", jlat(np), " valid range 1:", nlat
+           error stop 999
        end if
 
        varmp2_db(np,:) = varx3time_db(ilon(np), jlat(np), :)
@@ -1472,11 +1473,11 @@ subroutine lonlat2mpx4b(ilon,jlat,xmin,xmax,xdef,varx4_db,varmp3_db)
     do np = 1, mp
        if (ilon(np) < 1 .or. ilon(np) > nlon .or. &
            jlat(np) < 1 .or. jlat(np) > nlat) then
-           write(*,*) "ERROR in lonlat2mpx4: invalid grid index"
-           write(*,*) "np=", np
-           write(*,*) "ilon=", ilon(np), " valid 1:", nlon
-           write(*,*) "jlat=", jlat(np), " valid 1:", nlat
-           stop
+           write(stderr,*) "ERROR in lonlat2mpx4: invalid grid index"
+           write(stderr,*) "np=", np
+           write(stderr,*) "ilon=", ilon(np), " valid 1:", nlon
+           write(stderr,*) "jlat=", jlat(np), " valid 1:", nlat
+           error stop 999
        end if
        varmp3_db(np,:,:) = varx4_db(ilon(np),jlat(np),:,:)
 
@@ -2188,8 +2189,8 @@ end subroutine lonlat2mpx4b
         read(13,*,end=91) year,c14del,sdx1,c14fm,sdx2
         ny = year - 1940
          if(ny<1 .or. ny>79) then
-            print *, "year", year, "outside the range"
-            stop
+            write(stderr, *) "year", year, "outside the range"
+            error stop 999
          else
             micparam%c14atm(ny,nz,1) = c14del !!! delta c14
             micparam%c14atm(ny,nz,2) = c14fm
@@ -2307,8 +2308,8 @@ end subroutine lonlat2mpx4b
        if(status /= nf90_noerr) print*,"Error reading soil texure"
        micglobal%isoil = ivarx1
     case default
-      write(6,"(a,i0,a)") "ERROR getdata_hwsd: Invalid model '", jmodel, "'"
-      stop 999
+      write(stderr,"(a,i0,a)") "ERROR getdata_hwsd: Invalid model '", jmodel, "'"
+      error stop 999
     end select
 
     status = nf90_inq_varid(ncid,"max_PFTfrac",varid)
@@ -2491,8 +2492,8 @@ end subroutine lonlat2mpx4b
        case (model_cable)
          ipft =  micglobal%pft(np)
          if(ipft<1 .or. ipft >17) then
-           write(6,"(a,i0,a,i0)") "PFT error for CABLE at ipft=", ipft, ", np=", np
-           stop
+           write(stderr,"(a,i0,a,i0)") "PFT error for CABLE at ipft=", ipft, ", np=", np
+           error stop 999
          end if
          micparam%xcnleaf(np)  = cnleaf1(ipft)
          micparam%xcnroot(np)  = cnroot1(ipft)
@@ -2503,8 +2504,8 @@ end subroutine lonlat2mpx4b
        case (model_orchidee)
          ipft =  micglobal%pft(np)
          if(ipft<1 .or. ipft >19) then
-           write(6,"(a,i0,a,i0)") "PFT error for ORCHIDEE at ipft=", ipft, ", np=", np
-           stop
+           write(stderr,"(a,i0,a,i0)") "PFT error for ORCHIDEE at ipft=", ipft, ", np=", np
+           error stop 999
          end if
          micparam%xcnleaf(np)  = cnleaf2(ipft)
          micparam%xcnroot(np)  = cnroot2(ipft)
@@ -2513,8 +2514,8 @@ end subroutine lonlat2mpx4b
          micparam%fligroot(np) = ligroot2(ipft)
          micparam%fligwood(np) = ligwood2(ipft)
        case default
-         write(6,"(a,i0,a)") "ERROR getdata_hwsd: Invalid model '", jmodel, "'"
-         stop 999
+         write(stderr,"(a,i0,a)") "ERROR getdata_hwsd: Invalid model '", jmodel, "'"
+         error stop 999
        end select
 
        nsocobs=0
