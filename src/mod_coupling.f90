@@ -28,7 +28,6 @@
 !!   not feed back into the LSM. (May change if nutrient coupling is added.)
 !! * Vertical layers retained: MESC's vertical soil resolution is kept.
 !! * RK4 retained as the ODE solver.
-!! * Only `kinetics=3` is supported.
 !! * Single interface: litter and SOM pools are advanced together by
 !!   [[mesc_step]] (i.e., litter/SOM entry points are not separated).
 !! * Minimal LSM-side changes: the LSM only passes inputs.
@@ -65,8 +64,6 @@ module mesc_coupling_module
 
   !> Number of days per forcing year. MESC forcing is cyclic over one year.
   integer, parameter :: nday_year = 365
-  !> Kinetics variant used for coupled runs. Only kinetics=3 is supported.
-  integer, parameter :: kinetics_coupled = 3
   !> 14C tracking is disabled for coupled runs.
   integer, parameter :: isoc14_coupled = 0
 
@@ -222,7 +219,7 @@ contains
     call getparam_global(fparam, rootdepth, state%micpxdef)
 
     ! Constant-in-time parameters (requires pft and bgctype to be set first)
-    call vmic_param_constant(kinetics_coupled, state%micpxdef, state%micpdef, &
+    call vmic_param_constant(state%micpxdef, state%micpdef, &
                              state%micparam, state%zse)
 
     ! Initial carbon pools: caller-supplied (e.g. from an offline spinup) or
@@ -315,7 +312,7 @@ contains
     cinput_prev = state%micoutput%fluxcinput(icell)
     rsoil_prev  = state%micoutput%fluxrsoil(icell)
 
-    call mesc_step(icell, doy, year, ny, kinetics_coupled, isoc14_coupled, state%zse, &
+    call mesc_step(icell, doy, year, ny, isoc14_coupled, state%zse, &
                    state%micpxdef, state%micpdef, state%micparam, state%micinput, &
                    state%micglobal, state%miccpool, state%micnpool, state%micoutput)
 
