@@ -1,0 +1,53 @@
+#!/bin/bash
+#SBATCH -J global-okd
+#SBATCH -p node
+#SBATCH -e slurm_%j.err
+#SBATCH -o slurm_%j.out
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+
+# Shell script for running the MESC test suite.
+# --------------------------------------------------
+# Load environment
+#
+# This will be specific to the machine you are working on and will need to be
+# completed by the user. For example:
+# ```
+module purge
+module load oneapi23u1   # load intel compiler
+module load netcdf_intel # load netcdf library
+# ```
+# --------------------------------------------------
+set -e
+# --------------------------------------------------
+# Set environment variables
+# --------------------------------------------------
+export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
+export OMP_PLACES=cores
+export OMP_PROC_BIND=close
+cd "${SLURM_SUBMIT_DIR}"
+
+# --------------------------------------------------
+# Remove old files
+# --------------------------------------------------
+rm -f -- *.txt mesc.nml
+
+# --------------------------------------------------
+# Run the global_orchidee case
+# --------------------------------------------------
+case_name="global_orchidee"
+echo "Running test case '${case_name}' "
+
+cp -- "./input/mesc_${case_name}.nml" mesc.nml
+START="$(date +%s)"
+./main >"outval_${case_name}.txt"
+DURATION="$(($(date +%s) - START))"
+echo "Time taken: ${DURATION} seconds"
+
+mv -- vmic_output.nc  "output/vmic_output_${case_name}.nc"
+mv -- miccpool_out.nc "output/miccpool_out_${case_name}.nc"
+mv -- "outval_${case_name}.txt" output/
+mv -- fort.91 "output/valsoc_91_${case_name}.txt"
+mv -- fort.92 "output/valsoc_92_${case_name}.txt"
+
+echo "===== Job finished of global_orchidee: $(date) ====="

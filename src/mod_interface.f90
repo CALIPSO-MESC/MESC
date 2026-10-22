@@ -23,7 +23,7 @@ module mesc_interface_module
   use mesc_variable_module, only: mic_param_xscale, mic_param_default, &
                                   mic_parameter, mic_input, mic_npool, &
                                   mic_cpool, mic_output, mic_global_input
-  use mesc_inout_module, only: vmic_restart_read
+  use mesc_inout_module, only: vmic_restart_read, vmic_output_write, vmic_restart_write
   use mesc_model_module, only: rk4modelx, bioturb, bgc_fractions, &
                                 mget, turnovert, desorpt, vmaxt, kmt
   implicit none
@@ -318,8 +318,9 @@ end subroutine variable_time
 !> time-varying forcing per station. Includes bioturbation and leaching. Parallelized
 !> over stations with OpenMP.
 !> See [[vmicsoil_c14]]
-subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bgcopt,nyeqpool, &
+subroutine vmicsoil_hwsd_cpu(jopt,jrestart,frestart_in,frestart_out,foutput,isoc14,bgcopt,nyeqpool, &
                              zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
+    logical,                 intent(in)    :: jopt         !! optimization flag (.false., .true.) for all points or selected bgctype
     integer,                 intent(in)    :: jrestart     !! restart flag (1=read restart file)
     character(len=140),      intent(in)    :: frestart_in  !! restart input filename
     character(len=140),      intent(in)    :: frestart_out !! restart output filename
@@ -356,7 +357,10 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bg
   station_count = 0
   allocate(stations_used(mp))
   do station_index=1,mp
-    if (micparam%bgctype(station_index)==bgcopt .and. micglobal%area(station_index)>0.0) then
+    if (.not. jopt .and. micglobal%area(station_index) > 0.0)   then
+      station_count = station_count + 1
+      stations_used(station_count) = station_index
+    else if (micparam%bgctype(station_index)==bgcopt .and. micglobal%area(station_index)>0.0) then
       stations_used(station_count+1) = station_index
       station_count = station_count + 1
     end if
@@ -390,10 +394,12 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bg
 
   end do ! station_index(station_count)
   !$OMP END DO
-
   !$OMP END PARALLEL
 
   miccpool%cpooleq(:,:,:) = miccpool%cpool(:,:,:)
+  call vmic_output_write(foutput,micinput,micoutput)
+  call vmic_restart_write(frestart_out,miccpool,micnpool)
+
 end subroutine vmicsoil_hwsd_cpu
 
 
