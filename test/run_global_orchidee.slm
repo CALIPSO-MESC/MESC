@@ -7,9 +7,13 @@
 #SBATCH --cpus-per-task=8
 
 # Shell script for running the MESC test suite.
-# --------------------------------------------------
+# -----------------------------------------------------------------------------
+# NOTE: You must modify the SBATCH options above to match your HPC system:
+#       -p: partition/queue name
+#       -A: your project/account code
+# These settings are site-specific and will not work unchanged on other clusters.
+# -----------------------------------------------------------------------------
 # Load environment
-#
 # This will be specific to the machine you are working on and will need to be
 # completed by the user. For example:
 # ```
