@@ -35,7 +35,7 @@ jobs:
   test-suite:
     name: ${{ matrix.FC }} ${{ matrix.version }}, ${{ matrix.std }}
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     # The timeout minutes for the job to complete
     timeout-minutes: 15
 
@@ -74,7 +74,8 @@ jobs:
 
       - name: Install NetCDF C library
         run: |
-          sudo apt-get install -y libnetcdf-dev netcdf-bin
+          sudo apt-get update
+          sudo apt-get install -y libnetcdff-dev libnetcdf-dev netcdf-bin
 
       - name: Build NetCDF Fortran with Intel compiler
         run: |
