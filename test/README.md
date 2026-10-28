@@ -13,28 +13,30 @@ short.
 
 You may wish to run the test suite over a full global data set rather than the
 small subset. If so, you will need to download the files named
-`data_extraction_cable_model_calibration_cluster_new.nc`
 
-`ORCHIDEE_time_invariant.nc`
+- `data_extraction_cable_model_calibration_cluster_new.nc`
 
-`hwsd_aoc_halfdeg.nc`
+- `ORCHIDEE_time_invariant.nc`
 
-`hwsd-soil-orchidee-cluster.nc`
+- `hwsd_aoc_halfdeg.nc`
 
-`ORCHIDEE_ave_1990_2020_time_varing_PFTave.nc` from [Google Drive](https://drive.google.com/drive/folders/1Od3GMuTzgwdi7wnynJZ9GZjPH768tq2A?usp=sharing).
+- `hwsd-soil-orchidee-cluster.nc`
+
+- `ORCHIDEE_ave_1990_2020_time_varing_PFTave.nc` 
+
+from [Google Drive](https://drive.google.com/drive/folders/1Od3GMuTzgwdi7wnynJZ9GZjPH768tq2A?usp=sharing).
 
 Put the downloaded NetCDF files into the `test/input` directory, renaming `data_extraction_cable_model_calibration_cluster_new.nc` to
 overwrite `data_extraction_cable_model_calibration_cluster_test.nc`.
 
 **Note** :
 
-`ORCHIDEE_time_invariant.nc`
+- `ORCHIDEE_time_invariant.nc`
+- `hwsd_aoc_halfdeg.nc`
+- `hwsd-soil-orchidee-cluster.nc`
+- `ORCHIDEE_ave_1990_2020_time_varing_PFTave.nc` 
 
-`hwsd_aoc_halfdeg.nc`
-
-`hwsd-soil-orchidee-cluster.nc`
-
-`ORCHIDEE_ave_1990_2020_time_varing_PFTave.nc` must exist under `test/input` to run global_orchidee.
+must exist under `test/input` to run global_orchidee.
 
 ### Step 2: Execute the program
 

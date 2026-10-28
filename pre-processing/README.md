@@ -1,4 +1,5 @@
 # Pre-processing for MESC
+
 Provider: Xinyu Zou (zouxinyu@igsnrr.ac.cn)
 Date: 2026.05
 
@@ -7,13 +8,15 @@ These scripts are primarily used for processing input data for the MESC model. T
 Most of the processing is performed using Python scripts, while data format conversion and spatial resolution resampling are performed using GDAL commands. Some variable merging tasks are completed using CDO and NCO commands.
 The two folders, cable and ORCHIDEE, correspond to the data processing for each respective model.
 
+## Code Structure
 
-## Code Structure 
 ```
 pre-processing/
     |——convert_scale.bash                                       #Resampling and format conversion (tif to netcdf) of HWSD soil property data
+    |——coarsen_cluster_mode.py                                  #Area-weighted dominant-cluster aggregation from 0.5° to 1.25° x 1.875°.
+    |——Cluster_comparsion.png                                   #Global soil cluster classification: before and after area-weighted modal aggregation
     |——available_USDASoilClass_mask.py                          #Generate filter masks for cable and ORCHIDEE
-    |——resample_USDA_SoilSuborder.py                            #Resample USDA SoilSuborder    
+    |——resample_USDA_SoilSuborder.py                            #Resample USDA SoilSuborder  
     |——cable/
         |——add_CABLE_HWSD_SOC.py                                #Add HWSD SOC variable to CABLE_Time_invariant_variables file；
         |——add_CABLE_HWSD_SOC_to_cluster.py                     #Add HWSD SOC variable to calibration_cluster file；
@@ -33,7 +36,7 @@ pre-processing/
         |——HWSD_soil_cable.py                                   #Replace CABLE original soil properties with HWSD soil properties；
         |——update_Al_Fe_Ca_Mg.py                                #Add iron, aluminum oxides, calcium, and magnesium；
         |——water_potential_cal_USDA_Texture_class.py            #Calculate water potential；
-    
+  
     |——ORCHIDEE/
         |——add_bulk_density.py                                  #Add bulk density derived from USDA Soil Texture Class lookup table；
         |——add_HWSD_SOC_to_cluster.py                           #Add HWSD SOC variable to calibration_cluster file；
@@ -50,10 +53,5 @@ pre-processing/
         |——HWSD_soil_ORCHIDEE.py                                #Replace ORHCIDEE original soil properties with HWSD soil properties；
         |——update_Al_Fe_Ca_Mg.py                                #Add iron, aluminum oxides, calcium, and magnesium；
         |——water_potential_cal_USDA_Texture_class_ORCHIDEE.py   #Calculate water potential；
-
-
-
-
-
-
-
+        
+```

@@ -2,3 +2,6 @@ netCDF4
 numpy
 pandas
 xarray
+h5py
+matplotlib
+scipy
