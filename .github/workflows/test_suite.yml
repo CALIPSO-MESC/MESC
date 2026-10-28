@@ -35,7 +35,7 @@ jobs:
   test-suite:
     name: ${{ matrix.FC }} ${{ matrix.version }}, ${{ matrix.std }}
     # The type of runner that the job will run on
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     # The timeout minutes for the job to complete
     timeout-minutes: 15
 

@@ -35,7 +35,7 @@ jobs:
     name: linting
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
 
@@ -87,7 +87,7 @@ jobs:
   # Apply GitHub Actions linter, zizmor
   zizmor:
     name: zizmor
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     # Terminate the job if it runs for more than 5 minutes
     timeout-minutes: 5
