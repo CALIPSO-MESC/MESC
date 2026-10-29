@@ -367,9 +367,9 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bg
   ! We print the progress over stations up to 80 characters
   print_frequency = max(floor(station_count / 80.0), 1)
   write(stdout,"('stations:')")
-  write(stdout,"('1')",advance='no')
+  write(stdout,"('1')",advance="no")
   do station_index=2, station_count / print_frequency - 1
-    write(stdout,"('.')", advance='no')
+    write(stdout,"('.')", advance="no")
   end do
   write(stdout,"(i0)") station_count
   write(stdout,"('progress:')")
