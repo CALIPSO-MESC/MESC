@@ -5,6 +5,7 @@
 !> fractions, HWSD soil carbon profiles, global HWSD data, and Australian
 !> soil carbon measurements.
 module mesc_calcost_module
+  use, intrinsic :: iso_fortran_env, only: stdout => output_unit
   use mesc_precision_module, only: dp
   use mesc_constant_module, only: mcpool, mp, ms
   use mesc_variable_module, only: mic_param_xscale, mic_param_default, &
@@ -99,8 +100,8 @@ module mesc_calcost_module
            micparam%c14soilobsm(np)= max(small,micparam%c14soilobsm(np))
 
            if (xmod(np) >= 1000.0 .or. xmodp(np) >= 1000.0 .or. xmodm(np) >= 1000.0) then
-               print *, "abnormal value of model simulation site=", micparam%siteid(np)
-               print *, "parameter values = ",  xopt(1:nx)
+               write(stdout,*) "abnormal value of model simulation site=", micparam%siteid(np)
+               write(stdout,*) "parameter values = ",  xopt(1:nx)
             !   stop
            end if
 
@@ -222,9 +223,9 @@ module mesc_calcost_module
            xobsfracm(np) = xobsm(np)/(xobsp(np)+xobsm(np)+1.0e-6)
 
            if (xmod(np) >= 1000.0 .or. xmodp(np) >= 1000.0 .or. xmodm(np) >= 1000.0) then
-               print *, "abnormal value of model simulation site=", micparam%siteid(np)
-               print *, "parameter values = ",  xopt(1:nx)
-               print *, xmodp(np),xmodm(np)
+               write(stdout,*) "abnormal value of model simulation site=", micparam%siteid(np)
+               write(stdout,*) "parameter values = ",  xopt(1:nx)
+               write(stdout,*) xmodp(np),xmodm(np)
             !   stop
             end if
 
@@ -329,10 +330,10 @@ module mesc_calcost_module
             xobs7(np,ns) = micparam%csoilobs(np,ns) * (1.0- micparam%fracaoc(np,ns))
             xmod7(np,ns) = xmod(np,ns)                                     ! gC/kg soil
             if(xmod7(np,ns) <0.0 .or. xmod7(np,ns) >1.0e3) then
-               print *, "abnormal value of model simulation site=", micparam%siteid(np)
-               print *, "parameter values = ",  xopt(1:nx)
-               print *,  xobs7(np,ns),xmod7(np,ns),xobs7(np,ns)-xmod7(np,ns)
-               print *, " modelled pool size= ", ns,1000.0 * miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
+               write(stdout,*) "abnormal value of model simulation site=", micparam%siteid(np)
+               write(stdout,*) "parameter values = ",  xopt(1:nx)
+               write(stdout,*)  xobs7(np,ns),xmod7(np,ns),xobs7(np,ns)-xmod7(np,ns)
+               write(stdout,*) " modelled pool size= ", ns,1000.0 * miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
                !stop
             end if
 
@@ -432,10 +433,10 @@ module mesc_calcost_module
            xmod7(np,ns) = xmod(np,ns)                                       ! gC/kg soil
 
             if(xmod7(np,ns) <0.0 .or. xmod7(np,ns) >1.0e3) then
-               print *, "abnormal value of model simulation site=", micparam%siteid(np)
-               print *, "parameter values = ",  xopt(1:nx)
-               print *,  xobs7(np,ns),xmod7(np,ns),xobs7(np,ns)-xmod7(np,ns)
-               print *, " modelled pool size= ", ns,miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
+               write(stdout,*) "abnormal value of model simulation site=", micparam%siteid(np)
+               write(stdout,*) "parameter values = ",  xopt(1:nx)
+               write(stdout,*)  xobs7(np,ns),xmod7(np,ns),xobs7(np,ns)-xmod7(np,ns)
+               write(stdout,*) " modelled pool size= ", ns,miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
                !stop
             end if
 
@@ -534,10 +535,10 @@ module mesc_calcost_module
          do ns = 1,msobs
 
             if(xmod(np,ns) <0.0 .or. xmod(np,ns) >1.0e3) then
-               print *, "abnormal value of model simulation site=", micparam%siteid(np)
-               print *, "parameter values = ",  xopt(1:nx)
-               print *,  xobs(np,ns),xmod(np,ns),xobs(np,ns)-xmod(np,ns)
-               print *, " modelled pool size= ", ns,1000.0*miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
+               write(stdout,*) "abnormal value of model simulation site=", micparam%siteid(np)
+               write(stdout,*) "parameter values = ",  xopt(1:nx)
+               write(stdout,*)  xobs(np,ns),xmod(np,ns),xobs(np,ns)-xmod(np,ns)
+               write(stdout,*) " modelled pool size= ", ns,1000.0*miccpool%cpooleq(np,ns,:)/micinput%bulkd(np,ns)
                !stop
             end if
 

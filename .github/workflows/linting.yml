@@ -61,7 +61,8 @@ jobs:
           python -m venv ../lint_venv
           . ../lint_venv/bin/activate
           pip install -r requirements-dev.txt
-          sudo apt install shellcheck
+          sudo apt-get update
+          sudo apt install -y shellcheck
 
       # Apply Shell linter, shellcheck
       - name: shellcheck
