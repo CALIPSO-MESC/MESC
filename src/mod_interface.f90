@@ -384,11 +384,13 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bg
 
    do station_index=1,station_count
 
+      !$OMP CRITICAL
       ! Print station progress to the screen
       if (mod(station_index, print_frequency) == 0) then
         write(stdout,"('%')", advance="no")
         call flush(stdout)
       end if
+      !$OMP END CRITICAL
 
       np=stations_used(station_index)
 
