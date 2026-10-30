@@ -61,6 +61,7 @@ for i in 0 1; do
     mv fort.92 "output/valsoc_92_${case}_${run}.txt"
     diff "benchmark/valsoc_92_${case}_${run}.txt" "output/valsoc_92_${case}_${run}.txt" >"output/diff_valsoc_92_${case}_${run}.txt"
   fi
+  rm -f mesc.nml
 done
 
 # --------------------------------------------------
@@ -93,5 +94,15 @@ for i in {0..1}; do
   fi
 done
 rm -f output/diff_*.txt
-rm -f mesc.nml
+
+# --------------------------------------------------
+# Run the mock LSM driver (coupling API test)
+# --------------------------------------------------
+echo "Running mock LSM driver (coupling API test)"
+if ./mock_lsm_driver >output/outval_mock_lsm.txt 2>&1; then
+  echo "PASS: mock LSM driver (coupling API)"
+else
+  echo "FAIL: mock LSM driver (coupling API) - see output/outval_mock_lsm.txt"
+fi
+
 echo "===== Job finished: $(date) ====="
