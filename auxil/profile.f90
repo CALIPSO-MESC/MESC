@@ -3253,7 +3253,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                   fluxsoc(:) = 0.0  ! This flux is added in "modelx"
                   diffsocxx= micparam%diffsocx(np)
 
-                  call bioturb(int(delty/delty),ms,zse,delty,diffsocxx,fluxsoc,ypooli,ypoole)  ! only do every 24*delt
+                  call bioturb(int(delty/delty),zse,diffsocxx,fluxsoc,ypooli,ypoole)  ! only do every 24*delt
 
                   do ns=1,ms
                      miccpool%cpool(np,ns,ip) = ypoole(ns)
