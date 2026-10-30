@@ -20,7 +20,7 @@
 module mesc_interface_module
   use, intrinsic :: iso_fortran_env, only: stdout => output_unit
   use mesc_precision_module, only: dp
-  use mesc_constant_module, only: diag, delt, mp, ms, mpft, mcpool, outp
+  use mesc_constant_module, only: diag, delt, delt_slow, mp, ms, mpft, mcpool, outp
   use mesc_variable_module, only: mic_param_xscale, mic_param_default, &
                                   mic_parameter, mic_input, mic_npool, &
                                   mic_cpool, mic_output, mic_global_input
@@ -467,11 +467,9 @@ end subroutine vmicsoil_hwsd_cpu
   ! Local variables
   real(dp), dimension(mcpool) :: xpool0, xpool1
   real(dp), dimension(ms)     :: ypooli, ypoole, fluxsoc, cfluxa
-  integer   :: ip, ns, ndelt
-  real(dp)  :: timex, delty, diffsocxx
+  integer   :: ip, ns
+  real(dp)  :: timex, diffsocxx
   real(dp)  :: cpool0, cpool1, totcinput
-
-  ndelt = int(24*365/delt)  ! number of time steps per year in "delt" units
 
     call variable_time(year, doy, micglobal, micinput, micnpool, np)
     ! calculate parameter values that depend on soil temperature or moisture (varying with time)
@@ -492,8 +490,7 @@ end subroutine vmicsoil_hwsd_cpu
 
       ! integration step: delty in rk4; ndelt is number of delt-steps per year
       timex = real(doy * delt)
-      delty = real(ndelt) / (365.0 * delt)  ! time step in "24*delt (daily)" units
-      call rk4modelx(timex, delty, ny, isoc14, np, ns, micpdef, micparam, micinput, xpool0, xpool1)
+      call rk4modelx(timex, delt_slow, ny, isoc14, np, ns, micpdef, micparam, micinput, xpool0, xpool1)
 
     do ip = 1, mcpool
       miccpool%cpool(np,ns,ip) = max(xpool1(ip), 1.0e-8)
@@ -527,7 +524,7 @@ end subroutine vmicsoil_hwsd_cpu
     end do
     fluxsoc(:) = 0.0
     diffsocxx = micparam%diffsocx(np)
-    call bioturb(int(delty/delty), ms, zse, delty, diffsocxx, fluxsoc, ypooli, ypoole)
+    call bioturb(int(delt_slow / delt_slow), zse, diffsocxx, fluxsoc, ypooli, ypoole)
     do ns = 1, ms
       miccpool%cpool(np,ns,ip) = ypoole(ns)
     end do
