@@ -487,7 +487,7 @@ end subroutine vmicsoil_hwsd_cpu
       cpool0     = cpool0 + xpool0(ip) * zse(ns) * 1000.0  ! mg C/cm3 -> g C/m2
     end do
 
-      ! integration step: delty in rk4; ndelt is number of delt-steps per year
+      ! integration step: delt_slow in rk4;
       call rk4modelx(ny, isoc14, np, ns, micpdef, micparam, micinput, xpool0, xpool1)
 
     do ip = 1, mcpool
@@ -496,14 +496,14 @@ end subroutine vmicsoil_hwsd_cpu
     end do
   end do ! ns
 
-  micoutput%fluxcinput(np) = micoutput%fluxcinput(np) + totcinput * real(delty)
-  micoutput%fluxrsoil(np)  = micoutput%fluxrsoil(np)  + totcinput * real(delty) + (cpool1 - cpool0)
+  micoutput%fluxcinput(np) = micoutput%fluxcinput(np) + totcinput * delt_slow
+  micoutput%fluxrsoil(np)  = micoutput%fluxrsoil(np)  + totcinput * delt_slow + (cpool1 - cpool0)
 
   ! bottom-layer DOC leaching (other layers handled via bioturbation)
   ! "tvac" is hourly; multiply by 24 to convert to daily rate
   cfluxa(:) = 0.0
   cfluxa(ms) = micparam%tvac(np,ms) * sqrt(micinput%wavg(np,ms) / micinput%porosity(np,ms)) &
-              * max(0.0_dp, miccpool%cpool(np,ms,7)) * delty * 24.0
+              * max(0.0_dp, miccpool%cpool(np,ms,7)) * delt_slow
   ! convert from mg C cm-3 delty-1 to g C m-2 delty-1
   micoutput%fluxcleach(np) = cfluxa(ms) * zse(ms) * 1000.0
   miccpool%cpool(np,ms,7)  = miccpool%cpool(np,ms,7) - cfluxa(ms)

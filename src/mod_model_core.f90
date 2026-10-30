@@ -3,7 +3,7 @@
 module mesc_model_module
   use, intrinsic :: iso_fortran_env, only: stdout => output_unit
   use mesc_precision_module, only: dp
-  use mesc_constant_module, only: diag, outp, mcpool, delt, delt_slow mp, ms, tvc14
+  use mesc_constant_module, only: diag, outp, mcpool, delt, delt_slow, mp, ms, tvc14
   use mesc_variable_module, only: mic_param_xscale, mic_param_default, &
                                   mic_parameter, mic_input, mic_npool
   implicit none
