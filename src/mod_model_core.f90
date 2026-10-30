@@ -3,7 +3,7 @@
 module mesc_model_module
   use, intrinsic :: iso_fortran_env, only: stdout => output_unit
   use mesc_precision_module, only: dp
-  use mesc_constant_module, only: diag, outp, mcpool, delt, mp, ms, tvc14
+  use mesc_constant_module, only: diag, outp, mcpool, delt, delt_slow mp, ms, tvc14
   use mesc_variable_module, only: mic_param_xscale, mic_param_default, &
                                   mic_parameter, mic_input, mic_npool
   implicit none
@@ -14,19 +14,17 @@ module mesc_model_module
 contains
 
  !> Fourth-order Runge-Kutta integrator for the soil C ODE system.
- subroutine rk4modelx(timex,delty,ny,isoc14,np,ns,micpdef,micparam,micinput,xpool0,xpool1)
+ subroutine rk4modelx(ny,isoc14,np,ns,micpdef,micparam,micinput,xpool0,xpool1)
      TYPE(mic_param_default), INTENT(IN)    :: micpdef           !! fixed model parameters
      TYPE(mic_parameter),     INTENT(IN)    :: micparam          !! computed model parameters
      TYPE(mic_input),         INTENT(IN)    :: micinput          !! environmental model inputs
      integer,                 INTENT(IN)    :: np,ns             !! grid point and layer indices
      integer,                 INTENT(IN)    :: ny,isoc14         !! model year and 14C flag
-     real(dp),               INTENT(IN)    :: timex             !! current simulation time
-     real(dp),               INTENT(IN)    :: delty             !! integration time step (hours)
      real(dp),   dimension(mcpool),intent(inout)     :: xpool0,xpool1  !! pool state: initial and updated (mg C/cm3)
     real(dp)    :: h
     real(dp),   dimension(mcpool)                   :: y1,y2,y3,y4,dy1dt,dy2dt,dy3dt,dy4dt
 
-     h=delty
+     h=delt_slow
      y1(:) = xpool0(:)
      call vmic_c(ny, isoc14, np, ns, micpdef, micparam, micinput, y1, dy1dt)
 
