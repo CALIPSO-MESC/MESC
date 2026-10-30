@@ -468,8 +468,7 @@ end subroutine vmicsoil_hwsd_cpu
   real(dp), dimension(mcpool) :: xpool0, xpool1
   real(dp), dimension(ms)     :: ypooli, ypoole, fluxsoc, cfluxa
   integer   :: ip, ns
-  real(dp)  :: timex, diffsocxx
-  real(dp)  :: cpool0, cpool1, totcinput
+  real(dp)  :: cpool0, cpool1, totcinput, diffsocxx
 
     call variable_time(year, doy, micglobal, micinput, micnpool, np)
     ! calculate parameter values that depend on soil temperature or moisture (varying with time)
@@ -489,8 +488,7 @@ end subroutine vmicsoil_hwsd_cpu
     end do
 
       ! integration step: delty in rk4; ndelt is number of delt-steps per year
-      timex = real(doy * delt)
-      call rk4modelx(timex, delt_slow, ny, isoc14, np, ns, micpdef, micparam, micinput, xpool0, xpool1)
+      call rk4modelx(ny, isoc14, np, ns, micpdef, micparam, micinput, xpool0, xpool1)
 
     do ip = 1, mcpool
       miccpool%cpool(np,ns,ip) = max(xpool1(ip), 1.0e-8)
