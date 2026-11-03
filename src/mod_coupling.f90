@@ -45,7 +45,8 @@
 !!   module-level variables shared by all of MESC.
 module mesc_coupling_module
   use mesc_precision_module, only: dp
-  use mesc_constant_module, only: mp, ms, mpft, mbgc, ntime, nlon, nlat, mcpool
+  use mesc_constant_module, only: mp, ms, mpft, mbgc, ntime, nlon, nlat, mcpool, &
+                                  ndays_max, ndays_ref
   use mesc_variable_module, only: mic_param_xscale, mic_param_default, &
                                   mic_parameter, mic_input, mic_npool, &
                                   mic_cpool, mic_output, mic_global_input, &
@@ -62,8 +63,6 @@ module mesc_coupling_module
   ! All module members are public by default
   public
 
-  !> Number of days per forcing year. MESC forcing is cyclic over one year.
-  integer, parameter :: nday_year = 365
   !> 14C tracking is disabled for coupled runs.
   integer, parameter :: isoc14_coupled = 0
 
@@ -166,7 +165,7 @@ contains
     ms    = nlev
     mpft  = npft
     mbgc  = nbgc
-    ntime = nday_year
+    ntime = ndays_max
     nlon  = 0   ! not used outside the standalone NetCDF loaders
     nlat  = 0
 
@@ -237,6 +236,7 @@ contains
     state%initialised = .true.
   end subroutine mesc_coupling_init
 
+
   !> Advance one grid cell by one day.
   !!
   !! Stages the LSM forcing for cell `icell` and day `doy` into the forcing
@@ -263,7 +263,7 @@ contains
                                 flux_cinput, flux_rsoil, flux_cleach)
     type(mesc_coupling_state), intent(inout) :: state       !! coupling state
     integer,                   intent(in)    :: icell       !! grid cell index (1..ncell)
-    integer,                   intent(in)    :: doy         !! day of year (1..365)
+    integer,                   intent(in)    :: doy         !! day of year (1..365/366)
     integer,                   intent(in)    :: year        !! simulation year counter (1-based)
     real(dp),                  intent(in)    :: litter_leaf !! leaf litterfall today [g C m-2 day-1]
     real(dp),                  intent(in)    :: litter_wood !! above-ground woody litterfall today [g C m-2 day-1]
@@ -285,8 +285,8 @@ contains
     if (icell < 1 .or. icell > state%ncell) then
       error stop "ERROR mesc_coupling_step: icell is outside 1:ncell"
     end if
-    if (doy < 1 .or. doy > nday_year) then
-      error stop "ERROR mesc_coupling_step: doy is outside 1:365"
+    if (doy < 1 .or. doy > state%micglobal%days_per_year) then
+      error stop "ERROR mesc_coupling_step: doy is outside 1:days_per_year"
     end if
 
     ! Reset year-to-date flux accumulators at the start of each year
@@ -359,7 +359,7 @@ contains
 
     call mic_deallocate_parameter(state%npft, state%nbgc, state%ncell, state%nlev, &
                                   state%micpxdef, state%micparam)
-    call mic_deallocate_input(state%ncell, state%nlev, nlon, nlat, nday_year, &
+    call mic_deallocate_input(state%ncell, state%nlev, nlon, nlat, ntime, &
                               state%micinput, state%micglobal)
     call mic_deallocate_output(state%ncell, state%micoutput)
     call mic_deallocate_cpool(state%ncell, state%nlev, state%miccpool)

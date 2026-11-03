@@ -2778,7 +2778,7 @@ end subroutine variable_time
                  ! here the integration step is "delty" in rk4 and "ndelt" is number of "delt (hour) per year
                   timex=real(i*delt)
                   delty = real(ndelt)/(365.0*delt)  ! time step in rk4 in "24 * delt (or daily)", all C input are in " per delt"
-                  call rk4modelx(timex,delty,ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,xpool0,xpool1)
+                  call rk4modelx(ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,xpool0,xpool1)
 
                   do ip=1,mcpool
                      miccpool%cpool(np,ns,ip) = max(xpool1(ip),1.0e-8)
@@ -2996,7 +2996,7 @@ end subroutine variable_time
                   timex=real(i*delt)
                   delty = real(ndelt)/(365.0*delt)  ! time step in rk4 in "24 * delt (or daily)", all C input are in " per delt"
 
-                  call rk4modelx(timex,delty,ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,xpool0,xpool1)
+                  call rk4modelx(ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,xpool0,xpool1)
 
                   do ip=1,mcpool
                      miccpool%cpool(np,ns,ip) = max(xpool1(ip),1.0e-8)
@@ -3203,7 +3203,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                  ! here the integration step is "delty" in rk4 and "ndelt" is number of "delt (hour) per year
                   timex=real(i*delt)
                   delty = real(ndelt)/(365.0*delt)  ! time step in rk4 in "24 * delt (or daily)", all C input are in " per delt"
-                  call rk4modelx(timex,delty,ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,xpool0,xpool1)
+                  call rk4modelx(ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,xpool0,xpool1)
 
                   do ip=1,mcpool
                      miccpool%cpool(np,ns,ip) = max(xpool1(ip),1.0e-8)
@@ -3253,7 +3253,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                   fluxsoc(:) = 0.0  ! This flux is added in "modelx"
                   diffsocxx= micparam%diffsocx(np)
 
-                  call bioturb(int(delty/delty),ms,zse,delty,diffsocxx,fluxsoc,ypooli,ypoole)  ! only do every 24*delt
+                  call bioturb(int(delty/delty),zse,diffsocxx,fluxsoc,ypooli,ypoole)  ! only do every 24*delt
 
                   do ns=1,ms
                      miccpool%cpool(np,ns,ip) = ypoole(ns)
@@ -3389,7 +3389,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,kinetics,
                   timex=real(i*delt)
                   delty = real(ndelt)/(365.0*delt)  ! time step in rk4 in "24 * delt (or daily)", all C input are in " per delt"
 
-                  call rk4modelx(timex,delty,ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,xpool0,xpool1)
+                  call rk4modelx(ny,isoc14,np,ns,kinetics,micpdef,micparam,micinput,xpool0,xpool1)
 
                   do ip=1,mcpool
                      miccpool%cpool(np,ns,ip) = max(xpool1(ip),1.0e-8)

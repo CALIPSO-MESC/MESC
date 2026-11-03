@@ -20,7 +20,8 @@
 module mesc_interface_module
   use, intrinsic :: iso_fortran_env, only: stdout => output_unit
   use mesc_precision_module, only: dp
-  use mesc_constant_module, only: diag, delt, mp, ms, mpft, mcpool, outp
+  use mesc_constant_module, only: diag, delt, delt_slow, mp, ms, mpft, mcpool, &
+                                  outp, ndays_ref
   use mesc_variable_module, only: mic_param_xscale, mic_param_default, &
                                   mic_parameter, mic_input, mic_npool, &
                                   mic_cpool, mic_output, mic_global_input
@@ -403,7 +404,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bg
       micoutput%fluxrsoil(np) = 0.0
       micoutput%fluxcleach(np) = 0.0
 
-         do i=1,365   !ntime
+         do i=1,ndays_ref
             call mesc_step(np, i, year, ny, isoc14, zse, &
                            micpxdef, micpdef, micparam, micinput, micglobal, &
                            miccpool, micnpool, micoutput)
@@ -438,7 +439,7 @@ end subroutine vmicsoil_hwsd_cpu
     integer,                     intent(in)    :: np
       !! patch index (1-based)
     integer,                     intent(in)    :: doy
-      !! day of year (1–365)
+      !! day of year (1–365/366)
     integer,                     intent(in)    :: year
       !! simulation year (1-based, used by [[variable_time]])
     integer,                     intent(in)    :: ny
@@ -467,11 +468,8 @@ end subroutine vmicsoil_hwsd_cpu
   ! Local variables
   real(dp), dimension(mcpool) :: xpool0, xpool1
   real(dp), dimension(ms)     :: ypooli, ypoole, fluxsoc, cfluxa
-  integer   :: ip, ns, ndelt
-  real(dp)  :: timex, delty, diffsocxx
-  real(dp)  :: cpool0, cpool1, totcinput
-
-  ndelt = int(24*365/delt)  ! number of time steps per year in "delt" units
+  integer   :: ip, ns
+  real(dp)  :: cpool0, cpool1, totcinput, diffsocxx
 
     call variable_time(year, doy, micglobal, micinput, micnpool, np)
     ! calculate parameter values that depend on soil temperature or moisture (varying with time)
@@ -490,10 +488,8 @@ end subroutine vmicsoil_hwsd_cpu
       cpool0     = cpool0 + xpool0(ip) * zse(ns) * 1000.0  ! mg C/cm3 -> g C/m2
     end do
 
-      ! integration step: delty in rk4; ndelt is number of delt-steps per year
-      timex = real(doy * delt)
-      delty = real(ndelt) / (365.0 * delt)  ! time step in "24*delt (daily)" units
-      call rk4modelx(timex, delty, ny, isoc14, np, ns, micpdef, micparam, micinput, xpool0, xpool1)
+      ! integration step: delt_slow in rk4;
+      call rk4modelx(ny, isoc14, np, ns, micpdef, micparam, micinput, xpool0, xpool1)
 
     do ip = 1, mcpool
       miccpool%cpool(np,ns,ip) = max(xpool1(ip), 1.0e-8)
@@ -501,14 +497,14 @@ end subroutine vmicsoil_hwsd_cpu
     end do
   end do ! ns
 
-  micoutput%fluxcinput(np) = micoutput%fluxcinput(np) + totcinput * real(delty)
-  micoutput%fluxrsoil(np)  = micoutput%fluxrsoil(np)  + totcinput * real(delty) + (cpool1 - cpool0)
+  micoutput%fluxcinput(np) = micoutput%fluxcinput(np) + totcinput * delt_slow
+  micoutput%fluxrsoil(np)  = micoutput%fluxrsoil(np)  + totcinput * delt_slow + (cpool1 - cpool0)
 
   ! bottom-layer DOC leaching (other layers handled via bioturbation)
   ! "tvac" is hourly; multiply by 24 to convert to daily rate
   cfluxa(:) = 0.0
   cfluxa(ms) = micparam%tvac(np,ms) * sqrt(micinput%wavg(np,ms) / micinput%porosity(np,ms)) &
-              * max(0.0_dp, miccpool%cpool(np,ms,7)) * delty * 24.0
+              * max(0.0_dp, miccpool%cpool(np,ms,7)) * delt_slow * 24.0
   ! convert from mg C cm-3 delty-1 to g C m-2 delty-1
   micoutput%fluxcleach(np) = cfluxa(ms) * zse(ms) * 1000.0
   miccpool%cpool(np,ms,7)  = miccpool%cpool(np,ms,7) - cfluxa(ms)
@@ -527,7 +523,7 @@ end subroutine vmicsoil_hwsd_cpu
     end do
     fluxsoc(:) = 0.0
     diffsocxx = micparam%diffsocx(np)
-    call bioturb(int(delty/delty), ms, zse, delty, diffsocxx, fluxsoc, ypooli, ypoole)
+    call bioturb(int(delt_slow / delt_slow), zse, diffsocxx, fluxsoc, ypooli, ypoole)
     do ns = 1, ms
       miccpool%cpool(np,ns,ip) = ypoole(ns)
     end do
