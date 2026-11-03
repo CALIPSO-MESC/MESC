@@ -36,7 +36,6 @@ program mock_lsm_driver
                                   cnroot2, ligleaf2, ligwood2, ligroot2,   &
                                   ndays_max, ndays_ref
   use mesc_coupling_module, only : mesc_coupling_state, &
-                                   update_days_per_year, &
                                    mesc_coupling_init, mesc_coupling_step, &
                                    mesc_coupling_get_cpool, &
                                    mesc_coupling_finalize
