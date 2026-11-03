@@ -20,7 +20,8 @@
 module mesc_interface_module
   use, intrinsic :: iso_fortran_env, only: stdout => output_unit
   use mesc_precision_module, only: dp
-  use mesc_constant_module, only: diag, delt, delt_slow, mp, ms, mpft, mcpool, outp
+  use mesc_constant_module, only: diag, delt, delt_slow, mp, ms, mpft, mcpool, &
+                                  outp, ndays_ref
   use mesc_variable_module, only: mic_param_xscale, mic_param_default, &
                                   mic_parameter, mic_input, mic_npool, &
                                   mic_cpool, mic_output, mic_global_input
@@ -403,7 +404,7 @@ subroutine vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bg
       micoutput%fluxrsoil(np) = 0.0
       micoutput%fluxcleach(np) = 0.0
 
-         do i=1,365   !ntime
+         do i=1,ndays_ref
             call mesc_step(np, i, year, ny, isoc14, zse, &
                            micpxdef, micpdef, micparam, micinput, micglobal, &
                            miccpool, micnpool, micoutput)
@@ -438,7 +439,7 @@ end subroutine vmicsoil_hwsd_cpu
     integer,                     intent(in)    :: np
       !! patch index (1-based)
     integer,                     intent(in)    :: doy
-      !! day of year (1–365)
+      !! day of year (1–365/366)
     integer,                     intent(in)    :: year
       !! simulation year (1-based, used by [[variable_time]])
     integer,                     intent(in)    :: ny
@@ -503,7 +504,7 @@ end subroutine vmicsoil_hwsd_cpu
   ! "tvac" is hourly; multiply by 24 to convert to daily rate
   cfluxa(:) = 0.0
   cfluxa(ms) = micparam%tvac(np,ms) * sqrt(micinput%wavg(np,ms) / micinput%porosity(np,ms)) &
-              * max(0.0_dp, miccpool%cpool(np,ms,7)) * delt_slow
+              * max(0.0_dp, miccpool%cpool(np,ms,7)) * delt_slow * 24.0
   ! convert from mg C cm-3 delty-1 to g C m-2 delty-1
   micoutput%fluxcleach(np) = cfluxa(ms) * zse(ms) * 1000.0
   miccpool%cpool(np,ms,7)  = miccpool%cpool(np,ms,7) - cfluxa(ms)

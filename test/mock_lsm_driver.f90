@@ -33,8 +33,10 @@ program mock_lsm_driver
   use, intrinsic :: ieee_arithmetic, only : ieee_is_finite
   use mesc_precision_module, only: dp
   use mesc_constant_module, only: mcpool, xrootorchidee, cnleaf2, cnwood2, &
-                                  cnroot2, ligleaf2, ligwood2, ligroot2
-  use mesc_coupling_module, only : mesc_coupling_state, nday_year, &
+                                  cnroot2, ligleaf2, ligwood2, ligroot2,   &
+                                  ndays_max, ndays_ref
+  use mesc_coupling_module, only : mesc_coupling_state, &
+                                   update_days_per_year, &
                                    mesc_coupling_init, mesc_coupling_step, &
                                    mesc_coupling_get_cpool, &
                                    mesc_coupling_finalize
@@ -59,7 +61,7 @@ program mock_lsm_driver
   integer,  parameter :: grid_pft(ncell) = [2, 6, 7, 10]
     !! dominant PFT per cell (tropical/temperate/boreal forest, grassland)
   real(dp), parameter :: grid_npp(ncell) = [1200.0_dp, 650.0_dp, 350.0_dp, 180.0_dp]
-    !! annual NPP per cell [g C m-2 yr-1]
+    !! annual (365 days) NPP per cell [g C m-2 yr-1]
   real(dp), parameter :: grid_clay(ncell) = [0.35_dp, 0.22_dp, 0.15_dp, 0.25_dp]
   real(dp), parameter :: grid_silt(ncell) = [0.30_dp, 0.35_dp, 0.25_dp, 0.30_dp]
   real(dp), parameter :: grid_ph(ncell) = [5.2_dp, 6.5_dp, 4.8_dp, 7.8_dp]
@@ -106,7 +108,7 @@ program mock_lsm_driver
   real(dp) :: pools(nlev, mcpool)
   real(dp) :: run_a_final(ncell, nlev, mcpool)  !! pool state at end of run A
   real(dp) :: snapshot(ncell, nlev, mcpool)     !! pool state after year nyear_restart
-  real(dp) :: leaf_weight(ncell, nday_year)     !! normalised leaf litter seasonality [1]
+  real(dp) :: leaf_weight(ncell, ndays_max)     !! normalised leaf litter seasonality [1]
   real(dp) :: ytd_cinput(ncell), ytd_rsoil(ncell), ytd_cleach(ncell)
   real(dp) :: litter_leaf, litter_wood, litter_root
   real(dp) :: tsoil(nlev), moist(nlev), matpot(nlev)
@@ -147,7 +149,11 @@ program mock_lsm_driver
     ytd_rsoil(:) = 0.0_dp
     ytd_cleach(:) = 0.0_dp
 
-    do doy = 1, nday_year
+    ! check for leap year (starting from 1 here, so 4,8,12 ... are leap years)
+    state%micglobal%leap_year  = mod(year,4)==0
+    state%micglobal%days_per_year = merge(ndays_max, ndays_ref, state%micglobal%leap_year)
+
+    do doy = 1, state%micglobal%days_per_year
       do icell = 1, ncell
         call daily_forcing(icell, doy, litter_leaf, litter_wood, litter_root, &
                            tsoil, moist, matpot)
@@ -213,7 +219,11 @@ program mock_lsm_driver
                           grid_isoil, grid_sorder, grid_bgctype, cpool0=snapshot)
 
   do year = nyear_restart + 1, nyears
-    do doy = 1, nday_year
+    ! check for leap year (starting from 1 here, so 4,8,12 ... are leap years)
+    state%micglobal%leap_year  = mod(year,4)==0
+    state%micglobal%days_per_year = merge(ndays_max, ndays_ref, state%micglobal%leap_year)
+
+    do doy = 1, state%micglobal%days_per_year
       do icell = 1, ncell
         call daily_forcing(icell, doy, litter_leaf, litter_wood, litter_root, &
                            tsoil, moist, matpot)
@@ -260,19 +270,20 @@ contains
   !> Precompute the normalised leaf-litter seasonality weights for each cell.
   !!
   !! A wrapped Gaussian (peak day `lday_peak`, spread `lday_spread`) is used,
-  !! normalised so that the weights sum to one over the year. Root and wood
+  !! normalised so that the weights sum to one over a reference year. Leap years
+  !! receive an extra day of leaf-litter by design. Root and wood
   !! litterfall are distributed uniformly over the year (see [[daily_forcing]]).
   subroutine setup_litter_weights()
     integer  :: jcell, jday
     real(dp) :: dist
 
     do jcell = 1, ncell
-      do jday = 1, nday_year
+      do jday = 1, ndays_max
         dist = abs(real(jday, dp) - lday_peak(jcell))
-        dist = min(dist, real(nday_year, dp) - dist)  ! periodic distance
+        dist = min(dist, real(ndays_ref, dp) - dist)  ! periodic distance
         leaf_weight(jcell, jday) = exp(-0.5_dp * (dist / lday_spread(jcell))**2)
       end do
-      leaf_weight(jcell, :) = leaf_weight(jcell, :) / sum(leaf_weight(jcell, :))
+      leaf_weight(jcell, :) = leaf_weight(jcell, :) / sum(leaf_weight(jcell, 1:ndays_ref))
     end do
   end subroutine setup_litter_weights
 
@@ -283,12 +294,12 @@ contains
   !! potential is tied to the moisture anomaly. Leaf litterfall follows the
   !! precomputed seasonal weights; root litterfall (kept strictly positive so
   !! that the litter C:N partitioning in MESC stays well-defined) and wood
-  !! litterfall are uniform over the year. Annual totals equal the per-cell
-  !! NPP by construction.
+  !! litterfall are uniform over the year. Annual totals over a 365 reference 
+  !! year equal the per-cell NPP by construction.
   subroutine daily_forcing(jcell, jday, dlit_leaf, dlit_wood, dlit_root, &
                            dtsoil, dmoist, dmatpot)
     integer,  intent(in)  :: jcell     !! grid cell index
-    integer,  intent(in)  :: jday      !! day of year (1..365)
+    integer,  intent(in)  :: jday      !! day of year (1..365/366)
     real(dp), intent(out) :: dlit_leaf !! leaf litterfall today [g C m-2 day-1]
     real(dp), intent(out) :: dlit_wood !! wood litterfall today [g C m-2 day-1]
     real(dp), intent(out) :: dlit_root !! root litterfall today [g C m-2 day-1]
@@ -300,15 +311,15 @@ contains
     real(dp) :: phase, swc
 
     dlit_leaf = frac_leaf(jcell) * grid_npp(jcell) * leaf_weight(jcell, jday)
-    dlit_wood = frac_wood(jcell) * grid_npp(jcell) / real(nday_year, dp)
-    dlit_root = frac_root(jcell) * grid_npp(jcell) / real(nday_year, dp)
+    dlit_wood = frac_wood(jcell) * grid_npp(jcell) / real(ndays_ref, dp)
+    dlit_root = frac_root(jcell) * grid_npp(jcell) / real(ndays_ref, dp)
 
-    phase = 2.0_dp * pi * (real(jday, dp) - tday_peak(jcell)) / real(nday_year, dp)
+    phase = 2.0_dp * pi * (real(jday, dp) - tday_peak(jcell)) / real(ndays_ref, dp)
     do ns = 1, nlev
       dtsoil(ns) = tsoil_mean(jcell) + tsoil_amp(jcell) * cos(phase) * depth_damp(ns)
     end do
 
-    phase = 2.0_dp * pi * (real(jday, dp) - mday_peak(jcell)) / real(nday_year, dp)
+    phase = 2.0_dp * pi * (real(jday, dp) - mday_peak(jcell)) / real(ndays_ref, dp)
     swc = moist_mean(jcell) + moist_amp(jcell) * cos(phase)
     swc = min(0.75_dp, max(0.05_dp, swc))
     dmoist(:) = swc

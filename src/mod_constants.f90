@@ -10,6 +10,8 @@ module mesc_constant_module
   integer,  parameter :: outp=1           !! output site index
   integer             :: mp               !! number of sites the model runs for
   integer             :: ntime            !! number of time steps
+  integer,  parameter :: ndays_ref=365    !! reference number of days per year (non-leap year)
+  integer,  parameter :: ndays_max=366    !! maximum number of days per year (leap year)
   integer             :: mpft             !! number of PFTs (17 for CABLE, 19 for ORCHIDEE)
   integer             :: mbgc             !! number of soil categories
   integer             :: ms               !! number of soil layers
