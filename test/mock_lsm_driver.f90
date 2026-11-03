@@ -293,7 +293,7 @@ contains
   !! potential is tied to the moisture anomaly. Leaf litterfall follows the
   !! precomputed seasonal weights; root litterfall (kept strictly positive so
   !! that the litter C:N partitioning in MESC stays well-defined) and wood
-  !! litterfall are uniform over the year. Annual totals over a 365 reference 
+  !! litterfall are uniform over the year. Annual totals over a 365 reference
   !! year equal the per-cell NPP by construction.
   subroutine daily_forcing(jcell, jday, dlit_leaf, dlit_wood, dlit_root, &
                            dtsoil, dmoist, dmatpot)
