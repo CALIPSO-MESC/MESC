@@ -7,8 +7,6 @@
 module mesc_function_module
   use, intrinsic :: iso_fortran_env, only: stderr => error_unit, &
                                            stdout => output_unit
-  use, intrinsic :: iso_fortran_env, only: stderr => error_unit, &
-                                           stdout => output_unit
   use mesc_precision_module, only: dp
   use mesc_constant_module, only: mp, mpft, mbgc, ntime, nlon, nlat, ms, &
                                   xrootcable, xrootorchidee
