@@ -244,49 +244,149 @@ contains
 
   end subroutine vmic_output_write
 
-  !> Get PFT-dependent model parameter values (up to 20 parameters)
+  !> Get PFT-dependent model parameter values (up to 20 parameters) from NetCDF file
+  !! input:  fglobalparam, rootdepth(mpft)
+  !! output: micpxdef%xav, micpxdef%xak, micpxdef%xfm, micpxdef%xfs, micpxdef%xtvmic, &
+  !!         micpxdef%xtvp, micpxdef%xtvc, micpxdef%xtvac, micpxdef%xkba, micpxdef%xqmaxcoeff, &
+  !!         micpxdef%xdiffsoc, micpxdef%xnpp, micpxdef%xrootbeta, micpxdef%xvmaxbeta
   subroutine getparam_global(fglobalparam,rootdepth,micpxdef)
 
     character(len=140),     intent(in)    :: fglobalparam
-      !! Parameter filename (currently hard-coded to "parameters_global.csv")
+      !! Parameter filename (NetCDF: global_parameter_orchidee.nc)
     real(dp), dimension(:), intent(in)    :: rootdepth
       !! Per-PFT rooting depths [m] (size mpft). In standalone mode pass xrootcable or
       !! xrootorchidee from mod_constants.f90; for online coupling ORCHIDEE supplies this.
-    TYPE(mic_param_xscale), intent(inout) :: micpxdef
+    type(mic_param_xscale), intent(inout) :: micpxdef
       !! Object holding parameter values
 
     ! Local variables
-    integer                 :: ibgc,ipft,n
-    real(dp), dimension(14) :: x
+    integer :: ibgc, ipft, status, ncid, dimid, varid, n_orchidee
+    real(dp), allocatable :: xav(:), xak(:), xfm(:), xfs(:), xtvmic(:), xtvp(:), &
+                             xtvc(:), xtvac(:), xkba(:), xqmax(:), xdiffdoc(:), &
+                             xnpp(:), xrootbeta(:), xvmaxbeta(:)
 
-    open(100,file=fglobalparam)
-    read(100,*)
-    do ibgc=1,mbgc
-       read(100,*) ipft, (x(n),n=1,14)
-       ! ensure x(1:16) are consistent with "vmic_param_xscale"
-       micpxdef%xav(ibgc)        = x(1)
-       micpxdef%xak(ibgc)        = x(2)
-       micpxdef%xfm(ibgc)        = x(3)
-       micpxdef%xfs(ibgc)        = x(4)
-       micpxdef%xtvmic(ibgc)     = x(5)
-       micpxdef%xtvp(ibgc)       = x(6)
-       micpxdef%xtvc(ibgc)       = x(7)
-       micpxdef%xtvac(ibgc)      = x(8)
-       micpxdef%xkba(ibgc)       = x(9)
-       micpxdef%xqmaxcoeff(ibgc) = x(10)
-       micpxdef%xdiffsoc(ibgc)   = x(11)
-       micpxdef%xnpp(ibgc)       = x(12)
-       micpxdef%xvmaxbeta(ibgc)  = x(14)
-       ! the following parameters are fixed to 1.0
+    ! ---- open nc ----
+    status = nf90_open(trim(fglobalparam), nf90_nowrite, ncid)
+    if (status /= nf90_noerr) call nc_abort(status, "Error opening "//trim(fglobalparam))
+
+    ! ---- get dimension 'orchidee' ----
+    status = nf90_inq_dimid(ncid, "orchidee", dimid)
+    if (status /= nf90_noerr) call nc_abort(status, "Error inquiring dim orchidee")
+    status = nf90_inquire_dimension(ncid, dimid, len=n_orchidee)
+    if (status /= nf90_noerr) call nc_abort(status, "Error reading dim orchidee")
+
+    if (n_orchidee /= mbgc) then
+       write(*,*) "ERROR getparam_global: n_orchidee=", n_orchidee, &
+                  " /= mbgc=", mbgc
+       stop 1
+    end if
+
+    ! ---- allocate ----
+    allocate(xav(n_orchidee), xak(n_orchidee), xfm(n_orchidee), xfs(n_orchidee), &
+             xtvmic(n_orchidee), xtvp(n_orchidee), xtvc(n_orchidee), xtvac(n_orchidee), &
+             xkba(n_orchidee), xqmax(n_orchidee), xdiffdoc(n_orchidee), &
+             xnpp(n_orchidee), xrootbeta(n_orchidee), xvmaxbeta(n_orchidee))
+
+    ! ---- read all 14 params ----
+    status = nf90_inq_varid(ncid,"xav",varid)
+    if(status /= nf90_noerr) call nc_abort(status,"Error inquiring xav")
+    status = nf90_get_var(ncid,varid,xav)
+    if(status /= nf90_noerr) call nc_abort(status,"Error reading xav")
+
+    status = nf90_inq_varid(ncid,"xak",varid)
+    if(status /= nf90_noerr) call nc_abort(status,"Error inquiring xak")
+    status = nf90_get_var(ncid,varid,xak)
+    if(status /= nf90_noerr) call nc_abort(status,"Error reading xak")
+
+    status = nf90_inq_varid(ncid,"xfm",varid)
+    if(status /= nf90_noerr) call nc_abort(status,"Error inquiring xfm")
+    status = nf90_get_var(ncid,varid,xfm)
+    if(status /= nf90_noerr) call nc_abort(status,"Error reading xfm")
+
+    status = nf90_inq_varid(ncid,"xfs",varid)
+    if(status /= nf90_noerr) call nc_abort(status,"Error inquiring xfs")
+    status = nf90_get_var(ncid,varid,xfs)
+    if(status /= nf90_noerr) call nc_abort(status,"Error reading xfs")
+
+    status = nf90_inq_varid(ncid,"xtvmic",varid)
+    if(status /= nf90_noerr) call nc_abort(status,"Error inquiring xtvmic")
+    status = nf90_get_var(ncid,varid,xtvmic)
+    if(status /= nf90_noerr) call nc_abort(status,"Error reading xtvmic")
+
+    status = nf90_inq_varid(ncid,"xtvp",varid)
+    if(status /= nf90_noerr) call nc_abort(status,"Error inquiring xtvp")
+    status = nf90_get_var(ncid,varid,xtvp)
+    if(status /= nf90_noerr) call nc_abort(status,"Error reading xtvp")
+
+    status = nf90_inq_varid(ncid,"xtvc",varid)
+    if(status /= nf90_noerr) call nc_abort(status,"Error inquiring xtvc")
+    status = nf90_get_var(ncid,varid,xtvc)
+    if(status /= nf90_noerr) call nc_abort(status,"Error reading xtvc")
+
+    status = nf90_inq_varid(ncid,"xtvac",varid)
+    if(status /= nf90_noerr) call nc_abort(status,"Error inquiring xtvac")
+    status = nf90_get_var(ncid,varid,xtvac)
+    if(status /= nf90_noerr) call nc_abort(status,"Error reading xtvac")
+
+    status = nf90_inq_varid(ncid,"xkba",varid)
+    if(status /= nf90_noerr) call nc_abort(status,"Error inquiring xkba")
+    status = nf90_get_var(ncid,varid,xkba)
+    if(status /= nf90_noerr) call nc_abort(status,"Error reading xkba")
+
+    status = nf90_inq_varid(ncid,"xqmax",varid)
+    if(status /= nf90_noerr) call nc_abort(status,"Error inquiring xqmax")
+    status = nf90_get_var(ncid,varid,xqmax)
+    if(status /= nf90_noerr) call nc_abort(status,"Error reading xqmax")
+
+    status = nf90_inq_varid(ncid,"xdiffdoc",varid)
+    if(status /= nf90_noerr) call nc_abort(status,"Error inquiring xdiffdoc")
+    status = nf90_get_var(ncid,varid,xdiffdoc)
+    if(status /= nf90_noerr) call nc_abort(status,"Error reading xdiffdoc")
+
+    status = nf90_inq_varid(ncid,"xnpp",varid)
+    if(status /= nf90_noerr) call nc_abort(status,"Error inquiring xnpp")
+    status = nf90_get_var(ncid,varid,xnpp)
+    if(status /= nf90_noerr) call nc_abort(status,"Error reading xnpp")
+
+    status = nf90_inq_varid(ncid,"xrootbeta",varid)
+    if(status /= nf90_noerr) call nc_abort(status,"Error inquiring xrootbeta")
+    status = nf90_get_var(ncid,varid,xrootbeta)
+    if(status /= nf90_noerr) call nc_abort(status,"Error reading xrootbeta")
+
+    status = nf90_inq_varid(ncid,"xvmaxbeta",varid)
+    if(status /= nf90_noerr) call nc_abort(status,"Error inquiring xvmaxbeta")
+    status = nf90_get_var(ncid,varid,xvmaxbeta)
+    if(status /= nf90_noerr) call nc_abort(status,"Error reading xvmaxbeta")
+
+    status = nf90_close(ncid)
+    if (status /= nf90_noerr) call nc_abort(status, "Error closing "//trim(fglobalparam))
+
+    ! ---- assign to micpxdef (ibgc=1..mbgc) ----
+    do ibgc = 1, mbgc
+       micpxdef%xav(ibgc)        = xav(ibgc)
+       micpxdef%xak(ibgc)        = xak(ibgc)
+       micpxdef%xfm(ibgc)        = xfm(ibgc)
+       micpxdef%xfs(ibgc)        = xfs(ibgc)
+       micpxdef%xtvmic(ibgc)     = xtvmic(ibgc)
+       micpxdef%xtvp(ibgc)       = xtvp(ibgc)
+       micpxdef%xtvc(ibgc)       = xtvc(ibgc)
+       micpxdef%xtvac(ibgc)      = xtvac(ibgc)
+       micpxdef%xkba(ibgc)       = xkba(ibgc)
+       micpxdef%xqmaxcoeff(ibgc) = xqmax(ibgc)
+       micpxdef%xdiffsoc(ibgc)   = xdiffdoc(ibgc)
+       micpxdef%xnpp(ibgc)       = xnpp(ibgc)
+       micpxdef%xvmaxbeta(ibgc)  = xvmaxbeta(ibgc)
        micpxdef%xfp2ax(ibgc)     = 1.0
        micpxdef%xbeta(ibgc)      = 1.0
        micpxdef%xdesorp(ibgc)    = 1.0
     end do
-    close(100)
 
-    do ipft=1,mpft
+    do ipft = 1, mpft
        micpxdef%xrootbeta(ipft) = rootdepth(ipft)
     end do
+
+    deallocate(xav,xak,xfm,xfs,xtvmic,xtvp,xtvc,xtvac,xkba,xqmax,xdiffdoc,xnpp,xrootbeta,xvmaxbeta)
+
   end subroutine getparam_global
 
   !> get number of patches

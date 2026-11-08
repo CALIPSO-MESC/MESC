@@ -34,8 +34,8 @@
     fglobal(1)='./input/ORCHIDEE_time_invariant.nc'
     fglobal(2)='./input/ORCHIDEE_ave_1990_2020_time_varing_PFTave.nc'
     fglobal(3)='./input/hwsd-soil-orchidee-cluster.nc'
-    fglobal(4)='./input/global_parameter_orchidee.txt'
-    fglobal(5)='./output/global_inputdata_orchidee.txt'
+    fglobal(4)='./input/global_parameter_orchidee.nc'
+    fglobal(5)='./output/global_inputdata_orchidee.nc'
     fglobal(6)='./input/MODIS_npp_2001-2009_0.5d.nc'
     fglobal(7)='./input/hwsd_aoc_halfdeg.nc'
 

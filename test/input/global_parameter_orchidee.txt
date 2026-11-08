@@ -1,4 +1,5 @@
-orchidee        cluster xav         xak     xfm     xfs     xtvmic      xtvp    xtvc    xtvac   xkba    xqmax   xdiffdoc        xnpp    xrootbeta       xvmaxbeta
+! This file contains the global ORCHIDEE parameters.
+cluster xav         xak     xfm     xfs     xtvmic      xtvp    xtvc    xtvac   xkba    xqmax   xdiffdoc        xnpp    xrootbeta       xvmaxbeta
 1   7.853 9.9900 1.0000 1.0000 0.1950 8.9020 17.276 1.0000 1.0000 5.483 1.0000 1.0000 1.0000 1.7620
 2  82.683 3.0240 1.0000 1.0000 2.4760 2.6790 19.861 1.0000 1.0000 9.987 1.0000 1.0000 1.0000 1.4950
 3   0.767 3.1960 1.0000 1.0000 1.4170 8.5100 6.910 1.0000 1.0000 4.292 1.0000 1.0000 1.0000 1.9120

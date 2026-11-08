@@ -12,46 +12,46 @@ The two folders, cable and ORCHIDEE, correspond to the data processing for each 
 
 ```
 pre-processing/
-    |——convert_scale.bash                                       #Resampling and format conversion (tif to netcdf) of HWSD soil property data
-    |——coarsen_cluster_mode.py                                  #Area-weighted dominant-cluster aggregation from 0.5° to 1.25° x 1.875°.
-    |——Cluster_comparsion.png                                   #Global soil cluster classification: before and after area-weighted modal aggregation
-    |——available_USDASoilClass_mask.py                          #Generate filter masks for cable and ORCHIDEE
-    |——resample_USDA_SoilSuborder.py                            #Resample USDA SoilSuborder  
+    |——convert_scale.bash                                       # Resampling and format conversion (tif to netcdf) of HWSD soil property data
+    |——coarsen_cluster_mode.py                                  # Area-weighted dominant-cluster aggregation from 0.5° to 1.25° x 1.875°.
+    |——Cluster_comparsion.png                                   # Global soil cluster classification: before and after area-weighted modal aggregation
+    |——available_USDASoilClass_mask.py                          # Generate filter masks for cable and ORCHIDEE
+    |——resample_USDA_SoilSuborder.py                            # Resample USDA SoilSuborder  
+    |——global_parameter_orchidee_txt2nc.py                      # Convert global orhidee parameter txt file -2-> Netcdf file   
     |——cable/
-        |——add_CABLE_HWSD_SOC.py                                #Add HWSD SOC variable to CABLE_Time_invariant_variables file；
-        |——add_CABLE_HWSD_SOC_to_cluster.py                     #Add HWSD SOC variable to calibration_cluster file；
-        |——average_PFT.py                                       #Merge all variables by weighted average based on PFT fraction；
-        |——cal_lignin_c.py                                      #Map lignin values from lookup table to spatial grid by PFT；
-        |——convert_cable_soil_layer_to_HWSD.py                  #Convert CABLE soil layers to HWSD soil layer depths；
-        |——convert_npp_unit.py                                  #Convert NPP units；
-        |——convert_patch_to_PFT.py                              #Reshape CABLE patch dimension to PFT dimension；
-        |——convert_patch_to_PFT_lignin.py                       #Reshape CABLE patch-dimension lignin to PFT dimension；
-        |——convert_pnt_to_PFT_CN_ratio.py                       #Reshape CABLE pnt-dimension CN_ratio to PFT dimension；
-        |——convert_pnt_to_PFT_litter_fall.py                    #Reshape CABLE pnt-dimension litter-related variables to PFT dimension；
-        |——convert_pnt_to_PFT_litter_leaf_root_wood.py          #Reshape CABLE pnt-dimension litter-related variables to PFT dimension(other)；
-        |——convert_pnt_to_PFT_npp_Fluxtolitter.py               #Reshape CABLE pnt-dimension NPP-related variables to PFT dimension；
-        |——data_extraction_cable_model_calibration.py           #Extract grid-cell variables to point samples based on filter mask；
-        |——data_extraction_cable_model_calibration_check.py     #Check units and value ranges of point-sample variables；
-        |——fill_nan.py                                          #Replace NaN values with -99999；
-        |——HWSD_soil_cable.py                                   #Replace CABLE original soil properties with HWSD soil properties；
-        |——update_Al_Fe_Ca_Mg.py                                #Add iron, aluminum oxides, calcium, and magnesium；
-        |——water_potential_cal_USDA_Texture_class.py            #Calculate water potential；
+        |——add_CABLE_HWSD_SOC.py                                # Add HWSD SOC variable to CABLE_Time_invariant_variables file；
+        |——add_CABLE_HWSD_SOC_to_cluster.py                     # Add HWSD SOC variable to calibration_cluster file；
+        |——average_PFT.py                                       # Merge all variables by weighted average based on PFT fraction；
+        |——cal_lignin_c.py                                      # Map lignin values from lookup table to spatial grid by PFT；
+        |——convert_cable_soil_layer_to_HWSD.py                  # Convert CABLE soil layers to HWSD soil layer depths；
+        |——convert_npp_unit.py                                  # Convert NPP units；
+        |——convert_patch_to_PFT.py                              # Reshape CABLE patch dimension to PFT dimension；
+        |——convert_patch_to_PFT_lignin.py                       # Reshape CABLE patch-dimension lignin to PFT dimension；
+        |——convert_pnt_to_PFT_CN_ratio.py                       # Reshape CABLE pnt-dimension CN_ratio to PFT dimension；
+        |——convert_pnt_to_PFT_litter_fall.py                    # Reshape CABLE pnt-dimension litter-related variables to PFT dimension；
+        |——convert_pnt_to_PFT_litter_leaf_root_wood.py          # Reshape CABLE pnt-dimension litter-related variables to PFT dimension(other)；
+        |——convert_pnt_to_PFT_npp_Fluxtolitter.py               # Reshape CABLE pnt-dimension NPP-related variables to PFT dimension；
+        |——data_extraction_cable_model_calibration.py           # Extract grid-cell variables to point samples based on filter mask；
+        |——data_extraction_cable_model_calibration_check.py     # Check units and value ranges of point-sample variables；
+        |——fill_nan.py                                          # Replace NaN values with -99999；
+        |——HWSD_soil_cable.py                                   # Replace CABLE original soil properties with HWSD soil properties；
+        |——update_Al_Fe_Ca_Mg.py                                # Add iron, aluminum oxides, calcium, and magnesium；
+        |——water_potential_cal_USDA_Texture_class.py            # Calculate water potential；
   
     |——ORCHIDEE/
-        |——add_bulk_density.py                                  #Add bulk density derived from USDA Soil Texture Class lookup table；
-        |——add_HWSD_SOC_to_cluster.py                           #Add HWSD SOC variable to calibration_cluster file；
-        |——add_litter.py                                        #Add litter variables；
-        |——add_npp_var.py                                       #Add NPP variables；
-        |——add_ORCHIDEE_HWSD_SOC.py                             #Add HWSD SOC variable to ORCHIDEE_time_invariant file；
-        |——add_soilgrid_soil_properties.py                      #Add SoilGrids soil properties variables；
-        |——average_PFT.py                                       #Merge all variables by weighted average based on PFT fraction；
-        |——convert_npp_unit.py                                  #Convert NPP units；
-        |——convert_ORCHIDEE_soil_layer_to_HWSD.py               #Convert ORCHIDEE soil layers to HWSD soil layer depths；
-        |——data_extraction_ORCHIDEE_model_calibration.py        #Extract grid-cell variables to point samples based on filter mask；
-        |——data_extraction_ORCHIDEE_model_calibration_check.py  #Check units and value ranges of point-sample variables；
-        |——fill_nan.py                                          #Replace NaN values with -99999；
-        |——HWSD_soil_ORCHIDEE.py                                #Replace ORHCIDEE original soil properties with HWSD soil properties；
-        |——update_Al_Fe_Ca_Mg.py                                #Add iron, aluminum oxides, calcium, and magnesium；
-        |——water_potential_cal_USDA_Texture_class_ORCHIDEE.py   #Calculate water potential；
-        
+        |——add_bulk_density.py                                  # Add bulk density derived from USDA Soil Texture Class lookup table；
+        |——add_HWSD_SOC_to_cluster.py                           # Add HWSD SOC variable to calibration_cluster file；
+        |——add_litter.py                                        # Add litter variables；
+        |——add_npp_var.py                                       # Add NPP variables；
+        |——add_ORCHIDEE_HWSD_SOC.py                             # Add HWSD SOC variable to ORCHIDEE_time_invariant file；
+        |——add_soilgrid_soil_properties.py                      # Add SoilGrids soil properties variables；
+        |——average_PFT.py                                       # Merge all variables by weighted average based on PFT fraction；
+        |——convert_npp_unit.py                                  # Convert NPP units；
+        |——convert_ORCHIDEE_soil_layer_to_HWSD.py               # Convert ORCHIDEE soil layers to HWSD soil layer depths；
+        |——data_extraction_ORCHIDEE_model_calibration.py        # Extract grid-cell variables to point samples based on filter mask；
+        |——data_extraction_ORCHIDEE_model_calibration_check.py  # Check units and value ranges of point-sample variables；
+        |——fill_nan.py                                          # Replace NaN values with -99999；
+        |——HWSD_soil_ORCHIDEE.py                                # Replace ORHCIDEE original soil properties with HWSD soil properties；
+        |——update_Al_Fe_Ca_Mg.py                                # Add iron, aluminum oxides, calcium, and magnesium；
+        |——water_potential_cal_USDA_Texture_class_ORCHIDEE.py   # Calculate water potential；
 ```
