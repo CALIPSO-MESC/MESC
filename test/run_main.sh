@@ -83,7 +83,16 @@ for case in "${cases[@]}"; do
     echo "PASS: test case '${case}'!"
   fi
 done
+rm -f output/diff_*.txt
 
-# rm output/diff_*.txt
-echo "===== Job finished of frc and hwsd: $(date) ====="
+# --------------------------------------------------
+# Run the mock LSM driver (coupling API test)
+# --------------------------------------------------
+echo "Running mock LSM driver (coupling API test)"
+if ./mock_lsm_driver >output/outval_mock_lsm.txt 2>&1; then
+  echo "PASS: mock LSM driver (coupling API)"
+else
+  echo "FAIL: mock LSM driver (coupling API) - see output/outval_mock_lsm.txt"
+fi
 
+echo "===== Job finished: $(date) ====="

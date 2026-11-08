@@ -81,6 +81,7 @@ jobs:
           cd ${{ github.workspace }}
           . ../lint_venv/bin/activate
           fortitude check src/*.f90
+          fortitude check test/*.f90
           # fortitude check auxil/*.f90
           # fortitude check auxil/*.for
 

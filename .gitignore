@@ -16,5 +16,6 @@ Makefile
 # test directory
 test/output/*.txt
 test/main
+test/mock_lsm_driver
 test/*.txt
 test/input/data_extraction_cable_model_calibration_cluster_new.nc

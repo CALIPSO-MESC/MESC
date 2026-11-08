@@ -1,6 +1,7 @@
 !> Core model physics: RK4 integrator, Michaelis-Menten kinetics, bioturbation, and C-flux RHS.
 !! A combined kinetics approach of MIMICS and MILLENNIAL2 is taken, with support for adsorption and desorption.
 module mesc_model_module
+  use, intrinsic :: iso_fortran_env, only: stdout => output_unit
   use mesc_precision_module, only: dp
   use mesc_constant_module, only: diag, outp, mcpool, delt, mp, ms, tvc14
   use mesc_variable_module, only: mic_param_xscale, mic_param_default, &
@@ -44,7 +45,7 @@ contains
     ! Euler
     ! xpool1(:) = xpool0(:) + dy1dt(:) * h
 
-!    write(*,101) np,ns,delty,micinput%cinputm(np,ns)+micinput%cinputs(np,ns),sum(dy1dt(1:7)), &
+!    write(stdout,101) np,ns,delty,micinput%cinputm(np,ns)+micinput%cinputs(np,ns),sum(dy1dt(1:7)), &
 !                 micinput%cinputm(np,ns)+micinput%cinputs(np,ns)-sum(dy1dt(1:7))
 101 format("rk4: input, sumdelc rsoil",2(i3,1x),f6.2,1x,3(f10.6,1x))
 
@@ -76,13 +77,13 @@ contains
       end do
 
       if(diag==1.and.np==outp) then
-         print *, "Kmt",micinput%clay(outp,1),micinput%tavg(outp,1),km(1),kmx(1)
-         print *, "K1=",micparam%K1(outp,1)
-         print *, "K2=",micparam%K2(outp,1)
-         print *, "K3=",micparam%K3(outp,1)
-         print *, "J1=",micparam%J1(outp,1)
-         print *, "J2=",micparam%J2(outp,1)
-         print *, "J3=",micparam%J3(outp,1)
+         write(stdout,*) "Kmt",micinput%clay(outp,1),micinput%tavg(outp,1),km(1),kmx(1)
+         write(stdout,*) "K1=",micparam%K1(outp,1)
+         write(stdout,*) "K2=",micparam%K2(outp,1)
+         write(stdout,*) "K3=",micparam%K3(outp,1)
+         write(stdout,*) "J1=",micparam%J1(outp,1)
+         write(stdout,*) "J2=",micparam%J2(outp,1)
+         write(stdout,*) "J3=",micparam%J3(outp,1)
       end if
 
     end subroutine Kmt
@@ -127,13 +128,13 @@ contains
       end do
 
       if(diag==1.and.np==outp) then
-         print *, "Vmaxt",micinput%tavg(outp,1),vmax(1)
-         print *, "V1=",micparam%V1(outp,1)
-         print *, "V2=",micparam%V2(outp,1)
-         print *, "V3=",micparam%V3(outp,1)
-         print *, "W1=",micparam%W1(outp,1)
-         print *, "W2=",micparam%W2(outp,1)
-         print *, "W3=",micparam%W3(outp,1)
+         write(stdout,*) "Vmaxt",micinput%tavg(outp,1),vmax(1)
+         write(stdout,*) "V1=",micparam%V1(outp,1)
+         write(stdout,*) "V2=",micparam%V2(outp,1)
+         write(stdout,*) "V3=",micparam%V3(outp,1)
+         write(stdout,*) "W1=",micparam%W1(outp,1)
+         write(stdout,*) "W2=",micparam%W2(outp,1)
+         write(stdout,*) "W3=",micparam%W3(outp,1)
       end if
 
     end subroutine Vmaxt
@@ -156,8 +157,8 @@ contains
 
 
       if(diag==1.and. np==outp) then
-         print *, "Desorpt"
-         print *, "desorpt=",micparam%desorp(outp,:)
+         write(stdout,*) "Desorpt"
+         write(stdout,*) "desorpt=",micparam%desorp(outp,:)
       end if
 
     end subroutine Desorpt
@@ -206,8 +207,8 @@ contains
       end do
 
       if(diag==1.and.np==outp) then
-         print *, "mget"
-         print *, "epislon1-4=",micpdef%epislon1,micpdef%epislon2,micpdef%epislon3,micpdef%epislon4
+         write(stdout,*) "mget"
+         write(stdout,*) "epislon1-4=",micpdef%epislon1,micpdef%epislon2,micpdef%epislon3,micpdef%epislon4
       end if
 
   end subroutine mget
@@ -238,11 +239,11 @@ contains
 
 
       if(diag==1.and.np==outp) then
-         print *, "turnovert"
-         print *, "tvref fmetave =", tvref,micparam%fmetave(np,:)
-         print *, "xtvmic xbeta = ", micpxdef%xtvmic(micparam%bgctype(np)),micpxdef%xbeta(micparam%bgctype(np))
-         print *, "tvmicR=",micparam%tvmicR(outp,:)
-         print *, "tvmicR=",micparam%tvmicR(outp,:)
+         write(stdout,*) "turnovert"
+         write(stdout,*) "tvref fmetave =", tvref,micparam%fmetave(np,:)
+         write(stdout,*) "xtvmic xbeta = ", micpxdef%xtvmic(micparam%bgctype(np)),micpxdef%xbeta(micparam%bgctype(np))
+         write(stdout,*) "tvmicR=",micparam%tvmicR(outp,:)
+         write(stdout,*) "tvmicR=",micparam%tvmicR(outp,:)
       end if
   end subroutine turnovert
 
@@ -351,21 +352,21 @@ contains
 
 
       if(diag==1.and.np ==outp) then
-         print *,"bgc_fraction parameters and pft",micparam%pft(np)
-         print *, "empirical params1-4=", micpdef%fmicsom1,micpdef%fmicsom2,micpdef%fmicsom3,micpdef%fmicsom4
-         print *, "fligleaf,xcnleaf=", micparam%fligleaf(np),micparam%xcnleaf(np)
-         print *, "fracroot sdepth", micparam%fracroot(np,:),micparam%sdepth(np,:)
-         print *, "cinputm=", micinput%cinputm(outp,:)
-         print *, "cinputs=",micinput%cinputs(outp,:)
-         print *, "fmetave=",micparam%fmetave(outp,:)
-         print *, "cn_r1=",micparam%cn_r(outp,:,1)
-         print *, "cn_r2=",micparam%cn_r(outp,:,2)
-         print *, "fr2p=",micparam%fr2p(outp,:)
-         print *, "fk2p=",micparam%fk2p(outp,:)
-         print *, "fr2c=",micparam%fr2c(outp,:)
-         print *, "fk2c=",micparam%fk2c(outp,:)
-         print *, "fr2a=",micparam%fr2a(outp,:)
-         print *, "fk2a=",micparam%fk2a(outp,:)
+         write(stdout,*)"bgc_fraction parameters and pft",micparam%pft(np)
+         write(stdout,*) "empirical params1-4=", micpdef%fmicsom1,micpdef%fmicsom2,micpdef%fmicsom3,micpdef%fmicsom4
+         write(stdout,*) "fligleaf,xcnleaf=", micparam%fligleaf(np),micparam%xcnleaf(np)
+         write(stdout,*) "fracroot sdepth", micparam%fracroot(np,:),micparam%sdepth(np,:)
+         write(stdout,*) "cinputm=", micinput%cinputm(outp,:)
+         write(stdout,*) "cinputs=",micinput%cinputs(outp,:)
+         write(stdout,*) "fmetave=",micparam%fmetave(outp,:)
+         write(stdout,*) "cn_r1=",micparam%cn_r(outp,:,1)
+         write(stdout,*) "cn_r2=",micparam%cn_r(outp,:,2)
+         write(stdout,*) "fr2p=",micparam%fr2p(outp,:)
+         write(stdout,*) "fk2p=",micparam%fk2p(outp,:)
+         write(stdout,*) "fr2c=",micparam%fr2c(outp,:)
+         write(stdout,*) "fk2c=",micparam%fk2c(outp,:)
+         write(stdout,*) "fr2a=",micparam%fr2a(outp,:)
+         write(stdout,*) "fk2a=",micparam%fk2a(outp,:)
       end if
 
    end subroutine bgc_fractions
@@ -479,7 +480,7 @@ end subroutine bioturb
          gam(j) = ct(j-1)/bet
          bet = bt(j)-at(j)* gam(j)
          if(bet ==0) then
-            print *, "triag failed"
+            write(stdout,*) "triag failed"
             stop
          end if
          u(j) = (rt(j) - at(j) * u(j-1))/bet
@@ -526,7 +527,7 @@ end subroutine bioturb
         totdoc0 = totdoc0 + ypool(ns)  *zse(ns)
         totdoc1 = totdoc1 + ypool1(ns) *zse(ns)
      end do
-    ! print *, 'mass cons DOC', totdoc0,totdoc1,(totdoc1-totdoc0)-(fluxdocsx - fluxdocbot)*deltx
+    ! write(stdout,*) 'mass cons DOC', totdoc0,totdoc1,(totdoc1-totdoc0)-(fluxdocsx - fluxdocbot)*deltx
 
      ypool = ypool1
 
@@ -622,20 +623,20 @@ end subroutine bioturb
       betamicR = micparam%betamicR(np,ns);  betamicK = micparam%betamicK(np,ns)
 
 
-!      print *, 'p1=',  fmx, fsx
-!      print *, 'p2=',  fr2px,fr2cx
-!      print *, 'p3=',  fr2ax,fk2px
-!      print *, 'p4=',  fk2cx,fk2ax
-!      print *, 'p5=',  mgeRx1,mgeRx2,mgeRx3
-!      print *, 'p6=',  mgeKx1,mgeKx2,mgeKx3
-!      print *, 'p7=',  tvmicRx,tvmicKx
-!      print *, 'p8=',  desorpx
-!      print *, 'p9=',  V1x,V2x,V3x
-!      print *, 'p10=', W1x,W2x,W3x
-!      print *, 'p11=', K1x,K2x,K3x
-!      print *, 'p12=', J1x,J2x,J3x
-!      print *, 'p13=', Q1x,Q2x
-!      print *, 'p14=', betamicR,betamicK
+!      write(stdout,*) 'p1=',  fmx, fsx
+!      write(stdout,*) 'p2=',  fr2px,fr2cx
+!      write(stdout,*) 'p3=',  fr2ax,fk2px
+!      write(stdout,*) 'p4=',  fk2cx,fk2ax
+!      write(stdout,*) 'p5=',  mgeRx1,mgeRx2,mgeRx3
+!      write(stdout,*) 'p6=',  mgeKx1,mgeKx2,mgeKx3
+!      write(stdout,*) 'p7=',  tvmicRx,tvmicKx
+!      write(stdout,*) 'p8=',  desorpx
+!      write(stdout,*) 'p9=',  V1x,V2x,V3x
+!      write(stdout,*) 'p10=', W1x,W2x,W3x
+!      write(stdout,*) 'p11=', K1x,K2x,K3x
+!      write(stdout,*) 'p12=', J1x,J2x,J3x
+!      write(stdout,*) 'p13=', Q1x,Q2x
+!      write(stdout,*) 'p14=', betamicR,betamicK
 
       moistx   = micinput%wavg(np,ns);          matpotx    = micinput%matpot(np,ns)
       soilphx  = micinput%ph(np,ns);            porex      = micinput%porosity(np,ns)
@@ -771,11 +772,11 @@ end subroutine bioturb
       rsoil = (1.0-mgeRx1) * (cfluxm2r+cfluxa2r) + (1.0-mgeKx1)* (cfluxm2k + cfluxa2k)  &
             + (1.0-mgeRx2) * cfluxs2r            + (1.0-mgeKx2)* cfluxs2k  - cfluxa
 
-!       write(*,101) np,ns, cinputmx+cinputsx,sum(y(1:7)),rsoil, cinputmx+cinputsx-sum(y(1:7))-rsoil
+!       write(stdout,101) np,ns, cinputmx+cinputsx,sum(y(1:7)),rsoil, cinputmx+cinputsx-sum(y(1:7))-rsoil
 101 format("vmic_c: input, sumdelc rsoil",2(i3,1x),10(f10.6,1x))
 
-!      print *, ' @ vmic_c xpool =', xpool(:)
-!      print *, ' @ vmic_c y =', y(:)
+!      write(stdout,*) ' @ vmic_c xpool =', xpool(:)
+!      write(stdout,*) ' @ vmic_c y =', y(:)
 
       if(isoc14==1) then
 
