@@ -169,7 +169,7 @@ real(dp) function functn_frc1(nx,xparam16)
       call getdata_frc(cfraction,jglobal,bgcopt,micinput,micparam,micnpool,micglobal,zse)
       call vmic_param_xscale(xopt,bgcopt,xrootcable,micpxdef)
 
-      call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bgcopt,nyeqpool, &
+      call vmicsoil_hwsd_cpu(jopt,jrestart,frestart_in,frestart_out,foutput,isoc14,bgcopt,nyeqpool, &
                          zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
     !  write(stdout,*) 'calcost_frc1'
@@ -283,7 +283,7 @@ END function functn_frc1
         call vmic_param_xscale(xopt,bgcopt,xrootorchidee,micpxdef)
       end if
 
-      call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bgcopt,nyeqpool, &
+      call vmicsoil_hwsd_cpu(jopt,jrestart,frestart_in,frestart_out,foutput,isoc14,bgcopt,nyeqpool, &
                          zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
       call calcost_hwsd3(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost1)
@@ -411,8 +411,8 @@ END function functn_soc_hwsd
         call vmic_param_xscale(xopt,bgcopt,xrootorchidee,micpxdef)  ! parameter optimization
       end if
 
-      write(stdout,*) "vmicsoil_global"
-      call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bgcopt,nyeqpool, &
+      print *, "vmicsoil_global"
+      call vmicsoil_hwsd_cpu(jopt,jrestart,frestart_in,frestart_out,foutput,isoc14,bgcopt,nyeqpool, &
                          zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
       call calcost_hwsd3(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost1)
@@ -512,7 +512,7 @@ END function functn_global4
         call vmic_param_xscale(xopt,bgcopt,xrootorchidee,micpxdef)
       end if
 
-      call vmicsoil_hwsd_cpu(jrestart,frestart_in,frestart_out,foutput,isoc14,bgcopt,nyeqpool, &
+      call vmicsoil_hwsd_cpu(jopt,jrestart,frestart_in,frestart_out,foutput,isoc14,bgcopt,nyeqpool, &
                          zse,micpxdef,micpdef,micparam,micinput,micglobal,miccpool,micnpool,micoutput)
 
       call calcost_aust(nx,bgcopt,xopt,micpxdef,micparam,miccpool,micinput,micglobal,zse,totcost1)

@@ -74,6 +74,7 @@ jobs:
 
       - name: Install NetCDF C library
         run: |
+          sudo apt-get update
           sudo apt-get install -y libnetcdf-dev netcdf-bin
 
       - name: Build NetCDF Fortran with Intel compiler
@@ -86,8 +87,10 @@ jobs:
                 -B /tmp/netcdf-fortran-build \
                 -DCMAKE_Fortran_COMPILER="${{ matrix.FC }}" \
                 -DCMAKE_C_COMPILER=gcc \
+                -DCMAKE_PREFIX_PATH=/usr \
                 -DCMAKE_INSTALL_PREFIX=/opt/netcdf-fortran \
-                -DBUILD_SHARED_LIBS=OFF
+                -DBUILD_SHARED_LIBS=OFF \
+                -DENABLE_TESTS=OFF
           cmake --build /tmp/netcdf-fortran-build -j$(nproc)
           sudo cmake --install /tmp/netcdf-fortran-build
           echo "/opt/netcdf-fortran/bin" >> "${GITHUB_PATH}"
@@ -96,7 +99,9 @@ jobs:
         env:
           FORTRAN_STANDARD: ${{ matrix.std }}
         run: |
-          cmake -B build -DCMAKE_Fortran_COMPILER="${{ matrix.FC }}"
+          cmake -B build -DCMAKE_Fortran_COMPILER="${{ matrix.FC }}" \
+          -DCMAKE_PREFIX_PATH=/opt/netcdf-fortran:/usr \
+          -DNetCDFFortran_ROOT=/opt/netcdf-fortran
           cmake --build build -j
 
       - name: Run test suite
