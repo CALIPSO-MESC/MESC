@@ -3,7 +3,7 @@
 module mesc_model_module
   use, intrinsic :: iso_fortran_env, only: stdout => output_unit
   use mesc_precision_module, only: dp
-  use mesc_constant_module, only: diag, outp, mcpool, delt, mp, ms, tvc14
+  use mesc_constant_module, only: diag, outp, mcpool, delt, delt_slow, mp, ms, tvc14
   use mesc_variable_module, only: mic_param_xscale, mic_param_default, &
                                   mic_parameter, mic_input, mic_npool
   implicit none
@@ -14,19 +14,17 @@ module mesc_model_module
 contains
 
  !> Fourth-order Runge-Kutta integrator for the soil C ODE system.
- subroutine rk4modelx(timex,delty,ny,isoc14,np,ns,micpdef,micparam,micinput,xpool0,xpool1)
+ subroutine rk4modelx(ny,isoc14,np,ns,micpdef,micparam,micinput,xpool0,xpool1)
      TYPE(mic_param_default), INTENT(IN)    :: micpdef           !! fixed model parameters
      TYPE(mic_parameter),     INTENT(IN)    :: micparam          !! computed model parameters
      TYPE(mic_input),         INTENT(IN)    :: micinput          !! environmental model inputs
      integer,                 INTENT(IN)    :: np,ns             !! grid point and layer indices
      integer,                 INTENT(IN)    :: ny,isoc14         !! model year and 14C flag
-     real(dp),               INTENT(IN)    :: timex             !! current simulation time
-     real(dp),               INTENT(IN)    :: delty             !! integration time step (hours)
      real(dp),   dimension(mcpool),intent(inout)     :: xpool0,xpool1  !! pool state: initial and updated (mg C/cm3)
     real(dp)    :: h
     real(dp),   dimension(mcpool)                   :: y1,y2,y3,y4,dy1dt,dy2dt,dy3dt,dy4dt
 
-     h=delty
+     h=delt_slow
      y1(:) = xpool0(:)
      call vmic_c(ny, isoc14, np, ns, micpdef, micparam, micinput, y1, dy1dt)
 
@@ -376,13 +374,12 @@ contains
  !! Solves `dc/dt = D * d2c/dx2 + F(z)` with Crank-Nicolson discretisation + Thomas algorithm.
  !! Top BC: `-D* dc/dx = F0 + F(1)` at x=0. Bottom BC: `dc/dx = 0` at x=h.
  !! Units: pools in mg C/cm3, flux in mg C/cm3/delt, length in cm, diffusion coefficient in cm2/delt.
- subroutine bioturb(ndelt,ms,zse,delt,diffsocxx,fluxsoc,xpooli,xpoole)
-     integer,                 INTENT(IN)    :: ndelt,ms          !! number of bioturbation sub-steps and soil layers
+ subroutine bioturb(ndelt,zse,diffsocxx,fluxsoc,xpooli,xpoole)
+     integer,                INTENT(IN)    :: ndelt             !! number of bioturbation sub-steps
      real(dp), dimension(ms),INTENT(IN)    :: zse               !! soil layer thickness (m), converted to cm internally
-     real(dp),               INTENT(IN)    :: delt              !! model time step (hours)
-     real(dp),               INTENT(IN)    :: diffsocxx         !! diffusion coefficient (cm²/delt)
+     real(dp),               INTENT(IN)    :: diffsocxx         !! diffusion coefficient (cm²/delt_slow)
      real(dp), dimension(ms),INTENT(IN)    :: xpooli            !! initial pool state per layer (mg C/cm3)
-     real(dp), dimension(ms),INTENT(IN)    :: fluxsoc           !! external C flux per layer (mg C/cm3/delt)
+     real(dp), dimension(ms),INTENT(IN)    :: fluxsoc           !! external C flux per layer (mg C/cm3/delt_slow)
      real(dp), dimension(ms),INTENT(OUT)   :: xpoole            !! pool state per layer after bioturbation (mg C/cm3)
    real(dp), dimension(ms)    :: xpool
    integer                       :: i,j
@@ -403,7 +400,7 @@ contains
         xzse(j) = 0.5 * (sdepthx(j) + sdepthx(j+1))    ! depth of midpoint of a layer j  (x_j)
      end do
 
-     deltD = diffsocxx * delt
+     deltD = diffsocxx * delt_slow
 
       xpool = xpooli
       tot0 = 0.0
@@ -421,7 +418,7 @@ contains
               bt(1) = 1.0 + 0.5 * coeffA
               ct(1) =     - 0.5 * coeffA
               rt(1) = (1.0-0.5*coeffA) * xpool(1) + 0.5 * coeffA * xpool(2) &
-                    +  fluxsoc(1) * delt
+                    +  fluxsoc(1) * delt_slow
            end if
            if(j>1.and.j<ms) then
              coeffA = deltD/((xzse(j+1)-xzse(j))*(sdepthx(j+1)-sdepthx(j)))
@@ -433,7 +430,7 @@ contains
              rt(j) = 0.5 * coeffA * coeffB * xpool(j-1)        &
                      +(1.0-0.5* coeffA*(1.0+coeffB))*xpool(j)  &
                      + 0.5* coeffA * xpool(j+1)                &
-                     + fluxsoc(j) *delt
+                     + fluxsoc(j) *delt_slow
            end if
            if(j==ms) then
                coeffA = deltD/((xzse(ms)-xzse(ms-1))*(sdepthx(ms+1) - sdepthx(ms)))
@@ -442,7 +439,7 @@ contains
                bt(ms) = 1.0 + 0.5 * coeffA
                ct(ms) = 0.0
                rt(ms) = 0.5* coeffA  * xpool(ms-1) + (1.0-0.5 * coeffA) * xpool(ms) &
-                    + fluxsoc(ms) * delt
+                    + fluxsoc(ms) * delt_slow
             end if
         end do
 

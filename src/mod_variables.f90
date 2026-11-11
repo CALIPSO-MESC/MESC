@@ -159,6 +159,8 @@ module mesc_variable_module
   type mic_global_input
       real(dp), dimension(:), allocatable  :: lon,lat    !! longitude, latitude [deg]
       real(dp), dimension(:), allocatable  :: time       !! simulation time [hour]
+      logical :: leap_year = .false.                     !! current year is leap year
+      integer :: days_per_year = 365                     !! number of days per year 365/366
       integer,   dimension(:), allocatable  :: pft,bgctype,isoil,sorder,siteid !! site metadata
       real(dp), dimension(:), allocatable  :: area       !! grid cell area [km2]
       real(dp), dimension(:), allocatable  :: npp        !! net primary production
@@ -318,7 +320,7 @@ module mesc_variable_module
                micinput%bulkd(mp,ms),   &
                micinput%porosity(mp,ms),&
                micinput%matpot(mp,ms),  &
-               micinput%tair(mp,365),   &
+               micinput%tair(mp,ntime),   &
                micinput%fcnpp(mp),      &
                micinput%dleaf(mp),      &
                micinput%dwood(mp),      &
