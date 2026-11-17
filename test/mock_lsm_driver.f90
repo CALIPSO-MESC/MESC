@@ -37,7 +37,7 @@ program mock_lsm_driver
   use mesc_coupling_module, only : mesc_coupling_state, nday_year, &
                                    mesc_coupling_init, mesc_coupling_step, &
                                    mesc_coupling_get_cpool, &
-                                   mesc_coupling_finalize
+                                   mesc_coupling_finalize, soil_water_potential
   implicit none
 
   ! ---- Grid definition (mimics an ORCHIDEE-forced global run, runcase 4) ----
@@ -294,8 +294,9 @@ contains
     real(dp), intent(out) :: dlit_root !! root litterfall today [g C m-2 day-1]
     real(dp), intent(out) :: dtsoil(nlev)  !! soil temperature per layer [degC]
     real(dp), intent(out) :: dmoist(nlev)  !! soil water content per layer [m3 m-3]
-    real(dp), intent(out) :: dmatpot(nlev) !! soil matric potential per layer [MPa]
+    real(dp), intent(out) :: dmatpot(nlev) !! soil matric potential per layer [kPa]
 
+    integer, dimension(nlev) :: status !! error status for matpot computation
     integer  :: ns
     real(dp) :: phase, swc
 
@@ -312,7 +313,15 @@ contains
     swc = moist_mean(jcell) + moist_amp(jcell) * cos(phase)
     swc = min(0.75_dp, max(0.05_dp, swc))
     dmoist(:) = swc
-    dmatpot(:) = -0.5_dp * (moist_mean(jcell) / swc)**2
+
+    ! compute soil matric potential from moisture
+    call soil_water_potential(dmoist, grid_isoil(icell), dmatpot, status)
+
+    if (any(status /= 0)) then
+      write(*,"(a,i0,a,i0)") &
+        "WARNING daily_forcing: soil water potential returned non-zero status for cell ", &
+        icell, ", number of affected layers: ", count(status /= 0)
+    end if
   end subroutine daily_forcing
 
   !> Write a synthetic per-BGC parameter look-up table for [[getparam_global]].
