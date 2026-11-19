@@ -46,6 +46,40 @@ module mesc_constant_module
   real(dp), dimension(19) :: xrootorchidee  !! ORCHIDEE rooting depth per PFT (m)
   data xrootorchidee/0.94,0.94,1.04,1.04,1.04,1.43,1.43,1.43,0.85,0.62,0.94,0.94,0.85,0.85,0.85,0.85,0.85,0.85,0.85/
 
+  !> ROSETTA van Genuchten soil water retention parameters for 12 USDA soil texture classes
+  !! Classes: 1=Clay, 2=Clay loam, 3=Loam, 4=Loamy sand, 5=Sand, 6=Sandy clay,
+  !!          7=Sandy clay loam, 8=Sandy loam, 9=Silt, 10=Silty clay, 11=Silty clay loam, 12=Silt loam
+  !! Used to compute soil matric potential from volumetric water content via van Genuchten (2018)
+  integer, parameter :: nrosetta = 12  !! number of ROSETTA soil texture classes
+
+  character(len=18), parameter :: texture_name(nrosetta) = [character(len=18) :: &
+      "Clay", "Clay loam", "Loam", "Loamy sand", "Sand", "Sandy clay", &
+      "Sandy clay loam", "Sandy loam", "Silt", "Silty clay", &
+      "Silty clay loam", "Silt loam"]
+
+  !> Residual volumetric water content [m3 m-3]
+  real(dp), dimension(nrosetta) :: rosetta_theta_r
+  data rosetta_theta_r/0.098_dp, 0.079_dp, 0.061_dp, 0.049_dp, 0.053_dp, 0.117_dp, &
+                       0.063_dp, 0.039_dp, 0.050_dp, 0.111_dp, 0.090_dp, 0.065_dp/
+
+  !> Saturated volumetric water content [m3 m-3]
+  real(dp), dimension(nrosetta) :: rosetta_theta_s
+  data rosetta_theta_s/0.459_dp, 0.442_dp, 0.399_dp, 0.390_dp, 0.375_dp, 0.385_dp, &
+                       0.384_dp, 0.387_dp, 0.489_dp, 0.481_dp, 0.482_dp, 0.439_dp/
+
+  !> van Genuchten alpha parameter (base-10 logarithms) [log10(cm-1)]
+  real(dp), dimension(nrosetta) :: rosetta_log10_alpha
+  data rosetta_log10_alpha/-1.825_dp, -1.801_dp, -1.954_dp, -1.459_dp, -1.453_dp, -1.476_dp, &
+                           -1.676_dp, -1.574_dp, -2.182_dp, -1.790_dp, -2.076_dp, -2.296_dp/
+
+  !> van Genuchten n parameter (base-10 logarithms) [log10(dimensionless)]
+  real(dp), dimension(nrosetta) :: rosetta_log10_n
+  data rosetta_log10_n/0.098_dp, 0.151_dp, 0.168_dp, 0.242_dp, 0.502_dp, 0.082_dp, &
+                       0.124_dp, 0.161_dp, 0.225_dp, 0.121_dp, 0.182_dp, 0.221_dp/
+
+  !> Unit conversion: cm water to kPa
+  real(dp), parameter :: cm_water_to_kpa = 0.0980665_dp
+
  !! @section legacy_configs Legacy commented-out configurations
  !! ~~~~
  !! integer,  parameter  :: msite=213   ! number of sites
