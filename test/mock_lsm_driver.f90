@@ -315,7 +315,7 @@ contains
     dmoist(:) = swc
 
     ! compute soil matric potential from moisture
-    call soil_water_potential(dmoist, grid_isoil(icell), dmatpot, status)
+    call soil_water_potential(dmoist, grid_isoil(jcell), dmatpot, status)
 
     if (any(status /= 0)) then
       write(*,"(a,i0,a,i0)") &
