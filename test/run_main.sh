@@ -55,6 +55,7 @@ done
 # --------------------------------------------------
 # Report test statuses
 # --------------------------------------------------
+fail=false
 for case in "${cases[@]}"; do
   pass=true
   for id in 91 92; do
@@ -79,6 +80,7 @@ for case in "${cases[@]}"; do
 
   if [ "${pass}" = false ]; then
     echo "FAIL: test case '${case}'!"
+    fail=true
   else
     echo "PASS: test case '${case}'!"
   fi
@@ -92,18 +94,15 @@ echo "Running mock LSM driver (coupling API test)"
 if ./mock_lsm_driver >output/outval_mock_lsm.txt 2>&1; then
   echo "PASS: mock LSM driver (coupling API)"
 else
-  echo "FAIL: mock LSM driver (coupling API) - see output/outval_mock_lsm.txt"
+  echo "FAIL: mock LSM driver (coupling API)"
+  echo
+  echo "output/outval_mock_lsm.txt:"
+  cat output/outval_mock_lsm.txt
+  fail=true
 fi
 
-
-# --------------------------------------------------
-# Run the mock LSM driver (coupling API test)
-# --------------------------------------------------
-echo "Running mock LSM driver (coupling API test)"
-if ./mock_lsm_driver >output/outval_mock_lsm.txt 2>&1; then
-  echo "PASS: mock LSM driver (coupling API)"
-else
-  echo "FAIL: mock LSM driver (coupling API) - see output/outval_mock_lsm.txt"
+if [ "${fail}" == true ]; then
+  exit 1
 fi
 
 echo "===== Job finished: $(date) ====="
