@@ -94,7 +94,10 @@ echo "Running mock LSM driver (coupling API test)"
 if ./mock_lsm_driver >output/outval_mock_lsm.txt 2>&1; then
   echo "PASS: mock LSM driver (coupling API)"
 else
-  echo "FAIL: mock LSM driver (coupling API) - see output/outval_mock_lsm.txt"
+  echo "FAIL: mock LSM driver (coupling API)"
+  echo
+  echo "output/outval_mock_lsm.txt:"
+  cat output/outval_mock_lsm.txt
   fail=true
 fi
 
