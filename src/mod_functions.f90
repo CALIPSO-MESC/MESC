@@ -9,7 +9,7 @@ module mesc_function_module
                                            stdout => output_unit
   use mesc_precision_module, only: dp
   use mesc_constant_module, only: mp, mpft, mbgc, ntime, nlon, nlat, ms, &
-                                  xrootcable, xrootorchidee
+                                  ndays_ref, xrootcable, xrootorchidee
   use mesc_namelist_module, only: mesc_config, read_mesc_namelist, &
                                   model_cable, model_orchidee
   use mesc_variable_module, only: mic_param_xscale, mic_param_default, &
@@ -142,7 +142,7 @@ real(dp) function functn_frc1(nx,xparam16)
     !  write(stdout,*) xopt
 
       !mp = 2206
-      ntime=365
+      ntime=ndays_ref
 
       totcost1 = 0.0
       nyeqpool= 1000
@@ -339,7 +339,7 @@ END function functn_soc_hwsd
       totcost1=0.0
       jmodel=model_cable
       mbgc=10
-      ntime=365
+      ntime=ndays_ref
       ms=7
       allocate(zse(ms))
       zse(1:5)=0.2;zse(6:7)=0.5
