@@ -44,8 +44,12 @@
 !!   the model dimensions in `mic_constant` (`mp`, `ms`, `mpft`, ...) are
 !!   module-level variables shared by all of MESC.
 module mesc_coupling_module
+  use, intrinsic :: ieee_arithmetic, only: ieee_value, ieee_quiet_nan, ieee_is_finite
   use mesc_precision_module, only: dp
-  use mesc_constant_module, only: mp, ms, mpft, mbgc, ntime, nlon, nlat, mcpool
+  use mesc_constant_module, only: mp, ms, mpft, mbgc, ntime, nlon, nlat, mcpool, &
+                                  nrosetta, rosetta_theta_r, rosetta_theta_s, &
+                                  rosetta_log10_alpha, rosetta_log10_n, &
+                                  cm_water_to_kpa
   use mesc_variable_module, only: mic_param_xscale, mic_param_default, &
                                   mic_parameter, mic_input, mic_npool, &
                                   mic_cpool, mic_output, mic_global_input, &
@@ -248,7 +252,7 @@ contains
   !!
   !! Inputs are clamped to the same ranges as in the standalone data loader:
   !! `tsoil` to [-100, 50] degC, `moist` to [0, 0.8] m3 m-3 and `matpot` to
-  !! [-1000, 0] MPa. Negative litter fluxes are reset to zero.
+  !! [-1000, 0] kPa. Negative litter fluxes are reset to zero.
   !!
   !! NOTE: MESC steps daily. If the LSM uses a sub-daily timestep, forcing must
   !!       be aggregated to daily means/sums by the LSM (or its coupling layer)
@@ -270,7 +274,7 @@ contains
     real(dp),                  intent(in)    :: litter_root !! below-ground litterfall today [g C m-2 day-1]
     real(dp),                  intent(in)    :: tsoil(state%nlev)  !! soil temperature per layer [degC]
     real(dp),                  intent(in)    :: moist(state%nlev)  !! soil water content per layer [m3 m-3]
-    real(dp),                  intent(in)    :: matpot(state%nlev) !! soil matric potential per layer [MPa]
+    real(dp),                  intent(in)    :: matpot(state%nlev) !! soil matric potential per layer [kPa]
     real(dp),                  intent(out)   :: flux_cinput !! total C input today [g C m-2]
     real(dp),                  intent(out)   :: flux_rsoil  !! soil respiration today [g C m-2]
     real(dp),                  intent(out)   :: flux_cleach !! dissolved C leached from the bottom layer today [g C m-2]
@@ -372,5 +376,48 @@ contains
     state%nbgc  = 0
     state%initialised = .false.
   end subroutine mesc_coupling_finalize
+
+  !> Compute soil matric potential from volumetric water content.
+  !!
+  !! Uses van Genuchten model with ROSETTA class-average parameters.
+  !! USDA soil texture classification (itexture = 1..12).
+  !!
+  !! Returns:
+  !!   status = 0: valid computation
+  !!          = 1: saturated (phi = 0)
+  !!          = 2: very dry (theta <= residual; undefined potential)
+  !!          = 3: invalid texture class or non-finite input (phi = 0)
+  !!   phi: soil matric potential [kPa]
+  elemental subroutine soil_water_potential(theta, itexture, phi, status)
+    real(dp), intent(in)  :: theta      !! volumetric water content [m3/m3]
+    integer,  intent(in)  :: itexture   !! USDA texture class (1..12)
+    real(dp), intent(out) :: phi        !! matric potential [kPa]
+    integer,  intent(out) :: status     !! status code
+    real(dp) :: se, alpha, n, m, h_cm
+
+    phi = ieee_value(0.0_dp, ieee_quiet_nan)
+    status = 3
+    if (itexture < 1 .or. itexture > nrosetta) return
+    if (.not. ieee_is_finite(theta)) return
+
+    if (theta >= rosetta_theta_s(itexture)) then
+       phi = 0.0_dp
+       status = 1
+       return
+    end if
+    if (theta <= rosetta_theta_r(itexture)) then
+       status = 2
+       return
+    end if
+
+    alpha = 10.0_dp**rosetta_log10_alpha(itexture)  ! cm^-1
+    n     = 10.0_dp**rosetta_log10_n(itexture)
+    m     = 1.0_dp - 1.0_dp/n
+    se    = (theta - rosetta_theta_r(itexture)) / &
+            (rosetta_theta_s(itexture) - rosetta_theta_r(itexture))
+    h_cm  = ((se**(-1.0_dp/m) - 1.0_dp)**(1.0_dp/n)) / alpha
+    phi   = -cm_water_to_kpa*h_cm        ! matric potential, kPa
+    status = 0
+  end subroutine soil_water_potential
 
 end module mesc_coupling_module
